@@ -65,6 +65,11 @@ group :development do
 
   # Speed up commands on slow machines / big apps [https://github.com/rails/spring]
   # gem "spring"
+
+  # gems for debbubg
+  gem "httplog"
+  gem "pry-byebug"
+  gem "pry-rails"
 end
 
 group :test do
@@ -72,3 +77,23 @@ group :test do
   gem "capybara"
   gem "selenium-webdriver"
 end
+
+# gem for authentification
+gem "devise"
+
+# gem for picuture saving - heroku is empheral
+gem "cloudinary"
+
+# gem for using llm
+gem "ruby_llm"
+
+# gem for markdown rendering
+gem "kramdown"
+gem "rouge"
+gem "kramdown-parser-gfm"
+
+# gem for multi-modal processing
+gem "image_processing", "~> 1.2"
+
+# open uri
+gem 'open-uri'
