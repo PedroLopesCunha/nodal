@@ -1,6 +1,7 @@
 class ApplicationController < ActionController::Base
   before_action :authenticate_member!
   before_action :configure_permitted_parameters, if: :devise_controller?
+  before_action :current_organisation
   include Pundit::Authorization
 
   # Pundit: allow-list approach
@@ -31,5 +32,18 @@ class ApplicationController < ActionController::Base
 
   def skip_pundit_scope?
     skip_pundit? || action_name != "index"
+  end
+
+  def pundit_user
+    current_member || current_customer
+  end
+
+  # accessable form every where, done before everything
+  # sets the current organisation
+  def current_organisation
+    return @current_organisation if defined?(@current_organisation)
+
+    slug = params[:org_slug]
+    @current_organisation = Organisation.find_by(slug: slug)
   end
 end

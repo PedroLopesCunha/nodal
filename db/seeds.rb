@@ -9,18 +9,34 @@
 #   end
 require "open-uri"
 
-Organisation.destroy_all
-Category.destroy_all
 Product.destroy_all
+Category.destroy_all
+Member.destroy_all
+Organisation.destroy_all
 
 puts "destroyed all"
 
-comp = Organisation.new(name: "B2B Groceries", slug: "b2b_groceries", billing_email: "b@b.b")
-comp.save
+comp = Organisation.new(name: "B2B Groceries", slug: "b2b-groceries", billing_email: "b@b.b")
+comp.save!
+
+mem = Member.create!(
+  email: "n@n.n",
+  password: "123123",
+  first_name: "John",
+  last_name: "Doe"
+ )
+
+OrgMember.create!(
+  organisation: comp,
+  member: mem,
+  role: "admin",
+  active: true,
+  joined_at: Time.current
+)
 
 cat = Category.new(name: "Fruits")
 cat.organisation = comp
-cat.save
+cat.save!
 
 prod = {
     "organisation_id": comp.id,
@@ -37,6 +53,6 @@ prod = {
 product = Product.new(prod)
 img = URI.parse("https://cdn.pixabay.com/photo/2016/09/29/08/33/apple-1702316_1280.jpg").open
 product.photo.attach(io: img , filename: "apple.jpg", content_type: "image/jpeg")
-product.save
+product.save!
 
 puts "no of orgs; #{Organisation.count}, no of cat: #{Category.count}, no of prod: #{Product.count}"
