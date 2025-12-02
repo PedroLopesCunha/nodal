@@ -55,7 +55,7 @@ ActiveRecord::Schema[7.1].define(version: 2025_12_02_120250) do
     t.datetime "updated_at", null: false
     t.index ["addressable_type", "addressable_id"], name: "index_addresses_on_addressable"
   end
-  
+
   create_table "categories", force: :cascade do |t|
     t.string "name"
     t.bigint "organisation_id", null: false
@@ -121,20 +121,21 @@ ActiveRecord::Schema[7.1].define(version: 2025_12_02_120250) do
   create_table "products", force: :cascade do |t|
     t.bigint "organisation_id", null: false
     t.string "name"
-    t.string "slug"
+    t.string "slug", null: false
     t.string "sku"
     t.text "description"
     t.integer "unit_price"
     t.string "unit_description"
     t.integer "min_quantity"
     t.string "min_quantity_type"
-    t.boolean "available"
+    t.boolean "available", default: true, null: false
     t.bigint "category_id", null: false
     t.json "product_attributes"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["category_id"], name: "index_products_on_category_id"
     t.index ["organisation_id"], name: "index_products_on_organisation_id"
+    t.index ["slug"], name: "index_products_on_slug", unique: true
   end
 
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
