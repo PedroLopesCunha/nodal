@@ -1,2 +1,288 @@
-<h1>Pages#home</h1>
-<p>Find me in app/views/pages/home.html.erb</p>
+<!-- Landing Page for Nodal - B2B Integration Platform -->
+<!-- Figma Make Ready: Semantic HTML with data-placeholder attributes for images -->
+
+<div class="landing-page">
+  <!-- ========================================
+       SECTION 1: NAVIGATION
+       ======================================== -->
+  <%= render "shared/navbar" %>
+
+  <!-- ========================================
+       SECTION 2: HERO
+       Purpose: Primary value proposition and conversion
+       ======================================== -->
+  <section class="hero-section" aria-labelledby="hero-heading">
+    <div class="container">
+      <div class="hero-content">
+        <div class="hero-text">
+          <h1 id="hero-heading" class="hero-headline">
+            Connect your business systems in minutes, not months
+          </h1>
+          <p class="hero-subheadline">
+            Nodal is the integration platform that lets you securely connect APIs, automate workflows, and monitor everything—without the enterprise complexity.
+          </p>
+          <div class="hero-cta-group">
+            <%= link_to "Get Started Free", "#", class: "btn btn-primary btn-lg hero-cta-primary" %>
+            <%= link_to "Book a Demo", "#", class: "btn btn-outline-light btn-lg hero-cta-secondary" %>
+          </div>
+          <p class="hero-disclaimer">No credit card required • Free tier available</p>
+        </div>
+        <div class="hero-visual">
+          <!-- Placeholder for dashboard mockup or product screenshot -->
+          <div class="hero-image-placeholder" data-placeholder="dashboard-mockup">
+            <div class="placeholder-content">
+              <i class="fas fa-chart-line"></i>
+              <span>Dashboard Preview</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========================================
+       SECTION 3: SOCIAL PROOF / LOGOS BAR
+       Purpose: Build trust with recognizable brands
+       ======================================== -->
+  <section class="logos-section" aria-label="Trusted by companies">
+    <div class="container">
+      <p class="logos-heading">Trusted by teams at</p>
+      <div class="logos-grid">
+        <!-- Logo placeholders - replace with actual client logos -->
+        <div class="logo-item" data-placeholder="company-logo-1">
+          <div class="logo-placeholder">Logo 1</div>
+        </div>
+        <div class="logo-item" data-placeholder="company-logo-2">
+          <div class="logo-placeholder">Logo 2</div>
+        </div>
+        <div class="logo-item" data-placeholder="company-logo-3">
+          <div class="logo-placeholder">Logo 3</div>
+        </div>
+        <div class="logo-item" data-placeholder="company-logo-4">
+          <div class="logo-placeholder">Logo 4</div>
+        </div>
+        <div class="logo-item" data-placeholder="company-logo-5">
+          <div class="logo-placeholder">Logo 5</div>
+        </div>
+        <div class="logo-item" data-placeholder="company-logo-6">
+          <div class="logo-placeholder">Logo 6</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========================================
+       SECTION 4: FEATURES (Core Platform Capabilities)
+       Purpose: Explain what the product does
+       ======================================== -->
+  <section class="features-section" aria-labelledby="features-heading">
+    <div class="container">
+      <header class="section-header">
+        <h2 id="features-heading" class="section-title">Everything you need to connect your business</h2>
+        <p class="section-subtitle">One platform for integrations, monitoring, and workflow automation</p>
+      </header>
+
+      <div class="features-grid">
+        <!-- Feature 1: Secure Integrations -->
+        <article class="feature-card">
+          <div class="feature-icon" data-placeholder="security-icon">
+            <i class="fas fa-shield-alt"></i>
+          </div>
+          <h3 class="feature-title">Secure Integrations</h3>
+          <p class="feature-description">
+            Built-in encryption, role-based access, and audit logs so your data flows remain compliant and traceable.
+          </p>
+          <ul class="feature-list">
+            <li>End-to-end encryption</li>
+            <li>SOC 2 compliant</li>
+            <li>Full audit trail</li>
+          </ul>
+        </article>
+
+        <!-- Feature 2: Observability -->
+        <article class="feature-card">
+          <div class="feature-icon" data-placeholder="observability-icon">
+            <i class="fas fa-eye"></i>
+          </div>
+          <h3 class="feature-title">Observability</h3>
+          <p class="feature-description">
+            End-to-end tracing and realtime dashboards to find and resolve issues before customers notice.
+          </p>
+          <ul class="feature-list">
+            <li>Real-time monitoring</li>
+            <li>Custom alerts</li>
+            <li>Performance insights</li>
+          </ul>
+        </article>
+
+        <!-- Feature 3: Orchestration -->
+        <article class="feature-card">
+          <div class="feature-icon" data-placeholder="orchestration-icon">
+            <i class="fas fa-project-diagram"></i>
+          </div>
+          <h3 class="feature-title">Orchestration</h3>
+          <p class="feature-description">
+            Design workflows, retry policies, and transformations with a visual editor or via API.
+          </p>
+          <ul class="feature-list">
+            <li>Visual workflow builder</li>
+            <li>Automatic retries</li>
+            <li>Data transformations</li>
+          </ul>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========================================
+       SECTION 5: HOW IT WORKS
+       Purpose: Simplify the product understanding
+       ======================================== -->
+  <section class="how-it-works-section" aria-labelledby="how-it-works-heading">
+    <div class="container">
+      <header class="section-header">
+        <h2 id="how-it-works-heading" class="section-title">Up and running in three steps</h2>
+        <p class="section-subtitle">Get started in minutes, not months</p>
+      </header>
+
+      <div class="steps-grid">
+        <!-- Step 1 -->
+        <div class="step-card">
+          <div class="step-number">1</div>
+          <div class="step-icon" data-placeholder="connect-icon">
+            <i class="fas fa-plug"></i>
+          </div>
+          <h3 class="step-title">Connect your systems</h3>
+          <p class="step-description">
+            Choose from 100+ pre-built connectors or use our universal API adapter to connect any system.
+          </p>
+        </div>
+
+        <!-- Step 2 -->
+        <div class="step-card">
+          <div class="step-number">2</div>
+          <div class="step-icon" data-placeholder="configure-icon">
+            <i class="fas fa-sliders-h"></i>
+          </div>
+          <h3 class="step-title">Configure your workflows</h3>
+          <p class="step-description">
+            Use our visual editor to map data, set triggers, and define business logic—no coding required.
+          </p>
+        </div>
+
+        <!-- Step 3 -->
+        <div class="step-card">
+          <div class="step-number">3</div>
+          <div class="step-icon" data-placeholder="monitor-icon">
+            <i class="fas fa-chart-bar"></i>
+          </div>
+          <h3 class="step-title">Monitor and scale</h3>
+          <p class="step-description">
+            Watch your integrations run with real-time monitoring. Scale automatically as your business grows.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========================================
+       SECTION 6: SOLUTIONS (Industry-Specific)
+       Purpose: Show relevance to target markets
+       ======================================== -->
+  <section class="solutions-section" aria-labelledby="solutions-heading">
+    <div class="container">
+      <header class="section-header">
+        <h2 id="solutions-heading" class="section-title">Built for your industry</h2>
+        <p class="section-subtitle">Purpose-built solutions for complex business needs</p>
+      </header>
+
+      <div class="solutions-grid">
+        <!-- Solution 1: Finance & Payments -->
+        <article class="solution-card">
+          <div class="solution-icon" data-placeholder="finance-icon">
+            <i class="fas fa-university"></i>
+          </div>
+          <h3 class="solution-title">Finance & Payments</h3>
+          <p class="solution-description">
+            Securely route payment events, reconcile ledgers, and keep your financial systems in sync—with full compliance.
+          </p>
+          <ul class="solution-benefits">
+            <li><i class="fas fa-check"></i> PCI-DSS compliant</li>
+            <li><i class="fas fa-check"></i> Real-time reconciliation</li>
+            <li><i class="fas fa-check"></i> Multi-currency support</li>
+          </ul>
+          <%= link_to "Learn more →", "#", class: "solution-link" %>
+        </article>
+
+        <!-- Solution 2: Supply Chain -->
+        <article class="solution-card">
+          <div class="solution-icon" data-placeholder="supply-chain-icon">
+            <i class="fas fa-truck"></i>
+          </div>
+          <h3 class="solution-title">Supply Chain</h3>
+          <p class="solution-description">
+            Connect logistics partners, track shipments in real-time, and automate inventory management across your network.
+          </p>
+          <ul class="solution-benefits">
+            <li><i class="fas fa-check"></i> EDI & API support</li>
+            <li><i class="fas fa-check"></i> Real-time tracking</li>
+            <li><i class="fas fa-check"></i> Inventory automation</li>
+          </ul>
+          <%= link_to "Learn more →", "#", class: "solution-link" %>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========================================
+       SECTION 7: TESTIMONIAL
+       Purpose: Social proof from a real customer
+       ======================================== -->
+  <section class="testimonial-section" aria-labelledby="testimonial-heading">
+    <div class="container">
+      <h2 id="testimonial-heading" class="visually-hidden">Customer Testimonial</h2>
+      <blockquote class="testimonial-quote">
+        <p class="quote-text">
+          "Nodal reduced our integration time from 6 months to 2 weeks. We're now processing 10x more transactions with the same team."
+        </p>
+        <footer class="quote-attribution">
+          <div class="quote-avatar" data-placeholder="customer-avatar">
+            <i class="fas fa-user-circle"></i>
+          </div>
+          <div class="quote-info">
+            <cite class="quote-name">Sarah Chen</cite>
+            <span class="quote-title">VP of Engineering, TechCorp</span>
+          </div>
+          <div class="quote-logo" data-placeholder="customer-company-logo">
+            <span class="logo-placeholder-sm">Company Logo</span>
+          </div>
+        </footer>
+      </blockquote>
+    </div>
+  </section>
+
+  <!-- ========================================
+       SECTION 8: BOTTOM CTA
+       Purpose: Final conversion opportunity
+       ======================================== -->
+  <section class="cta-section" aria-labelledby="cta-heading">
+    <div class="container">
+      <div class="cta-content">
+        <h2 id="cta-heading" class="cta-headline">Ready to streamline your operations?</h2>
+        <p class="cta-subheadline">
+          Join hundreds of businesses already using Nodal to connect their systems and automate workflows.
+        </p>
+        <div class="cta-buttons">
+          <%= link_to "Start Free Trial", "#", class: "btn btn-primary btn-lg" %>
+          <%= link_to "Talk to Sales", "#", class: "btn btn-outline-light btn-lg" %>
+        </div>
+        <p class="cta-disclaimer">14-day free trial • No credit card required • Cancel anytime</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========================================
+       SECTION 9: FOOTER
+       ======================================== -->
+  <%= render "shared/footer" %>
+</div>
