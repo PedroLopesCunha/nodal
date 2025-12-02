@@ -10,7 +10,6 @@ class Category < ApplicationRecord
   private
 
   def ensure_layout
-    debugger
     name.downcase!
     name.capitalize!
   end
