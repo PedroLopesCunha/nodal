@@ -2,14 +2,16 @@ class Category < ApplicationRecord
   belongs_to :organisation
 
   validates :name, presence: :true
-  validates :name, uniqueness: { case_sensitive: false; scope: :organisation,
+  validates :name, uniqueness: { case_sensitive: false, scope: :organisation,
     message: "Category #{:name} already exists"}
 
-  before_save :ensure_writing
+  before_save :ensure_layout
 
-  prive
+  private
 
-  def ensure_writing
-    name.lowercase.capitalize
+  def ensure_layout
+    debugger
+    name.downcase!
+    name.capitalize!
   end
 end
