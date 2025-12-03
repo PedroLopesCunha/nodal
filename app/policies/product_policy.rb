@@ -14,7 +14,7 @@ class ProductPolicy < ApplicationPolicy
   end
 
   def create?
-    true
+    belongs_to_organisation?
   end
 
   def edit?
@@ -34,9 +34,15 @@ class ProductPolicy < ApplicationPolicy
   def belongs_to_organisation?
     user.organisations.include?(record.organisation)
   end
+
   class Scope < ApplicationPolicy::Scope
     def resolve
-      scope.where(organisation: user.organisations)
+      number_of_companies = scope.select("organisation_id").distinct.length
+      if number_of_companies == 1
+        scope.all
+      else
+        # raise an error
+      end
     end
   end
 end
