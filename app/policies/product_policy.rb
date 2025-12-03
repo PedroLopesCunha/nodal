@@ -6,7 +6,7 @@ class ProductPolicy < ApplicationPolicy
   # https://gist.github.com/Burgestrand/4b4bc22f31c8a95c425fc0e30d7ef1f5
 
   def show?
-    true
+    belongs_to_organisation?
   end
 
   def new?
@@ -18,20 +18,25 @@ class ProductPolicy < ApplicationPolicy
   end
 
   def edit?
-    true
+    belongs_to_organisation?
   end
 
   def update?
-    true
+    belongs_to_organisation?
   end
 
   def destroy?
-    true
+    belongs_to_organisation?
+  end
+
+  private
+
+  def belongs_to_organisation?
+    user.organisations.include?(record.organisation)
   end
   class Scope < ApplicationPolicy::Scope
-    # NOTE: Be explicit about which records you allow access to!
     def resolve
-      scope.all
+      scope.where(organisation: user.organisations)
     end
   end
 end

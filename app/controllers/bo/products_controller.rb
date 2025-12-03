@@ -3,7 +3,14 @@ class Bo::ProductsController < Bo::BaseController
 
   def index
     @products = policy_scope(Product)
-    @products = Product.all
+    @products = @products.where(organisation: current_organisation)
+
+    if params[:query].present?
+      @products = @products.joins(:category).where(
+        "products.name ILIKE :q OR products.sku ILIKE :q OR products.description ILIKE :q OR categories.name ILIKE :q",
+        q: "%#{params[:query]}%"
+      )
+    end
   end
 
   def show
@@ -51,7 +58,7 @@ class Bo::ProductsController < Bo::BaseController
   private
 
   def set_product
-    @product = Product.find(params[:id])
+    @product = Product.where(organisation: current_organisation).find(params[:id])
   end
 
   def product_params
