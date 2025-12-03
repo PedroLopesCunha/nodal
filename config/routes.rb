@@ -8,4 +8,17 @@ Rails.application.routes.draw do
 
   # Defines the root path route ("/")
   # root "posts#index"
+
+  # routes for each organisation
+  scope ":org_slug" do
+    # customer routes
+    devise_for :customers, skip: [:registrations]
+    resources :products, only: :index
+
+    # bo routes
+    devise_for :members
+    namespace :bo do
+      get "/", to: "dashboards#dashview"
+    end
+  end
 end
