@@ -14,7 +14,6 @@ class Bo::ProductsController < Bo::BaseController
   end
 
   def show
-    authorize @product
   end
 
   def new
@@ -35,12 +34,9 @@ class Bo::ProductsController < Bo::BaseController
   end
 
   def edit
-    authorize @product
   end
 
   def update
-    authorize @product
-
     if @product.update(product_params)
       redirect_to bo_product_path(params[:org_slug], @product), notice: "Product was successfully updated."
     else
@@ -49,16 +45,15 @@ class Bo::ProductsController < Bo::BaseController
   end
 
   def destroy
-    authorize @product
     @product.destroy
-
     redirect_to bo_products_path(params[:org_slug]), notice: "Product was successfully deleted."
   end
 
   private
 
   def set_product
-    @product = Product.where(organisation: current_organisation).find(params[:id])
+    @product = current_organisation.products.find(params[:id])
+    authorize @product
   end
 
   def product_params
