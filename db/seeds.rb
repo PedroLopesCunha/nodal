@@ -17,7 +17,7 @@ Organisation.destroy_all
 
 puts "destroyed all"
 
-comp = Organisation.new(name: "B2B Groceries", slug: "b2b-groceries", billing_email: "b@b.b")
+comp = Organisation.new(name: "B2B Groceries", billing_email: "b@b.b")
 comp.save!
 
 mem = Member.create!(
@@ -154,5 +154,51 @@ Customer.create!(
   password: "123123",
   active: true
 )
+
+comp_screws = Organisation.new(name: "Screw Market", billing_email: "s@s.s")
+comp_screws.save!
+
+mem_screw = Member.create!(
+  email: "s@s.s",
+  password: "123123",
+  first_name: "Screw",
+  last_name: "Master"
+)
+
+OrgMember.create!(
+  organisation: comp_screws,
+  member: mem_screw,
+  role: "admin",
+  active: true,
+  joined_at: Time.current
+)
+
+cat_screw = Category.create!(name: "Screws", organisation: comp_screws)
+
+10.times do |i|
+  Customer.create!(
+    organisation: comp_screws,
+    company_name: "Screw Client #{i + 1}",
+    contact_name: "Screw Contact #{i + 1}",
+    email: "screw#{i + 1}@client.com",
+    password: "123123",
+    active: true
+  )
+end
+
+10.times do |i|
+  Product.create!(
+    organisation: comp_screws,
+    name: "Screw Product #{i + 1}",
+    slug: "screw-product-#{i + 1}",
+    description: "Screw product description #{i + 1}",
+    category: cat_screw,
+    min_quantity: 1,
+    min_quantity_type: "box",
+    unit_price: (i + 1) * 0.99,
+    unit_description: "box of screws",
+    product_attributes: {}
+  )
+end
 
 puts "no of orgs: #{Organisation.count}, no of cat: #{Category.count}, no of prod: #{Product.count}, no of customers: #{Customer.count}"
