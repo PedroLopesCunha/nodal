@@ -6,8 +6,8 @@ class Bo::CustomersController < Bo::BaseController
   end
 
   def show
-    @customers=policy_scope(Customer)
-    
+    @customer = Customer.find(params[:id])
+    authorize @customer
   end
 
 end

@@ -55,8 +55,10 @@
       <% @customers.each do |customer| %>
         <tr>
           <td>
-            <div class="fw-semibold"><%= customer.contact_name %></div>
-            <small class="text-muted">C<%= customer.id.to_s.rjust(3, '0') %></small>
+            <%= link_to bo_customer_path(params[:org_slug], customer), class: "text-decoration-none text-dark" do %>
+              <div class="fw-semibold"><%= customer.contact_name %></div>
+              <small class="text-muted">C<%= customer.id.to_s.rjust(3, '0') %></small>
+            <% end %>
           </td>
           <td><%= customer.company_name %></td>
           <td>
@@ -70,9 +72,9 @@
           <td>0</td>
           <td>
             <div class="d-flex gap-2">
-              <a href="#" class="text-muted" title="View">
+              <%= link_to bo_customer_path(params[:org_slug], customer), class: "text-muted", title: "View" do %>
                 <i class="fa-solid fa-eye"></i>
-              </a>
+              <% end %>
               <a href="#" class="text-muted" title="Edit">
                 <i class="fa-solid fa-pen-to-square"></i>
               </a>
