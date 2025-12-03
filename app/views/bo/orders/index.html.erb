@@ -19,24 +19,25 @@
   </div>
 
   <!-- Search -->
-  <%= form_with url: bo_orders_path(org_slug: @current_organisation.slug), method: :get, class: "card mb-4", data: { turbo_frame: "_top" } do |f| %>
-    <div class="card-body py-2">
-      <div class="d-flex align-items-center gap-3">
-        <div class="flex-grow-1">
-          <div class="input-group">
-            <span class="input-group-text bg-transparent border-0">
-              <i class="fa-solid fa-magnifying-glass text-muted"></i>
-            </span>
-            <%= f.text_field :search, value: params[:search], class: "form-control border-0", placeholder: "Search by order #, customer name..." %>
-          </div>
+  <div class="card mb-4">
+    <div class="card-body">
+      <%= form_with url: bo_orders_path(org_slug: @current_organisation.slug), method: :get, class: "d-flex align-items-center" do %>
+        <div class="input-group flex-grow-1 me-3">
+          <span class="input-group-text bg-white border-end-0">
+            <i class="fa-solid fa-magnifying-glass text-muted"></i>
+          </span>
+          <%= text_field_tag :search, params[:search], class: "form-control border-start-0", placeholder: "Search orders..." %>
         </div>
-        <%= f.submit "Search", class: "btn btn-primary" %>
+        <button type="submit" class="btn btn-outline-secondary me-2">
+          <i class="fa-solid fa-magnifying-glass"></i> Search
+        </button>
         <% if params[:search].present? %>
           <%= link_to "Clear", bo_orders_path(org_slug: @current_organisation.slug), class: "btn btn-outline-secondary" %>
         <% end %>
-      </div>
+      <% end %>
     </div>
-  <% end %>
+  </div>
+
 
   <!-- Orders Table -->
   <div class="card">
