@@ -1,3 +1,5 @@
+<% content_for :bo_main_content do%>
+
 <div class="container-fluid py-4">
   <!-- Header -->
   <div class="d-flex justify-content-between align-items-start mb-4">
@@ -83,7 +85,7 @@
                 <select name="order[order_items_attributes][NEW_INDEX][product_id]" class="form-select form-select-sm" data-action="change->order-items#updatePrice">
                   <option value="">Select product...</option>
                   <% @products.each do |product| %>
-                    <option value="<%= product.id %>" data-price="<%= product.unit_price %>"><%= product.name %></option>
+                    <option value="<%= product.id %>" data-price="<%= product.price %>"><%= product.name %></option>
                   <% end %>
                 </select>
               </td>
@@ -156,7 +158,7 @@
                 <div class="fw-medium small"><%= product.name %></div>
                 <div class="d-flex justify-content-between text-muted small">
                   <span><%= product.sku || 'No SKU' %></span>
-                  <span>$<%= number_with_precision(product.unit_price, precision: 2) %></span>
+                  <span>$<%= number_with_precision(product.price, precision: 2) %></span>
                 </div>
               </div>
             <% end %>
@@ -166,3 +168,5 @@
     </div>
   </div>
 </div>
+
+<% end %>
