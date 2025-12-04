@@ -1,15 +1,15 @@
 class OrderPolicy < ApplicationPolicy
 
   def show?
-    true
+    user_works_for_records_organisation?
   end
 
   def edit?
-    true
+    user_works_for_records_organisation?
   end
 
   def update?
-    true
+    user_works_for_records_organisation?
   end
 
   def new?
@@ -17,16 +17,27 @@ class OrderPolicy < ApplicationPolicy
   end
 
   def create?
-    true
+    user_works_for_records_organisation?
   end
 
   def destroy?
-    true
+    user_works_for_records_organisation?
   end
 
   class Scope < ApplicationPolicy::Scope
     def resolve
-      scope.all
+      number_of_distinct_organisations = scope.select("organisation_id").distinct.length
+      if number_of_distinct_organisations <= 1
+        scope.all
+      else
+        #redirect_to(root_path)
+      end
     end
+  end
+
+  private
+
+  def user_works_for_records_organisation?
+    return user.organisations.include?(record.organisation)
   end
 end
