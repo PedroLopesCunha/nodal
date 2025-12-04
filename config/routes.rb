@@ -19,6 +19,9 @@ Rails.application.routes.draw do
     devise_for :members
     namespace :bo do
       get "/", to: "dashboards#dashview"
+      resources :orders
+      resources :customers, only: [:index, :show, :new, :create, :edit, :update, :destroy]
+      resources :products
     end
   end
 end
