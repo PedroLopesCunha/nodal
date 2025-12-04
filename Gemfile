@@ -50,6 +50,34 @@ gem "font-awesome-sass", "~> 6.1"
 gem "simple_form", github: "heartcombo/simple_form"
 gem "sassc-rails"
 
+# gem for authentification
+gem "devise"
+# gem for invitations - building on top of devise
+gem 'devise_invitable', '~> 2.0.0'
+
+# gem for picuture saving - heroku is empheral
+gem "cloudinary"
+
+# gem for using llm
+gem "ruby_llm"
+
+# gem for markdown rendering
+gem "kramdown"
+gem "rouge"
+gem "kramdown-parser-gfm"
+
+# gem for multi-modal processing
+gem "image_processing", "~> 1.2"
+
+# open uri
+gem 'open-uri'
+
+# gem for authorization
+gem 'pundit'
+
+# gem for money handling
+gem 'money-rails', '~> 1.12'
+
 group :development, :test do
   gem "dotenv-rails"
   # See https://guides.rubyonrails.org/debugging_rails_applications.html#debugging-with-the-debug-gem
@@ -77,29 +105,3 @@ group :test do
   gem "capybara"
   gem "selenium-webdriver"
 end
-
-# gem for authentification
-gem "devise"
-
-# gem for picuture saving - heroku is empheral
-gem "cloudinary"
-
-# gem for using llm
-gem "ruby_llm"
-
-# gem for markdown rendering
-gem "kramdown"
-gem "rouge"
-gem "kramdown-parser-gfm"
-
-# gem for multi-modal processing
-gem "image_processing", "~> 1.2"
-
-# open uri
-gem 'open-uri'
-
-# gem for authorization
-gem 'pundit'
-
-# gem for money handling
-gem 'money-rails', '~> 1.12'
