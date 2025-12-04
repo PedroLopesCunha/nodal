@@ -377,7 +377,6 @@ end
 # -----------------------------------------------------------------------------
 puts "  Creating orders with various statuses..."
 
-<<<<<<< HEAD
 # COMPLETED + PAID orders
 order1 = Order.create!(organisation: groceries, customer: groceries_customers["hans@bakery.com"],
                        status: "completed", payment_status: "paid")
@@ -439,15 +438,6 @@ puts "=" * 70
 screws = Organisation.create!(
   name: "Screw Market",
   billing_email: "billing@screwmarket.com"
-=======
-customer1 = Customer.create!(
-  organisation: comp,
-  company_name: "Hans' Bakery",
-  contact_name: "Hans Hansensen",
-  email: "h@h.h",
-  password: "123123",
-  active: true
->>>>>>> master
 )
 
 Address.create!(
