@@ -98,6 +98,8 @@ group :development do
   gem "httplog"
   gem "pry-byebug"
   gem "pry-rails"
+
+  gem "letter_opener"
 end
 
 group :test do
