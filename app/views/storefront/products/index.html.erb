@@ -1,4 +1,4 @@
-<div class="d-flex justify-content-between align-items-center mb-4">
+<div class="d-flex justify-content-between align-items-center mb-4 mt-5">
   <div>
     <h1 class="mb-1">Product Catalog</h1>
     <p class="text-muted mb-0">Browse our products</p>
@@ -30,15 +30,13 @@
         <h6 class="card-title mb-3">Categories</h6>
         <div class="list-group list-group-flush">
           <%= link_to products_path(org_slug: params[:org_slug], query: params[:query]),
-              class: "list-group-item list-group-item-action d-flex justify-content-between align-items-center #{'active' if params[:category].blank?}" do %>
+              class: "list-group-item list-group-item-action #{'active' if params[:category].blank?}" do %>
             All Products
-            <span class="badge bg-secondary rounded-pill"><%= @products.count %></span>
           <% end %>
           <% @categories.each do |category| %>
             <%= link_to products_path(org_slug: params[:org_slug], category: category.id, query: params[:query]),
-                class: "list-group-item list-group-item-action d-flex justify-content-between align-items-center #{'active' if params[:category].to_s == category.id.to_s}" do %>
+                class: "list-group-item list-group-item-action #{'active' if params[:category].to_s == category.id.to_s}" do %>
               <%= category.name %>
-              <span class="badge bg-secondary rounded-pill"><%= category.products.count %></span>
             <% end %>
           <% end %>
         </div>
