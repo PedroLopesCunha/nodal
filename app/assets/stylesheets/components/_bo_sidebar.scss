@@ -1,15 +1,13 @@
 // Back Office Sidebar Styles
-// Modern design with collapsible toggle
+// Simplified Shopify-inspired design
 @import "../config/colors";
 
 // Back Office specific variables
-$bo-sidebar-width: 240px;
-$bo-sidebar-collapsed-width: 72px;
-$bo-sidebar-bg: #0f172a;
-$bo-sidebar-border: #1e293b;
-$text-primary: #f8fafc;
+$bo-sidebar-width: 220px;
+$bo-sidebar-bg: #1e293b;
 $text-muted: #94a3b8;
-$navbar-height: 64px;
+$text-primary: #f8fafc;
+$bo-sidebar-border: #334155;
 
 // ========================================
 // SIDEBAR CONTAINER
@@ -23,48 +21,47 @@ $navbar-height: 64px;
   background-color: $bo-sidebar-bg;
   display: flex;
   flex-direction: column;
-  z-index: 1000;
-  border-right: 1px solid $bo-sidebar-border;
-  transition: width 0.3s ease;
+  z-index: 998;
+  padding: 0;
+}
 
-  &.collapsed {
-    width: $bo-sidebar-collapsed-width;
+// Logo section at top of sidebar
+.bo-sidebar-logo {
+  padding: 20px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  margin-bottom: 16px;
+}
 
-    .brand-text,
-    .bo-sidebar-item span {
-      opacity: 0;
-      width: 0;
-      overflow: hidden;
-    }
+.bo-logo-link {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  text-decoration: none;
 
-    .bo-sidebar-header {
-      justify-content: center;
-      padding: 16px 0;
-    }
-
-    .bo-sidebar-brand {
-      justify-content: center;
-    }
-
-    .sidebar-toggle {
-      position: static;
-      margin-left: 0;
-
-      i {
-        transform: rotate(180deg);
-      }
-    }
-
-    .bo-sidebar-item a {
-      justify-content: center;
-      padding: 14px 0;
-    }
-
-    .bo-sidebar-nav,
-    .bo-sidebar-nav-bottom {
-      padding: 8px;
+  &:hover {
+    .bo-logo-text {
+      color: $teal;
     }
   }
+}
+
+.bo-logo-icon {
+  width: 36px;
+  height: 36px;
+  flex-shrink: 0;
+
+  svg {
+    width: 100%;
+    height: 100%;
+  }
+}
+
+.bo-logo-text {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #ffffff;
+  letter-spacing: -0.5px;
+  transition: color 0.2s ease;
 }
 
 // ========================================
@@ -142,7 +139,7 @@ $navbar-height: 64px;
 // ========================================
 .bo-sidebar-nav {
   list-style: none;
-  padding: 16px 12px;
+  padding: 0;
   margin: 0;
   flex: 1;
   display: flex;
@@ -197,8 +194,9 @@ $navbar-height: 64px;
   }
 
   &.active a {
-    color: $text-primary;
+    color: #ffffff;
     background-color: rgba(0, 128, 96, 0.15);
+    border-left-color: $teal;
 
     i {
       color: $teal;
@@ -215,23 +213,28 @@ $navbar-height: 64px;
   min-height: 100vh;
   background: #f8fafc;
   transition: margin-left 0.3s ease;
+}
 
-  .bo-sidebar.collapsed ~ & {
-    margin-left: $bo-sidebar-collapsed-width;
+// Clickable order rows
+.order-row {
+  transition: background-color 0.15s ease;
+
+  &:hover {
+    background-color: rgba(0, 128, 96, 0.05);
+  }
+
+  td:first-child {
+    color: $teal;
   }
 }
 
-// ========================================
-// BACK OFFICE NAVBAR (within sidebar layout)
-// ========================================
-.bo-navbar {
-  display: none; // Navbar integrated into sidebar for this design
+.order-actions {
+  position: relative;
+  z-index: 1;
 }
 
-// ========================================
-// RESPONSIVE
-// ========================================
-@media (max-width: 992px) {
+// Responsive - hide sidebar on mobile
+@media (max-width: 768px) {
   .bo-sidebar {
     transform: translateX(-100%);
 
@@ -268,33 +271,8 @@ $navbar-height: 64px;
   }
 }
 
-@media (min-width: 993px) {
+@media (min-width: 769px) {
   .mobile-sidebar-toggle {
     display: none;
-  }
-}
-
-// ========================================
-// TOOLTIPS FOR COLLAPSED STATE
-// ========================================
-.bo-sidebar.collapsed .bo-sidebar-item {
-  position: relative;
-
-  &:hover::after {
-    content: attr(data-tooltip);
-    position: absolute;
-    left: calc(100% + 12px);
-    top: 50%;
-    transform: translateY(-50%);
-    background: $bo-sidebar-bg;
-    color: $text-primary;
-    padding: 8px 12px;
-    border-radius: 8px;
-    font-size: 0.875rem;
-    font-weight: 500;
-    white-space: nowrap;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-    z-index: 1001;
-    border: 1px solid $bo-sidebar-border;
   }
 }
