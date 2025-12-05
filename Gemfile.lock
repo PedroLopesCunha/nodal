@@ -353,6 +353,7 @@ GEM
     ruby-vips (2.2.5)
       ffi (~> 1.12)
       logger
+    ruby_http_client (3.5.5)
     ruby_llm (1.9.1)
       base64
       event_stream_parser (~> 1)
@@ -380,6 +381,8 @@ GEM
       rexml (~> 3.2, >= 3.2.5)
       rubyzip (>= 1.2.2, < 4.0)
       websocket (~> 1.0)
+    sendgrid-ruby (6.7.0)
+      ruby_http_client (~> 3.4)
     sprockets (4.2.2)
       concurrent-ruby (~> 1.0)
       logger
@@ -461,6 +464,7 @@ DEPENDENCIES
   ruby_llm
   sassc-rails
   selenium-webdriver
+  sendgrid-ruby
   simple_form!
   sprockets-rails
   stimulus-rails
