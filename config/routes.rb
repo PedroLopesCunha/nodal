@@ -15,7 +15,10 @@ Rails.application.routes.draw do
   scope ":org_slug" do
     # customer routes
     devise_for :customers, skip: [:registrations],
-                controllers: { sessions: 'customers/sessions' }
+                controllers: {
+                  sessions: 'customers/sessions',
+                  invitations: 'customers/invitations'
+                }
 
     # storefront (customer-facing)
     scope module: :storefront do
