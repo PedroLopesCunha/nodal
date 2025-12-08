@@ -1,0 +1,136 @@
+<%= link_to cart_path(org_slug: params[:org_slug]), class: "btn btn-outline-secondary mb-4 mt-5" do %>
+  <i class="fa-solid fa-arrow-left me-2"></i>Back to Cart
+<% end %>
+
+<div class="row g-4">
+  <div class="col-lg-8">
+    <!-- Checkout Header -->
+    <div class="card border-0 shadow-sm mb-4" style="border-radius: 12px;">
+      <div class="card-body">
+        <h1 class="h3 mb-1">Checkout</h1>
+        <p class="text-muted mb-0">Review your order and choose delivery method</p>
+      </div>
+    </div>
+
+    <!-- Order Items -->
+    <div class="card border-0 shadow-sm mb-4" style="border-radius: 12px;">
+      <div class="card-body">
+        <h5 class="card-title mb-3">Order Items</h5>
+
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Product</th>
+              <th class="text-center">Quantity</th>
+              <th class="text-end">Price</th>
+              <th class="text-end">Total</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% @order_items.each do |item| %>
+              <tr>
+                <td>
+                  <div class="d-flex align-items-center">
+                    <% if item.product.photo.attached? %>
+                      <%= image_tag item.product.photo, style: "width: 50px; height: 50px; object-fit: cover; border-radius: 6px;", class: "me-3" %>
+                    <% else %>
+                      <div class="me-3 bg-light d-flex align-items-center justify-content-center" style="width: 50px; height: 50px; border-radius: 6px;">
+                        <i class="fa-solid fa-image text-muted"></i>
+                      </div>
+                    <% end %>
+                    <div>
+                      <div class="fw-medium"><%= item.product.name %></div>
+                      <small class="text-muted"><%= item.product.category&.name %></small>
+                    </div>
+                  </div>
+                </td>
+                <td class="text-center"><%= item.quantity %></td>
+                <td class="text-end"><%= humanized_money_with_symbol(item.price) %></td>
+                <td class="text-end fw-medium"><%= humanized_money_with_symbol(item.total_price) %></td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Delivery Method -->
+    <div class="card border-0 shadow-sm" style="border-radius: 12px;">
+      <div class="card-body">
+        <h5 class="card-title mb-3">
+          <i class="fa-solid fa-truck me-2"></i>Delivery Method
+        </h5>
+
+        <%= form_with model: @order, url: checkout_path(org_slug: params[:org_slug]), method: :patch, id: "checkout-form" do |f| %>
+          <div class="mb-3">
+            <div class="form-check p-3 border rounded mb-2">
+              <%= f.radio_button :delivery_method, "delivery",
+                  class: "form-check-input",
+                  id: "delivery_method_delivery",
+                  checked: @order.delivery_method != "pickup" %>
+              <label class="form-check-label d-flex justify-content-between align-items-center w-100 ms-2" for="delivery_method_delivery">
+                <div>
+                  <strong>Delivery</strong>
+                  <div class="text-muted small">We'll deliver to your address</div>
+                </div>
+                <span class="fw-medium"><%= humanized_money_with_symbol(@current_organisation.shipping_cost) %></span>
+              </label>
+            </div>
+
+            <div class="form-check p-3 border rounded">
+              <%= f.radio_button :delivery_method, "pickup",
+                  class: "form-check-input",
+                  id: "delivery_method_pickup" %>
+              <label class="form-check-label d-flex justify-content-between align-items-center w-100 ms-2" for="delivery_method_pickup">
+                <div>
+                  <strong>Pickup</strong>
+                  <div class="text-muted small">Pick up your order yourself</div>
+                </div>
+                <span class="fw-medium text-success">Free</span>
+              </label>
+            </div>
+          </div>
+        <% end %>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-lg-4">
+    <!-- Order Summary -->
+    <div class="card border-0 shadow-sm mb-4" style="border-radius: 12px;">
+      <div class="card-body">
+        <h5 class="card-title mb-3">Order Summary</h5>
+
+        <div class="d-flex justify-content-between mb-2">
+          <span class="text-muted">Subtotal (<%= @order.item_count %> items)</span>
+          <span><%= humanized_money_with_symbol(@order.total_amount) %></span>
+        </div>
+
+        <div class="d-flex justify-content-between mb-2">
+          <span class="text-muted">Tax (<%= (@current_organisation.tax_rate * 100).round(1) %>%)</span>
+          <span><%= humanized_money_with_symbol(@order.calculated_tax) %></span>
+        </div>
+
+        <div class="d-flex justify-content-between mb-2">
+          <span class="text-muted">Shipping</span>
+          <span><%= humanized_money_with_symbol(@order.calculated_shipping) %></span>
+        </div>
+
+        <hr>
+
+        <div class="d-flex justify-content-between mb-4">
+          <span class="fw-bold">Total</span>
+          <span class="fw-bold fs-5"><%= humanized_money_with_symbol(@order.grand_total) %></span>
+        </div>
+
+        <button type="submit" form="checkout-form" class="btn btn-primary w-100 btn-lg">
+          <i class="fa-solid fa-check me-2"></i>Place Order
+        </button>
+
+        <p class="text-muted small text-center mt-3 mb-0">
+          By placing your order, you agree to our terms and conditions.
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
