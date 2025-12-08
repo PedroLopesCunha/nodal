@@ -8,6 +8,8 @@ class Order < ApplicationRecord
 
   belongs_to :customer
   belongs_to :organisation
+  belongs_to :shipping_address, class_name: "Address", optional: true
+  belongs_to :billing_address, class_name: "Address", optional: true
   has_many :order_items, dependent: :destroy
   has_many :products, through: :order_items
 
@@ -38,6 +40,13 @@ class Order < ApplicationRecord
 
   def place!
     update!(placed_at: Time.current)
+  end
+
+  def finalize_checkout!(same_as_shipping: false)
+    self.billing_address = shipping_address if same_as_shipping && shipping_address.present?
+    self.tax_amount = calculated_tax
+    self.shipping_amount = calculated_shipping
+    place!
   end
 
   def total_amount

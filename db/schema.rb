@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2025_12_08_153734) do
+ActiveRecord::Schema[7.1].define(version: 2025_12_08_163658) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -135,9 +135,13 @@ ActiveRecord::Schema[7.1].define(version: 2025_12_08_153734) do
     t.integer "shipping_amount_cents"
     t.string "shipping_amount_currency"
     t.string "delivery_method", default: "delivery"
+    t.bigint "shipping_address_id"
+    t.bigint "billing_address_id"
+    t.index ["billing_address_id"], name: "index_orders_on_billing_address_id"
     t.index ["customer_id"], name: "index_orders_on_customer_id"
     t.index ["order_number"], name: "index_orders_on_order_number", unique: true
     t.index ["organisation_id"], name: "index_orders_on_organisation_id"
+    t.index ["shipping_address_id"], name: "index_orders_on_shipping_address_id"
   end
 
   create_table "org_members", force: :cascade do |t|
@@ -191,6 +195,8 @@ ActiveRecord::Schema[7.1].define(version: 2025_12_08_153734) do
   add_foreign_key "customers", "organisations"
   add_foreign_key "order_items", "orders"
   add_foreign_key "order_items", "products"
+  add_foreign_key "orders", "addresses", column: "billing_address_id"
+  add_foreign_key "orders", "addresses", column: "shipping_address_id"
   add_foreign_key "orders", "customers"
   add_foreign_key "orders", "organisations"
   add_foreign_key "org_members", "members"
