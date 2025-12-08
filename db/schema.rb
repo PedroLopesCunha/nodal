@@ -64,6 +64,20 @@ ActiveRecord::Schema[7.1].define(version: 2025_12_08_163658) do
     t.index ["organisation_id"], name: "index_categories_on_organisation_id"
   end
 
+  create_table "customer_product_discounts", force: :cascade do |t|
+    t.bigint "customer_id", null: false
+    t.bigint "product_id", null: false
+    t.bigint "organisation_id", null: false
+    t.decimal "discount_percentage", precision: 5, scale: 4, default: "0.0"
+    t.date "valid_from"
+    t.date "valid_until"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["customer_id"], name: "index_customer_product_discounts_on_customer_id"
+    t.index ["organisation_id"], name: "index_customer_product_discounts_on_organisation_id"
+    t.index ["product_id"], name: "index_customer_product_discounts_on_product_id"
+  end
+
   create_table "customers", force: :cascade do |t|
     t.string "email", default: "", null: false
     t.string "encrypted_password", default: "", null: false
@@ -112,7 +126,7 @@ ActiveRecord::Schema[7.1].define(version: 2025_12_08_163658) do
     t.bigint "product_id", null: false
     t.integer "quantity", default: 1, null: false
     t.integer "unit_price", null: false
-    t.integer "discount_amount", default: 0
+    t.decimal "discount_percentage", precision: 5, scale: 4, default: "0.0"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["order_id"], name: "index_order_items_on_order_id"
@@ -192,6 +206,9 @@ ActiveRecord::Schema[7.1].define(version: 2025_12_08_163658) do
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
   add_foreign_key "categories", "organisations"
+  add_foreign_key "customer_product_discounts", "customers"
+  add_foreign_key "customer_product_discounts", "organisations"
+  add_foreign_key "customer_product_discounts", "products"
   add_foreign_key "customers", "organisations"
   add_foreign_key "order_items", "orders"
   add_foreign_key "order_items", "products"
