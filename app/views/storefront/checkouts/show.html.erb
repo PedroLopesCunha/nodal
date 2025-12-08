@@ -2,7 +2,11 @@
   <i class="fa-solid fa-arrow-left me-2"></i>Back to Cart
 <% end %>
 
-<div class="row g-4">
+<div class="row g-4"
+     data-controller="checkout"
+     data-checkout-subtotal-value="<%= @order.total_amount.cents %>"
+     data-checkout-tax-value="<%= @order.calculated_tax.cents %>"
+     data-checkout-shipping-cost-value="<%= @current_organisation.shipping_cost.cents %>">
   <div class="col-lg-8">
     <!-- Checkout Header -->
     <div class="card border-0 shadow-sm mb-4" style="border-radius: 12px;">
@@ -67,7 +71,8 @@
               <%= f.radio_button :delivery_method, "delivery",
                   class: "form-check-input",
                   id: "delivery_method_delivery",
-                  checked: @order.delivery_method != "pickup" %>
+                  checked: @order.delivery_method != "pickup",
+                  data: { action: "checkout#updateTotal" } %>
               <label class="form-check-label d-flex justify-content-between align-items-center w-100 ms-2" for="delivery_method_delivery">
                 <div>
                   <strong>Delivery</strong>
@@ -80,7 +85,8 @@
             <div class="form-check p-3 border rounded">
               <%= f.radio_button :delivery_method, "pickup",
                   class: "form-check-input",
-                  id: "delivery_method_pickup" %>
+                  id: "delivery_method_pickup",
+                  data: { action: "checkout#updateTotal" } %>
               <label class="form-check-label d-flex justify-content-between align-items-center w-100 ms-2" for="delivery_method_pickup">
                 <div>
                   <strong>Pickup</strong>
@@ -113,14 +119,14 @@
 
         <div class="d-flex justify-content-between mb-2">
           <span class="text-muted">Shipping</span>
-          <span><%= humanized_money_with_symbol(@order.calculated_shipping) %></span>
+          <span data-checkout-target="shippingAmount"><%= humanized_money_with_symbol(@order.calculated_shipping) %></span>
         </div>
 
         <hr>
 
         <div class="d-flex justify-content-between mb-4">
           <span class="fw-bold">Total</span>
-          <span class="fw-bold fs-5"><%= humanized_money_with_symbol(@order.grand_total) %></span>
+          <span class="fw-bold fs-5" data-checkout-target="totalAmount"><%= humanized_money_with_symbol(@order.grand_total) %></span>
         </div>
 
         <button type="submit" form="checkout-form" class="btn btn-primary w-100 btn-lg">
