@@ -39,11 +39,12 @@ export default class extends Controller {
     const row = event.target.closest("tr")
     const select = event.target
     const selectedOption = select.options[select.selectedIndex]
-    const price = selectedOption.dataset.price || 0
+    const priceInCents = selectedOption.dataset.price || 0
 
     const unitPriceInput = row.querySelector("[data-price-field]")
     if (unitPriceInput) {
-      unitPriceInput.value = parseFloat(price).toFixed(2)
+      // Convert cents to EUR for display
+      unitPriceInput.value = (parseFloat(priceInCents) / 100).toFixed(2)
     }
 
     this.calculateLineTotal(row)
