@@ -402,30 +402,30 @@ puts "  Creating orders with various statuses..."
 
 # COMPLETED + PAID orders
 order1 = Order.create!(organisation: groceries, customer: groceries_customers["hans@bakery.com"],
-                       status: "completed", payment_status: "paid")
+                       status: "in_process", payment_status: "paid")
 OrderItem.create!(order: order1, product: groceries_products["artisan-sourdough-flour"], quantity: 50)
 OrderItem.create!(order: order1, product: groceries_products["grass-fed-butter"], quantity: 20)
 OrderItem.create!(order: order1, product: groceries_products["organic-honey"], quantity: 10)
 
 order2 = Order.create!(organisation: groceries, customer: groceries_customers["maria@cafe.com"],
-                       status: "completed", payment_status: "paid")
+                       status: "completed", payment_status: "paid", placed_at: Time.current)
 OrderItem.create!(order: order2, product: groceries_products["organic-coffee-beans"], quantity: 30)
 OrderItem.create!(order: order2, product: groceries_products["fresh-mozzarella"], quantity: 15)
 
 order3 = Order.create!(organisation: groceries, customer: groceries_customers["oliver@greenkitchen.com"],
-                       status: "completed", payment_status: "paid")
+                       status: "completed", payment_status: "paid", placed_at: Time.current)
 OrderItem.create!(order: order3, product: groceries_products["fresh-basil"], quantity: 25)
 OrderItem.create!(order: order3, product: groceries_products["organic-apples"], quantity: 40)
 OrderItem.create!(order: order3, product: groceries_products["organic-lemons"], quantity: 30)
 
 # PROCESSED + PENDING orders
 order4 = Order.create!(organisation: groceries, customer: groceries_customers["erik@nordicdelights.com"],
-                       status: "processed", payment_status: "pending")
+                       status: "processed", payment_status: "pending", placed_at: Time.current)
 OrderItem.create!(order: order4, product: groceries_products["wild-caught-salmon"], quantity: 20)
 OrderItem.create!(order: order4, product: groceries_products["atlantic-shrimp"], quantity: 15)
 
 order5 = Order.create!(organisation: groceries, customer: groceries_customers["sophie@freshandco.com"],
-                       status: "processed", payment_status: "pending")
+                       status: "processed", payment_status: "pending", placed_at: Time.current)
 OrderItem.create!(order: order5, product: groceries_products["prime-ribeye-steak"], quantity: 25)
 OrderItem.create!(order: order5, product: groceries_products["aged-parmesan"], quantity: 10)
 OrderItem.create!(order: order5, product: groceries_products["premium-olive-oil"], quantity: 12)
@@ -439,14 +439,14 @@ OrderItem.create!(order: order6, product: groceries_products["whole-wheat-flour"
 
 # PROCESSED + FAILED (payment failure scenario)
 order7 = Order.create!(organisation: groceries, customer: groceries_customers["anna@sunrisehotel.com"],
-                       status: "processed", payment_status: "failed")
+                       status: "processed", payment_status: "failed", placed_at: Time.current)
 OrderItem.create!(order: order7, product: groceries_products["wild-caught-salmon"], quantity: 50)
 OrderItem.create!(order: order7, product: groceries_products["prime-ribeye-steak"], quantity: 40)
 OrderItem.create!(order: order7, product: groceries_products["aged-parmesan"], quantity: 20)
 
 # COMPLETED + REFUNDED (refund scenario)
 order8 = Order.create!(organisation: groceries, customer: groceries_customers["michael@cornerdeli.com"],
-                       status: "completed", payment_status: "refunded")
+                       status: "completed", payment_status: "refunded", placed_at: Time.current)
 OrderItem.create!(order: order8, product: groceries_products["fresh-mozzarella"], quantity: 10)
 
 puts "  Created #{groceries.orders.count} orders with #{OrderItem.where(order: groceries.orders).count} items"
@@ -612,7 +612,7 @@ end
 puts "  Creating orders..."
 
 order_s1 = Order.create!(organisation: screws, customer: screws_customers["john@builditright.com"],
-                         status: "completed", payment_status: "paid")
+                         status: "completed", payment_status: "paid", placed_at: Time.current)
 OrderItem.create!(order: order_s1, product: screws_products["wood-screws-8"], quantity: 50)
 OrderItem.create!(order: order_s1, product: screws_products["hex-bolts"], quantity: 30)
 
@@ -623,7 +623,7 @@ OrderItem.create!(order: order_s2, product: screws_products["deck-screws"], quan
 
 # Order from the shared-email customer (Hans in Screws org)
 order_s3 = Order.create!(organisation: screws, customer: screws_customers["hans@bakery.com"],
-                         status: "processed", payment_status: "pending")
+                         status: "processed", payment_status: "pending", placed_at: Time.current)
 OrderItem.create!(order: order_s3, product: screws_products["machine-screws"], quantity: 200)
 OrderItem.create!(order: order_s3, product: screws_products["lock-nuts"], quantity: 200)
 
