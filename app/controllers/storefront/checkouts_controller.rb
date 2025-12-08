@@ -1,7 +1,7 @@
 class Storefront::CheckoutsController < Storefront::BaseController
   def show
     @order = current_cart
-    authorize @order, policy_class: OrderPolicy
+    authorize @order, :checkout?, policy_class: OrderPolicy
 
     if @order.order_items.empty?
       redirect_to cart_path(org_slug: params[:org_slug]), alert: "Your cart is empty."
@@ -13,7 +13,7 @@ class Storefront::CheckoutsController < Storefront::BaseController
 
   def update
     @order = current_cart
-    authorize @order, policy_class: OrderPolicy
+    authorize @order, :checkout?, policy_class: OrderPolicy
 
     if @order.order_items.empty?
       redirect_to cart_path(org_slug: params[:org_slug]), alert: "Your cart is empty."
