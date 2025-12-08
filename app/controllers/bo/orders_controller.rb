@@ -72,9 +72,20 @@ class Bo::OrdersController < Bo::BaseController
   end
 
   def order_params
-    params.require(:order).permit(
+    permitted = params.require(:order).permit(
       :customer_id, :status, :payment_status, :receive_on, :notes,
       order_items_attributes: [:id, :product_id, :quantity, :unit_price, :discount_amount, :_destroy]
     )
+
+    # Convert unit_price from EUR (form input) to cents (database storage)
+    if permitted[:order_items_attributes].present?
+      permitted[:order_items_attributes].each do |_key, item_attrs|
+        if item_attrs[:unit_price].present?
+          item_attrs[:unit_price] = (item_attrs[:unit_price].to_f * 100).to_i
+        end
+      end
+    end
+
+    permitted
   end
 end
