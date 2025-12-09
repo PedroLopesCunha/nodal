@@ -264,6 +264,7 @@
 
             <%= form_with url: apply_discount_bo_order_path(org_slug: @current_organisation.slug, id: @order.id),
                 method: :patch,
+                scope: :order,
                 local: true do |f| %>
               <div class="mb-3">
                 <label class="form-label small">Discount Type</label>
