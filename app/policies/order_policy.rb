@@ -40,6 +40,10 @@ class OrderPolicy < ApplicationPolicy
     customer_owner? && record.draft?
   end
 
+  def reorder?
+    customer_owner? && record.placed?
+  end
+
   class Scope < ApplicationPolicy::Scope
     def resolve
       if user.is_a?(Customer)

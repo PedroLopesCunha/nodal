@@ -149,8 +149,11 @@
       </div>
     <% end %>
 
-    <!-- Continue Shopping -->
+    <!-- Reorder -->
     <div class="mt-4">
+      <%= button_to reorder_order_path(org_slug: params[:org_slug], id: @order, confirm: params[:confirm_reorder]), method: :post, class: "btn btn-outline-secondary w-100 mb-2" do %>
+        <i class="fa-solid fa-rotate-right me-2"></i>Reorder
+      <% end %>
       <%= link_to products_path(org_slug: params[:org_slug]), class: "btn btn-primary w-100" do %>
         <i class="fa-solid fa-shopping-bag me-2"></i>Continue Shopping
       <% end %>
