@@ -37,7 +37,9 @@ Rails.application.routes.draw do
       resources :order_items, only: [:create, :update, :destroy]
 
       # Order history (placed orders only)
-      resources :orders, only: [:index, :show]
+      resources :orders, only: [:index, :show] do
+        post :reorder, on: :member
+      end
     end
 
     # bo routes
