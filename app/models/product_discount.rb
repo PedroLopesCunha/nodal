@@ -10,6 +10,7 @@ class ProductDiscount < ApplicationRecord
 
   validate :discount_value_valid_for_type
   validate :valid_until_after_valid_from
+  validate :min_quantity_not_below_product_minimum
 
   scope :active, -> {
     where(active: true)
@@ -64,6 +65,15 @@ class ProductDiscount < ApplicationRecord
 
     if valid_until < valid_from
       errors.add(:valid_until, "must be after valid from date")
+    end
+  end
+
+  def min_quantity_not_below_product_minimum
+    return if product.blank? || min_quantity.blank?
+
+    product_min = product.min_quantity || 1
+    if min_quantity < product_min
+      errors.add(:min_quantity, "cannot be less than the product's minimum order quantity (#{product_min})")
     end
   end
 end
