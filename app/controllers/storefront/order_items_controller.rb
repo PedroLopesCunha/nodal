@@ -9,8 +9,17 @@ class Storefront::OrderItemsController < Storefront::BaseController
       @order_item.quantity += order_item_params[:quantity].to_i
     else
       @order_item = @order.order_items.build(order_item_params.merge(product: @product))
-      if discount = @product.active_discount_for(current_customer)
-        @order_item.discount_percentage = discount.discount_percentage
+
+      # Use DiscountCalculator to get the effective discount from ALL sources
+      # (ProductDiscount, CustomerDiscount, CustomerProductDiscount)
+      calculator = DiscountCalculator.new(
+        product: @product,
+        customer: current_customer,
+        quantity: order_item_params[:quantity].to_i
+      )
+
+      if calculator.effective_discount[:percentage] > 0
+        @order_item.discount_percentage = calculator.effective_discount[:percentage]
       end
     end
 

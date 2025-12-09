@@ -66,7 +66,7 @@ class DiscountCalculator
       discounts << {
         type: :customer_product,
         discount_type: cpd.discount_type,
-        value: cpd.discount_percentage,
+        value: cpd.discount_value,
         stackable: cpd.stackable,
         label: "Your Special Price",
         valid_until: cpd.valid_until,
