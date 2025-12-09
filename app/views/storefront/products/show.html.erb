@@ -12,19 +12,6 @@
       </span>
 
       <% discount_breakdown = @discount_calculator.discount_breakdown %>
-      <% if discount_breakdown[:has_discount] %>
-        <!-- Discount Badge on Image -->
-        <div class="position-absolute" style="top: 16px; right: 16px; z-index: 10;">
-          <span class="badge bg-success shadow" style="font-size: 1.1rem; padding: 10px 14px; border-radius: 20px;">
-            <i class="fa-solid fa-percent me-1"></i>-<%= (discount_breakdown[:effective_discount][:percentage] * 100).round(0) %>% OFF
-          </span>
-          <% if discount_breakdown[:all_discounts].any? { |d| d[:type] == :product } %>
-            <span class="badge bg-danger shadow d-block mt-2" style="font-size: 1rem; padding: 8px 14px; border-radius: 20px;">
-              <i class="fa-solid fa-fire me-1"></i>SALE
-            </span>
-          <% end %>
-        </div>
-      <% end %>
 
       <!-- Main Image -->
       <div class="d-flex align-items-center justify-content-center" style="min-height: 400px; padding: 40px;">
