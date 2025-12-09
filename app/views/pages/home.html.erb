@@ -37,11 +37,22 @@
           <path id="bgPath8" d="M900,50 Q750,150 600,300"/>
           <path id="bgPath9" d="M300,550 Q450,450 600,300"/>
           <path id="bgPath10" d="M900,550 Q750,450 600,300"/>
-          <!-- Cross connections -->
-          <line x1="80" y1="100" x2="300" y2="50" stroke-opacity="0.1"/>
-          <line x1="1120" y1="100" x2="900" y2="50" stroke-opacity="0.1"/>
-          <line x1="80" y1="500" x2="300" y2="550" stroke-opacity="0.1"/>
-          <line x1="1120" y1="500" x2="900" y2="550" stroke-opacity="0.1"/>
+          <!-- Cross connections between outer nodes -->
+          <!-- Top to side connections -->
+          <line x1="80" y1="100" x2="300" y2="50" stroke-opacity="0.25"/>
+          <line x1="1120" y1="100" x2="900" y2="50" stroke-opacity="0.25"/>
+          <!-- Bottom to side connections -->
+          <line x1="80" y1="500" x2="300" y2="550" stroke-opacity="0.25"/>
+          <line x1="1120" y1="500" x2="900" y2="550" stroke-opacity="0.25"/>
+          <!-- Vertical side connections -->
+          <line x1="80" y1="100" x2="80" y2="300" stroke-opacity="0.2"/>
+          <line x1="80" y1="300" x2="80" y2="500" stroke-opacity="0.2"/>
+          <line x1="1120" y1="100" x2="1120" y2="300" stroke-opacity="0.2"/>
+          <line x1="1120" y1="300" x2="1120" y2="500" stroke-opacity="0.2"/>
+          <!-- Top horizontal connection -->
+          <line x1="300" y1="50" x2="900" y2="50" stroke-opacity="0.15"/>
+          <!-- Bottom horizontal connection -->
+          <line x1="300" y1="550" x2="900" y2="550" stroke-opacity="0.15"/>
         </g>
 
         <!-- Animated pulses -->
@@ -191,8 +202,8 @@
             </g>
           </g>
 
-          <!-- Center: Nodal hub - GLOWING RING EFFECT (moved up) -->
-          <g class="node node-center" transform="translate(0, -120)">
+          <!-- Center: Nodal hub - GLOWING RING EFFECT -->
+          <g class="node node-center">
             <!-- Glow filter for rings -->
             <defs>
               <filter id="ringGlow" x="-100%" y="-100%" width="300%" height="300%">
@@ -272,7 +283,7 @@
       <div class="hero-content">
         <div class="hero-text">
           <h1 id="hero-heading" class="hero-headline">
-            Connecting Businesses Through Smarter Orders
+            Ordering that works
           </h1>
           <p class="hero-subheadline">
             A plug-and-play B2B ordering platform built specifically for small and medium businesses. No developers required, no complex setup — just smart ordering that works.
@@ -281,7 +292,6 @@
             <%= link_to "Get Started", "#", class: "btn btn-primary btn-lg hero-cta-primary" %>
             <%= link_to "Book a Demo", "#", class: "btn btn-outline-light btn-lg hero-cta-secondary" %>
           </div>
-          <p class="hero-disclaimer">No credit card required • Launch in minutes</p>
         </div>
         <div class="hero-visual">
           <!-- Animated Dashboard Preview (Light Theme) -->
