@@ -5,13 +5,46 @@
 <h1 class="mb-4">Your Cart</h1>
 
 <% if @order.order_items.empty? %>
-  <div class="card border-0 shadow-sm" style="border-radius: 12px;">
-    <div class="card-body text-center py-5">
-      <i class="fa-solid fa-cart-shopping fa-4x text-muted mb-3"></i>
-      <h4>Your cart is empty</h4>
-      <p class="text-muted">Browse our products and add items to your cart.</p>
-      <%= link_to "Browse Products", products_path(org_slug: params[:org_slug]), class: "btn btn-primary" %>
+  <div class="row g-4">
+    <div class="col-lg-8">
+      <div class="card border-0 shadow-sm" style="border-radius: 12px;">
+        <div class="card-body text-center py-5">
+          <i class="fa-solid fa-cart-shopping fa-4x text-muted mb-3"></i>
+          <h4>Your cart is empty</h4>
+          <p class="text-muted">Browse our products and add items to your cart.</p>
+          <%= link_to "Browse Products", products_path(org_slug: params[:org_slug]), class: "btn btn-primary" %>
+        </div>
+      </div>
     </div>
+
+    <% if @order_discounts.any? %>
+      <div class="col-lg-4">
+        <div class="card border-0 shadow-sm" style="border-radius: 12px;">
+          <div class="card-body">
+            <h6 class="card-title mb-3">
+              <i class="fa-solid fa-percent text-success me-2"></i>Order Discounts Available!
+            </h6>
+            <p class="text-muted small mb-3">Save more when your order reaches these thresholds:</p>
+
+            <% @order_discounts.each do |discount| %>
+              <div class="d-flex align-items-center mb-2 p-2 bg-light rounded">
+                <i class="fa-solid fa-tag text-success me-2"></i>
+                <div>
+                  <div class="fw-semibold">
+                    <% if discount.percentage? %>
+                      <%= discount.value_display %> off
+                    <% else %>
+                      <%= humanized_money_with_symbol(Money.new((discount.discount_value * 100).to_i, 'EUR')) %> off
+                    <% end %>
+                  </div>
+                  <small class="text-muted">Orders over <%= discount.min_amount_display %></small>
+                </div>
+              </div>
+            <% end %>
+          </div>
+        </div>
+      </div>
+    <% end %>
   </div>
 <% else %>
   <div class="row g-4">
@@ -127,7 +160,7 @@
         <div class="card border-0 shadow-sm mt-3" style="border-radius: 12px;">
           <div class="card-body">
             <h6 class="card-title mb-3">
-              <i class="fa-solid fa-gift text-primary me-2"></i>Available Order Discounts
+              <i class="fa-solid fa-percent text-primary me-2"></i>Available Order Discounts
             </h6>
 
             <% @order_discounts.each do |discount| %>
