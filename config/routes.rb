@@ -58,7 +58,6 @@ Rails.application.routes.draw do
       resources :products
 
       # Unified Pricing section
-      resource :pricing, only: [:show], controller: 'pricing', action: 'index'
       get 'pricing', to: 'pricing#index', as: :pricing
 
       resources :product_discounts, except: [:index, :show] do
