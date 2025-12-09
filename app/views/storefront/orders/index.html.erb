@@ -35,6 +35,9 @@
                 <span class="badge <%= status_class %>"><%= order.status.titleize %></span>
               </td>
               <td class="text-end pe-4">
+                <%= button_to reorder_order_path(org_slug: params[:org_slug], id: order), method: :post, class: "btn btn-sm btn-outline-secondary me-2" do %>
+                  <i class="fa-solid fa-rotate-right me-1"></i>Reorder
+                <% end %>
                 <%= link_to order_path(org_slug: params[:org_slug], id: order), class: "btn btn-sm btn-outline-primary" do %>
                   View <i class="fa-solid fa-arrow-right ms-1"></i>
                 <% end %>
