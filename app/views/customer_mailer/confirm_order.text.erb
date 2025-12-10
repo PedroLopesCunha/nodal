@@ -1,6 +1,6 @@
-<p>Hello <%= @customer.contact_name %></p>
+Hello <%= @customer.contact_name %>
 
-<p>Your order is confirmed. Your ordered</p>
+Your order is confirmed. Your ordered
 <% @order.order_items.each do |item| %>
-<p><%= item.product.name  %></p>
+  <%= item.product.name  %>
 <% end %>
