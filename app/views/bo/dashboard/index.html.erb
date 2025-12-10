@@ -392,13 +392,19 @@
   } // end initDashboard
 
   // Initialize on various events
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', initDashboard);
-  } else {
-    initDashboard();
+  // Initialize immediately if DOM is ready
+  if (document.readyState === 'complete' || document.readyState === 'interactive') {
+    // Small delay to ensure all elements are rendered
+    setTimeout(initDashboard, 0);
   }
+
+  // Also listen for various load events
+  document.addEventListener('DOMContentLoaded', initDashboard);
   document.addEventListener('turbo:load', initDashboard);
   document.addEventListener('turbo:render', initDashboard);
+
+  // Fallback: try again after a short delay for edge cases
+  setTimeout(initDashboard, 100);
 })();
 </script>
 
