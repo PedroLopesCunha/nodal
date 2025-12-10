@@ -3,16 +3,12 @@
 <div class="dashboard" data-metrics-url="<%= bo_dashboard_metrics_path(org_slug: @organisation.slug) %>">
   <!-- Header -->
   <div class="bo-page-header">
-    <div class="d-flex justify-content-between align-items-start">
-      <div>
-        <h1>Dashboard</h1>
-        <p>Business insights and KPI metrics for <%= @organisation.name %></p>
-      </div>
-      <div class="bo-page-actions">
-        <%= render "bo/dashboard/filters_panel" %>
-      </div>
-    </div>
+    <h1>Dashboard</h1>
+    <p>Business insights and KPI metrics for <%= @organisation.name %></p>
   </div>
+
+  <!-- Filters Bar -->
+  <%= render "bo/dashboard/filters_panel" %>
 
   <!-- Page Body -->
   <div class="bo-page-body">

@@ -367,6 +367,63 @@
 .filters-panel {
   position: relative;
 
+  &--inline {
+    background: #f9fafb;
+    border-radius: 8px;
+    padding: 1rem;
+    margin-bottom: 1rem;
+  }
+
+  &__row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    align-items: flex-end;
+  }
+
+  &__field {
+    display: flex;
+    flex-direction: column;
+    min-width: 120px;
+
+    &--wide {
+      min-width: 180px;
+      flex: 1;
+    }
+
+    &--action {
+      min-width: auto;
+    }
+
+    .form-label {
+      font-size: 0.75rem;
+      color: #6b7280;
+      margin-bottom: 0.25rem;
+      font-weight: 500;
+    }
+  }
+
+  @media (max-width: 768px) {
+    &__row {
+      flex-direction: column;
+      align-items: stretch;
+    }
+
+    &__field {
+      min-width: 100%;
+
+      &--wide {
+        min-width: 100%;
+      }
+
+      &--action {
+        .form-label {
+          display: none;
+        }
+      }
+    }
+  }
+
   &__dropdown {
     position: absolute;
     top: 100%;
