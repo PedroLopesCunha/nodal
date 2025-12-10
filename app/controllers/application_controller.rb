@@ -9,6 +9,8 @@ class ApplicationController < ActionController::Base
 
   include Pundit::Authorization
 
+  helper_method :current_organisation
+
   # Pundit: allow-list approach
   after_action :verify_authorized, unless: :skip_authorization?
   after_action :verify_policy_scoped, unless: :skip_pundit_scope?
@@ -40,7 +42,7 @@ class ApplicationController < ActionController::Base
   end
 
   def pundit_user
-    current_member || current_customer
+    PunditContext.new(current_member || current_customer, current_organisation)
   end
 
   # accessable form every where, done before everything
