@@ -21,4 +21,28 @@ class CustomerMailer < ApplicationMailer
     @order = params[:order]
     mail(to: @customer.email, subject: "Orderconfirmation for Order #{@order.order_number}", template_path: 'customer_mailer')
   end
+
+  def notify_clients_about_discount
+    @discount = params[:discount]
+    @organisation = params[:organisation]
+    mailing_list = @organisation.customers.pluck(:email)
+    if @discount.has_attribute?(:product_id) #ProductDiscount
+      send_product_discount_mail(mailing_list)
+    else #Order Discount
+      send_order_discount_mail(mailing_list)
+    end
+  end
+
+  private
+
+  def send_product_discount_mail(mailing_list)
+    @product = @discount.product
+    subject = "New Product Discount on #{@product.name}"
+    mail(to: mailing_list, subject: subject)
+  end
+
+  def send_order_discount_mail(mailing_list)
+    subject = "New Discount on new Order"
+    mail(to: mailing_list, subject: subject)
+  end
 end
