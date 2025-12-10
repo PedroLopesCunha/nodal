@@ -3,15 +3,12 @@
 class Bo::DashboardController < Bo::BaseController
   # GET /bo/dashboard
   def index
-    authorize current_member
     @organisation = current_organisation
   end
 
   # GET /bo/dashboard/metrics
   # Returns JSON with all KPI data
   def metrics
-    authorize current_member
-
     metrics_service = Dashboard::Metrics.new(current_organisation)
     render json: metrics_service.to_json(metrics_params)
   rescue StandardError => e
