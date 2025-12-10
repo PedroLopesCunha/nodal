@@ -1,0 +1,419 @@
+<% content_for :bo_main_content do %>
+
+<div class="dashboard" data-metrics-url="<%= bo_dashboard_metrics_path(org_slug: @organisation.slug) %>">
+  <!-- Header -->
+  <div class="bo-page-header">
+    <div class="d-flex justify-content-between align-items-start">
+      <div>
+        <h1>Dashboard</h1>
+        <p>Business insights and KPI metrics for <%= @organisation.name %></p>
+      </div>
+      <div class="bo-page-actions">
+        <%= render "bo/dashboard/filters_panel" %>
+      </div>
+    </div>
+  </div>
+
+  <!-- Page Body -->
+  <div class="bo-page-body">
+    <!-- Top Row: KPI Cards -->
+    <div class="dashboard__grid dashboard__grid--kpis mb-4">
+      <%= render "bo/dashboard/kpi_card",
+          id: "total_sales",
+          title: "Total Sales",
+          icon: "fa-euro-sign",
+          format: "currency",
+          drill_path: bo_orders_path(org_slug: @organisation.slug) %>
+
+      <%= render "bo/dashboard/kpi_card",
+          id: "order_count",
+          title: "Orders",
+          icon: "fa-clipboard-list",
+          format: "number",
+          drill_path: bo_orders_path(org_slug: @organisation.slug) %>
+
+      <%= render "bo/dashboard/kpi_card",
+          id: "aov",
+          title: "Avg Order Value",
+          icon: "fa-chart-line",
+          format: "currency",
+          drill_path: nil %>
+
+      <%= render "bo/dashboard/kpi_card",
+          id: "open_carts",
+          title: "Open Carts",
+          icon: "fa-shopping-cart",
+          format: "number",
+          drill_path: nil %>
+    </div>
+
+    <!-- Middle Section -->
+    <div class="dashboard__grid dashboard__grid--middle mb-4">
+      <!-- Left Column: Top Clients & Order Frequency -->
+      <div class="dashboard__main-col">
+        <%= render "bo/dashboard/top_clients", organisation: @organisation %>
+        <%= render "bo/dashboard/order_frequency" %>
+      </div>
+
+      <!-- Right Column: Retention & Discount Panel -->
+      <div class="dashboard__side-col">
+        <!-- Retention Rate Card -->
+        <div class="card dashboard__card mb-3">
+          <div class="card-body">
+            <h6 class="card-subtitle text-muted mb-2">
+              <i class="fa-solid fa-users-rays me-1"></i> Retention Rate
+            </h6>
+            <div class="dashboard__retention">
+              <span class="dashboard__retention-value" id="retention-value">--</span>
+              <span class="dashboard__retention-label">of customers returned</span>
+            </div>
+          </div>
+        </div>
+
+        <%= render "bo/dashboard/discount_panel" %>
+      </div>
+    </div>
+
+    <!-- Bottom Row: Product Tables -->
+    <div class="dashboard__grid dashboard__grid--products">
+      <%= render "bo/dashboard/orders_per_product", organisation: @organisation %>
+      <%= render "bo/dashboard/revenue_per_product", organisation: @organisation %>
+    </div>
+  </div>
+</div>
+
+<script>
+document.addEventListener('turbo:load', initDashboard);
+document.addEventListener('DOMContentLoaded', initDashboard);
+
+let dashboardInitialized = false;
+
+function initDashboard() {
+  if (dashboardInitialized) return;
+
+  const dashboard = document.querySelector('.dashboard');
+  if (!dashboard) return;
+
+  dashboardInitialized = true;
+
+  const metricsUrl = dashboard.dataset.metricsUrl;
+  const fromInput = document.getElementById('dashboard-from');
+  const toInput = document.getElementById('dashboard-to');
+
+  // Set default dates (last 30 days)
+  const today = new Date();
+  const thirtyDaysAgo = new Date(today);
+  thirtyDaysAgo.setDate(today.getDate() - 30);
+
+  if (fromInput && !fromInput.value) {
+    fromInput.value = thirtyDaysAgo.toISOString().split('T')[0];
+  }
+  if (toInput && !toInput.value) {
+    toInput.value = today.toISOString().split('T')[0];
+  }
+
+  loadMetrics();
+
+  // Filter change handlers
+  document.getElementById('apply-filters')?.addEventListener('click', loadMetrics);
+
+  function loadMetrics() {
+    const params = new URLSearchParams();
+    if (fromInput?.value) params.set('from', fromInput.value);
+    if (toInput?.value) params.set('to', toInput.value);
+
+    const clientSelect = document.getElementById('dashboard-client');
+    const productSelect = document.getElementById('dashboard-product');
+    const categorySelect = document.getElementById('dashboard-category');
+
+    if (clientSelect?.value) params.set('client_id', clientSelect.value);
+    if (productSelect?.value) params.set('product_id', productSelect.value);
+    if (categorySelect?.value) params.set('category_id', categorySelect.value);
+
+    const url = `${metricsUrl}?${params.toString()}`;
+
+    // Show loading state
+    document.querySelectorAll('.kpi__value').forEach(el => {
+      el.textContent = '...';
+    });
+
+    fetch(url, {
+      headers: {
+        'Accept': 'application/json',
+        'X-Requested-With': 'XMLHttpRequest'
+      }
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (data.error) {
+        console.error('Metrics error:', data.error);
+        return;
+      }
+      updateDashboard(data);
+    })
+    .catch(error => {
+      console.error('Failed to load metrics:', error);
+    });
+  }
+
+  function updateDashboard(data) {
+    // Update KPI cards
+    updateKpiCard('total_sales', data.kpis.total_sales, 'currency');
+    updateKpiCard('order_count', data.kpis.order_count, 'number');
+    updateKpiCard('aov', data.kpis.aov, 'currency');
+    updateOpenCarts(data.kpis.open_carts);
+
+    // Update retention rate
+    const retentionEl = document.getElementById('retention-value');
+    if (retentionEl && data.retention_rate) {
+      retentionEl.textContent = (data.retention_rate.value * 100).toFixed(1) + '%';
+    }
+
+    // Update top clients
+    updateTopClients(data.top_clients);
+
+    // Update order frequency
+    updateOrderFrequency(data.order_frequency);
+
+    // Update product tables
+    updateOrdersPerProduct(data.orders_per_product);
+    updateRevenuePerProduct(data.revenue_per_product);
+
+    // Update discount analytics
+    updateDiscountPanel(data.discounts);
+  }
+
+  function updateKpiCard(id, kpiData, format) {
+    const card = document.querySelector(`[data-kpi="${id}"]`);
+    if (!card || !kpiData) return;
+
+    const valueEl = card.querySelector('.kpi__value');
+    const deltaEl = card.querySelector('.kpi__delta');
+    const sparklineEl = card.querySelector('.kpi__sparkline');
+
+    if (valueEl) {
+      valueEl.textContent = formatValue(kpiData.value, format);
+    }
+
+    if (deltaEl) {
+      const delta = kpiData.delta_pct || 0;
+      deltaEl.textContent = (delta >= 0 ? '+' : '') + delta.toFixed(1) + '%';
+      deltaEl.classList.remove('delta--up', 'delta--down');
+      deltaEl.classList.add(delta >= 0 ? 'delta--up' : 'delta--down');
+    }
+
+    if (sparklineEl && kpiData.sparkline) {
+      drawSparkline(sparklineEl, kpiData.sparkline);
+    }
+  }
+
+  function updateOpenCarts(cartsData) {
+    const card = document.querySelector('[data-kpi="open_carts"]');
+    if (!card || !cartsData) return;
+
+    const valueEl = card.querySelector('.kpi__value');
+    if (valueEl) {
+      valueEl.textContent = cartsData.value;
+    }
+
+    const listEl = card.querySelector('.kpi__carts-list');
+    if (listEl && cartsData.top_carts) {
+      listEl.innerHTML = cartsData.top_carts.slice(0, 3).map(cart => `
+        <div class="kpi__cart-item">
+          <span class="kpi__cart-client">${escapeHtml(cart.client_name)}</span>
+          <span class="kpi__cart-total">${formatValue(cart.cart_total, 'currency')}</span>
+        </div>
+      `).join('');
+    }
+  }
+
+  function updateTopClients(clients) {
+    const container = document.getElementById('top-clients-list');
+    if (!container || !clients) return;
+
+    container.innerHTML = clients.map((client, index) => `
+      <div class="top-clients__item">
+        <div class="top-clients__rank">${index + 1}</div>
+        <div class="top-clients__info">
+          <div class="top-clients__name">${escapeHtml(client.client_name)}</div>
+          <div class="top-clients__sales">${formatValue(client.total_sales, 'currency')}</div>
+        </div>
+        <div class="top-clients__delta ${client.delta_pct >= 0 ? 'delta--up' : 'delta--down'}">
+          ${client.delta_pct >= 0 ? '+' : ''}${client.delta_pct.toFixed(1)}%
+        </div>
+      </div>
+    `).join('');
+  }
+
+  function updateOrderFrequency(freqData) {
+    const container = document.getElementById('order-frequency');
+    if (!container || !freqData) return;
+
+    const valueEl = container.querySelector('.frequency__value');
+    const meanEl = container.querySelector('.frequency__mean');
+    const medianEl = container.querySelector('.frequency__median');
+
+    if (valueEl) valueEl.textContent = freqData.value.toFixed(1);
+    if (meanEl) meanEl.textContent = freqData.breakdown?.mean?.toFixed(1) || '--';
+    if (medianEl) medianEl.textContent = freqData.breakdown?.median?.toFixed(1) || '--';
+
+    // Draw distribution chart
+    const chartEl = container.querySelector('.frequency__chart');
+    if (chartEl && freqData.breakdown?.distribution) {
+      drawDistributionChart(chartEl, freqData.breakdown.distribution);
+    }
+  }
+
+  function updateOrdersPerProduct(products) {
+    const tbody = document.querySelector('#orders-per-product tbody');
+    if (!tbody || !products) return;
+
+    tbody.innerHTML = products.map(product => `
+      <tr>
+        <td>${escapeHtml(product.product_name)}</td>
+        <td class="text-center">${product.order_count}</td>
+        <td><canvas class="product-sparkline" data-values="${product.sparkline?.join(',') || ''}"></canvas></td>
+      </tr>
+    `).join('');
+
+    // Draw sparklines
+    tbody.querySelectorAll('.product-sparkline').forEach(canvas => {
+      const values = canvas.dataset.values.split(',').filter(v => v).map(Number);
+      if (values.length > 0) {
+        drawSparkline(canvas, values);
+      }
+    });
+  }
+
+  function updateRevenuePerProduct(products) {
+    const tbody = document.querySelector('#revenue-per-product tbody');
+    if (!tbody || !products) return;
+
+    tbody.innerHTML = products.map(product => `
+      <tr>
+        <td>${escapeHtml(product.product_name)}</td>
+        <td class="text-end">${formatValue(product.gross_revenue, 'currency')}</td>
+        <td class="text-end text-danger">${formatValue(product.discount_amount, 'currency')}</td>
+        <td class="text-end fw-semibold">${formatValue(product.net_revenue, 'currency')}</td>
+      </tr>
+    `).join('');
+  }
+
+  function updateDiscountPanel(discounts) {
+    if (!discounts) return;
+
+    const usageEl = document.getElementById('discount-usage-rate');
+    const avgEl = document.getElementById('discount-avg');
+    const lostEl = document.getElementById('discount-revenue-lost');
+
+    if (usageEl) usageEl.textContent = (discounts.usage_rate * 100).toFixed(1) + '%';
+    if (avgEl) avgEl.textContent = formatValue(discounts.avg_discount_per_order, 'currency');
+    if (lostEl) lostEl.textContent = formatValue(discounts.revenue_lost, 'currency');
+
+    // Top discounted products
+    const productsEl = document.getElementById('top-discounted-products');
+    if (productsEl && discounts.top_discounted_products) {
+      productsEl.innerHTML = discounts.top_discounted_products.map(p => `
+        <div class="discount-item">
+          <span>${escapeHtml(p.product_name)}</span>
+          <span class="text-danger">${formatValue(p.discount_amount, 'currency')}</span>
+        </div>
+      `).join('');
+    }
+
+    // Top clients by discount
+    const clientsEl = document.getElementById('top-clients-by-discount');
+    if (clientsEl && discounts.top_clients_by_discount) {
+      clientsEl.innerHTML = discounts.top_clients_by_discount.map(c => `
+        <div class="discount-item">
+          <span>${escapeHtml(c.client_name)}</span>
+          <span class="text-danger">${formatValue(c.discount_amount, 'currency')}</span>
+        </div>
+      `).join('');
+    }
+  }
+
+  function formatValue(value, format) {
+    if (value === null || value === undefined) return '--';
+
+    if (format === 'currency') {
+      return new Intl.NumberFormat('de-CH', {
+        style: 'currency',
+        currency: 'EUR',
+        minimumFractionDigits: 2
+      }).format(value);
+    }
+
+    return new Intl.NumberFormat('de-CH').format(value);
+  }
+
+  function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+  }
+
+  // Simple canvas sparkline
+  function drawSparkline(canvas, values) {
+    if (!values || values.length === 0) return;
+
+    const ctx = canvas.getContext('2d');
+    const width = canvas.width || 80;
+    const height = canvas.height || 24;
+
+    canvas.width = width;
+    canvas.height = height;
+
+    const min = Math.min(...values);
+    const max = Math.max(...values);
+    const range = max - min || 1;
+
+    const stepX = width / (values.length - 1 || 1);
+    const padding = 2;
+    const availableHeight = height - padding * 2;
+
+    ctx.clearRect(0, 0, width, height);
+    ctx.beginPath();
+    ctx.strokeStyle = '#6366f1';
+    ctx.lineWidth = 1.5;
+
+    values.forEach((val, i) => {
+      const x = i * stepX;
+      const y = height - padding - ((val - min) / range) * availableHeight;
+
+      if (i === 0) {
+        ctx.moveTo(x, y);
+      } else {
+        ctx.lineTo(x, y);
+      }
+    });
+
+    ctx.stroke();
+  }
+
+  function drawDistributionChart(container, distribution) {
+    if (!distribution || distribution.length === 0) {
+      container.innerHTML = '<span class="text-muted">No data</span>';
+      return;
+    }
+
+    const maxCustomers = Math.max(...distribution.map(d => d.customers));
+
+    container.innerHTML = distribution.slice(0, 8).map(d => {
+      const height = (d.customers / maxCustomers * 100).toFixed(0);
+      return `
+        <div class="frequency__bar" style="height: ${height}%" title="${d.orders} orders: ${d.customers} customers">
+          <span class="frequency__bar-label">${d.orders}</span>
+        </div>
+      `;
+    }).join('');
+  }
+}
+
+// Reset on turbo navigation
+document.addEventListener('turbo:before-render', function() {
+  dashboardInitialized = false;
+});
+</script>
+
+<% end %>

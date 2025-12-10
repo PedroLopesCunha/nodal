@@ -1,0 +1,43 @@
+<div class="filters-panel">
+  <button class="btn btn-outline-secondary" type="button" data-bs-toggle="collapse" data-bs-target="#dashboard-filters" aria-expanded="false">
+    <i class="fa-solid fa-filter me-1"></i> Filters
+  </button>
+
+  <div class="collapse filters-panel__dropdown" id="dashboard-filters">
+    <div class="card card-body">
+      <div class="row g-3">
+        <div class="col-md-6">
+          <label class="form-label" for="dashboard-from">From</label>
+          <input type="date" class="form-control form-control-sm" id="dashboard-from">
+        </div>
+        <div class="col-md-6">
+          <label class="form-label" for="dashboard-to">To</label>
+          <input type="date" class="form-control form-control-sm" id="dashboard-to">
+        </div>
+        <div class="col-md-12">
+          <label class="form-label" for="dashboard-client">Client</label>
+          <select class="form-select form-select-sm" id="dashboard-client">
+            <option value="">All Clients</option>
+            <% @organisation.customers.where(active: true).order(:company_name).each do |customer| %>
+              <option value="<%= customer.id %>"><%= customer.company_name %></option>
+            <% end %>
+          </select>
+        </div>
+        <div class="col-md-12">
+          <label class="form-label" for="dashboard-category">Category</label>
+          <select class="form-select form-select-sm" id="dashboard-category">
+            <option value="">All Categories</option>
+            <% @organisation.categories.order(:name).each do |category| %>
+              <option value="<%= category.id %>"><%= category.name %></option>
+            <% end %>
+          </select>
+        </div>
+        <div class="col-12">
+          <button type="button" class="btn btn-primary btn-sm w-100" id="apply-filters">
+            <i class="fa-solid fa-check me-1"></i> Apply Filters
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
