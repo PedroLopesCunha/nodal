@@ -33,6 +33,26 @@ class CustomerMailer < ApplicationMailer
     end
   end
 
+  def notify_customer_about_discount
+    @discount = params[:discount]
+    @organisation = params[:organisation]
+    @customer = @discount.customer
+    if @discount.has_attribute?(:product_id) #CustomerProductDiscount
+      @product = @discount.product
+      subject = "New Discount on #{@product.name}"
+      mail(to: @customer.email, subject: subject) do |format|
+        format.html { render 'customer_product_discount' }
+        format.text { render 'customer_product_discount' }
+      end
+    else #CustomerDiscount
+      subject = "New Discount personal Discount for YOU!"
+      mail(to: @customer.email, subject: subject) do |format|
+        format.html { render 'customer_discount' }
+        format.text { render 'customer_discount' }
+      end
+    end
+  end
+
   private
 
   def send_product_discount_mail(mailing_list)
