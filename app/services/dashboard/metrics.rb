@@ -371,44 +371,48 @@ module Dashboard
     def top_discounted_products(organisation, from, to, limit: 5)
       orders = placed_orders_in_range(organisation, from, to)
 
-      OrderItem.where(order_id: orders.select(:id))
+      results = OrderItem.where(order_id: orders.select(:id))
         .where("COALESCE(order_items.discount_percentage, 0) > 0")
-        .joins(:product)
         .group(:product_id)
         .select(
           "order_items.product_id",
-          "products.name as product_name",
           "SUM(order_items.unit_price * order_items.quantity * order_items.discount_percentage) as discount_cents"
         )
         .order("discount_cents DESC")
         .limit(limit)
-        .map do |row|
-          {
-            product_id: row.product_id,
-            product_name: row.product_name,
-            discount_amount: (row.discount_cents.to_f / 100.0).round(2)
-          }
-        end
+
+      product_ids = results.map(&:product_id)
+      products = Product.where(id: product_ids).index_by(&:id)
+
+      results.map do |row|
+        {
+          product_id: row.product_id,
+          product_name: products[row.product_id]&.name || "Unknown",
+          discount_amount: (row.discount_cents.to_f / 100.0).round(2)
+        }
+      end
     end
 
     def top_clients_by_discount(organisation, from, to, limit: 5)
       orders = placed_orders_in_range(organisation, from, to)
 
-      discount_by_customer = orders.joins(:order_items, :customer)
+      results = orders.joins(:order_items)
         .where("COALESCE(order_items.discount_percentage, 0) > 0")
-        .group("orders.customer_id", "customers.company_name")
+        .group("orders.customer_id")
         .select(
           "orders.customer_id as client_id",
-          "customers.company_name as client_name",
           "SUM(order_items.unit_price * order_items.quantity * order_items.discount_percentage) as discount_cents"
         )
         .order("discount_cents DESC")
         .limit(limit)
 
-      discount_by_customer.map do |row|
+      customer_ids = results.map(&:client_id)
+      customers = Customer.where(id: customer_ids).index_by(&:id)
+
+      results.map do |row|
         {
           client_id: row.client_id,
-          client_name: row.client_name,
+          client_name: customers[row.client_id]&.company_name || "Unknown",
           discount_amount: (row.discount_cents.to_f / 100.0).round(2)
         }
       end
