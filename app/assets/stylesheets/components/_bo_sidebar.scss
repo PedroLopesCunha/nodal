@@ -59,6 +59,10 @@ $bo-sidebar-border: #334155;
     // Adjust main content when collapsed
     & ~ .bo-main-content {
       margin-left: $bo-sidebar-collapsed-width;
+
+      .bo-page-header {
+        left: $bo-sidebar-collapsed-width;
+      }
     }
   }
 }
@@ -386,16 +390,30 @@ $bo-sidebar-border: #334155;
 }
 
 // Sticky page header
+$bo-page-header-height: 85px;
+$bo-page-header-with-filters-height: 155px;
+
 .bo-page-header {
-  position: sticky;
-  top: 0;
+  position: fixed;
+  top: $navbar-height;
+  left: $bo-sidebar-width;
+  right: 0;
   background: #ffffff;
-  z-index: 100;
+  z-index: 99;
   padding: 20px 24px;
   border-bottom: 1px solid #e5e5e5;
+  transition: left 0.3s ease;
 
   &--with-filters {
     padding-bottom: 16px;
+
+    & + .bo-page-body {
+      padding-top: $bo-page-header-with-filters-height;
+    }
+  }
+
+  & + .bo-page-body {
+    padding-top: $bo-page-header-height;
   }
 
   &__top {
