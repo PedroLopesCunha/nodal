@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2025_12_10_171352) do
+ActiveRecord::Schema[7.1].define(version: 2025_12_10_195311) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -234,6 +234,7 @@ ActiveRecord::Schema[7.1].define(version: 2025_12_10_171352) do
     t.decimal "tax_rate", precision: 5, scale: 4, default: "0.08"
     t.integer "shipping_cost_cents", default: 1500
     t.string "shipping_cost_currency", default: "EUR"
+    t.string "currency", default: "EUR", null: false
     t.index ["slug"], name: "index_organisations_on_slug", unique: true
   end
 

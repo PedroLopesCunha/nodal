@@ -70,7 +70,7 @@
         </div>
 
         <!-- Order Items -->
-        <div class="card mb-4" data-controller="order-items">
+        <div class="card mb-4" data-controller="order-items" data-order-items-currency-symbol-value="<%= @current_organisation.currency_symbol %>">
           <div class="card-body">
             <div class="d-flex justify-content-between align-items-center mb-4">
               <div>
@@ -105,7 +105,7 @@
               <div class="d-flex justify-content-end">
                 <div class="text-end">
                   <span class="text-muted me-3">Order Total:</span>
-                  <strong class="fs-5">€<span data-order-items-target="total"><%= number_with_precision(@order.total_amount.to_f, precision: 2) %></span></strong>
+                  <strong class="fs-5"><%= @current_organisation.currency_symbol %><span data-order-items-target="total"><%= number_with_precision(@order.total_amount.to_f, precision: 2) %></span></strong>
                 </div>
               </div>
             </div>
@@ -126,12 +126,12 @@
               </td>
               <td>
                 <div class="input-group input-group-sm">
-                  <span class="input-group-text">€</span>
+                  <span class="input-group-text"><%= @current_organisation.currency_symbol %></span>
                   <input type="number" name="order[order_items_attributes][NEW_INDEX][price]" class="form-control form-control-sm" step="0.01" min="0" data-price-field data-action="input->order-items#calculate">
                 </div>
               </td>
               <td>
-                <span class="fw-medium">€<span data-line-total>0.00</span></span>
+                <span class="fw-medium"><%= @current_organisation.currency_symbol %><span data-line-total>0.00</span></span>
               </td>
               <td>
                 <button type="button" class="btn btn-sm btn-link text-danger p-0" data-action="order-items#remove">

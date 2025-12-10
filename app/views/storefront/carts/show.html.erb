@@ -34,7 +34,7 @@
                     <% if discount.percentage? %>
                       <%= discount.value_display %> off
                     <% else %>
-                      <%= humanized_money_with_symbol(Money.new((discount.discount_value * 100).to_i, 'EUR')) %> off
+                      <%= humanized_money_with_symbol(Money.new((discount.discount_value * 100).to_i, @current_organisation.currency)) %> off
                     <% end %>
                   </div>
                   <small class="text-muted">Orders over <%= discount.min_amount_display %></small>
@@ -178,13 +178,13 @@
                     <% if discount.percentage? %>
                       <%= discount.value_display %> off
                     <% else %>
-                      <%= humanized_money_with_symbol(Money.new((discount.discount_value * 100).to_i, 'EUR')) %> off
+                      <%= humanized_money_with_symbol(Money.new((discount.discount_value * 100).to_i, @current_organisation.currency)) %> off
                     <% end %>
                     orders over <%= discount.min_amount_display %>
                   </div>
                   <% if qualified %>
                     <small>Applied to your order!</small>
-                  <% elsif amount_needed > Money.new(0, 'EUR') %>
+                  <% elsif amount_needed > Money.new(0, @current_organisation.currency) %>
                     <small>Spend <%= humanized_money_with_symbol(amount_needed) %> more to unlock</small>
                   <% end %>
                 </div>

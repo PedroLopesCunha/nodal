@@ -1,6 +1,6 @@
 <% content_for :bo_main_content do %>
 
-<div data-controller="dashboard" data-dashboard-metrics-url-value="<%= bo_dashboard_metrics_path(org_slug: @organisation.slug) %>">
+<div data-controller="dashboard" data-dashboard-metrics-url-value="<%= bo_dashboard_metrics_path(org_slug: @organisation.slug) %>" data-dashboard-currency-value="<%= @organisation.currency %>">
   <!-- Sticky Header with Filters -->
   <div class="bo-page-header bo-page-header--with-filters">
     <div class="bo-page-header__top">

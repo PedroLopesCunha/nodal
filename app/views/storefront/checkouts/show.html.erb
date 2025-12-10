@@ -6,7 +6,8 @@
      data-controller="checkout"
      data-checkout-subtotal-value="<%= @order.total_amount.cents %>"
      data-checkout-tax-value="<%= @order.calculated_tax.cents %>"
-     data-checkout-shipping-cost-value="<%= @current_organisation.shipping_cost.cents %>">
+     data-checkout-shipping-cost-value="<%= @current_organisation.shipping_cost.cents %>"
+     data-checkout-currency-symbol-value="<%= @current_organisation.currency_symbol %>">
   <div class="col-lg-8">
     <!-- Checkout Header -->
     <div class="card border-0 shadow-sm mb-4" style="border-radius: 12px;">

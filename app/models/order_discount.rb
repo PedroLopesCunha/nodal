@@ -57,12 +57,12 @@ class OrderDiscount < ApplicationRecord
   end
 
   def calculate_discount(order_total)
-    return Money.new(0, 'EUR') unless order_total >= min_order_amount
+    return Money.new(0, organisation.currency) unless order_total >= min_order_amount
 
     if percentage?
       order_total * discount_value
     else
-      Money.new((discount_value * 100).to_i, 'EUR')
+      Money.new((discount_value * 100).to_i, organisation.currency)
     end
   end
 

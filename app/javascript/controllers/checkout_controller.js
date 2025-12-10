@@ -10,7 +10,8 @@ export default class extends Controller {
     static values = {
         subtotal: Number,
         tax: Number,
-        shippingCost: Number
+        shippingCost: Number,
+        currencySymbol: String
     }
 
     connect() {
@@ -59,6 +60,7 @@ export default class extends Controller {
 
     formatCurrency(cents) {
         const amount = (cents / 100).toFixed(2)
-        return `€${amount}`
+        const symbol = this.currencySymbolValue || '€'
+        return `${symbol}${amount}`
     }
 }

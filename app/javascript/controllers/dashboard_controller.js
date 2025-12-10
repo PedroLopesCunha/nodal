@@ -3,7 +3,7 @@ import { Controller } from "@hotwired/stimulus"
 // Connects to data-controller="dashboard"
 export default class extends Controller {
   static targets = ["from", "to", "client", "category"]
-  static values = { metricsUrl: String }
+  static values = { metricsUrl: String, currency: String }
 
   connect() {
     console.log("Dashboard controller connected")
@@ -229,7 +229,7 @@ export default class extends Controller {
     if (format === 'currency') {
       return new Intl.NumberFormat('de-CH', {
         style: 'currency',
-        currency: 'EUR',
+        currency: this.currencyValue || 'EUR',
         minimumFractionDigits: 2
       }).format(value)
     }
