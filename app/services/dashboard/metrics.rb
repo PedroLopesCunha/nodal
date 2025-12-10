@@ -128,12 +128,31 @@ module Dashboard
     end
 
     # Top clients by sales
-    def top_clients(organisation:, from:, to:, limit: 10, **_filters)
+    def top_clients(organisation:, from:, to:, client_id: nil, category_id: nil, limit: 10, **_filters)
       prev_from = from - (to - from + 1).days
       prev_to = from - 1.day
 
-      current_sales = customer_sales_hash(organisation, from, to)
-      prev_sales = customer_sales_hash(organisation, prev_from, prev_to)
+      # If filtering by a specific client, just show that client
+      if client_id.present?
+        customer = organisation.customers.find_by(id: client_id)
+        return [] unless customer
+
+        current_sales = customer_sales_hash(organisation, from, to, category_id: category_id)
+        prev_sales = customer_sales_hash(organisation, prev_from, prev_to, category_id: category_id)
+
+        sales = current_sales[client_id.to_i] || 0
+        prev = prev_sales[client_id.to_i] || 0
+
+        return [{
+          client_id: client_id.to_i,
+          client_name: customer.company_name,
+          total_sales: (sales / 100.0).round(2),
+          delta_pct: calculate_delta(sales, prev)
+        }]
+      end
+
+      current_sales = customer_sales_hash(organisation, from, to, category_id: category_id)
+      prev_sales = customer_sales_hash(organisation, prev_from, prev_to, category_id: category_id)
 
       customers = organisation.customers
         .where(id: current_sales.keys)
@@ -154,8 +173,11 @@ module Dashboard
     end
 
     # Order frequency: average orders per customer in the period
-    def order_frequency(organisation:, from:, to:, **_filters)
+    def order_frequency(organisation:, from:, to:, client_id: nil, category_id: nil, **_filters)
       orders = placed_orders_in_range(organisation, from, to)
+      orders = orders.where(customer_id: client_id) if client_id.present?
+      orders = orders.joins(order_items: :product).where(products: { category_id: category_id }).distinct if category_id.present?
+
       customer_order_counts = orders.group(:customer_id).count.values
 
       return { value: 0.0, breakdown: { mean: 0.0, median: 0.0, distribution: [] } } if customer_order_counts.empty?
@@ -210,8 +232,9 @@ module Dashboard
     end
 
     # Orders per product: count of orders containing each product
-    def orders_per_product(organisation:, from:, to:, category_id: nil, limit: 20, **_filters)
+    def orders_per_product(organisation:, from:, to:, client_id: nil, category_id: nil, limit: 20, **_filters)
       orders = placed_orders_in_range(organisation, from, to)
+      orders = orders.where(customer_id: client_id) if client_id.present?
 
       query = OrderItem.where(order_id: orders.select(:id))
         .joins(:product)
@@ -232,7 +255,7 @@ module Dashboard
           product_id: row.product_id,
           product_name: product&.name || "Unknown",
           order_count: row.order_count,
-          sparkline: product_orders_sparkline(organisation, from, to, row.product_id)
+          sparkline: product_orders_sparkline(organisation, from, to, row.product_id, client_id: client_id)
         }
       end
     end
@@ -274,8 +297,11 @@ module Dashboard
     end
 
     # Discount analytics
-    def discount_analytics(organisation:, from:, to:, discount_type: nil, **_filters)
+    def discount_analytics(organisation:, from:, to:, client_id: nil, category_id: nil, discount_type: nil, **_filters)
       orders = placed_orders_in_range(organisation, from, to)
+      orders = orders.where(customer_id: client_id) if client_id.present?
+      orders = orders.joins(order_items: :product).where(products: { category_id: category_id }).distinct if category_id.present?
+
       total_order_count = orders.count
 
       return empty_discount_analytics if total_order_count.zero?
@@ -304,23 +330,23 @@ module Dashboard
         usage_rate: usage_rate,
         avg_discount_per_order: avg_discount,
         revenue_lost: total_discounts.round(2),
-        top_discounted_products: top_discounted_products(organisation, from, to),
-        top_clients_by_discount: top_clients_by_discount(organisation, from, to)
+        top_discounted_products: top_discounted_products(organisation, from, to, client_id: client_id, category_id: category_id),
+        top_clients_by_discount: top_clients_by_discount(organisation, from, to, client_id: client_id, category_id: category_id)
       }
     end
 
     # Sparkline data generators (daily data points)
-    def sales_sparkline(organisation:, from:, to:, **_filters)
-      daily_sales(organisation, from, to).map { |_, v| v }
+    def sales_sparkline(organisation:, from:, to:, client_id: nil, category_id: nil, **_filters)
+      daily_sales(organisation, from, to, client_id: client_id, category_id: category_id).map { |_, v| v }
     end
 
-    def orders_sparkline(organisation:, from:, to:, **_filters)
-      daily_orders(organisation, from, to).map { |_, v| v }
+    def orders_sparkline(organisation:, from:, to:, client_id: nil, category_id: nil, **_filters)
+      daily_orders(organisation, from, to, client_id: client_id, category_id: category_id).map { |_, v| v }
     end
 
-    def aov_sparkline(organisation:, from:, to:, **_filters)
-      sales = daily_sales(organisation, from, to)
-      orders = daily_orders(organisation, from, to)
+    def aov_sparkline(organisation:, from:, to:, client_id: nil, category_id: nil, **_filters)
+      sales = daily_sales(organisation, from, to, client_id: client_id, category_id: category_id)
+      orders = daily_orders(organisation, from, to, client_id: client_id, category_id: category_id)
 
       sales.map do |date, sale_total|
         order_count = orders[date] || 0
@@ -328,9 +354,11 @@ module Dashboard
       end
     end
 
-    def product_orders_sparkline(organisation, from, to, product_id)
-      placed_orders_in_range(organisation, from, to)
-        .joins(:order_items)
+    def product_orders_sparkline(organisation, from, to, product_id, client_id: nil)
+      query = placed_orders_in_range(organisation, from, to)
+      query = query.where(customer_id: client_id) if client_id.present?
+
+      query.joins(:order_items)
         .where(order_items: { product_id: product_id })
         .group("DATE(orders.placed_at)")
         .count
@@ -343,24 +371,42 @@ module Dashboard
         .where(placed_at: from.beginning_of_day..to.end_of_day)
     end
 
-    def customer_sales_hash(organisation, from, to)
-      placed_orders_in_range(organisation, from, to)
+    def customer_sales_hash(organisation, from, to, category_id: nil)
+      query = placed_orders_in_range(organisation, from, to)
         .joins(:order_items)
-        .group(:customer_id)
+
+      if category_id.present?
+        query = query.joins(order_items: :product).where(products: { category_id: category_id })
+      end
+
+      query.group(:customer_id)
         .sum("order_items.unit_price * order_items.quantity * (1 - COALESCE(order_items.discount_percentage, 0))")
     end
 
-    def daily_sales(organisation, from, to)
-      placed_orders_in_range(organisation, from, to)
-        .joins(:order_items)
-        .group("DATE(orders.placed_at)")
+    def daily_sales(organisation, from, to, client_id: nil, category_id: nil)
+      query = placed_orders_in_range(organisation, from, to)
+      query = query.where(customer_id: client_id) if client_id.present?
+      query = query.joins(:order_items)
+
+      if category_id.present?
+        query = query.joins(order_items: :product).where(products: { category_id: category_id })
+      end
+
+      query.group("DATE(orders.placed_at)")
         .sum("order_items.unit_price * order_items.quantity * (1 - COALESCE(order_items.discount_percentage, 0)) / 100.0")
         .transform_keys { |k| k.to_date }
     end
 
-    def daily_orders(organisation, from, to)
-      placed_orders_in_range(organisation, from, to)
-        .group("DATE(orders.placed_at)")
+    def daily_orders(organisation, from, to, client_id: nil, category_id: nil)
+      query = placed_orders_in_range(organisation, from, to)
+      query = query.where(customer_id: client_id) if client_id.present?
+
+      if category_id.present?
+        query = query.joins(order_items: :product).where(products: { category_id: category_id })
+      end
+
+      query.group("DATE(orders.placed_at)")
+        .distinct
         .count
         .transform_keys { |k| k.to_date }
     end
@@ -381,12 +427,17 @@ module Dashboard
       manual_discounts + auto_discounts
     end
 
-    def top_discounted_products(organisation, from, to, limit: 5)
+    def top_discounted_products(organisation, from, to, client_id: nil, category_id: nil, limit: 5)
       orders = placed_orders_in_range(organisation, from, to)
+      orders = orders.where(customer_id: client_id) if client_id.present?
 
-      results = OrderItem.where(order_id: orders.select(:id))
+      query = OrderItem.where(order_id: orders.select(:id))
+        .joins(:product)
         .where("COALESCE(order_items.discount_percentage, 0) > 0")
-        .group(:product_id)
+
+      query = query.where(products: { category_id: category_id }) if category_id.present?
+
+      results = query.group(:product_id)
         .select(
           "order_items.product_id",
           "SUM(order_items.unit_price * order_items.quantity * order_items.discount_percentage) as discount_cents"
@@ -406,12 +457,18 @@ module Dashboard
       end
     end
 
-    def top_clients_by_discount(organisation, from, to, limit: 5)
+    def top_clients_by_discount(organisation, from, to, client_id: nil, category_id: nil, limit: 5)
       orders = placed_orders_in_range(organisation, from, to)
+      orders = orders.where(customer_id: client_id) if client_id.present?
 
-      results = orders.joins(:order_items)
+      query = orders.joins(:order_items)
         .where("COALESCE(order_items.discount_percentage, 0) > 0")
-        .group("orders.customer_id")
+
+      if category_id.present?
+        query = query.joins(order_items: :product).where(products: { category_id: category_id })
+      end
+
+      results = query.group("orders.customer_id")
         .select(
           "orders.customer_id as client_id",
           "SUM(order_items.unit_price * order_items.quantity * order_items.discount_percentage) as discount_cents"
