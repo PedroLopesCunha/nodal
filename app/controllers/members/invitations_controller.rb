@@ -22,11 +22,20 @@ class Members::InvitationsController < ApplicationController
     @member = Member.new(member_params)
     @member.email = @org_member.invited_email  # Ensure email matches invitation
 
+
     if @member.save
-      @org_member.accept_invitation!(@member)
+      ActiveRecord::Base.transaction do
+        @org_member.accept_invitation!(@member)
+        # accept invitation on other linkings
+        other_open_org_members = OrgMember.where(invited_email: @member.email, member_id: nil)
+                                          .where.not(id: @org_member.id)
+        other_open_org_members.each { |open_member| open_member.accept_invitation!(@member) }
+      end
+
       sign_in(@member)
       redirect_to bo_path(org_slug: current_organisation.slug), notice: "Welcome to #{current_organisation.name}!"
     else
+      flash.now[:alert] = @member.errors.full_messages.to_sentence
       render :show, status: :unprocessable_entity
     end
   end
