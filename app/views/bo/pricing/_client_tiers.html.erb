@@ -55,7 +55,7 @@
               <% if discount.percentage? %>
                 <span class="text-success fw-semibold"><%= discount.value_display %></span>
               <% else %>
-                <span class="text-success fw-semibold"><%= humanized_money_with_symbol(Money.new((discount.discount_value * 100).to_i, 'EUR')) %></span>
+                <span class="text-success fw-semibold"><%= humanized_money_with_symbol(Money.new((discount.discount_value * 100).to_i, @current_organisation.currency)) %></span>
               <% end %>
             </td>
             <td><%= discount.valid_period_display %></td>

@@ -128,7 +128,7 @@ class DiscountCalculator
     remaining_price = product.price
 
     # Apply the best exclusive (non-stackable) discount first as the base
-    if base_exclusive[:savings] && base_exclusive[:savings] > Money.new(0, 'EUR')
+    if base_exclusive[:savings] && base_exclusive[:savings] > Money.new(0, currency)
       remaining_price = remaining_price - base_exclusive[:savings]
     end
 
@@ -137,11 +137,11 @@ class DiscountCalculator
       if d[:discount_type] == 'percentage'
         remaining_price = remaining_price - (remaining_price * d[:value])
       else # fixed
-        remaining_price = remaining_price - Money.new((d[:value] * 100).to_i, 'EUR')
+        remaining_price = remaining_price - Money.new((d[:value] * 100).to_i, currency)
       end
     end
 
-    remaining_price = [remaining_price, Money.new(0, 'EUR')].max
+    remaining_price = [remaining_price, Money.new(0, currency)].max
     savings = product.price - remaining_price
 
     # Calculate effective percentage for display
@@ -158,7 +158,7 @@ class DiscountCalculator
   end
 
   def calculate_stacked(discounts)
-    return { percentage: 0, savings: Money.new(0, 'EUR'), source: :none, label: nil } if discounts.empty?
+    return { percentage: 0, savings: Money.new(0, currency), source: :none, label: nil } if discounts.empty?
 
     # Start with full price
     remaining_price = product.price
@@ -167,11 +167,11 @@ class DiscountCalculator
       if d[:discount_type] == 'percentage'
         remaining_price = remaining_price - (remaining_price * d[:value])
       else # fixed
-        remaining_price = remaining_price - Money.new((d[:value] * 100).to_i, 'EUR')
+        remaining_price = remaining_price - Money.new((d[:value] * 100).to_i, currency)
       end
     end
 
-    remaining_price = [remaining_price, Money.new(0, 'EUR')].max
+    remaining_price = [remaining_price, Money.new(0, currency)].max
     savings = product.price - remaining_price
 
     # Calculate effective percentage for display
@@ -187,16 +187,16 @@ class DiscountCalculator
   end
 
   def find_best_exclusive(discounts)
-    return { percentage: 0, savings: Money.new(0, 'EUR'), source: :none, label: nil } if discounts.empty?
+    return { percentage: 0, savings: Money.new(0, currency), source: :none, label: nil } if discounts.empty?
 
     best = nil
-    best_savings = Money.new(0, 'EUR')
+    best_savings = Money.new(0, currency)
 
     discounts.each do |d|
       savings = if d[:discount_type] == 'percentage'
         product.price * d[:value]
       else
-        Money.new((d[:value] * 100).to_i, 'EUR')
+        Money.new((d[:value] * 100).to_i, currency)
       end
 
       if savings > best_savings
@@ -220,6 +220,10 @@ class DiscountCalculator
     return price if discount_info[:savings].nil? || discount_info[:savings].zero?
 
     result = price - discount_info[:savings]
-    [result, Money.new(0, 'EUR')].max
+    [result, Money.new(0, currency)].max
+  end
+
+  def currency
+    product.organisation.currency
   end
 end

@@ -10,12 +10,12 @@
   </td>
   <td>
     <div class="input-group input-group-sm">
-      <span class="input-group-text">€</span>
+      <span class="input-group-text"><%= @current_organisation.currency_symbol %></span>
       <%= f.number_field :price, class: "form-control form-control-sm", step: 0.01, min: 0, data: { price_field: true, action: "input->order-items#calculate" } %>
     </div>
   </td>
   <td>
-    <span class="fw-medium">€<span data-line-total><%= number_with_precision(f.object.total_price.to_f, precision: 2) %></span></span>
+    <span class="fw-medium"><%= @current_organisation.currency_symbol %><span data-line-total><%= number_with_precision(f.object.total_price.to_f, precision: 2) %></span></span>
   </td>
   <td>
     <%= f.hidden_field :_destroy, value: "0" %>

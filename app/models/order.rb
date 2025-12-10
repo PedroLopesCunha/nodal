@@ -73,11 +73,11 @@ class Order < ApplicationRecord
   # Calculate the automatic order tier discount amount
   def auto_order_discount_amount
     if placed? && has_auto_discount_snapshot?
-      Money.new(auto_discount_amount_cents, 'EUR')
+      Money.new(auto_discount_amount_cents, organisation.currency)
     elsif best_order_discount.present?
       best_order_discount.calculate_discount(total_amount)
     else
-      Money.new(0, 'EUR')
+      Money.new(0, organisation.currency)
     end
   end
 
@@ -91,14 +91,14 @@ class Order < ApplicationRecord
     if auto_discount_type == 'percentage'
       "#{(auto_discount_value * 100).round(0)}%"
     else
-      "€#{auto_discount_value}"
+      "#{organisation.currency_symbol}#{auto_discount_value}"
     end
   end
 
   # Total with automatic order tier discount applied (before manual discounts)
   def total_with_auto_discount
     result = total_amount - auto_order_discount_amount
-    [result, Money.new(0, 'EUR')].max
+    [result, Money.new(0, organisation.currency)].max
   end
 
   def pickup?
@@ -111,7 +111,7 @@ class Order < ApplicationRecord
 
   # Calculate shipping based on delivery method and organisation's shipping cost
   def calculated_shipping
-    pickup? ? Money.new(0, 'EUR') : organisation.shipping_cost
+    pickup? ? Money.new(0, organisation.currency) : organisation.shipping_cost
   end
 
   # Order discount methods
@@ -120,22 +120,22 @@ class Order < ApplicationRecord
   end
 
   def order_discount_amount
-    return Money.new(0, 'EUR') unless has_order_discount?
+    return Money.new(0, organisation.currency) unless has_order_discount?
 
     case discount_type
     when 'percentage'
       total_amount * discount_value
     when 'fixed'
-      Money.new((discount_value * 100).to_i, 'EUR')
+      Money.new((discount_value * 100).to_i, organisation.currency)
     else
-      Money.new(0, 'EUR')
+      Money.new(0, organisation.currency)
     end
   end
 
   def subtotal_after_discount
     # Apply both auto order tier discount and manual order discount
     result = total_with_auto_discount - order_discount_amount
-    [result, Money.new(0, 'EUR')].max
+    [result, Money.new(0, organisation.currency)].max
   end
 
   def order_discount_display
@@ -144,7 +144,7 @@ class Order < ApplicationRecord
     if discount_type == 'percentage'
       "#{(discount_value * 100).round(0)}%"
     else
-      "€#{discount_value}"
+      "#{organisation.currency_symbol}#{discount_value}"
     end
   end
 

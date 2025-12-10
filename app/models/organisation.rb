@@ -1,6 +1,8 @@
 class Organisation < ApplicationRecord
   include Slugable
 
+  SUPPORTED_CURRENCIES = %w[EUR CHF USD GBP].freeze
+
   monetize :shipping_cost_cents
 
   has_many :org_members, dependent: :destroy
@@ -17,6 +19,11 @@ class Organisation < ApplicationRecord
 
   validates :name, presence: true
   validates :billing_email, format: { with: URI::MailTo::EMAIL_REGEXP }, allow_blank: true
+  validates :currency, presence: true, inclusion: { in: SUPPORTED_CURRENCIES }
 
   slugify :name
+
+  def currency_symbol
+    Money::Currency.new(currency).symbol
+  end
 end
