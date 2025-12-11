@@ -180,3 +180,13 @@ Test structure:
 | `app/services/dashboard/metrics.rb` | Analytics calculations |
 | `config/initializers/money.rb` | Currency configuration |
 | `config/initializers/ruby_llm.rb` | LLM provider setup |
+
+## Claude Agents
+
+Custom agents are defined in `.claude/agents/` for specialized tasks:
+
+| Agent | Purpose |
+|-------|---------|
+| `frontend-refactor` | Frontend specialist for refactoring ERB templates, SCSS, and Stimulus controllers. Follows BEM naming, semantic HTML5, and Rails view best practices. |
+
+Usage: Reference agents via Claude Code's agent functionality.
