@@ -140,11 +140,6 @@
           <h5 class="card-title mb-4">Product Info</h5>
 
           <div class="border-bottom pb-3 mb-3">
-            <small class="text-muted d-block">Product ID</small>
-            <span>P<%= @product.id.to_s.rjust(3, '0') %></span>
-          </div>
-
-          <div class="border-bottom pb-3 mb-3">
             <small class="text-muted d-block">SKU</small>
             <span><%= @product.sku || "-" %></span>
           </div>
