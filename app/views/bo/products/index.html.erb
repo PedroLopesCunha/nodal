@@ -69,7 +69,6 @@
         <tr class="product-row" data-href="<%= bo_product_path(params[:org_slug], product) %>" style="cursor: pointer;">
           <td>
             <div class="fw-semibold"><%= product.name %></div>
-            <small class="text-muted">P<%= product.id.to_s.rjust(3, '0') %></small>
           </td>
           <td><%= product.sku %></td>
           <td><%= product.category&.name %></td>
