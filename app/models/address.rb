@@ -19,4 +19,12 @@ class Address < ApplicationRecord
   def shipping?
     address_type == "shipping"
   end
+
+  def full_address
+  [
+    "#{street_name} #{street_nr}".strip,
+    "#{postal_code} #{city}".strip,
+    country
+  ].compact.reject(&:blank?).join(", ")
+  end
 end
