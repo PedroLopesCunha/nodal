@@ -34,6 +34,11 @@ class Customer < ApplicationRecord
   validates :password, confirmation: true, if: :password_required?
   validates :password, length: { within: Devise.password_length, allow_blank: true }
 
+  # Addresses validation (PEDRO)
+  accepts_nested_attributes_for :billing_address, update_only: true
+  accepts_nested_attributes_for :shipping_addresses, allow_destroy: true
+
+
   def self.find_for_database_authentication(warden_conditions)
      raise
      org = Organisation.find_by(slug: params[:org_slug])

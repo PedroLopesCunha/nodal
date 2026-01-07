@@ -79,9 +79,11 @@
               <div>
                 <small class="text-muted d-block">Shipping addresses</small>
                   <% if @customer.shipping_addresses.any? %>
+                    <ul class="text-muted ps-3 mb-0">
                     <% @customer.shipping_addresses.each do |address| %>
-                      <span class="text-muted d-block"><%= address.full_address %></span>
+                      <li><span class="text-muted d-block"><%= address.full_address %></span></li>
                     <% end %>
+                  </ul>
                   <% else %>
                     <span class="text-muted">Not provided</span>
                   <% end %>

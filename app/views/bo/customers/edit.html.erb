@@ -64,6 +64,85 @@
               <label class="form-label">Company Name</label>
               <%= f.text_field :company_name, class: "form-control", placeholder: "Enter company name" %>
             </div>
+
+            <hr class="my-4">
+
+              <h6 class="mb-3">Billing Address</h6>
+
+              <%= f.fields_for :billing_address do |ba| %>
+                <%= ba.hidden_field :address_type, value: "billing" %>
+
+                <div class="row g-3">
+                  <div class="col-md-8">
+                    <label class="form-label">Street</label>
+                    <%= ba.text_field :street_name, class: "form-control" %>
+                  </div>
+
+                  <div class="col-md-4">
+                    <label class="form-label">Number</label>
+                    <%= ba.text_field :street_nr, class: "form-control" %>
+                  </div>
+
+                  <div class="col-md-4">
+                    <label class="form-label">Postal Code</label>
+                    <%= ba.text_field :postal_code, class: "form-control" %>
+                  </div>
+
+                  <div class="col-md-4">
+                    <label class="form-label">City</label>
+                    <%= ba.text_field :city, class: "form-control" %>
+                  </div>
+
+                  <div class="col-md-4">
+                    <label class="form-label">Country</label>
+                    <%= ba.text_field :country, class: "form-control" %>
+                  </div>
+                </div>
+              <% end %>
+
+            <hr class="my-4">
+
+              <h6 class="mb-3">Shipping Addresses</h6>
+
+              <%= f.fields_for :shipping_addresses do |sa| %>
+                <%= sa.hidden_field :address_type, value: "shipping" %>
+
+                <div class="border rounded p-3 mb-3">
+                  <div class="row g-3">
+                    <div class="col-md-8">
+                      <label class="form-label">Street</label>
+                      <%= sa.text_field :street_name, class: "form-control" %>
+                    </div>
+
+                    <div class="col-md-4">
+                      <label class="form-label">Number</label>
+                      <%= sa.text_field :street_nr, class: "form-control" %>
+                    </div>
+
+                    <div class="col-md-4">
+                      <label class="form-label">Postal Code</label>
+                      <%= sa.text_field :postal_code, class: "form-control" %>
+                    </div>
+
+                    <div class="col-md-4">
+                      <label class="form-label">City</label>
+                      <%= sa.text_field :city, class: "form-control" %>
+                    </div>
+
+                    <div class="col-md-4">
+                      <label class="form-label">Country</label>
+                      <%= sa.text_field :country, class: "form-control" %>
+                    </div>
+                  </div>
+
+                  <div class="form-check mt-2">
+                    <%= sa.check_box :_destroy, class: "form-check-input" %>
+                    <label class="form-check-label text-danger">Remove this address</label>
+                  </div>
+                </div>
+              <% end %>
+
+
           </div>
         </div>
       </div>
@@ -85,11 +164,6 @@
       <div class="card">
         <div class="card-body">
           <h5 class="card-title mb-4">Account Info</h5>
-
-          <div class="border-bottom pb-3 mb-3">
-            <small class="text-muted d-block">Client ID</small>
-            <span>C<%= @customer.id.to_s.rjust(3, '0') %></span>
-          </div>
 
           <div class="border-bottom pb-3 mb-3">
             <small class="text-muted d-block">Member Since</small>
