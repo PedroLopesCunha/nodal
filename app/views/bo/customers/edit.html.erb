@@ -102,54 +102,33 @@
 
             <hr class="my-4">
 
-              <h6 class="mb-3">Shipping Addresses</h6>
+                <h6 class="mb-3">Shipping Addresses</h6>
 
-              <%= f.fields_for :shipping_addresses_with_archived do |sa| %>
-                <%= sa.hidden_field :address_type, value: "shipping" %>
-
-                <div class="border rounded p-3 mb-3">
-                  <div class="row g-3">
-                    <div class="col-md-8">
-                      <label class="form-label">Street</label>
-                      <%= sa.text_field :street_name, class: "form-control" %>
+                  <div data-controller="nested-addresses">
+                    <div data-nested-addresses-target="container">
+                      <%= f.fields_for :shipping_addresses_with_archived do |sa| %>
+                        <%= render "shipping_address_fields", f: sa %>
+                      <% end %>
                     </div>
 
-                    <div class="col-md-4">
-                      <label class="form-label">Number</label>
-                      <%= sa.text_field :street_nr, class: "form-control" %>
-                    </div>
+                    <template data-nested-addresses-target="template">
+                      <%= f.fields_for(
+                        :shipping_addresses_with_archived,
+                        Address.new(address_type: "shipping", active: true),
+                        child_index: "NEW_RECORD"
+                      ) do |sa| %>
+                        <%= render "shipping_address_fields", f: sa %>
+                      <% end %>
+                    </template>
 
-                    <div class="col-md-4">
-                      <label class="form-label">Postal Code</label>
-                      <%= sa.text_field :postal_code, class: "form-control" %>
-                    </div>
-
-                    <div class="col-md-4">
-                      <label class="form-label">City</label>
-                      <%= sa.text_field :city, class: "form-control" %>
-                    </div>
-
-                    <div class="col-md-4">
-                      <label class="form-label">Country</label>
-                      <%= sa.text_field :country, class: "form-control" %>
-                    </div>
+                    <button
+                      type="button"
+                      class="btn btn-sm btn-outline-primary mt-2"
+                      data-action="nested-addresses#add"
+                    >
+                      <i class="fa-solid fa-plus"></i> Add shipping address
+                    </button>
                   </div>
-
-                  <div class="form-check mt-2">
-                    <%= sa.check_box :active, {}, false, true %>
-                    <label class="form-check-label text-danger">
-                      Archive this address
-                    </label>
-                  </div>
-
-                  <% if sa.object.archived? %>
-                    <span class="badge bg-secondary">Archived</span>
-                  <% end %>
-
-                </div>
-              <% end %>
-
-
           </div>
         </div>
       </div>
