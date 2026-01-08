@@ -77,7 +77,7 @@
             <div class="d-flex align-items-start gap-3">
               <i class="fa-solid fa-truck text-muted mt-1"></i>
               <div>
-                <small class="text-muted d-block">Shipping addresses</small>
+                <small class="text-muted d-block">Active shipping addresses</small>
                   <% if @customer.shipping_addresses.any? %>
                     <ul class="text-muted ps-3 mb-0">
                     <% @customer.shipping_addresses.each do |address| %>

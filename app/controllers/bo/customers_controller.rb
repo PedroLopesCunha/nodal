@@ -32,8 +32,8 @@ class Bo::CustomersController < Bo::BaseController
 
   def edit
     @customer = Customer.find(params[:id])
-    @customer.build_billing_address if @customer.billing_address.nil?
-    @customer.shipping_addresses.build if @customer.shipping_addresses.empty?
+    @customer.build_billing_address_with_archived if @customer.billing_address_with_archived.nil?
+    @customer.shipping_addresses_with_archived.build if @customer.shipping_addresses_with_archived.empty?
   end
 
   def update
@@ -58,7 +58,7 @@ class Bo::CustomersController < Bo::BaseController
   private
 
   def customer_params
-    params.require(:customer).permit(:company_name, :contact_name, :email, :contact_phone, :active, :password, :password_confirmation, billing_address_attributes: [:id, :street_name, :street_nr, :postal_code, :city, :country, :address_type], shipping_addresses_attributes: [:id, :street_name, :street_nr, :postal_code, :city, :country, :address_type, :_destroy])
+    params.require(:customer).permit(:company_name, :contact_name, :email, :contact_phone, :active, :password, :password_confirmation, billing_address_attributes: [:id, :street_name, :street_nr, :postal_code, :city, :country, :address_type, :active], shipping_addresses_attributes: [:id, :street_name, :street_nr, :postal_code, :city, :country, :address_type, :_destroy, :active])
   end
 
   def set_and_authorize_customer

@@ -13,8 +13,10 @@ class Customer < ApplicationRecord
 
   belongs_to :organisation
   has_many :orders, dependent: :destroy
-  has_one :billing_address, -> { billing }, class_name: "Address", as: :addressable, dependent: :destroy
-  has_many :shipping_addresses, -> { shipping }, class_name: "Address", as: :addressable, dependent: :destroy
+  has_one :billing_address, -> { billing.active }, class_name: "Address", as: :addressable, dependent: :destroy
+  has_many :shipping_addresses, -> { shipping.active }, class_name: "Address", as: :addressable, dependent: :destroy
+  has_one :billing_address_with_archived, -> { billing }, class_name: "Address", as: :addressable, dependent: :destroy
+  has_many :shipping_addresses_with_archived, -> { shipping }, class_name: "Address", as: :addressable, dependent: :destroy
   has_many :customer_product_discounts, dependent: :destroy
   has_many :customer_discounts, dependent: :destroy
 
@@ -35,8 +37,11 @@ class Customer < ApplicationRecord
   validates :password, length: { within: Devise.password_length, allow_blank: true }
 
   # Addresses validation (PEDRO)
-  accepts_nested_attributes_for :billing_address, update_only: true
-  accepts_nested_attributes_for :shipping_addresses, allow_destroy: true
+  #accepts_nested_attributes_for :billing_address, update_only: true
+  #accepts_nested_attributes_for :shipping_addresses
+  #new below
+  accepts_nested_attributes_for :billing_address_with_archived, update_only: true
+  accepts_nested_attributes_for :shipping_addresses_with_archived
 
 
   def self.find_for_database_authentication(warden_conditions)

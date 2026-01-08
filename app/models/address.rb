@@ -11,6 +11,7 @@ class Address < ApplicationRecord
 
   scope :billing, -> { where(address_type: "billing") }
   scope :shipping, -> { where(address_type: "shipping") }
+  scope :active,   -> { where(active: true) }
 
   def billing?
     address_type == "billing"
@@ -27,4 +28,9 @@ class Address < ApplicationRecord
     country
   ].compact.reject(&:blank?).join(", ")
   end
+
+  def archived?
+    !active
+  end
+
 end

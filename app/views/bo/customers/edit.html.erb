@@ -69,7 +69,7 @@
 
               <h6 class="mb-3">Billing Address</h6>
 
-              <%= f.fields_for :billing_address do |ba| %>
+              <%= f.fields_for :billing_address_with_archived do |ba| %>
                 <%= ba.hidden_field :address_type, value: "billing" %>
 
                 <div class="row g-3">
@@ -104,7 +104,7 @@
 
               <h6 class="mb-3">Shipping Addresses</h6>
 
-              <%= f.fields_for :shipping_addresses do |sa| %>
+              <%= f.fields_for :shipping_addresses_with_archived do |sa| %>
                 <%= sa.hidden_field :address_type, value: "shipping" %>
 
                 <div class="border rounded p-3 mb-3">
@@ -136,9 +136,16 @@
                   </div>
 
                   <div class="form-check mt-2">
-                    <%= sa.check_box :_destroy, class: "form-check-input" %>
-                    <label class="form-check-label text-danger">Remove this address</label>
+                    <%= sa.check_box :active, {}, false, true %>
+                    <label class="form-check-label text-danger">
+                      Archive this address
+                    </label>
                   </div>
+
+                  <% if sa.object.archived? %>
+                    <span class="badge bg-secondary">Archived</span>
+                  <% end %>
+
                 </div>
               <% end %>
 
