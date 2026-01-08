@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class Bo::DashboardController < Bo::BaseController
+class Bo::DashboardsController < Bo::BaseController
   skip_after_action :verify_authorized
   skip_after_action :verify_policy_scoped
 

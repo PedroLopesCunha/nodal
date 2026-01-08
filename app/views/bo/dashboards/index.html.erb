@@ -1,6 +1,6 @@
 <% content_for :bo_main_content do %>
 
-<div data-controller="dashboard" data-dashboard-metrics-url-value="<%= bo_dashboard_metrics_path(org_slug: @organisation.slug) %>" data-dashboard-currency-value="<%= @organisation.currency %>">
+<div data-controller="dashboard" data-dashboard-metrics-url-value="<%= bo_dashboards_metrics_path(org_slug: @organisation.slug) %>" data-dashboard-currency-value="<%= @organisation.currency %>">
   <!-- Sticky Header with Filters -->
   <div class="bo-page-header bo-page-header--with-filters">
     <div class="bo-page-header__top">
@@ -53,28 +53,28 @@
       <!-- Top Row: KPI Cards -->
       <div class="dashboard__grid dashboard__grid--kpis mb-4">
 
-        <%= render "bo/dashboard/kpi_card",
+        <%= render "bo/dashboards/kpi_card",
             id: "total_sales",
             title: "Total Sales",
             icon: "fa-euro-sign",
             format: "currency",
             drill_path: bo_orders_path(org_slug: @organisation.slug) %>
 
-        <%= render "bo/dashboard/kpi_card",
+        <%= render "bo/dashboards/kpi_card",
             id: "order_count",
             title: "Orders",
             icon: "fa-clipboard-list",
             format: "number",
             drill_path: bo_orders_path(org_slug: @organisation.slug) %>
 
-        <%= render "bo/dashboard/kpi_card",
+        <%= render "bo/dashboards/kpi_card",
             id: "aov",
             title: "Avg Order Value",
             icon: "fa-chart-line",
             format: "currency",
             drill_path: nil %>
 
-        <%= render "bo/dashboard/kpi_card",
+        <%= render "bo/dashboards/kpi_card",
             id: "open_carts",
             title: "Open Carts",
             icon: "fa-shopping-cart",
@@ -86,20 +86,20 @@
       <div class="dashboard__grid dashboard__grid--middle mb-4">
         <!-- Left Column: Top Clients & Order Frequency -->
         <div class="dashboard__main-col">
-          <%= render "bo/dashboard/top_clients", organisation: @organisation %>
-          <%= render "bo/dashboard/order_frequency" %>
+          <%= render "bo/dashboards/top_clients", organisation: @organisation %>
+          <%= render "bo/dashboards/order_frequency" %>
         </div>
 
         <!-- Right Column: Discount Panel -->
         <div class="dashboard__side-col">
-          <%= render "bo/dashboard/discount_panel" %>
+          <%= render "bo/dashboards/discount_panel" %>
         </div>
       </div>
 
       <!-- Bottom Row: Product Tables -->
       <div class="dashboard__grid dashboard__grid--products">
-        <%= render "bo/dashboard/orders_per_product", organisation: @organisation %>
-        <%= render "bo/dashboard/revenue_per_product", organisation: @organisation %>
+        <%= render "bo/dashboards/orders_per_product", organisation: @organisation %>
+        <%= render "bo/dashboards/revenue_per_product", organisation: @organisation %>
       </div>
     </div>
   </div>
