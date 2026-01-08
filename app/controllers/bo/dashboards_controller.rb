@@ -1,17 +1,18 @@
 # frozen_string_literal: true
 
 class Bo::DashboardsController < Bo::BaseController
-  skip_after_action :verify_authorized
-  skip_after_action :verify_policy_scoped
+  skip_after_action :verify_policy_scoped, only: :index
 
-  # GET /bo/dashboard
+  # GET /bo/dashboards
   def index
     @organisation = current_organisation
+    authorize :dashboard, :index?
   end
 
-  # GET /bo/dashboard/metrics
+  # GET /bo/dashboards/metrics
   # Returns JSON with all KPI data
   def metrics
+    authorize :dashboard
     metrics_service = Dashboard::Metrics.new(current_organisation)
     render json: metrics_service.to_json(metrics_params)
   rescue StandardError => e
