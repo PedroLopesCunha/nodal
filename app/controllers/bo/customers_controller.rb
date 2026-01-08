@@ -38,6 +38,8 @@ class Bo::CustomersController < Bo::BaseController
 
   def update
     if @customer.update(customer_params)
+      #PEDRO ADDED THIS BELOW TO FIX THE UNARCHIVE
+      @customer.reload
       redirect_to bo_customer_path(params[:org_slug], @customer), notice: "Customer updated successfully."
     else
       render :edit, status: :unprocessable_entity
@@ -58,7 +60,7 @@ class Bo::CustomersController < Bo::BaseController
   private
 
   def customer_params
-    params.require(:customer).permit(:company_name, :contact_name, :email, :contact_phone, :active, :password, :password_confirmation, billing_address_attributes: [:id, :street_name, :street_nr, :postal_code, :city, :country, :address_type, :active], shipping_addresses_attributes: [:id, :street_name, :street_nr, :postal_code, :city, :country, :address_type, :_destroy, :active])
+    params.require(:customer).permit(:company_name, :contact_name, :email, :contact_phone, :active, :password, :password_confirmation, billing_address_with_archived_attributes: [:id, :street_name, :street_nr, :postal_code, :city, :country, :address_type, :active], shipping_addresses_with_archived_attributes: [:id, :street_name, :street_nr, :postal_code, :city, :country, :address_type, :_destroy, :active])
   end
 
   def set_and_authorize_customer
