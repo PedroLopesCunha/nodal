@@ -1,44 +1,34 @@
 class CustomerPolicy < ApplicationPolicy
-
   def show?
-    user_works_for_records_organisation?
+    member_working_for_organisation? && record_belongs_to_user_organisation?
   end
 
   def update?
-    user_works_for_records_organisation?
+    member_working_for_organisation? && record_belongs_to_user_organisation?
   end
 
   def destroy?
-    user_works_for_records_organisation?
+    member_working_for_organisation? && record_belongs_to_user_organisation?
   end
 
   def new?
-    true
+    member_working_for_organisation?
   end
 
   def create?
-    user_works_for_records_organisation?
+    member_working_for_organisation? && record_belongs_to_user_organisation?
   end
 
   def invite?
-    user_works_for_records_organisation?
+    member_working_for_organisation? && record_belongs_to_user_organisation?
   end
 
   class Scope < ApplicationPolicy::Scope
     # NOTE: Be explicit about which records you allow access to!
     def resolve
-      number_of_distinct_organisations = scope.select("organisation_id").distinct.length
-      if number_of_distinct_organisations <= 1
-        scope.all
-      else
-        #
-      end
+      raise Pundit::NotAuthorizedError unless member_working_for_organisation?
+
+      scope.where(organisation: @organisation)
     end
-  end
-
-  private
-
-  def user_works_for_records_organisation?
-    return user.organisations.include?(record.organisation)
   end
 end
