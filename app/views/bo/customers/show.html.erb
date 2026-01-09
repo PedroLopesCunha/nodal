@@ -62,13 +62,36 @@
           </div>
         </div>
 
-        <div class="d-flex align-items-start gap-3">
-          <i class="fa-solid fa-location-dot text-muted mt-1"></i>
-          <div>
-            <small class="text-muted d-block">Address</small>
-            <span class="text-muted">No address on file</span>
+        <div class="row mb-4">
+          <div class="col-md-6">
+            <div class="d-flex align-items-start gap-3">
+              <i class="fa-solid fa-location-dot text-muted mt-1"></i>
+              <div>
+                <small class="text-muted d-block">Billing address</small>
+                <span class="text-muted"><%= @customer.billing_address&.full_address|| "Not provided" %></span>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-md-6">
+            <div class="d-flex align-items-start gap-3">
+              <i class="fa-solid fa-truck text-muted mt-1"></i>
+              <div>
+                <small class="text-muted d-block">Active shipping addresses</small>
+                  <% if @customer.shipping_addresses.any? %>
+                    <ul class="text-muted ps-3 mb-0">
+                    <% @customer.shipping_addresses.each do |address| %>
+                      <li><span class="text-muted d-block"><%= address.full_address %></span></li>
+                    <% end %>
+                  </ul>
+                  <% else %>
+                    <span class="text-muted">Not provided</span>
+                  <% end %>
+              </div>
+            </div>
           </div>
         </div>
+
       </div>
     </div>
   </div>
@@ -77,11 +100,6 @@
     <div class="card h-100">
       <div class="card-body">
         <h5 class="card-title mb-4">Account Details</h5>
-
-        <div class="border-bottom pb-3 mb-3">
-          <small class="text-muted d-block">Client ID</small>
-          <span>C<%= @customer.id.to_s.rjust(3, '0') %></span>
-        </div>
 
         <div>
           <small class="text-muted d-block">Member Since</small>

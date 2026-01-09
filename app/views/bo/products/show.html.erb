@@ -44,6 +44,10 @@
             <strong><%= @product.category&.name %></strong>
           </div>
           <div class="col-md-6 mb-3">
+            <small class="text-muted d-block">Unit Price (<%= @current_organisation.currency_symbol %>)</small>
+            <strong><%= humanized_money_with_symbol(@product.price) || '-'  %></strong>
+          </div>
+          <div class="col-md-6 mb-3">
             <small class="text-muted d-block">Unit of Measure</small>
             <strong><%= @product.unit_description || '-' %></strong>
           </div>
@@ -51,20 +55,27 @@
 
         <div class="row">
           <div class="col-md-6 mb-3">
-            <small class="text-muted d-block">Shelf Life</small>
-            <strong>12 months</strong>
+            <small class="text-muted d-block">Minimum Quantity</small>
+            <strong><%= @product.min_quantity %></strong>
           </div>
           <div class="col-md-6 mb-3">
-            <small class="text-muted d-block">Reorder Point</small>
-            <strong>100 <%= @product.unit_description || 'units' %></strong>
+            <small class="text-muted d-block">Minimum Quantity Type</small>
+            <strong><%= @product.min_quantity_type || 'units' %></strong>
           </div>
         </div>
 
         <hr>
 
         <div>
-          <small class="text-muted d-block">Storage Conditions</small>
-          <strong>Cool, dry place away from direct sunlight</strong>
+          <small class="text-muted d-block">Product Image</small>
+          <% if @product.photo.attached? %>
+            <div class="mb-3">
+              <label class="form-label">Current Image</label>
+              <div class="border rounded p-2 d-inline-block">
+                <%= image_tag @product.photo, style: "max-width: 200px; max-height: 200px; object-fit: cover;" %>
+              </div>
+            </div>
+          <% end %>
         </div>
       </div>
     </div>

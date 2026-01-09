@@ -69,7 +69,6 @@
         <tr class="customer-row" data-href="<%= bo_customer_path(params[:org_slug], customer) %>" style="cursor: pointer;">
           <td>
             <div class="fw-semibold"><%= customer.contact_name %></div>
-            <small class="text-muted">C<%= customer.id.to_s.rjust(3, '0') %></small>
           </td>
           <td><%= customer.company_name %></td>
           <td>
