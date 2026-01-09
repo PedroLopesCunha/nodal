@@ -52,4 +52,14 @@ class ApplicationPolicy
       raise NoMethodError, "You must define #resolve in #{self.class}"
     end
   end
+
+  private
+
+  def user_is_a_member?
+    return @user.is_a?(Member)
+  end
+
+  def member_working_for_organisation?
+    return user_is_a_member? ? @user.organisations.include?(@organisation) : false
+  end
 end
