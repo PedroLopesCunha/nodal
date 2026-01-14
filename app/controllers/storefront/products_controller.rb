@@ -22,7 +22,7 @@ class Storefront::ProductsController < Storefront::BaseController
 
   def show
     @product = current_organisation.products.find(params[:id])
-    authorize @product
+    authorize @product, :show_storefront?
     # for_display: true shows all available discounts (ignoring min_quantity) for display purposes
     @discount_calculator = DiscountCalculator.new(product: @product, customer: current_customer, for_display: true)
   end
