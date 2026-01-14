@@ -1,11 +1,10 @@
 class PricingPolicy < ApplicationPolicy
   def index?
-    true
+    member_working_for_organisation?
   end
 
   class Scope < ApplicationPolicy::Scope
     def resolve
-      scope.all
     end
   end
 end
