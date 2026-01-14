@@ -1,6 +1,6 @@
 class ProfilePolicy < ApplicationPolicy
   # Members can only edit their own profile
   def update?
-    user == record
+    member_working_for_organisation? && user == record
   end
 end
