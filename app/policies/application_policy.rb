@@ -59,6 +59,14 @@ class ApplicationPolicy
     def member_working_for_organisation?
       return user_is_a_member? ? @user.organisations.include?(@organisation) : false
     end
+
+    def user_is_a_customer?
+      return @user.is_a?(Customer)
+    end
+
+    def user_beeing_customer_of_organsiation?
+      return user_is_a_customer? ? @user.organisation == @organisation : false
+    end
   end
 
   private
@@ -71,9 +79,19 @@ class ApplicationPolicy
     return user_is_a_member? ? @user.organisations.include?(@organisation) : false
   end
 
+  def user_is_a_customer?
+    return @user.is_a?(Customer)
+  end
+
+  def user_beeing_customer_of_organsiation?
+    return user_is_a_customer? ? @user.organisation == @organisation : false
+  end
+
   def record_belongs_to_user_organisation?
     if user_is_a_member?
       return @user.organisations.include?(record.organisation)
+    elsif user_is_a_customer?
+      return @user.organisation == record.organisation
     else
       return false
     end
