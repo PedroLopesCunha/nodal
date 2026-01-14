@@ -1,42 +1,29 @@
 class OrgMemberPolicy < ApplicationPolicy
-  # All members can view team (record is the class OrgMember for index)
-  def index?
-    user.is_a?(Member)
-  end
-
   # Admin/Owner can invite new members
   def new?
-    admin_or_owner?
+    member_working_for_organisation? && admin_or_owner?
   end
 
   def create?
-    admin_or_owner?
+    member_working_for_organisation? && record_belongs_to_user_organisation? &&
+      admin_or_owner?
   end
 
   # Only owner can edit roles
-  def edit?
-    owner? && !editing_self?
-  end
-
   def update?
-    owner? && !editing_self?
+    member_working_for_organisation? && record_belongs_to_user_organisation? &&
+      owner? && !editing_self?
   end
 
   # Owner can remove anyone except themselves
   def destroy?
-    return false if editing_self?
-    return true if owner?
-
-    false
+    owner? && !editing_self?
   end
 
   # Toggle active status
   def toggle_active?
-    return false if editing_self?
-    return true if owner?
-
+    (owner? && !editing_self?) || (admin? && record.role == 'member')
     # Admins can toggle members but not other admins/owners
-    admin? && record.role == 'member'
   end
 
   def resend_invitation?
@@ -45,39 +32,31 @@ class OrgMemberPolicy < ApplicationPolicy
 
   class Scope < ApplicationPolicy::Scope
     def resolve
-      scope.all
+      raise Pundit::NotAuthorizedError unless member_working_for_organisation?
+
+      scope.where(organisation: @organisation)
     end
   end
 
   private
 
-  def organisation
-    @org ||= if record.is_a?(OrgMember)
-               record.organisation
-             else
-               super
-             end
-  end
-
-  def current_org_member
-    return nil unless organisation
-
-    @current_org_member ||= OrgMember.find_by(member: user, organisation: organisation)
+  def member_role
+    user_is_a_member? ? user.org_members.find_by(organisation: @organisation).role : "no role"
   end
 
   def owner?
-    current_org_member&.role == 'owner'
+    member_role == 'owner'
   end
 
   def admin?
-    current_org_member&.role == 'admin'
+    member_role == 'admin'
   end
 
   def admin_or_owner?
-    current_org_member&.role.in?(%w[admin owner])
+    member_role.in?(%w[admin owner])
   end
 
   def editing_self?
-    record.is_a?(OrgMember) && record.member_id == user.id
+    user.is_a?(Member) && record.member_id == user.id
   end
 end
