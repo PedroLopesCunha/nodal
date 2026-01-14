@@ -3,7 +3,6 @@ class Bo::TeamMembersController < Bo::BaseController
 
   def index
     @org_members = policy_scope(current_organisation.org_members).includes(:member)
-    authorize OrgMember
   end
 
   def new
@@ -18,7 +17,7 @@ class Bo::TeamMembersController < Bo::BaseController
     authorize @org_member
 
     email = params[:org_member][:invited_email]&.downcase&.strip
-    
+
     # Check if invitation already exists
     invited_member = OrgMember.where(member_id: nil).find_by(invited_email: email, organisation_id: @org_member.organisation_id)
     if invited_member
