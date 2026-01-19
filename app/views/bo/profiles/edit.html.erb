@@ -8,17 +8,17 @@
       </div>
 
       <div>
-        <h4 class="mb-0">My Profile</h4>
+        <h4 class="mb-0"><%= t('bo.profiles.edit.title') %></h4>
         <span class="text-muted"><%= @member.email %></span>
       </div>
     </div>
 
     <div class="d-flex gap-2 align-items-center">
       <%= link_to bo_path, class: "btn btn-outline-secondary" do %>
-        Cancel
+        <%= t('bo.common.actions.cancel') %>
       <% end %>
       <button type="submit" form="profile-form" class="btn btn-primary">
-        <i class="fa-solid fa-check"></i> Save Changes
+        <i class="fa-solid fa-check"></i> <%= t('bo.common.actions.save_changes') %>
       </button>
     </div>
   </div>
@@ -29,23 +29,23 @@
     <div class="col-md-8">
       <div class="card mb-3">
         <div class="card-body">
-          <h5 class="card-title mb-4">Personal Information</h5>
+          <h5 class="card-title mb-4"><%= t('bo.profiles.edit.personal_info') %></h5>
 
           <div class="row g-3">
             <div class="col-md-6">
-              <label class="form-label">First Name</label>
-              <%= f.text_field :first_name, class: "form-control", placeholder: "Enter first name" %>
+              <label class="form-label"><%= t('bo.profiles.edit.first_name') %></label>
+              <%= f.text_field :first_name, class: "form-control", placeholder: t('bo.profiles.edit.first_name_placeholder') %>
             </div>
             <div class="col-md-6">
-              <label class="form-label">Last Name</label>
-              <%= f.text_field :last_name, class: "form-control", placeholder: "Enter last name" %>
+              <label class="form-label"><%= t('bo.profiles.edit.last_name') %></label>
+              <%= f.text_field :last_name, class: "form-control", placeholder: t('bo.profiles.edit.last_name_placeholder') %>
             </div>
           </div>
 
           <div class="row g-3 mt-1">
             <div class="col-md-12">
-              <label class="form-label">Email</label>
-              <%= f.email_field :email, class: "form-control", placeholder: "Enter email address" %>
+              <label class="form-label"><%= t('bo.profiles.edit.email') %></label>
+              <%= f.email_field :email, class: "form-control", placeholder: t('bo.profiles.edit.email_placeholder') %>
             </div>
           </div>
         </div>
@@ -53,17 +53,17 @@
 
       <div class="card">
         <div class="card-body">
-          <h5 class="card-title mb-4">Change Password</h5>
-          <p class="text-muted small mb-3">Leave blank if you don't want to change your password</p>
+          <h5 class="card-title mb-4"><%= t('bo.profiles.edit.change_password') %></h5>
+          <p class="text-muted small mb-3"><%= t('bo.profiles.edit.password_hint') %></p>
 
           <div class="row g-3">
             <div class="col-md-6">
-              <label class="form-label">New Password</label>
-              <%= f.password_field :password, class: "form-control", placeholder: "Enter new password", autocomplete: "new-password" %>
+              <label class="form-label"><%= t('bo.profiles.edit.new_password') %></label>
+              <%= f.password_field :password, class: "form-control", placeholder: t('bo.profiles.edit.new_password_placeholder'), autocomplete: "new-password" %>
             </div>
             <div class="col-md-6">
-              <label class="form-label">Confirm Password</label>
-              <%= f.password_field :password_confirmation, class: "form-control", placeholder: "Confirm new password", autocomplete: "new-password" %>
+              <label class="form-label"><%= t('bo.profiles.edit.confirm_password') %></label>
+              <%= f.password_field :password_confirmation, class: "form-control", placeholder: t('bo.profiles.edit.confirm_password_placeholder'), autocomplete: "new-password" %>
             </div>
           </div>
         </div>
@@ -73,29 +73,29 @@
     <div class="col-md-4">
       <div class="card mb-3">
         <div class="card-body">
-          <h5 class="card-title mb-4">Role in <%= current_organisation.name %></h5>
+          <h5 class="card-title mb-4"><%= t('bo.profiles.edit.role_in_org', organisation: current_organisation.name) %></h5>
 
           <div class="d-flex align-items-center gap-2 mb-3">
             <% role = current_org_member&.role %>
             <span class="badge <%= role == 'owner' ? 'bg-danger' : role == 'admin' ? 'bg-warning text-dark' : 'bg-secondary' %>">
-              <%= role&.capitalize %>
+              <%= t("bo.team_members.roles.#{role}") %>
             </span>
           </div>
-          <small class="text-muted">Contact an owner to change your role</small>
+          <small class="text-muted"><%= t('bo.profiles.edit.role_change_hint') %></small>
         </div>
       </div>
 
       <div class="card">
         <div class="card-body">
-          <h5 class="card-title mb-4">Account Info</h5>
+          <h5 class="card-title mb-4"><%= t('bo.profiles.edit.account_info') %></h5>
 
           <div class="border-bottom pb-3 mb-3">
-            <small class="text-muted d-block">Member Since</small>
+            <small class="text-muted d-block"><%= t('bo.profiles.edit.member_since') %></small>
             <span><%= @member.created_at.strftime("%-m/%-d/%Y") %></span>
           </div>
 
           <div>
-            <small class="text-muted d-block">Last Updated</small>
+            <small class="text-muted d-block"><%= t('bo.profiles.edit.last_updated') %></small>
             <span><%= @member.updated_at.strftime("%-m/%-d/%Y") %></span>
           </div>
         </div>

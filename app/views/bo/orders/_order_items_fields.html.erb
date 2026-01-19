@@ -2,7 +2,7 @@
   <td>
     <%= f.select :product_id,
         options_for_select(products.map { |p| [p.name, p.id, { 'data-price': p.price.to_f }] }, f.object.product_id),
-        { prompt: "Select product..." },
+        { prompt: t('bo.orders.form.select_product') },
         { class: "form-select form-select-sm", data: { action: "change->order-items#updatePrice" } } %>
   </td>
   <td>

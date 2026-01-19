@@ -3,8 +3,8 @@
   <div class="card-body">
     <div class="d-flex justify-content-between align-items-center mb-3">
       <div>
-        <h5 class="card-title mb-1">Product Discounts</h5>
-        <p class="text-muted small mb-0">Set quantity-based or time-limited discounts on products</p>
+        <h5 class="card-title mb-1"><%= t('bo.pricing.tabs.product_discounts') %></h5>
+        <p class="text-muted small mb-0"><%= t('bo.pricing.product_discounts.description') %></p>
       </div>
     </div>
 
@@ -16,7 +16,7 @@
         <%= text_field_tag :search,
               params[:search],
               class: "form-control border-start-0",
-              placeholder: "Search product discounts..."
+              placeholder: t('bo.pricing.product_discounts.search_placeholder')
         %>
         <%= hidden_field_tag :tab, 'product_discounts' %>
       </div>
@@ -29,13 +29,13 @@
   <table class="table table-hover mb-0">
     <thead class="table-light">
       <tr>
-        <th>Product</th>
-        <th>Discount Type</th>
-        <th>Value</th>
-        <th>Min Quantity</th>
-        <th>Valid Period</th>
-        <th>Status</th>
-        <th>Actions</th>
+        <th><%= t('bo.common.product') %></th>
+        <th><%= t('bo.pricing.form.discount_type') %></th>
+        <th><%= t('bo.pricing.form.value') %></th>
+        <th><%= t('bo.pricing.form.min_quantity') %></th>
+        <th><%= t('bo.pricing.form.valid_period') %></th>
+        <th><%= t('bo.common.status') %></th>
+        <th><%= t('bo.common.actions_column') %></th>
       </tr>
     </thead>
     <tbody>
@@ -74,10 +74,10 @@
             </td>
             <td>
               <div class="d-flex gap-2">
-                <%= link_to edit_bo_product_discount_path(params[:org_slug], discount), class: "text-muted", title: "Edit" do %>
+                <%= link_to edit_bo_product_discount_path(params[:org_slug], discount), class: "text-muted", title: t('bo.common.actions.edit') do %>
                   <i class="fa-solid fa-pen-to-square"></i>
                 <% end %>
-                <%= link_to bo_product_discount_path(params[:org_slug], discount), class: "text-danger", title: "Delete", data: { turbo_method: :delete, turbo_confirm: "Are you sure you want to delete this discount?" } do %>
+                <%= link_to bo_product_discount_path(params[:org_slug], discount), class: "text-danger", title: t('bo.common.actions.delete'), data: { turbo_method: :delete, turbo_confirm: t('bo.common.confirm.delete_discount') } do %>
                   <i class="fa-solid fa-trash"></i>
                 <% end %>
               </div>
@@ -88,8 +88,8 @@
         <tr>
           <td colspan="7" class="text-center text-muted py-4">
             <i class="fa-solid fa-tag fa-2x mb-2 d-block"></i>
-            No product discounts yet.
-            <%= link_to "Create your first discount", new_bo_product_discount_path(params[:org_slug]) %>.
+            <%= t('bo.pricing.product_discounts.no_discounts') %>
+            <%= link_to t('bo.pricing.product_discounts.create_first'), new_bo_product_discount_path(params[:org_slug]) %>.
           </td>
         </tr>
       <% end %>
