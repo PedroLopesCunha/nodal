@@ -1,5 +1,5 @@
 <%= link_to orders_path(org_slug: params[:org_slug]), class: "btn btn-outline-secondary mb-4 mt-5" do %>
-  <i class="fa-solid fa-arrow-left me-2"></i>Back to Orders
+  <i class="fa-solid fa-arrow-left me-2"></i><%= t('storefront.orders.show.back_to_orders') %>
 <% end %>
 
 <div class="row g-4">
@@ -9,12 +9,12 @@
       <div class="card-body">
         <div class="d-flex justify-content-between align-items-start">
           <div>
-            <h1 class="h3 mb-1">Order <%= @order.order_number %></h1>
+            <h1 class="h3 mb-1"><%= t('storefront.orders.show.order_number', number: @order.order_number) %></h1>
             <p class="text-muted mb-0">
               <% if @order.placed? %>
-                Placed on <%= @order.placed_at.strftime("%B %d, %Y at %I:%M %p") %>
+                <%= t('storefront.orders.show.placed_on', date: l(@order.placed_at, format: :long)) %>
               <% else %>
-                Draft order
+                <%= t('storefront.orders.show.draft_order') %>
               <% end %>
             </p>
           </div>
@@ -32,15 +32,15 @@
     <!-- Order Items -->
     <div class="card border-0 shadow-sm mb-4" style="border-radius: 12px;">
       <div class="card-body">
-        <h5 class="card-title mb-3">Order Items</h5>
+        <h5 class="card-title mb-3"><%= t('storefront.orders.show.order_items') %></h5>
 
         <table class="table">
           <thead>
             <tr>
-              <th>Product</th>
-              <th class="text-center">Quantity</th>
-              <th class="text-end">Price</th>
-              <th class="text-end">Total</th>
+              <th><%= t('storefront.orders.show.table.product') %></th>
+              <th class="text-center"><%= t('storefront.orders.show.table.quantity') %></th>
+              <th class="text-end"><%= t('storefront.checkouts.show.table.price') %></th>
+              <th class="text-end"><%= t('storefront.orders.show.table.total') %></th>
             </tr>
           </thead>
           <tbody>
@@ -89,35 +89,35 @@
         <div class="d-flex justify-content-end">
           <div style="width: 250px;">
             <div class="d-flex justify-content-between mb-2">
-              <span class="text-muted">Subtotal</span>
+              <span class="text-muted"><%= t('storefront.orders.show.summary.subtotal') %></span>
               <span><%= humanized_money_with_symbol(@order.total_amount) %></span>
             </div>
             <% if @order.has_auto_discount_snapshot? %>
               <div class="d-flex justify-content-between mb-2 text-success">
-                <span>Order Discount (<%= @order.auto_discount_display %>)</span>
+                <span><%= t('storefront.carts.show.order_discount') %> (<%= @order.auto_discount_display %>)</span>
                 <span>-<%= humanized_money_with_symbol(@order.auto_order_discount_amount) %></span>
               </div>
             <% end %>
             <% if @order.has_order_discount? %>
               <div class="d-flex justify-content-between mb-2 text-success">
-                <span>Additional Discount (<%= @order.order_discount_display %>)</span>
+                <span><%= t('storefront.orders.show.summary.discount') %> (<%= @order.order_discount_display %>)</span>
                 <span>-<%= humanized_money_with_symbol(@order.order_discount_amount) %></span>
               </div>
             <% end %>
             <% if @order.tax_amount.present? %>
               <div class="d-flex justify-content-between mb-2">
-                <span class="text-muted">Tax</span>
+                <span class="text-muted"><%= t('storefront.orders.show.summary.tax') %></span>
                 <span><%= humanized_money_with_symbol(@order.tax_amount) %></span>
               </div>
             <% end %>
             <% if @order.shipping_amount.present? %>
               <div class="d-flex justify-content-between mb-2">
-                <span class="text-muted">Shipping</span>
+                <span class="text-muted"><%= t('storefront.orders.show.summary.shipping') %></span>
                 <span><%= humanized_money_with_symbol(@order.shipping_amount) %></span>
               </div>
             <% end %>
             <div class="d-flex justify-content-between fw-bold border-top pt-2">
-              <span>Total</span>
+              <span><%= t('storefront.orders.show.summary.total') %></span>
               <span><%= humanized_money_with_symbol(@order.grand_total) %></span>
             </div>
           </div>
@@ -128,7 +128,7 @@
     <% if @order.notes.present? %>
       <div class="card border-0 shadow-sm" style="border-radius: 12px;">
         <div class="card-body">
-          <h5 class="card-title mb-3">Order Notes</h5>
+          <h5 class="card-title mb-3"><%= t('storefront.orders.show.order_notes') %></h5>
           <p class="mb-0"><%= @order.notes %></p>
         </div>
       </div>
@@ -140,7 +140,7 @@
     <div class="card border-0 shadow-sm mb-4" style="border-radius: 12px;">
       <div class="card-body">
         <h6 class="text-muted mb-3">
-          <i class="fa-solid fa-credit-card me-2"></i>Payment Status
+          <i class="fa-solid fa-credit-card me-2"></i><%= t('storefront.orders.show.payment_status') %>
         </h6>
         <% payment_class = case @order.payment_status
            when 'paid' then 'text-success'
@@ -157,9 +157,9 @@
       <div class="card border-0 shadow-sm mb-4" style="border-radius: 12px;">
         <div class="card-body">
           <h6 class="text-muted mb-3">
-            <i class="fa-solid fa-<%= @order.pickup? ? 'store' : 'truck' %> me-2"></i>Delivery Method
+            <i class="fa-solid fa-<%= @order.pickup? ? 'store' : 'truck' %> me-2"></i><%= t('storefront.orders.show.delivery_method') %>
           </h6>
-          <span class="fs-5"><%= @order.pickup? ? 'Pickup' : 'Delivery' %></span>
+          <span class="fs-5"><%= @order.pickup? ? t('storefront.orders.show.pickup') : t('storefront.orders.show.delivery') %></span>
         </div>
       </div>
     <% end %>
@@ -169,7 +169,7 @@
       <div class="card border-0 shadow-sm mb-4" style="border-radius: 12px;">
         <div class="card-body">
           <h6 class="text-muted mb-3">
-            <i class="fa-solid fa-calendar me-2"></i>Expected Delivery
+            <i class="fa-solid fa-calendar me-2"></i><%= t('storefront.orders.show.expected_delivery') %>
           </h6>
           <span class="fs-5"><%= @order.receive_on.strftime("%B %d, %Y") %></span>
         </div>
@@ -179,10 +179,10 @@
     <!-- Reorder -->
     <div class="mt-4">
       <%= button_to reorder_order_path(org_slug: params[:org_slug], id: @order, confirm: params[:confirm_reorder]), method: :post, class: "btn btn-outline-secondary w-100 mb-2" do %>
-        <i class="fa-solid fa-rotate-right me-2"></i>Reorder
+        <i class="fa-solid fa-rotate-right me-2"></i><%= t('storefront.orders.index.reorder') %>
       <% end %>
       <%= link_to products_path(org_slug: params[:org_slug]), class: "btn btn-primary w-100" do %>
-        <i class="fa-solid fa-shopping-bag me-2"></i>Continue Shopping
+        <i class="fa-solid fa-shopping-bag me-2"></i><%= t('storefront.orders.show.continue_shopping') %>
       <% end %>
     </div>
   </div>
