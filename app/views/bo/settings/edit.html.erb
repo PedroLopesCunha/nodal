@@ -45,6 +45,21 @@
               <small class="text-muted">Used for invoices and billing communications</small>
             </div>
           </div>
+
+          <div class="row g-3 mt-1">
+            <div class="col-md-12">
+              <label class="form-label">Default Language</label>
+              <%= f.select :default_locale,
+                           options_for_select([
+                             ['English', 'en'],
+                             ['Português', 'pt'],
+                             ['Español', 'es']
+                           ], @organisation.default_locale),
+                           {},
+                           class: "form-control" %>
+              <small class="text-muted">Default language for all users in this organisation</small>
+            </div>
+          </div>
         </div>
       </div>
 

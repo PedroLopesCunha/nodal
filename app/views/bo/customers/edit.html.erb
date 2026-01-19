@@ -114,7 +114,7 @@
                     <template data-nested-addresses-target="template">
                       <%= f.fields_for(
                         :shipping_addresses_with_archived,
-                        Address.new(address_type: "shipping", active: true),
+                        Address.new(address_type: "shipping", active: true), 
                         child_index: "NEW_RECORD"
                       ) do |sa| %>
                         <%= render "shipping_address_fields", f: sa %>

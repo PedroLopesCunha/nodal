@@ -13,4 +13,5 @@ class Member < ApplicationRecord
   has_many :organisations, through: :org_members
 
   validates :first_name, :last_name, presence: true
+  validates :locale, inclusion: { in: I18n.available_locales.map(&:to_s) }, allow_nil: true
 end

@@ -13,6 +13,9 @@ Rails.application.routes.draw do
 
   # routes for each organisation
   scope ":org_slug" do
+    # Locale switching
+    patch 'locale', to: 'locales#update', as: :update_locale
+
     # customer routes
     devise_for :customers, skip: [:registrations],
                 controllers: {

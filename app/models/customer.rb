@@ -23,6 +23,7 @@ class Customer < ApplicationRecord
   validates :company_name, presence: true
   validates :contact_name, presence: true
   validates :active, inclusion: { in: [true, false] }
+  validates :locale, inclusion: { in: I18n.available_locales.map(&:to_s) }, allow_nil: true
 
   # Email validations (from Devise::Models::Validatable, with scoped uniqueness)
   validates :email, presence: true, if: :email_required?

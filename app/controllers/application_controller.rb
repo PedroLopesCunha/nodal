@@ -26,9 +26,27 @@ class ApplicationController < ActionController::Base
   private
 
   def set_locale
-    locale = params[:locale] || cookies[:locale] || I18n.default_locale
+    locale = determine_locale
     I18n.locale = locale.to_sym if I18n.available_locales.include?(locale.to_sym)
-    cookies[:locale] = { value: I18n.locale, expires: 1.year.from_now }
+    cookies[:locale] = { value: I18n.locale.to_s, expires: 1.year.from_now }
+  end
+
+  def determine_locale
+    # URL parameter takes precedence (for switching)
+    return params[:locale] if params[:locale].present?
+
+    # User preference (Member or Customer)
+    current_user = current_member || current_customer
+    return current_user.locale if current_user&.locale.present?
+
+    # Organisation default
+    return current_organisation.default_locale if current_organisation&.default_locale.present?
+
+    # Cookie fallback
+    return cookies[:locale] if cookies[:locale].present?
+
+    # System default
+    I18n.default_locale.to_s
   end
 
   def configure_permitted_parameters

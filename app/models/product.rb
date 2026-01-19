@@ -23,3 +23,4 @@ class Product < ApplicationRecord
     price - (price * discount.discount_percentage)
   end
 end
+
