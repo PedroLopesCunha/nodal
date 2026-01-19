@@ -20,6 +20,7 @@ class Organisation < ApplicationRecord
   validates :name, presence: true
   validates :billing_email, format: { with: URI::MailTo::EMAIL_REGEXP }, allow_blank: true
   validates :currency, presence: true, inclusion: { in: SUPPORTED_CURRENCIES }
+  validates :default_locale, inclusion: { in: I18n.available_locales.map(&:to_s) }
 
   slugify :name
 

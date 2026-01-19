@@ -4,12 +4,12 @@
 <div class="bo-page-header">
   <div class="d-flex justify-content-between align-items-start">
     <div>
-      <h1>Pricing & Discounts</h1>
-      <p>Manage product discounts, client pricing tiers, and custom pricing rules</p>
+      <h1><%= t('bo.pricing.index.title') %></h1>
+      <p><%= t('bo.pricing.index.subtitle') %></p>
     </div>
     <div class="bo-page-actions">
       <%= link_to new_bo_customer_product_discount_path(params[:org_slug]), class: "btn btn-primary" do %>
-        <i class="fa-solid fa-plus"></i> Add Custom Price
+        <i class="fa-solid fa-plus"></i> <%= t('bo.pricing.custom_pricing.add_custom_price') %>
       <% end %>
     </div>
   </div>
@@ -28,11 +28,11 @@
           <%= text_field_tag :query,
                 params[:query],
                 class: "form-control border-start-0",
-                placeholder: "Search custom pricing..."
+                placeholder: t('bo.pricing.custom_pricing.search_placeholder')
           %>
         </div>
         <button type="submit" class="btn btn-outline-secondary">
-          <i class="fa-solid fa-magnifying-glass"></i> Search
+          <i class="fa-solid fa-magnifying-glass"></i> <%= t('bo.common.actions.search') %>
         </button>
       <% end %>
     </div>
@@ -43,13 +43,13 @@
     <table class="table table-hover mb-0">
       <thead class="table-light">
         <tr>
-          <th>Client</th>
-          <th>Product</th>
-          <th>Base Price</th>
-          <th>Custom Price</th>
-          <th>Discount</th>
-          <th>Effective Date</th>
-          <th>Actions</th>
+          <th><%= t('bo.pricing.custom_pricing.table.client') %></th>
+          <th><%= t('bo.pricing.custom_pricing.table.product') %></th>
+          <th><%= t('bo.pricing.custom_pricing.table.base_price') %></th>
+          <th><%= t('bo.pricing.custom_pricing.table.custom_price') %></th>
+          <th><%= t('bo.pricing.custom_pricing.table.discount') %></th>
+          <th><%= t('bo.pricing.custom_pricing.table.effective_date') %></th>
+          <th><%= t('bo.pricing.custom_pricing.table.actions') %></th>
         </tr>
       </thead>
       <tbody>
@@ -73,10 +73,10 @@
             <td><%= discount.valid_from.strftime("%Y-%m-%d") %></td>
             <td>
               <div class="d-flex gap-2">
-                <%= link_to edit_bo_customer_product_discount_path(params[:org_slug], discount), class: "text-muted", title: "Edit" do %>
+                <%= link_to edit_bo_customer_product_discount_path(params[:org_slug], discount), class: "text-muted", title: t('bo.common.actions.edit') do %>
                   <i class="fa-solid fa-pen-to-square"></i>
                 <% end %>
-                <%= link_to bo_customer_product_discount_path(params[:org_slug], discount), class: "text-danger", title: "Delete", data: { turbo_method: :delete, turbo_confirm: "Are you sure you want to delete this discount?" } do %>
+                <%= link_to bo_customer_product_discount_path(params[:org_slug], discount), class: "text-danger", title: t('bo.common.actions.delete'), data: { turbo_method: :delete, turbo_confirm: t('bo.common.confirm.delete_discount') } do %>
                   <i class="fa-solid fa-trash"></i>
                 <% end %>
               </div>

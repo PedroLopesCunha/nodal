@@ -12,17 +12,17 @@
       </div>
 
       <div>
-        <h4 class="mb-0">Edit Client Tier Discount</h4>
+        <h4 class="mb-0"><%= t('bo.pricing.client_tiers.edit.title') %></h4>
         <span class="text-muted"><%= @discount.customer.company_name %></span>
       </div>
     </div>
 
     <div class="d-flex gap-2 align-items-center">
       <%= link_to bo_pricing_path(params[:org_slug], tab: 'client_tiers'), class: "btn btn-outline-secondary" do %>
-        Cancel
+        <%= t('bo.common.actions.cancel') %>
       <% end %>
       <button type="submit" form="customer-discount-form" class="btn btn-primary">
-        <i class="fa-solid fa-check"></i> Update Discount
+        <i class="fa-solid fa-check"></i> <%= t('bo.pricing.client_tiers.edit.submit') %>
       </button>
     </div>
   </div>
@@ -30,7 +30,7 @@
 
 <% if @discount.errors.any? %>
   <div class="alert alert-danger mb-4">
-    <h6 class="alert-heading">Please fix the following errors:</h6>
+    <h6 class="alert-heading"><%= t('bo.pricing.errors.title') %></h6>
     <ul class="mb-0">
       <% @discount.errors.full_messages.each do |message| %>
         <li><%= message %></li>
@@ -44,31 +44,31 @@
     <div class="col-md-8">
       <div class="card mb-3">
         <div class="card-body">
-          <h5 class="card-title mb-4">Discount Details</h5>
+          <h5 class="card-title mb-4"><%= t('bo.pricing.client_tiers.card_title') %></h5>
 
           <div class="row g-3">
             <div class="col-md-12">
-              <label class="form-label">Client <span class="text-danger">*</span></label>
-              <%= f.collection_select :customer_id, @customers, :id, :company_name, { prompt: "Select a client..." }, { class: "form-select", required: true } %>
+              <label class="form-label"><%= t('bo.pricing.form.client') %> <span class="text-danger">*</span></label>
+              <%= f.collection_select :customer_id, @customers, :id, :company_name, { prompt: t('bo.pricing.form.select_client') }, { class: "form-select", required: true } %>
             </div>
           </div>
 
           <div class="row g-3 mt-1">
             <div class="col-md-6">
-              <label class="form-label">Discount Type <span class="text-danger">*</span></label>
-              <%= f.select :discount_type, [['Percentage', 'percentage'], ['Fixed Amount', 'fixed']], {}, { class: "form-select", required: true } %>
+              <label class="form-label"><%= t('bo.pricing.form.discount_type') %> <span class="text-danger">*</span></label>
+              <%= f.select :discount_type, [[t('bo.pricing.form.percentage'), 'percentage'], [t('bo.pricing.form.fixed_amount'), 'fixed']], {}, { class: "form-select", required: true } %>
             </div>
             <div class="col-md-6">
-              <label class="form-label">Discount Value <span class="text-danger">*</span></label>
+              <label class="form-label"><%= t('bo.pricing.form.discount_value') %> <span class="text-danger">*</span></label>
               <%= f.number_field :discount_value, class: "form-control", placeholder: "0.10", step: 0.01, min: 0, required: true %>
-              <small class="text-muted">For percentage: 0.15 = 15%. For fixed: 5.00 = <%= @current_organisation.currency_symbol %>5</small>
+              <small class="text-muted"><%= t('bo.pricing.form.discount_value_hint', symbol: @current_organisation.currency_symbol) %></small>
             </div>
           </div>
 
           <div class="row g-3 mt-3">
             <div class="col-md-12">
-              <label class="form-label">Notes</label>
-              <%= f.text_area :notes, class: "form-control", rows: 2, placeholder: "Optional notes about this discount..." %>
+              <label class="form-label"><%= t('bo.pricing.form.notes') %></label>
+              <%= f.text_area :notes, class: "form-control", rows: 2, placeholder: t('bo.pricing.form.notes_placeholder') %>
             </div>
           </div>
 
@@ -77,19 +77,19 @@
               <div class="form-check form-switch">
                 <%= f.check_box :stackable, class: "form-check-input", role: "switch", id: "stackableSwitch" %>
                 <label class="form-check-label" for="stackableSwitch">
-                  Stackable with other discounts
+                  <%= t('bo.pricing.form.stackable_label') %>
                 </label>
               </div>
-              <small class="text-muted">If enabled, this discount can combine with product discounts</small>
+              <small class="text-muted"><%= t('bo.pricing.form.stackable_hint_customer') %></small>
             </div>
             <div class="col-md-6">
               <div class="form-check form-switch">
                 <%= f.check_box :active, class: "form-check-input", role: "switch", id: "activeSwitch" %>
                 <label class="form-check-label" for="activeSwitch">
-                  Active
+                  <%= t('bo.pricing.form.active_label') %>
                 </label>
               </div>
-              <small class="text-muted">Enable or disable this discount</small>
+              <small class="text-muted"><%= t('bo.pricing.form.active_hint') %></small>
             </div>
           </div>
         </div>
@@ -99,16 +99,16 @@
     <div class="col-md-4">
       <div class="card">
         <div class="card-body">
-          <h5 class="card-title mb-4">Validity Period</h5>
-          <p class="text-muted small">Leave blank for no expiration</p>
+          <h5 class="card-title mb-4"><%= t('bo.pricing.client_tiers.validity_title') %></h5>
+          <p class="text-muted small"><%= t('bo.pricing.form.no_expiration') %></p>
 
           <div class="mb-3">
-            <label class="form-label">Valid From</label>
+            <label class="form-label"><%= t('bo.pricing.form.valid_from') %></label>
             <%= f.date_field :valid_from, class: "form-control" %>
           </div>
 
           <div>
-            <label class="form-label">Valid Until</label>
+            <label class="form-label"><%= t('bo.pricing.form.valid_until') %></label>
             <%= f.date_field :valid_until, class: "form-control" %>
           </div>
         </div>

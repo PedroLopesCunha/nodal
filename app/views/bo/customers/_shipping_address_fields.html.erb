@@ -4,27 +4,27 @@
 
   <div class="row g-3">
     <div class="col-md-8">
-      <label class="form-label">Street</label>
+      <label class="form-label"><%= t('bo.customers.form.address.street') %></label>
       <%= f.text_field :street_name, class: "form-control" %>
     </div>
 
     <div class="col-md-4">
-      <label class="form-label">Number</label>
+      <label class="form-label"><%= t('bo.customers.form.address.number') %></label>
       <%= f.text_field :street_nr, class: "form-control" %>
     </div>
 
     <div class="col-md-4">
-      <label class="form-label">Postal Code</label>
+      <label class="form-label"><%= t('bo.customers.form.address.postal_code') %></label>
       <%= f.text_field :postal_code, class: "form-control" %>
     </div>
 
     <div class="col-md-4">
-      <label class="form-label">City</label>
+      <label class="form-label"><%= t('bo.customers.form.address.city') %></label>
       <%= f.text_field :city, class: "form-control" %>
     </div>
 
     <div class="col-md-4">
-      <label class="form-label">Country</label>
+      <label class="form-label"><%= t('bo.customers.form.address.country') %></label>
       <%= f.text_field :country, class: "form-control" %>
     </div>
   </div>
@@ -32,11 +32,11 @@
   <div class="form-check mt-2">
     <%= f.check_box :active, {}, false, true %>
     <label class="form-check-label text-danger">
-      Archive this address
+      <%= t('bo.customers.form.archive_address') %>
     </label>
   </div>
 
   <% if f.object.archived? %>
-    <span class="badge bg-secondary">Archived</span>
+    <span class="badge bg-secondary"><%= t('bo.common.statuses.archived') %></span>
   <% end %>
 </div>

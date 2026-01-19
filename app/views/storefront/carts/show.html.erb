@@ -1,8 +1,8 @@
 <%= link_to products_path(org_slug: params[:org_slug]), class: "btn btn-outline-secondary mb-4 mt-5" do %>
-  <i class="fa-solid fa-arrow-left me-2"></i>Back to products
+  <i class="fa-solid fa-arrow-left me-2"></i><%= t('storefront.products.show.back_to_products') %>
 <% end %>
 
-<h1 class="mb-4">Your Cart</h1>
+<h1 class="mb-4"><%= t('storefront.carts.show.title') %></h1>
 
 <% if @order.order_items.empty? %>
   <div class="row g-4">
@@ -10,9 +10,9 @@
       <div class="card border-0 shadow-sm" style="border-radius: 12px;">
         <div class="card-body text-center py-5">
           <i class="fa-solid fa-cart-shopping fa-4x text-muted mb-3"></i>
-          <h4>Your cart is empty</h4>
-          <p class="text-muted">Browse our products and add items to your cart.</p>
-          <%= link_to "Browse Products", products_path(org_slug: params[:org_slug]), class: "btn btn-primary" %>
+          <h4><%= t('storefront.carts.show.empty_cart') %></h4>
+          <p class="text-muted"><%= t('storefront.carts.show.empty_cart_hint') %></p>
+          <%= link_to t('storefront.common.browse_products'), products_path(org_slug: params[:org_slug]), class: "btn btn-primary" %>
         </div>
       </div>
     </div>
@@ -22,9 +22,9 @@
         <div class="card border-0 shadow-sm" style="border-radius: 12px;">
           <div class="card-body">
             <h6 class="card-title mb-3">
-              <i class="fa-solid fa-percent text-success me-2"></i>Order Discounts Available!
+              <i class="fa-solid fa-percent text-success me-2"></i><%= t('storefront.carts.show.order_discounts_available') %>
             </h6>
-            <p class="text-muted small mb-3">Save more when your order reaches these thresholds:</p>
+            <p class="text-muted small mb-3"><%= t('storefront.carts.show.order_discounts_hint') %></p>
 
             <% @order_discounts.each do |discount| %>
               <div class="d-flex align-items-center mb-2 p-2 bg-light rounded">
@@ -54,10 +54,10 @@
           <table class="table table-hover align-middle mb-0">
             <thead class="table-light">
               <tr>
-                <th class="ps-4">Product</th>
-                <th class="text-center" style="width: 180px;">Quantity</th>
-                <th class="text-end">Price</th>
-                <th class="text-end">Total</th>
+                <th class="ps-4"><%= t('storefront.carts.show.table.product') %></th>
+                <th class="text-center" style="width: 180px;"><%= t('storefront.carts.show.table.quantity') %></th>
+                <th class="text-end"><%= t('storefront.carts.show.table.price') %></th>
+                <th class="text-end"><%= t('storefront.carts.show.table.total') %></th>
                 <th class="pe-4"></th>
               </tr>
             </thead>
@@ -107,7 +107,7 @@
                     <% end %>
                   </td>
                   <td class="text-end pe-4">
-                    <%= button_to order_item_path(org_slug: params[:org_slug], id: item), method: :delete, class: "btn btn-sm btn-outline-danger", data: { turbo_confirm: "Remove this item?" } do %>
+                    <%= button_to order_item_path(org_slug: params[:org_slug], id: item), method: :delete, class: "btn btn-sm btn-outline-danger", data: { turbo_confirm: t('storefront.carts.show.confirm_remove_item') } do %>
                       <i class="fa-solid fa-trash"></i>
                     <% end %>
                   </td>
@@ -120,25 +120,25 @@
 
       <div class="d-flex justify-content-between mt-3">
         <%= link_to products_path(org_slug: params[:org_slug]), class: "btn btn-outline-secondary" do %>
-          <i class="fa-solid fa-arrow-left me-2"></i>Continue Shopping
+          <i class="fa-solid fa-arrow-left me-2"></i><%= t('storefront.carts.show.continue_shopping') %>
         <% end %>
-        <%= button_to "Clear Cart", clear_cart_path(org_slug: params[:org_slug]), method: :delete, class: "btn btn-outline-danger", data: { turbo_confirm: "Are you sure you want to clear your cart?" } %>
+        <%= button_to t('storefront.carts.show.clear_cart'), clear_cart_path(org_slug: params[:org_slug]), method: :delete, class: "btn btn-outline-danger", data: { turbo_confirm: t('storefront.carts.show.confirm_clear_cart') } %>
       </div>
     </div>
 
     <div class="col-lg-4">
       <div class="card border-0 shadow-sm" style="border-radius: 12px;">
         <div class="card-body">
-          <h5 class="card-title mb-3">Order Summary</h5>
+          <h5 class="card-title mb-3"><%= t('storefront.carts.show.order_summary') %></h5>
 
           <div class="d-flex justify-content-between mb-2">
-            <span class="text-muted">Subtotal (<%= @order.item_count %> items)</span>
+            <span class="text-muted"><%= t('storefront.carts.show.subtotal') %> (<%= @order.item_count %> <%= t('storefront.common.items', count: @order.item_count) %>)</span>
             <span><%= humanized_money_with_symbol(@order.total_amount) %></span>
           </div>
 
           <% if @order.best_order_discount.present? %>
             <div class="d-flex justify-content-between mb-2 text-success">
-              <span>Order Discount (<%= @order.best_order_discount.value_display %>)</span>
+              <span><%= t('storefront.carts.show.order_discount') %> (<%= @order.best_order_discount.value_display %>)</span>
               <span>-<%= humanized_money_with_symbol(@order.auto_order_discount_amount) %></span>
             </div>
           <% end %>
@@ -146,12 +146,12 @@
           <hr>
 
           <div class="d-flex justify-content-between mb-4">
-            <span class="fw-bold">Total</span>
+            <span class="fw-bold"><%= t('storefront.checkouts.show.summary.total') %></span>
             <span class="fw-bold fs-5"><%= humanized_money_with_symbol(@order.total_with_auto_discount) %></span>
           </div>
 
           <%= link_to checkout_path(org_slug: params[:org_slug]), class: "btn btn-primary w-100 btn-lg" do %>
-            <i class="fa-solid fa-arrow-right me-2"></i>Proceed to Checkout
+            <i class="fa-solid fa-arrow-right me-2"></i><%= t('storefront.carts.show.proceed_to_checkout') %>
           <% end %>
         </div>
       </div>
@@ -160,7 +160,7 @@
         <div class="card border-0 shadow-sm mt-3" style="border-radius: 12px;">
           <div class="card-body">
             <h6 class="card-title mb-3">
-              <i class="fa-solid fa-percent text-primary me-2"></i>Available Order Discounts
+              <i class="fa-solid fa-percent text-primary me-2"></i><%= t('storefront.carts.show.available_discounts') %>
             </h6>
 
             <% @order_discounts.each do |discount| %>
@@ -183,9 +183,9 @@
                     orders over <%= discount.min_amount_display %>
                   </div>
                   <% if qualified %>
-                    <small>Applied to your order!</small>
+                    <small><%= t('storefront.carts.show.discount_applied') %></small>
                   <% elsif amount_needed > Money.new(0, @current_organisation.currency) %>
-                    <small>Spend <%= humanized_money_with_symbol(amount_needed) %> more to unlock</small>
+                    <small><%= t('storefront.carts.show.spend_more_to_unlock', amount: humanized_money_with_symbol(amount_needed)) %></small>
                   <% end %>
                 </div>
               </div>

@@ -1,0 +1,191 @@
+es:
+  storefront:
+    # Traducciones comunes
+    common:
+      back: "Volver"
+      continue_shopping: "Continuar Comprando"
+      browse_products: "Ver Productos"
+      loading: "Cargando..."
+      items:
+        one: "%{count} artículo"
+        other: "%{count} artículos"
+
+    # Barra de navegación
+    navbar:
+      products: "Productos"
+      orders: "Pedidos"
+      cart: "Carrito"
+      sign_out: "Cerrar sesión"
+      order_discounts_available: "¡Descuentos de pedido disponibles!"
+
+    # Sección de productos
+    products:
+      index:
+        title: "Catálogo de Productos"
+        subtitle: "Explore nuestros productos"
+        search: "Buscar"
+        search_placeholder: "Buscar productos..."
+        categories: "Categorías"
+        all_products: "Todos los Productos"
+        clear_filters: "Limpiar filtros"
+        no_products: "No se encontraron productos"
+        no_products_hint: "Intente ajustar su búsqueda o filtros."
+        empty_catalog: "No hay productos disponibles en este momento."
+        sale_badge: "OFERTA"
+        min_order: "Pedido mín."
+      show:
+        back_to_products: "Volver a productos"
+        zoom: "Ampliar"
+        available_discounts: "Descuentos Disponibles"
+        product_discount: "Descuento de Producto"
+        customer_tier_discount: "Descuento de Cliente"
+        your_special_price: "Su Precio Especial"
+        min_quantity_met: "Cantidad mín. alcanzada"
+        buy_to_unlock: "Compre %{quantity}+ unidades para desbloquear este descuento"
+        you_save: "Ahorra: %{amount} por unidad"
+        valid_until: "Válido hasta %{date}"
+        min_order: "Pedido mín."
+        category: "Categoría"
+        availability: "Disponibilidad"
+        in_stock: "En Stock"
+        out_of_stock: "Agotado"
+        add_to_cart: "Añadir al carrito"
+        estimated_total: "Total estimado:"
+        out_of_stock_message: "Este producto está actualmente agotado"
+        per_unit: "/ unidad"
+        quantity: "Cantidad"
+        unit_price: "Precio Unitario"
+        your_price: "Su Precio"
+        discount: "descuento"
+        stackable: "Acumulable"
+
+    # Sección del carrito
+    carts:
+      show:
+        title: "Su Carrito"
+        empty_cart: "Su carrito está vacío"
+        empty_cart_hint: "Explore nuestros productos y añada artículos a su carrito."
+        order_discounts_available: "¡Descuentos de Pedido Disponibles!"
+        order_discounts_hint: "Ahorre más cuando su pedido alcance estos valores:"
+        table:
+          product: "Producto"
+          quantity: "Cantidad"
+          price: "Precio"
+          total: "Total"
+          actions: "Acciones"
+        continue_shopping: "Continuar Comprando"
+        clear_cart: "Vaciar Carrito"
+        confirm_remove_item: "¿Eliminar este artículo?"
+        confirm_clear_cart: "¿Está seguro de que desea vaciar el carrito?"
+        order_summary: "Resumen del Pedido"
+        subtotal: "Subtotal"
+        subtotal_items: "Subtotal (%{count} artículos)"
+        order_discount: "Descuento de Pedido"
+        available_discounts: "Descuentos de Pedido Disponibles"
+        spend_more_to_unlock: "Gaste %{amount} más para desbloquear"
+        discount_applied: "¡Aplicado a su pedido!"
+        proceed_to_checkout: "Proceder al Pago"
+        remove: "Eliminar"
+        sku: "SKU"
+        min_order: "Mín"
+
+    # Sección de checkout
+    checkouts:
+      show:
+        title: "Checkout"
+        subtitle: "Revise su pedido y elija el método de entrega"
+        order_items: "Artículos del Pedido"
+        delivery_method:
+          title: "Método de Entrega"
+          delivery: "Envío"
+          delivery_hint: "Entregaremos en su dirección"
+          pickup: "Recogida"
+          pickup_hint: "Recoja su pedido personalmente"
+          free: "Gratis"
+        delivery_date:
+          title: "Fecha de Entrega"
+          hint: "Seleccione cuándo le gustaría recibir su pedido"
+        shipping_address: "Dirección de Envío"
+        billing_address: "Dirección de Facturación"
+        select_address: "Seleccionar o añadir dirección"
+        add_new_address: "+ Añadir nueva dirección"
+        form:
+          street_address: "Dirección"
+          street_address_placeholder: "Introduzca la dirección"
+          postal_code: "Código Postal"
+          postal_code_placeholder: "Introduzca el código postal"
+          city: "Ciudad"
+          city_placeholder: "Introduzca la ciudad"
+          country: "País"
+          country_placeholder: "Introduzca el país"
+        same_as_shipping: "Igual que la dirección de envío"
+        order_notes:
+          title: "Notas del Pedido"
+          optional: "(opcional)"
+          placeholder: "Instrucciones especiales para su pedido..."
+        summary:
+          subtotal: "Subtotal"
+          tax: "IVA"
+          shipping: "Envío"
+          discount: "Descuento"
+          total: "Total"
+        place_order: "Realizar Pedido"
+        terms_agreement: "Al realizar el pedido, acepta nuestros términos y condiciones."
+        table:
+          product: "Producto"
+          quantity: "Cant"
+          price: "Precio"
+          total: "Total"
+
+    # Sección de pedidos
+    orders:
+      index:
+        title: "Historial de Pedidos"
+        table:
+          order_number: "Número de Pedido"
+          date: "Fecha"
+          items: "Artículos"
+          status: "Estado"
+          total: "Total"
+          actions: "Acciones"
+        reorder: "Repetir"
+        view: "Ver"
+        no_orders: "Aún no tiene pedidos"
+        no_orders_hint: "Cuando realice un pedido, aparecerá aquí."
+      show:
+        back_to_orders: "Volver a Pedidos"
+        order_number: "Pedido #%{number}"
+        placed_on: "Realizado el %{date}"
+        draft_order: "Pedido en borrador"
+        order_notes: "Notas del Pedido"
+        payment_status: "Estado del Pago"
+        delivery_method: "Método de Entrega"
+        expected_delivery: "Entrega Prevista"
+        continue_shopping: "Continuar Comprando"
+        order_details: "Detalles del Pedido"
+        order_items: "Artículos del Pedido"
+        table:
+          product: "Producto"
+          quantity: "Cant"
+          unit_price: "Precio Unitario"
+          discount: "Descuento"
+          total: "Total"
+        summary:
+          subtotal: "Subtotal"
+          tax: "IVA"
+          shipping: "Envío"
+          discount: "Descuento"
+          total: "Total"
+        shipping_address: "Dirección de Envío"
+        billing_address: "Dirección de Facturación"
+        delivery: "Envío"
+        pickup: "Recogida"
+
+    # Mensajes flash
+    flash:
+      cart_updated: "Carrito actualizado con éxito"
+      item_added: "Artículo añadido al carrito"
+      item_removed: "Artículo eliminado del carrito"
+      cart_cleared: "Carrito vaciado"
+      order_placed: "¡Pedido realizado con éxito!"
+      order_error: "Hubo un error al realizar el pedido"

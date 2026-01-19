@@ -1,5 +1,5 @@
 <%= link_to products_path(org_slug: params[:org_slug]), class: "btn btn-outline-secondary mb-4 mt-5" do %>
-  <i class="fa-solid fa-arrow-left me-2"></i>Back to products
+  <i class="fa-solid fa-arrow-left me-2"></i><%= t('storefront.products.show.back_to_products') %>
 <% end %>
 
 <div class="row g-4">
@@ -25,7 +25,7 @@
       <!-- Zoom Button -->
       <% if @product.photo.attached? %>
         <button class="btn btn-dark btn-sm position-absolute" style="bottom: 16px; right: 16px; border-radius: 20px; padding: 6px 16px;" data-bs-toggle="modal" data-bs-target="#imageModal">
-          <i class="fa-solid fa-magnifying-glass-plus me-1"></i>Zoom
+          <i class="fa-solid fa-magnifying-glass-plus me-1"></i><%= t('storefront.products.show.zoom') %>
         </button>
       <% end %>
     </div>
@@ -69,7 +69,7 @@
                 -<%= (discount_breakdown[:effective_discount][:percentage] * 100).round(0) %>% OFF
               </span>
               <% if discount_breakdown[:all_discounts].any? { |d| d[:type] == :product } %>
-                <span class="badge bg-danger fs-6 ms-1">SALE</span>
+                <span class="badge bg-danger fs-6 ms-1"><%= t('storefront.products.index.sale_badge') %></span>
               <% end %>
             </div>
           <% else %>
@@ -82,38 +82,38 @@
         <% if discount_breakdown[:has_discount] %>
           <div class="alert alert-success mb-4" style="border-radius: 10px;">
             <h6 class="alert-heading mb-3">
-              <i class="fa-solid fa-tags me-2"></i>Available Discounts
+              <i class="fa-solid fa-tags me-2"></i><%= t('storefront.products.show.available_discounts') %>
             </h6>
             <% discount_breakdown[:all_discounts].each do |discount| %>
               <div class="d-flex justify-content-between align-items-center py-2 <%= 'border-bottom' unless discount == discount_breakdown[:all_discounts].last %>">
                 <div>
                   <% case discount[:type] %>
                   <% when :product %>
-                    <span class="badge bg-danger me-2">SALE</span>
-                    <strong>Product Discount</strong>
+                    <span class="badge bg-danger me-2"><%= t('storefront.products.index.sale_badge') %></span>
+                    <strong><%= t('storefront.products.show.product_discount') %></strong>
                     <% if discount[:min_quantity_required] && discount[:min_quantity_required] > 1 %>
                       <% if discount[:meets_min_quantity] %>
                         <small class="text-success d-block">
-                          <i class="fa-solid fa-check me-1"></i>Min. quantity met (<%= discount[:min_quantity_required] %>+ units)
+                          <i class="fa-solid fa-check me-1"></i><%= t('storefront.products.show.min_quantity_met') %> (<%= discount[:min_quantity_required] %>+ units)
                         </small>
                       <% else %>
                         <small class="text-warning d-block">
-                          <i class="fa-solid fa-info-circle me-1"></i>Buy <%= discount[:min_quantity_required] %>+ units to unlock this discount
+                          <i class="fa-solid fa-info-circle me-1"></i><%= t('storefront.products.show.buy_to_unlock', quantity: discount[:min_quantity_required]) %>
                         </small>
                       <% end %>
                     <% end %>
                   <% when :customer %>
                     <span class="badge bg-info me-2">VIP</span>
-                    <strong>Customer Tier Discount</strong>
+                    <strong><%= t('storefront.products.show.customer_tier_discount') %></strong>
                     <small class="text-muted d-block">Special pricing for your account</small>
                   <% when :customer_product %>
                     <span class="badge bg-primary me-2">SPECIAL</span>
-                    <strong>Your Special Price</strong>
+                    <strong><%= t('storefront.products.show.your_special_price') %></strong>
                     <small class="text-muted d-block">Exclusive pricing just for you</small>
                   <% end %>
                   <% if discount[:valid_until].present? %>
                     <small class="text-warning d-block">
-                      <i class="fa-solid fa-clock me-1"></i>Valid until <%= discount[:valid_until].strftime('%b %d, %Y') %>
+                      <i class="fa-solid fa-clock me-1"></i><%= t('storefront.products.show.valid_until', date: l(discount[:valid_until], format: :short)) %>
                     </small>
                   <% end %>
                 </div>
@@ -122,15 +122,14 @@
                     -<%= discount[:discount_type] == 'percentage' ? "#{(discount[:value] * 100).round(0)}%" : humanized_money_with_symbol(Money.new((discount[:value] * 100).to_i, @current_organisation.currency)) %>
                   </span>
                   <% if discount[:stackable] %>
-                    <small class="text-muted d-block">Stackable</small>
+                    <small class="text-muted d-block"><%= t('storefront.products.show.stackable') %></small>
                   <% end %>
                 </div>
               </div>
             <% end %>
             <div class="mt-3 pt-2 border-top">
               <div class="d-flex justify-content-between">
-                <strong>You Save:</strong>
-                <strong class="text-success"><%= humanized_money_with_symbol(discount_breakdown[:savings]) %> per unit</strong>
+                <strong><%= t('storefront.products.show.you_save', amount: humanized_money_with_symbol(discount_breakdown[:savings])) %></strong>
               </div>
             </div>
           </div>
@@ -146,28 +145,28 @@
         <!-- Info Grid -->
         <div class="row g-3 mb-4 py-3 border-top border-bottom">
           <div class="col-4">
-            <div class="text-muted small fw-semibold mb-1">Min. order</div>
+            <div class="text-muted small fw-semibold mb-1"><%= t('storefront.products.show.min_order') %></div>
             <div>
               <i class="fa-solid fa-layer-group me-1 text-muted"></i>
               <%= @product.min_quantity || 1 %> <%= @product.min_quantity_type || @product.unit_description || 'unit' %>
             </div>
           </div>
           <div class="col-4">
-            <div class="text-muted small fw-semibold mb-1">Category</div>
+            <div class="text-muted small fw-semibold mb-1"><%= t('storefront.products.show.category') %></div>
             <div>
               <i class="fa-solid fa-folder me-1 text-muted"></i>
               <%= @product.category&.name || '-' %>
             </div>
           </div>
           <div class="col-4">
-            <div class="text-muted small fw-semibold mb-1">Availability</div>
+            <div class="text-muted small fw-semibold mb-1"><%= t('storefront.products.show.availability') %></div>
             <div>
               <% if @product.available? %>
                 <i class="fa-solid fa-circle-check me-1 text-success"></i>
-                In Stock
+                <%= t('storefront.products.show.in_stock') %>
               <% else %>
                 <i class="fa-solid fa-circle-xmark me-1 text-danger"></i>
-                Out of Stock
+                <%= t('storefront.products.show.out_of_stock') %>
               <% end %>
             </div>
           </div>
@@ -179,17 +178,17 @@
           <div class="input-group" style="width: 140px;">
             <span class="input-group-text bg-white border-end-0">
               <i class="fa-solid fa-arrow-up-1-9 text-muted"></i>
-              <span class="ms-2 text-muted small">Qty</span>
+              <span class="ms-2 text-muted small"><%= t('storefront.products.show.quantity') %></span>
             </span>
             <%= number_field_tag "order_item[quantity]", @product.min_quantity || 1, min: @product.min_quantity || 1, class: "form-control border-start-0 text-center", style: "max-width: 60px;" %>
           </div>
 
           <button type="submit" class="btn btn-primary btn-lg px-4" style="border-radius: 8px;" <%= 'disabled' unless @product.available? %>>
-            <i class="fa-solid fa-cart-plus me-2"></i>Add to cart
+            <i class="fa-solid fa-cart-plus me-2"></i><%= t('storefront.products.show.add_to_cart') %>
           </button>
 
           <div class="text-muted">
-            <i class="fa-solid fa-calculator me-2"></i>Estimated total:
+            <i class="fa-solid fa-calculator me-2"></i><%= t('storefront.products.show.estimated_total') %>
             <% if discount_breakdown[:has_discount] %>
               <%= humanized_money_with_symbol(discount_breakdown[:final_price]) %>
               <small class="text-success">(-<%= (discount_breakdown[:effective_discount][:percentage] * 100).round(0) %>%)</small>
@@ -201,7 +200,7 @@
 
         <% unless @product.available? %>
           <small class="text-danger d-block mt-3">
-            <i class="fa-solid fa-circle-xmark me-1"></i>This product is currently out of stock
+            <i class="fa-solid fa-circle-xmark me-1"></i><%= t('storefront.products.show.out_of_stock_message') %>
           </small>
         <% end %>
       </div>
