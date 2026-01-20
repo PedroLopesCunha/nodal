@@ -1,0 +1,42 @@
+<%
+  is_current = current_category&.id == category.id
+  is_ancestor = current_category&.ancestor_ids&.include?(category.id)
+  has_children = category.children.kept.any?
+  is_expanded = is_current || is_ancestor || local_assigns[:expanded]
+%>
+
+<li class="category-tree-item" data-storefront-category-tree-target="item" data-category-id="<%= category.id %>">
+  <div class="d-flex align-items-center">
+    <% if has_children %>
+      <button type="button"
+              class="btn btn-sm btn-link text-muted p-0 me-1 toggle-btn"
+              data-action="storefront-category-tree#toggle"
+              data-storefront-category-tree-target="toggle"
+              aria-expanded="<%= is_expanded %>">
+        <i class="fa-solid fa-chevron-right toggle-icon <%= 'rotated' if is_expanded %>"></i>
+      </button>
+    <% else %>
+      <span class="me-3"></span>
+    <% end %>
+
+    <%= link_to products_path(org_slug: params[:org_slug], category: category.id, query: params[:query]),
+        class: "category-link flex-grow-1 py-1 #{'active fw-bold text-primary' if is_current}" do %>
+      <% if category.icon.present? %>
+        <i class="<%= category.icon %> me-2" style="color: <%= category.color.presence || 'inherit' %>;"></i>
+      <% else %>
+        <i class="fa-solid fa-folder me-2" style="color: <%= category.color.presence || 'inherit' %>;"></i>
+      <% end %>
+      <%= category.name %>
+      <span class="badge bg-secondary-subtle text-secondary ms-1"><%= category.all_products_count %></span>
+    <% end %>
+  </div>
+
+  <% if has_children %>
+    <ul class="list-unstyled ms-3 category-children <%= 'collapsed' unless is_expanded %>"
+        data-storefront-category-tree-target="children">
+      <% category.children.kept.by_position.each do |child| %>
+        <%= render 'storefront/shared/category_tree_item', category: child, current_category: current_category %>
+      <% end %>
+    </ul>
+  <% end %>
+</li>

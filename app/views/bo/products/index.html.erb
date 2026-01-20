@@ -59,7 +59,7 @@
       <tr>
         <th><%= t('bo.common.product') %></th>
         <th><%= t('bo.products.form.sku') %></th>
-        <th><%= t('bo.products.form.category') %></th>
+        <th><%= t('bo.products.form.categories') %></th>
         <th><%= t('bo.common.price') %></th>
         <th class="text-end"><%= t('bo.common.actions_column') %></th>
       </tr>
@@ -71,7 +71,13 @@
             <div class="fw-semibold"><%= product.name %></div>
           </td>
           <td><%= product.sku %></td>
-          <td><%= product.category&.name %></td>
+          <td>
+            <% if product.categories.any? %>
+              <%= product.categories.map(&:name).join(', ') %>
+            <% else %>
+              <span class="text-muted">-</span>
+            <% end %>
+          </td>
           <td><%= humanized_money_with_symbol(product.price) %></td>
           <td class="text-end product-actions" onclick="event.stopPropagation();">
             <%= link_to bo_product_path(params[:org_slug], product), class: "btn btn-sm btn-link text-muted" do %>

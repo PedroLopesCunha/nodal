@@ -40,8 +40,18 @@
 
         <div class="row">
           <div class="col-md-6 mb-3">
-            <small class="text-muted d-block"><%= t('bo.products.form.category') %></small>
-            <strong><%= @product.category&.name %></strong>
+            <small class="text-muted d-block"><%= t('bo.products.form.categories') %></small>
+            <% if @product.categories.any? %>
+              <div class="d-flex flex-wrap gap-1">
+                <% @product.categories.each do |category| %>
+                  <%= link_to bo_category_path(params[:org_slug], category), class: "badge bg-secondary text-decoration-none" do %>
+                    <%= category.full_path %>
+                  <% end %>
+                <% end %>
+              </div>
+            <% else %>
+              <span class="text-muted">-</span>
+            <% end %>
           </div>
           <div class="col-md-6 mb-3">
             <small class="text-muted d-block"><%= t('bo.products.form.unit_price', currency: @current_organisation.currency_symbol) %></small>
