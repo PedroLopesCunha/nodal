@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2026_01_19_161207) do
+ActiveRecord::Schema[7.1].define(version: 2026_01_20_000004) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -62,7 +62,31 @@ ActiveRecord::Schema[7.1].define(version: 2026_01_19_161207) do
     t.bigint "organisation_id", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "ancestry"
+    t.integer "ancestry_depth", default: 0
+    t.integer "position"
+    t.datetime "discarded_at"
+    t.text "description"
+    t.string "icon"
+    t.string "color"
+    t.jsonb "metadata", default: {}
+    t.string "slug"
+    t.index ["ancestry"], name: "index_categories_on_ancestry"
+    t.index ["discarded_at"], name: "index_categories_on_discarded_at"
+    t.index ["organisation_id", "ancestry", "position"], name: "index_categories_on_organisation_id_and_ancestry_and_position"
+    t.index ["organisation_id", "slug"], name: "index_categories_on_organisation_id_and_slug", unique: true
     t.index ["organisation_id"], name: "index_categories_on_organisation_id"
+  end
+
+  create_table "category_products", force: :cascade do |t|
+    t.bigint "category_id", null: false
+    t.bigint "product_id", null: false
+    t.integer "position"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["category_id", "product_id"], name: "index_category_products_on_category_id_and_product_id", unique: true
+    t.index ["category_id"], name: "index_category_products_on_category_id"
+    t.index ["product_id"], name: "index_category_products_on_product_id"
   end
 
   create_table "customer_discounts", force: :cascade do |t|
@@ -273,7 +297,7 @@ ActiveRecord::Schema[7.1].define(version: 2026_01_19_161207) do
     t.integer "min_quantity"
     t.string "min_quantity_type"
     t.boolean "available", default: true, null: false
-    t.bigint "category_id", null: false
+    t.bigint "category_id"
     t.json "product_attributes"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
@@ -285,6 +309,8 @@ ActiveRecord::Schema[7.1].define(version: 2026_01_19_161207) do
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
   add_foreign_key "categories", "organisations"
+  add_foreign_key "category_products", "categories"
+  add_foreign_key "category_products", "products"
   add_foreign_key "customer_discounts", "customers"
   add_foreign_key "customer_discounts", "organisations"
   add_foreign_key "customer_product_discounts", "customers"

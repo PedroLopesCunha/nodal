@@ -2,13 +2,14 @@ class Bo::ProductsController < Bo::BaseController
   before_action :set_product, only: [:show, :edit, :update, :destroy]
 
   def index
-    @products = policy_scope(current_organisation.products)
+    @products = policy_scope(current_organisation.products).includes(:categories)
 
     if params[:query].present?
-      @products = @products.joins(:category).where(
+      matching_ids = @products.left_joins(:categories).where(
         "products.name ILIKE :q OR products.sku ILIKE :q OR products.description ILIKE :q OR categories.name ILIKE :q",
         q: "%#{params[:query]}%"
-      )
+      ).select("products.id").distinct
+      @products = @products.where(id: matching_ids)
     end
   end
 
@@ -17,6 +18,10 @@ class Bo::ProductsController < Bo::BaseController
 
   def new
     @product = Product.new
+    if params[:category_id].present?
+      category = current_organisation.categories.kept.find_by(id: params[:category_id])
+      @product.category_ids = [category.id] if category
+    end
     authorize @product
   end
 
@@ -56,6 +61,6 @@ class Bo::ProductsController < Bo::BaseController
   end
 
   def product_params
-    params.require(:product).permit(:name, :slug, :sku, :description, :price, :unit_description, :min_quantity, :min_quantity_type, :available, :category_id, :photo)
+    params.require(:product).permit(:name, :slug, :sku, :description, :price, :unit_description, :min_quantity, :min_quantity_type, :available, :category_id, :photo, category_ids: [])
   end
 end

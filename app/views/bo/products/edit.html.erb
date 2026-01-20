@@ -60,8 +60,17 @@
 
           <div class="row g-3 mt-1">
             <div class="col-md-6">
-              <label class="form-label"><%= t('bo.products.form.category') %> <span class="text-danger">*</span></label>
-              <%= f.collection_select :category_id, Category.where(organisation: @product.organisation), :id, :name, { prompt: t('bo.products.form.select_category') }, { class: "form-select", required: true } %>
+              <label class="form-label"><%= t('bo.products.form.categories') %> <span class="text-danger">*</span></label>
+              <%
+                category_options = current_organisation.categories.kept
+                  .order(:ancestry, :position)
+                  .map { |c| [c.full_path, c.id] }
+              %>
+              <%= f.select :category_ids,
+                    category_options,
+                    {},
+                    { class: "form-select", multiple: true, size: 5, required: true } %>
+              <small class="text-muted"><%= t('bo.products.form.categories_hint') %></small>
             </div>
             <div class="col-md-6">
               <label class="form-label"><%= t('bo.products.form.slug') %></label>

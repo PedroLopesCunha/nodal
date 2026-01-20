@@ -63,6 +63,18 @@ Rails.application.routes.draw do
       end
       resources :products
 
+      resources :categories do
+        member do
+          patch :move
+          patch :restore
+          post :add_products
+          delete :remove_product
+        end
+        collection do
+          patch :reorder
+        end
+      end
+
       # Unified Pricing section
       get 'pricing', to: 'pricing#index', as: :pricing
 

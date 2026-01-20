@@ -88,8 +88,13 @@ GEM
       mutex_m
       securerandom (>= 0.3)
       tzinfo (~> 2.0)
+    acts_as_list (1.2.6)
+      activerecord (>= 6.1)
+      activesupport (>= 6.1)
     addressable (2.8.8)
       public_suffix (>= 2.0.2, < 8.0)
+    ancestry (4.3.3)
+      activerecord (>= 5.2.6)
     autoprefixer-rails (10.4.21.0)
       execjs (~> 2)
     base64 (0.3.0)
@@ -137,6 +142,8 @@ GEM
     devise_invitable (2.0.11)
       actionmailer (>= 5.0)
       devise (>= 4.6)
+    discard (1.4.0)
+      activerecord (>= 4.2, < 9.0)
     dotenv (3.1.8)
     dotenv-rails (3.1.8)
       dotenv (= 3.1.8)
@@ -435,6 +442,8 @@ PLATFORMS
   x86_64-linux-musl
 
 DEPENDENCIES
+  acts_as_list
+  ancestry
   autoprefixer-rails
   bootsnap
   bootstrap (~> 5.3)
@@ -443,6 +452,7 @@ DEPENDENCIES
   debug
   devise
   devise_invitable (~> 2.0.0)
+  discard
   dotenv-rails
   font-awesome-sass (~> 6.1)
   httplog

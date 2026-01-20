@@ -75,6 +75,11 @@ gem 'open-uri'
 # gem for authorization
 gem 'pundit'
 
+# gem for hierarchical categories
+gem 'ancestry'       # Tree structure
+gem 'acts_as_list'   # Sibling ordering
+gem 'discard'        # Soft delete
+
 # gem for money handling
 gem 'money-rails', '~> 1.12'
 

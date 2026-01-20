@@ -1,0 +1,95 @@
+<%= form_with model: category,
+              url: category.persisted? ? bo_category_path(params[:org_slug], category) : bo_categories_path(params[:org_slug]),
+              method: category.persisted? ? :patch : :post,
+              id: "category-form",
+              data: { controller: "category-form" } do |f| %>
+
+  <div class="row g-3">
+    <div class="col-md-8">
+      <div class="card mb-3">
+        <div class="card-body">
+          <h5 class="card-title mb-4"><%= t('bo.categories.form.basic_information') %></h5>
+
+          <div class="row g-3">
+            <div class="col-md-8">
+              <label class="form-label"><%= t('bo.categories.form.name') %> <span class="text-danger">*</span></label>
+              <%= f.text_field :name, class: "form-control", placeholder: t('bo.categories.form.placeholders.name'), required: true %>
+            </div>
+            <div class="col-md-4">
+              <label class="form-label"><%= t('bo.categories.form.slug') %></label>
+              <%= f.text_field :slug, class: "form-control", placeholder: t('bo.categories.form.placeholders.slug') %>
+              <small class="text-muted"><%= t('bo.categories.form.slug_hint') %></small>
+            </div>
+          </div>
+
+          <div class="row g-3 mt-1">
+            <div class="col-md-12">
+              <label class="form-label"><%= t('bo.categories.form.description') %></label>
+              <%= f.text_area :description, class: "form-control", placeholder: t('bo.categories.form.placeholders.description'), rows: 3 %>
+            </div>
+          </div>
+
+          <div class="row g-3 mt-1">
+            <div class="col-md-12">
+              <label class="form-label"><%= t('bo.categories.form.parent_category') %></label>
+              <%
+                # Get all categories except current one, ordered by ancestry for tree-like display
+                parent_options = current_organisation.categories.kept
+                  .where.not(id: category.id)
+                  .order(:ancestry, :position)
+                  .map { |c| [c.full_path, c.id] }
+              %>
+              <%= f.select :parent_id,
+                    parent_options,
+                    { include_blank: t('bo.categories.form.no_parent') },
+                    { class: "form-select", data: { category_form_target: "parentSelect", action: "change->category-form#checkDepth" } } %>
+              <small class="text-muted"><%= t('bo.categories.form.parent_hint') %></small>
+              <div class="alert alert-warning mt-2 d-none" data-category-form-target="depthWarning">
+                <i class="fa-solid fa-triangle-exclamation"></i>
+                <%= t('bo.categories.form.depth_warning') %>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-4">
+      <div class="card mb-3">
+        <div class="card-body">
+          <h5 class="card-title mb-4"><%= t('bo.categories.form.appearance') %></h5>
+
+          <div class="mb-3">
+            <label class="form-label"><%= t('bo.categories.form.icon') %></label>
+            <%= f.text_field :icon, class: "form-control", placeholder: "fa-solid fa-folder" %>
+            <small class="text-muted"><%= t('bo.categories.form.icon_hint') %></small>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label"><%= t('bo.categories.form.color') %></label>
+            <div class="input-group">
+              <%= f.color_field :color, class: "form-control form-control-color", value: category.color.presence || "#6c757d" %>
+              <%= f.text_field :color, class: "form-control", placeholder: "#6c757d" %>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <% if category.persisted? %>
+        <div class="card">
+          <div class="card-body">
+            <h5 class="card-title mb-3"><%= t('bo.categories.form.statistics') %></h5>
+            <dl class="row mb-0">
+              <dt class="col-8"><%= t('bo.categories.show.total_products') %></dt>
+              <dd class="col-4 text-end"><%= category.all_products_count %></dd>
+              <dt class="col-8"><%= t('bo.categories.show.direct_products') %></dt>
+              <dd class="col-4 text-end"><%= category.direct_products_count %></dd>
+              <dt class="col-8"><%= t('bo.categories.show.subcategories') %></dt>
+              <dd class="col-4 text-end"><%= category.children.kept.count %></dd>
+            </dl>
+          </div>
+        </div>
+      <% end %>
+    </div>
+  </div>
+<% end %>

@@ -1,0 +1,211 @@
+<% content_for :bo_main_content do %>
+
+<div class="mb-4">
+  <div class="d-flex justify-content-between align-items-center">
+    <div class="d-flex align-items-center gap-3">
+      <%= link_to bo_categories_path(params[:org_slug]), class: "text-muted" do %>
+        <i class="fa-solid fa-arrow-left"></i>
+      <% end %>
+
+      <div class="rounded d-flex align-items-center justify-content-center text-white"
+           style="width: 60px; height: 60px; background-color: <%= @category.color.presence || '#6c757d' %>;">
+        <% if @category.icon.present? %>
+          <i class="<%= @category.icon %> fa-lg"></i>
+        <% else %>
+          <i class="fa-solid fa-folder fa-lg"></i>
+        <% end %>
+      </div>
+
+      <div>
+        <h4 class="mb-0"><%= @category.name %></h4>
+        <span class="text-muted"><%= @category.full_path %></span>
+      </div>
+    </div>
+
+    <div class="d-flex gap-2 align-items-center">
+      <%= link_to edit_bo_category_path(params[:org_slug], @category), class: "btn btn-outline-secondary" do %>
+        <i class="fa-solid fa-pen-to-square"></i> <%= t('bo.common.actions.edit') %>
+      <% end %>
+      <%= link_to new_bo_category_path(params[:org_slug], parent_id: @category.id), class: "btn btn-primary" do %>
+        <i class="fa-solid fa-plus"></i> <%= t('bo.categories.actions.add_subcategory') %>
+      <% end %>
+    </div>
+  </div>
+</div>
+
+<div class="row g-4">
+  <!-- Category Details -->
+  <div class="col-md-4">
+    <div class="card mb-4">
+      <div class="card-body">
+        <h5 class="card-title mb-3"><%= t('bo.categories.show.details') %></h5>
+
+        <dl class="row mb-0">
+          <dt class="col-5"><%= t('bo.categories.form.name') %></dt>
+          <dd class="col-7"><%= @category.name %></dd>
+
+          <dt class="col-5"><%= t('bo.categories.form.slug') %></dt>
+          <dd class="col-7"><code><%= @category.slug %></code></dd>
+
+          <% if @category.description.present? %>
+            <dt class="col-5"><%= t('bo.categories.form.description') %></dt>
+            <dd class="col-7"><%= @category.description %></dd>
+          <% end %>
+
+          <dt class="col-5"><%= t('bo.categories.show.depth') %></dt>
+          <dd class="col-7">
+            <%= @category.depth %>
+            <% if @category.depth_warning? %>
+              <span class="badge bg-warning text-dark ms-1">
+                <i class="fa-solid fa-triangle-exclamation"></i>
+              </span>
+            <% end %>
+          </dd>
+
+          <dt class="col-5"><%= t('bo.categories.show.total_products') %></dt>
+          <dd class="col-7"><%= @category.all_products_count %></dd>
+
+          <dt class="col-5"><%= t('bo.categories.show.direct_products') %></dt>
+          <dd class="col-7"><%= @category.direct_products_count %></dd>
+        </dl>
+      </div>
+    </div>
+
+    <!-- Subcategories -->
+    <% if @subcategories.any? %>
+      <div class="card">
+        <div class="card-body">
+          <h5 class="card-title mb-3"><%= t('bo.categories.show.subcategories') %></h5>
+          <ul class="list-group list-group-flush">
+            <% @subcategories.each do |subcategory| %>
+              <li class="list-group-item d-flex justify-content-between align-items-center px-0">
+                <%= link_to bo_category_path(params[:org_slug], subcategory), class: "text-decoration-none" do %>
+                  <% if subcategory.icon.present? %>
+                    <i class="<%= subcategory.icon %> me-2" style="color: <%= subcategory.color.presence || '#6c757d' %>;"></i>
+                  <% else %>
+                    <i class="fa-solid fa-folder me-2" style="color: <%= subcategory.color.presence || '#6c757d' %>;"></i>
+                  <% end %>
+                  <%= subcategory.name %>
+                <% end %>
+                <span class="badge bg-secondary"><%= subcategory.all_products_count %></span>
+              </li>
+            <% end %>
+          </ul>
+        </div>
+      </div>
+    <% end %>
+  </div>
+
+  <!-- Products in Category -->
+  <div class="col-md-8">
+    <div class="card">
+      <div class="card-body">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h5 class="card-title mb-0"><%= t('bo.categories.show.products') %></h5>
+          <div class="d-flex gap-2">
+            <button type="button" class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#addProductsModal">
+              <i class="fa-solid fa-link"></i> <%= t('bo.categories.actions.add_existing') %>
+            </button>
+            <%= link_to new_bo_product_path(params[:org_slug], category_id: @category.id), class: "btn btn-sm btn-primary" do %>
+              <i class="fa-solid fa-plus"></i> <%= t('bo.categories.actions.create_new') %>
+            <% end %>
+          </div>
+        </div>
+
+        <% if @products.empty? %>
+          <div class="text-center py-4">
+            <i class="fa-solid fa-box-open fa-2x text-muted mb-2"></i>
+            <p class="text-muted mb-0"><%= t('bo.categories.show.no_products') %></p>
+          </div>
+        <% else %>
+          <table class="table table-hover mb-0">
+            <thead class="table-light">
+              <tr>
+                <th><%= t('bo.common.product') %></th>
+                <th><%= t('bo.products.form.sku') %></th>
+                <th><%= t('bo.common.price') %></th>
+                <th class="text-end"><%= t('bo.common.actions_column') %></th>
+              </tr>
+            </thead>
+            <tbody>
+              <% @products.each do |product| %>
+                <tr>
+                  <td>
+                    <div class="fw-semibold"><%= product.name %></div>
+                  </td>
+                  <td><%= product.sku %></td>
+                  <td><%= humanized_money_with_symbol(product.price) %></td>
+                  <td class="text-end">
+                    <div class="d-flex justify-content-end align-items-center gap-1">
+                      <%= link_to bo_product_path(params[:org_slug], product), class: "btn btn-sm btn-link text-muted" do %>
+                        <i class="fa-solid fa-eye"></i>
+                      <% end %>
+                      <%= button_to remove_product_bo_category_path(params[:org_slug], @category, product_id: product.id),
+                          method: :delete,
+                          form: { class: "d-inline" },
+                          class: "btn btn-sm btn-link text-danger",
+                          title: t('bo.categories.actions.remove_from_category'),
+                          data: { turbo_confirm: t('bo.categories.confirm.remove_product', name: product.name) } do %>
+                        <i class="fa-solid fa-xmark"></i>
+                      <% end %>
+                    </div>
+                  </td>
+                </tr>
+              <% end %>
+            </tbody>
+          </table>
+        <% end %>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Add Existing Products Modal -->
+<div class="modal fade" id="addProductsModal" tabindex="-1" aria-labelledby="addProductsModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <%= form_with url: add_products_bo_category_path(params[:org_slug], @category), method: :post, local: true do |f| %>
+        <div class="modal-header">
+          <h5 class="modal-title" id="addProductsModalLabel"><%= t('bo.categories.modal.add_products_title') %></h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <p class="text-muted mb-3"><%= t('bo.categories.modal.add_products_hint') %></p>
+
+          <% available_products = current_organisation.products.where.not(id: @category.product_ids).order(:name) %>
+          <% if available_products.any? %>
+            <div data-controller="product-search">
+              <div class="mb-3">
+                <input type="text" class="form-control" placeholder="<%= t('bo.categories.modal.search_products') %>" data-action="input->product-search#filter">
+              </div>
+              <div class="list-group" style="max-height: 400px; overflow-y: auto;">
+                <% available_products.each do |product| %>
+                  <label class="list-group-item list-group-item-action d-flex align-items-center" data-product-search-target="item" data-name="<%= product.name.downcase %>">
+                    <input type="checkbox" name="product_ids[]" value="<%= product.id %>" class="form-check-input me-3">
+                    <div class="flex-grow-1">
+                      <div class="fw-semibold"><%= product.name %></div>
+                      <small class="text-muted"><%= product.sku %> &middot; <%= humanized_money_with_symbol(product.price) %></small>
+                    </div>
+                  </label>
+                <% end %>
+              </div>
+            </div>
+          <% else %>
+            <div class="text-center py-4">
+              <i class="fa-solid fa-check-circle fa-2x text-success mb-2"></i>
+              <p class="text-muted mb-0"><%= t('bo.categories.modal.all_products_added') %></p>
+            </div>
+          <% end %>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal"><%= t('bo.common.actions.cancel') %></button>
+          <% if available_products.any? %>
+            <button type="submit" class="btn btn-primary"><%= t('bo.categories.modal.add_selected') %></button>
+          <% end %>
+        </div>
+      <% end %>
+    </div>
+  </div>
+</div>
+
+<% end %>
