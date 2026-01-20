@@ -14,6 +14,9 @@ class ProductPolicy < ApplicationPolicy
   end
 
   def create?
+    # When authorizing class-level actions (like import), record is the class itself
+    return true if record == Product
+
     belongs_to_organisation?
   end
 
