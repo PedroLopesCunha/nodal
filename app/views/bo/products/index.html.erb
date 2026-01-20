@@ -18,9 +18,9 @@
       <p><%= t('bo.products.index.subtitle') %></p>
     </div>
     <div class="bo-page-actions">
-      <a href="#" class="btn btn-outline-secondary">
+      <%= link_to import_bo_products_path(params[:org_slug]), class: "btn btn-outline-secondary" do %>
         <i class="fa-solid fa-upload"></i> <%= t('bo.common.actions.import') %>
-      </a>
+      <% end %>
       <a href="#" class="btn btn-outline-secondary">
         <i class="fa-solid fa-download"></i> <%= t('bo.common.actions.export') %>
       </a>

@@ -1,0 +1,96 @@
+<% content_for :bo_main_content do %>
+
+<div class="mb-4">
+  <div class="d-flex justify-content-between align-items-center">
+    <div class="d-flex align-items-center gap-3">
+      <div class="rounded bg-success d-flex align-items-center justify-content-center text-white" style="width: 60px; height: 60px;">
+        <i class="fa-solid fa-check fa-lg"></i>
+      </div>
+
+      <div>
+        <h4 class="mb-0"><%= t('bo.products.import.results_title') %></h4>
+        <span class="text-muted"><%= t('bo.products.import.results_subtitle') %></span>
+      </div>
+    </div>
+
+    <%= link_to bo_products_path(params[:org_slug]), class: "btn btn-primary" do %>
+      <i class="fa-solid fa-arrow-left"></i> <%= t('bo.products.import.back_to_products') %>
+    <% end %>
+  </div>
+</div>
+
+<div class="row">
+  <div class="col-md-4 mb-3">
+    <div class="card text-center h-100">
+      <div class="card-body">
+        <div class="display-4 text-success mb-2"><%= @result.created %></div>
+        <h5 class="card-title text-muted"><%= t('bo.products.import.products_created') %></h5>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-md-4 mb-3">
+    <div class="card text-center h-100">
+      <div class="card-body">
+        <div class="display-4 text-primary mb-2"><%= @result.updated %></div>
+        <h5 class="card-title text-muted"><%= t('bo.products.import.products_updated') %></h5>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-md-4 mb-3">
+    <div class="card text-center h-100">
+      <div class="card-body">
+        <div class="display-4 <%= @result.errors.any? ? 'text-danger' : 'text-muted' %> mb-2"><%= @result.errors.size %></div>
+        <h5 class="card-title text-muted"><%= t('bo.products.import.errors_count') %></h5>
+      </div>
+    </div>
+  </div>
+</div>
+
+<% if @result.errors.any? %>
+  <div class="card mt-3">
+    <div class="card-header bg-danger text-white">
+      <i class="fa-solid fa-exclamation-triangle me-2"></i>
+      <%= t('bo.products.import.errors_title') %>
+    </div>
+    <div class="card-body p-0">
+      <div class="table-responsive">
+        <table class="table table-hover mb-0">
+          <thead class="table-light">
+            <tr>
+              <th style="width: 15%"><%= t('bo.products.import.row_number') %></th>
+              <th style="width: 20%"><%= t('bo.products.import.field') %></th>
+              <th style="width: 65%"><%= t('bo.products.import.error_message') %></th>
+            </tr>
+          </thead>
+          <tbody>
+            <% @result.errors.each do |error| %>
+              <tr>
+                <td><span class="badge bg-secondary"><%= t('bo.products.import.row') %> <%= error[:row] %></span></td>
+                <td><code><%= error[:field] || "-" %></code></td>
+                <td class="text-danger"><%= error[:message] %></td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+<% end %>
+
+<% if @result.total > 0 %>
+  <div class="alert alert-success mt-4">
+    <i class="fa-solid fa-check-circle me-2"></i>
+    <%= t('bo.products.import.success_message', count: @result.total) %>
+  </div>
+<% end %>
+
+<% if @result.total == 0 && @result.errors.empty? %>
+  <div class="alert alert-warning mt-4">
+    <i class="fa-solid fa-exclamation-circle me-2"></i>
+    <%= t('bo.products.import.no_products_imported') %>
+  </div>
+<% end %>
+
+<% end %>

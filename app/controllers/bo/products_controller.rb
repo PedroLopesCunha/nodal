@@ -1,5 +1,77 @@
+require "csv"
+
 class Bo::ProductsController < Bo::BaseController
   before_action :set_product, only: [:show, :edit, :update, :destroy]
+
+  # Import actions
+  def import
+    authorize Product, :create?
+  end
+
+  def import_mapping
+    authorize Product, :create?
+
+    unless params[:file].present?
+      redirect_to import_bo_products_path(params[:org_slug]), alert: t("bo.products.import.no_file")
+      return
+    end
+
+    begin
+      csv_content = params[:file].read.force_encoding("UTF-8")
+      csv_content = csv_content.encode("UTF-8", invalid: :replace, undef: :replace, replace: "")
+
+      # Auto-detect delimiter (semicolon common in European Excel exports)
+      col_sep = detect_csv_delimiter(csv_content)
+
+      # Parse CSV to get headers
+      csv = CSV.parse(csv_content, headers: true, col_sep: col_sep)
+      @csv_headers = csv.headers.compact.reject(&:blank?)
+      @preview_row = csv.first&.to_h || {}
+
+      # Store CSV content in temp file and delimiter in session
+      @import_key = SecureRandom.uuid
+      temp_path = Rails.root.join("tmp", "imports", "#{@import_key}.csv")
+      FileUtils.mkdir_p(temp_path.dirname)
+      File.write(temp_path, csv_content)
+      session["import_#{@import_key}_col_sep"] = col_sep
+
+      @importable_fields = ProductImportService.importable_fields
+    rescue CSV::MalformedCSVError => e
+      redirect_to import_bo_products_path(params[:org_slug]), alert: t("bo.products.import.invalid_csv", error: e.message)
+    end
+  end
+
+  def import_process
+    authorize Product, :create?
+
+    import_key = params[:import_key]
+    mapping = params[:mapping]&.to_unsafe_h || {}
+
+    temp_path = Rails.root.join("tmp", "imports", "#{import_key}.csv")
+
+    unless File.exist?(temp_path)
+      redirect_to import_bo_products_path(params[:org_slug]), alert: t("bo.products.import.session_expired")
+      return
+    end
+
+    csv_content = File.read(temp_path)
+    col_sep = session["import_#{import_key}_col_sep"] || ","
+
+    service = ProductImportService.new(
+      organisation: current_organisation,
+      csv_content: csv_content,
+      column_mapping: mapping,
+      col_sep: col_sep
+    )
+
+    @result = service.call
+
+    # Clean up temp file and session
+    File.delete(temp_path) if File.exist?(temp_path)
+    session.delete("import_#{import_key}_col_sep")
+
+    render :import_results
+  end
 
   def index
     @products = policy_scope(current_organisation.products).includes(:categories)
@@ -62,5 +134,23 @@ class Bo::ProductsController < Bo::BaseController
 
   def product_params
     params.require(:product).permit(:name, :slug, :sku, :description, :price, :unit_description, :min_quantity, :min_quantity_type, :available, :category_id, :photo, category_ids: [])
+  end
+
+  def detect_csv_delimiter(content)
+    # Sample first 1024 bytes to detect delimiter
+    sample = content[0, 1024] || content
+    # Count occurrences of common delimiters in first line
+    first_line = sample.lines.first || ""
+    semicolons = first_line.count(";")
+    commas = first_line.count(",")
+    tabs = first_line.count("\t")
+
+    if semicolons > commas && semicolons > tabs
+      ";"
+    elsif tabs > commas && tabs > semicolons
+      "\t"
+    else
+      ","
+    end
   end
 end

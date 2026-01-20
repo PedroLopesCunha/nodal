@@ -14,7 +14,7 @@ class Product < ApplicationRecord
 
   validates :slug, uniqueness: true
   validates :name, presence: true
-  validates :description, length: { minimum: 5, maximum: 150 }
+  validates :description, length: { maximum: 150 }, allow_blank: true
   monetize :unit_price, as: :price
 
   def active_discount_for(customer)

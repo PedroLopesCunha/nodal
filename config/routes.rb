@@ -61,7 +61,13 @@ Rails.application.routes.draw do
           post :invite
         end
       end
-      resources :products
+      resources :products do
+        collection do
+          get :import
+          post :import_mapping
+          post :import_process
+        end
+      end
 
       resources :categories do
         member do
