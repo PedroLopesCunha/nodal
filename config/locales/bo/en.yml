@@ -282,10 +282,12 @@ en:
         remove_image: "Remove Image"
         placeholders:
           name: "Enter product name"
+          product_name: "Enter product name"
           sku: "Enter SKU code"
           description: "Enter product description"
           slug: "auto-generated-from-name"
           unit_description: "e.g. per kg, per box"
+          min_quantity_type: "e.g. units, boxes"
       import:
         title: "Import Products"
         subtitle: "Bulk import products from CSV file"

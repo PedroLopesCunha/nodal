@@ -279,10 +279,12 @@ pt:
         remove_image: "Remover Imagem"
         placeholders:
           name: "Introduza o nome do produto"
+          product_name: "Introduza o nome do produto"
           sku: "Introduza o código SKU"
           description: "Introduza a descrição do produto"
           slug: "auto-gerado-do-nome"
           unit_description: "ex: por kg, por caixa"
+          min_quantity_type: "ex: unidades, caixas"
       import:
         title: "Importar Produtos"
         subtitle: "Importar produtos em massa a partir de ficheiro CSV"
