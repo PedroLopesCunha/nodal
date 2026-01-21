@@ -230,6 +230,9 @@ en:
           product: "Product"
           sku: "SKU"
           category: "Category"
+          type: "Type"
+          variable: "Variable"
+          simple: "Simple"
           price: "Price"
           actions: "Actions"
       show:
@@ -254,6 +257,8 @@ en:
         variant: "Variant"
         status: "Status"
         default: "Default"
+        and_more_variants: "...and %{count} more variant(s)"
+        no_variants: "No variants configured for this product."
       new:
         title: "New Product"
         subtitle: "Add a new product to your catalog"
@@ -587,6 +592,13 @@ en:
         order_items: "Order Items"
         select_product: "Select a product"
         quantity: "Quantity"
+        discount_type: "Discount Type"
+        select_type: "Select Type"
+        value: "Value"
+        value_placeholder: "Enter discount value"
+        percentage_hint: "For percentage: 0.15 = 15%"
+        reason: "Reason"
+        reason_placeholder: "Enter reason for discount"
 
     # Pricing section
     pricing:

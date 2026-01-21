@@ -58,8 +58,13 @@ en:
         your_price: "Your Price"
         discount: "discount"
         stackable: "Stackable"
+        select_options: "Select Options"
+        select_option: "Select %{attribute}..."
+        from_price: "From %{price}"
 
     # Cart section
+    cart:
+      item_added: "Item added to cart"
     carts:
       show:
         title: "Your Cart"

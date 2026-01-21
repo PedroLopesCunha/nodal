@@ -1,0 +1,163 @@
+<% content_for :bo_main_content do %>
+
+<div class="mb-4">
+  <div class="d-flex justify-content-between align-items-center">
+    <div class="d-flex align-items-center gap-3">
+      <%= link_to bo_product_path(params[:org_slug], @product), class: "text-muted" do %>
+        <i class="fa-solid fa-arrow-left"></i>
+      <% end %>
+
+      <div class="rounded bg-primary d-flex align-items-center justify-content-center text-white" style="width: 60px; height: 60px;">
+        <i class="fa-solid fa-sliders fa-lg"></i>
+      </div>
+
+      <div>
+        <h4 class="mb-0"><%= t('bo.products.configure_variants.title') %></h4>
+        <span class="text-muted"><%= @product.name %></span>
+      </div>
+    </div>
+
+    <div class="d-flex gap-2 align-items-center">
+      <%= link_to bo_product_variants_path(params[:org_slug], @product), class: "btn btn-outline-secondary" do %>
+        <i class="fa-solid fa-cubes"></i> <%= t('bo.products.configure_variants.view_variants') %>
+      <% end %>
+    </div>
+  </div>
+</div>
+
+<%= form_with url: update_variant_configuration_bo_product_path(params[:org_slug], @product), method: :patch, data: { controller: "variant-configuration" } do |f| %>
+  <div class="row g-3">
+    <div class="col-md-8">
+      <div class="card mb-3">
+        <div class="card-body">
+          <h5 class="card-title mb-4"><%= t('bo.products.configure_variants.variant_type') %></h5>
+
+          <div class="form-check mb-3">
+            <%= f.check_box :has_variants, class: "form-check-input", checked: @product.has_variants?, data: { variant_configuration_target: "toggle", action: "change->variant-configuration#toggleAttributes" } %>
+            <%= f.label :has_variants, t('bo.products.configure_variants.enable_variants'), class: "form-check-label" %>
+          </div>
+          <small class="text-muted"><%= t('bo.products.configure_variants.enable_variants_hint') %></small>
+        </div>
+      </div>
+
+      <div data-variant-configuration-target="attributesSection" <%= 'style="display: none;"' unless @product.has_variants? %>>
+        <div class="card mb-3">
+          <div class="card-body">
+            <h5 class="card-title mb-4"><%= t('bo.products.configure_variants.select_attributes') %></h5>
+
+            <% if @available_attributes.empty? %>
+              <div class="alert alert-info">
+                <i class="fa-solid fa-info-circle me-2"></i>
+                <%= t('bo.products.configure_variants.no_attributes') %>
+                <%= link_to t('bo.products.configure_variants.create_attributes'), new_bo_product_attribute_path(params[:org_slug]) %>
+              </div>
+            <% else %>
+              <p class="text-muted mb-3"><%= t('bo.products.configure_variants.select_attributes_hint') %></p>
+
+              <% @available_attributes.each do |attribute| %>
+                <div class="card card-body bg-light mb-3" data-variant-configuration-target="attributeCard" data-attribute-id="<%= attribute.id %>">
+                  <div class="d-flex justify-content-between align-items-center mb-2">
+                    <div class="form-check">
+                      <input type="checkbox"
+                             name="product[product_attribute_ids][]"
+                             value="<%= attribute.id %>"
+                             class="form-check-input"
+                             id="attribute_<%= attribute.id %>"
+                             <%= 'checked' if @product.product_attributes.include?(attribute) %>
+                             data-action="change->variant-configuration#toggleAttribute">
+                      <label class="form-check-label fw-bold" for="attribute_<%= attribute.id %>">
+                        <%= attribute.name %>
+                      </label>
+                    </div>
+                  </div>
+
+                  <div class="values-section <%= 'd-none' unless @product.product_attributes.include?(attribute) %>" data-variant-configuration-target="valuesSection">
+                    <p class="small text-muted mb-2"><%= t('bo.products.configure_variants.select_values') %></p>
+                    <div class="d-flex flex-wrap gap-2">
+                      <% attribute.product_attribute_values.active.by_position.each do |value| %>
+                        <div class="form-check">
+                          <input type="checkbox"
+                                 name="product[available_attribute_value_ids][]"
+                                 value="<%= value.id %>"
+                                 class="form-check-input"
+                                 id="value_<%= value.id %>"
+                                 <%= 'checked' if @product.available_attribute_values.include?(value) %>>
+                          <label class="form-check-label" for="value_<%= value.id %>">
+                            <% if value.color_hex.present? %>
+                              <span class="badge" style="background-color: <%= value.color_hex %>; color: <%= contrast_color(value.color_hex) %>;">
+                                <%= value.value %>
+                              </span>
+                            <% else %>
+                              <span class="badge bg-secondary"><%= value.value %></span>
+                            <% end %>
+                          </label>
+                        </div>
+                      <% end %>
+                    </div>
+                  </div>
+                </div>
+              <% end %>
+            <% end %>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-body">
+            <h5 class="card-title mb-4"><%= t('bo.products.configure_variants.generate_variants') %></h5>
+            <p class="text-muted"><%= t('bo.products.configure_variants.generate_hint') %></p>
+
+            <div class="d-flex gap-2">
+              <button type="submit" class="btn btn-primary">
+                <i class="fa-solid fa-check"></i> <%= t('bo.products.configure_variants.save_configuration') %>
+              </button>
+
+              <% if @product.product_attributes.any? && @product.available_attribute_values.any? %>
+                <%= link_to generate_bo_product_variants_path(params[:org_slug], @product),
+                    class: "btn btn-success",
+                    data: { turbo_method: :post, turbo_confirm: t('bo.products.configure_variants.confirm_generate') } do %>
+                  <i class="fa-solid fa-wand-magic-sparkles"></i> <%= t('bo.products.configure_variants.generate_button') %>
+                <% end %>
+              <% end %>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <% unless @product.has_variants? %>
+        <div class="card">
+          <div class="card-body">
+            <button type="submit" class="btn btn-primary">
+              <i class="fa-solid fa-check"></i> <%= t('bo.common.actions.save') %>
+            </button>
+          </div>
+        </div>
+      <% end %>
+    </div>
+
+    <div class="col-md-4">
+      <div class="card">
+        <div class="card-body">
+          <h5 class="card-title mb-3"><%= t('bo.products.configure_variants.current_status') %></h5>
+          <dl class="row mb-0">
+            <dt class="col-8"><%= t('bo.products.configure_variants.variant_mode') %></dt>
+            <dd class="col-4 text-end">
+              <% if @product.has_variants? %>
+                <span class="badge bg-success"><%= t('bo.products.configure_variants.variable') %></span>
+              <% else %>
+                <span class="badge bg-secondary"><%= t('bo.products.configure_variants.simple') %></span>
+              <% end %>
+            </dd>
+            <dt class="col-8"><%= t('bo.products.configure_variants.attributes_assigned') %></dt>
+            <dd class="col-4 text-end"><%= @product.product_attributes.count %></dd>
+            <dt class="col-8"><%= t('bo.products.configure_variants.values_selected') %></dt>
+            <dd class="col-4 text-end"><%= @product.available_attribute_values.count %></dd>
+            <dt class="col-8"><%= t('bo.products.configure_variants.variants_count') %></dt>
+            <dd class="col-4 text-end"><%= @product.product_variants.count %></dd>
+          </dl>
+        </div>
+      </div>
+    </div>
+  </div>
+<% end %>
+
+<% end %>

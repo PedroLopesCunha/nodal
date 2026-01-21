@@ -227,6 +227,9 @@ es:
           product: "Producto"
           sku: "SKU"
           category: "Categoría"
+          type: "Tipo"
+          variable: "Variable"
+          simple: "Simple"
           price: "Precio"
           actions: "Acciones"
       show:
@@ -251,6 +254,8 @@ es:
         variant: "Variante"
         status: "Estado"
         default: "Predeterminado"
+        and_more_variants: "...y %{count} variante(s) más"
+        no_variants: "No hay variantes configuradas para este producto."
       new:
         title: "Nuevo Producto"
         subtitle: "Añadir un nuevo producto al catálogo"
@@ -584,6 +589,13 @@ es:
         order_items: "Artículos del Pedido"
         select_product: "Seleccione un producto"
         quantity: "Cantidad"
+        discount_type: "Tipo de Descuento"
+        select_type: "Seleccione Tipo"
+        value: "Valor"
+        value_placeholder: "Introduzca el valor del descuento"
+        percentage_hint: "Para porcentaje: 0.15 = 15%"
+        reason: "Motivo"
+        reason_placeholder: "Introduzca el motivo del descuento"
 
     # Sección Precios
     pricing:

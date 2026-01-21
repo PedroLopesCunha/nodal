@@ -56,6 +56,10 @@ class Bo::ProductVariantsController < Bo::BaseController
       redirect_to configure_variants_bo_product_path(params[:org_slug], @product),
         alert: result[:errors].join(', ')
     end
+  rescue StandardError => e
+    Rails.logger.error "Variant generation failed: #{e.message}\n#{e.backtrace.first(10).join("\n")}"
+    redirect_to configure_variants_bo_product_path(params[:org_slug], @product),
+      alert: "Error generating variants: #{e.message}"
   end
 
   private
@@ -72,7 +76,7 @@ class Bo::ProductVariantsController < Bo::BaseController
 
   def variant_params
     params.require(:product_variant).permit(
-      :name, :sku, :unit_price, :stock_quantity, :track_stock, :available, :is_default, :photo
+      :name, :sku, :price, :stock_quantity, :track_stock, :available, :is_default, :photo
     )
   end
 end

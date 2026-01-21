@@ -1,0 +1,118 @@
+<%= form_with model: [@product, variant],
+            url: variant.persisted? ? bo_product_variant_path(params[:org_slug], @product, variant) : bo_product_variants_path(params[:org_slug], @product),
+            method: variant.persisted? ? :patch : :post,
+            id: "variant-form" do |f| %>
+
+  <div class="row g-3">
+    <div class="col-md-8">
+      <div class="card mb-3">
+        <div class="card-body">
+          <h5 class="card-title mb-4"><%= t('bo.product_variants.form.basic_information') %></h5>
+
+          <div class="row g-3">
+            <div class="col-md-8">
+              <label class="form-label"><%= t('bo.product_variants.form.name') %> <span class="text-danger">*</span></label>
+              <%= f.text_field :name, class: "form-control", placeholder: t('bo.product_variants.form.placeholders.name'), required: true %>
+              <small class="text-muted"><%= t('bo.product_variants.form.name_hint') %></small>
+            </div>
+            <div class="col-md-4">
+              <label class="form-label"><%= t('bo.product_variants.form.sku') %></label>
+              <%= f.text_field :sku, class: "form-control", placeholder: t('bo.product_variants.form.placeholders.sku') %>
+            </div>
+          </div>
+
+          <div class="row g-3 mt-2">
+            <div class="col-md-6">
+              <label class="form-label"><%= t('bo.product_variants.form.price') %> (<%= current_organisation.currency_symbol %>)</label>
+              <%= f.number_field :price, class: "form-control", step: 0.01, min: 0, placeholder: "0.00" %>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card mb-3">
+        <div class="card-body">
+          <h5 class="card-title mb-4"><%= t('bo.product_variants.form.inventory') %></h5>
+
+          <div class="row g-3">
+            <div class="col-md-12">
+              <div class="form-check">
+                <%= f.check_box :track_stock, class: "form-check-input", data: { controller: "toggle-field", toggle_field_target_value: "#stock-quantity-field" } %>
+                <%= f.label :track_stock, t('bo.product_variants.form.track_stock'), class: "form-check-label" %>
+              </div>
+              <small class="text-muted"><%= t('bo.product_variants.form.track_stock_hint') %></small>
+            </div>
+          </div>
+
+          <div class="row g-3 mt-2" id="stock-quantity-field" <%= 'style="display: none;"' unless variant.track_stock? %>>
+            <div class="col-md-6">
+              <label class="form-label"><%= t('bo.product_variants.form.stock_quantity') %></label>
+              <%= f.number_field :stock_quantity, class: "form-control", min: 0, step: 1, placeholder: "0" %>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-body">
+          <h5 class="card-title mb-4"><%= t('bo.product_variants.form.variant_image') %></h5>
+
+          <% if variant.photo.attached? %>
+            <div class="mb-3">
+              <%= image_tag variant.photo.variant(resize_to_limit: [200, 200]), class: "rounded mb-2" %>
+              <p class="text-muted small mb-0"><%= t('bo.product_variants.form.current_image') %></p>
+            </div>
+          <% end %>
+
+          <div class="mb-3">
+            <%= f.file_field :photo, class: "form-control", accept: "image/*" %>
+            <small class="text-muted"><%= t('bo.product_variants.form.image_hint') %></small>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-4">
+      <div class="card mb-3">
+        <div class="card-body">
+          <h5 class="card-title mb-3"><%= t('bo.product_variants.form.availability') %></h5>
+
+          <div class="form-check mb-3">
+            <%= f.check_box :available, class: "form-check-input" %>
+            <%= f.label :available, t('bo.product_variants.form.available'), class: "form-check-label" %>
+          </div>
+
+          <% if variant.persisted? && !variant.is_default? %>
+            <div class="form-check">
+              <%= f.check_box :is_default, class: "form-check-input" %>
+              <%= f.label :is_default, t('bo.product_variants.form.set_as_default'), class: "form-check-label" %>
+            </div>
+            <small class="text-muted"><%= t('bo.product_variants.form.default_hint') %></small>
+          <% end %>
+        </div>
+      </div>
+
+      <% if variant.persisted? && variant.attribute_values.any? %>
+        <div class="card">
+          <div class="card-body">
+            <h5 class="card-title mb-3"><%= t('bo.product_variants.form.options') %></h5>
+            <dl class="row mb-0">
+              <% variant.attribute_values.includes(:product_attribute).each do |value| %>
+                <dt class="col-6"><%= value.product_attribute.name %></dt>
+                <dd class="col-6">
+                  <% if value.color_hex.present? %>
+                    <span class="badge" style="background-color: <%= value.color_hex %>; color: <%= contrast_color(value.color_hex) %>;">
+                      <%= value.value %>
+                    </span>
+                  <% else %>
+                    <span class="badge bg-secondary"><%= value.value %></span>
+                  <% end %>
+                </dd>
+              <% end %>
+            </dl>
+          </div>
+        </div>
+      <% end %>
+    </div>
+  </div>
+<% end %>

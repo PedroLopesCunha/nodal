@@ -11,6 +11,8 @@ class Organisation < ApplicationRecord
   has_one :billing_address, -> { billing }, class_name: "Address", as: :addressable, dependent: :destroy
   has_many :categories, dependent: :destroy
   has_many :products, dependent: :destroy
+  has_many :product_attributes, dependent: :destroy
+  has_many :product_variants, dependent: :destroy
   has_many :orders, dependent: :destroy
   has_many :customer_product_discounts, dependent: :destroy
   has_many :product_discounts, dependent: :destroy

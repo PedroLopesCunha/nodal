@@ -67,6 +67,15 @@ Rails.application.routes.draw do
           post :import_mapping
           post :import_process
         end
+        member do
+          get :configure_variants
+          patch :update_variant_configuration
+        end
+        resources :variants, controller: 'product_variants', except: [:show] do
+          collection do
+            post :generate
+          end
+        end
       end
 
       resources :categories do
@@ -75,6 +84,15 @@ Rails.application.routes.draw do
           patch :restore
           post :add_products
           delete :remove_product
+        end
+        collection do
+          patch :reorder
+        end
+      end
+
+      resources :product_attributes do
+        member do
+          patch :restore
         end
         collection do
           patch :reorder

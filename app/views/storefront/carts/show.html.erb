@@ -66,8 +66,9 @@
                 <tr>
                   <td class="ps-4">
                     <div class="d-flex align-items-center">
-                      <% if item.product.photo.attached? %>
-                        <%= image_tag item.product.photo, class: "me-3", style: "width: 60px; height: 60px; object-fit: cover; border-radius: 8px;" %>
+                      <% photo = item.effective_photo %>
+                      <% if photo&.attached? %>
+                        <%= image_tag photo, class: "me-3", style: "width: 60px; height: 60px; object-fit: cover; border-radius: 8px;" %>
                       <% else %>
                         <div class="me-3 bg-light d-flex align-items-center justify-content-center" style="width: 60px; height: 60px; border-radius: 8px;">
                           <i class="fa-solid fa-image text-muted"></i>
@@ -75,6 +76,10 @@
                       <% end %>
                       <div>
                         <div class="fw-medium"><%= item.product.name %></div>
+                        <% if item.product_variant && item.product_variant.attribute_values.any? %>
+                          <small class="text-primary"><%= item.variant_name %></small>
+                          <br>
+                        <% end %>
                         <small class="text-muted"><%= item.product.category&.name %></small>
                       </div>
                     </div>
@@ -132,7 +137,7 @@
           <h5 class="card-title mb-3"><%= t('storefront.carts.show.order_summary') %></h5>
 
           <div class="d-flex justify-content-between mb-2">
-            <span class="text-muted"><%= t('storefront.carts.show.subtotal') %> (<%= @order.item_count %> <%= t('storefront.common.items', count: @order.item_count) %>)</span>
+            <span class="text-muted"><%= t('storefront.carts.show.subtotal') %> (<%= t('storefront.common.items', count: @order.item_count) %>)</span>
             <span><%= humanized_money_with_symbol(@order.total_amount) %></span>
           </div>
 

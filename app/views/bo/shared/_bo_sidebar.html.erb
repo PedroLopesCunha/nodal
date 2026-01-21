@@ -32,6 +32,12 @@
         <span><%= t('bo.sidebar.categories') %></span>
       <% end %>
     </li>
+    <li class="bo-sidebar-item <%= 'active' if controller_name == 'product_attributes' %>">
+      <%= link_to bo_product_attributes_path do %>
+        <i class="fa-solid fa-tags"></i>
+        <span><%= t('bo.sidebar.attributes') %></span>
+      <% end %>
+    </li>
     <li class="bo-sidebar-item <%= 'active' if controller_name == 'orders' %>">
       <%= link_to bo_orders_path do %>
         <i class="fa-solid fa-clipboard-list"></i>

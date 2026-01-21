@@ -64,10 +64,21 @@
                 </tr>
               </thead>
               <tbody>
-                <% @order.order_items.includes(:product).each do |item| %>
+                <% @order.order_items.includes(:product, :product_variant).each do |item| %>
                   <tr>
-                    <td><%= item.product.name %></td>
-                    <td class="text-muted"><%= item.product.sku || '-' %></td>
+                    <td>
+                      <div><%= item.product.name %></div>
+                      <% if item.product_variant.present? && item.product.variable? %>
+                        <small class="text-primary"><%= item.product_variant.option_values_string %></small>
+                      <% end %>
+                    </td>
+                    <td class="text-muted">
+                      <% if item.product_variant.present? && item.product_variant.sku.present? %>
+                        <%= item.product_variant.sku %>
+                      <% else %>
+                        <%= item.product.sku || '-' %>
+                      <% end %>
+                    </td>
                     <td class="text-center"><%= item.quantity %> <%= item.product.min_quantity_type %></td>
                     <td class="text-end">
                       <% if item.discount_percentage && item.discount_percentage > 0 %>

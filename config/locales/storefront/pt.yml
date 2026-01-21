@@ -58,8 +58,13 @@ pt:
         your_price: "O Seu Preço"
         discount: "desconto"
         stackable: "Acumulável"
+        select_options: "Selecionar Opções"
+        select_option: "Selecione %{attribute}..."
+        from_price: "A partir de %{price}"
 
     # Secção do carrinho
+    cart:
+      item_added: "Item adicionado ao carrinho"
     carts:
       show:
         title: "O Seu Carrinho"

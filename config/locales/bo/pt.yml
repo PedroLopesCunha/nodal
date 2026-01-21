@@ -227,6 +227,9 @@ pt:
           product: "Produto"
           sku: "SKU"
           category: "Categoria"
+          type: "Tipo"
+          variable: "Variável"
+          simple: "Simples"
           price: "Preço"
           actions: "Ações"
       show:
@@ -251,6 +254,8 @@ pt:
         variant: "Variante"
         status: "Estado"
         default: "Padrão"
+        and_more_variants: "...e mais %{count} variante(s)"
+        no_variants: "Nenhuma variante configurada para este produto."
       new:
         title: "Novo Produto"
         subtitle: "Adicionar um novo produto ao catálogo"
@@ -584,6 +589,13 @@ pt:
         order_items: "Itens da Encomenda"
         select_product: "Selecione um produto"
         quantity: "Quantidade"
+        discount_type: "Tipo de Desconto"
+        select_type: "Selecione o Tipo"
+        value: "Valor"
+        value_placeholder: "Introduza o valor do desconto"
+        percentage_hint: "Para percentagem: 0.15 = 15%"
+        reason: "Motivo"
+        reason_placeholder: "Introduza o motivo do desconto"
 
     # Secção Preços
     pricing:

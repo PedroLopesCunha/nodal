@@ -79,6 +79,8 @@
                           <span class="badge bg-danger ms-1"><%= t('storefront.products.index.sale_badge') %></span>
                         <% end %>
                       </div>
+                    <% elsif product.variable? && product.price_range&.dig(:range) %>
+                      <span class="h5 mb-0 text-primary"><%= product.display_price %></span>
                     <% else %>
                       <span class="h5 mb-0 text-primary"><%= humanized_money_with_symbol(product.price) %></span>
                     <% end %>

@@ -1,0 +1,91 @@
+<%= form_with model: product_attribute,
+            url: product_attribute.persisted? ? bo_product_attribute_path(params[:org_slug], product_attribute) : bo_product_attributes_path(params[:org_slug]),
+            method: product_attribute.persisted? ? :patch : :post,
+            id: "product-attribute-form",
+            data: { controller: "nested-fields" } do |f| %>
+
+  <div class="row g-3">
+    <div class="col-md-8">
+      <div class="card mb-3">
+        <div class="card-body">
+          <h5 class="card-title mb-4"><%= t('bo.product_attributes.form.basic_information') %></h5>
+
+          <div class="row g-3">
+            <div class="col-md-8">
+              <label class="form-label"><%= t('bo.product_attributes.form.name') %> <span class="text-danger">*</span></label>
+              <%= f.text_field :name, class: "form-control", placeholder: t('bo.product_attributes.form.placeholders.name'), required: true %>
+              <small class="text-muted"><%= t('bo.product_attributes.form.name_hint') %></small>
+            </div>
+            <div class="col-md-4">
+              <label class="form-label"><%= t('bo.product_attributes.form.slug') %></label>
+              <%= f.text_field :slug, class: "form-control", placeholder: t('bo.product_attributes.form.placeholders.slug') %>
+              <small class="text-muted"><%= t('bo.product_attributes.form.slug_hint') %></small>
+            </div>
+          </div>
+
+          <div class="row g-3 mt-2">
+            <div class="col-md-12">
+              <div class="form-check">
+                <%= f.check_box :active, class: "form-check-input" %>
+                <%= f.label :active, t('bo.product_attributes.form.active'), class: "form-check-label" %>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-body">
+          <div class="d-flex justify-content-between align-items-center mb-4">
+            <h5 class="card-title mb-0"><%= t('bo.product_attributes.form.values_title') %></h5>
+            <button type="button" class="btn btn-sm btn-outline-primary" data-action="nested-fields#add">
+              <i class="fa-solid fa-plus"></i> <%= t('bo.product_attributes.form.add_value') %>
+            </button>
+          </div>
+
+          <div data-nested-fields-target="container">
+            <%= f.fields_for :product_attribute_values do |value_form| %>
+              <%= render 'value_fields', f: value_form %>
+            <% end %>
+          </div>
+
+          <template data-nested-fields-target="template">
+            <%= f.fields_for :product_attribute_values, ProductAttributeValue.new, child_index: 'NEW_RECORD' do |value_form| %>
+              <%= render 'value_fields', f: value_form %>
+            <% end %>
+          </template>
+
+          <div class="text-muted small mt-3" data-nested-fields-target="empty" <%= product_attribute.product_attribute_values.any? ? 'style="display: none;"' : '' %>>
+            <i class="fa-solid fa-info-circle me-1"></i>
+            <%= t('bo.product_attributes.form.no_values_hint') %>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-4">
+      <% if product_attribute.persisted? %>
+        <div class="card">
+          <div class="card-body">
+            <h5 class="card-title mb-3"><%= t('bo.product_attributes.form.statistics') %></h5>
+            <dl class="row mb-0">
+              <dt class="col-8"><%= t('bo.product_attributes.form.total_values') %></dt>
+              <dd class="col-4 text-end"><%= product_attribute.product_attribute_values.count %></dd>
+              <dt class="col-8"><%= t('bo.product_attributes.form.products_using') %></dt>
+              <dd class="col-4 text-end"><%= product_attribute.products.count %></dd>
+            </dl>
+          </div>
+        </div>
+      <% end %>
+
+      <div class="card <%= 'mt-3' if product_attribute.persisted? %>">
+        <div class="card-body">
+          <h5 class="card-title mb-3"><%= t('bo.product_attributes.form.help_title') %></h5>
+          <p class="small text-muted mb-0">
+            <%= t('bo.product_attributes.form.help_text') %>
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+<% end %>

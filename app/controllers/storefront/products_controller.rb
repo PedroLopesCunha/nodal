@@ -41,7 +41,21 @@ class Storefront::ProductsController < Storefront::BaseController
       @breadcrumbs = @primary_category.ancestors.to_a << @primary_category
     end
 
+    # Load variants data for variable products
+    if @product.has_variants?
+      @variants = @product.product_variants.available.by_position.includes(:attribute_values)
+      @attributes_with_values = @product.available_values_by_attribute
+      @default_variant = @product.default_variant
+    else
+      @default_variant = @product.default_variant
+    end
+
     # for_display: true shows all available discounts (ignoring min_quantity) for display purposes
-    @discount_calculator = DiscountCalculator.new(product: @product, customer: current_customer, for_display: true)
+    @discount_calculator = DiscountCalculator.new(
+      product: @product,
+      customer: current_customer,
+      for_display: true,
+      variant: @default_variant
+    )
   end
 end

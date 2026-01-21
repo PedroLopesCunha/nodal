@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2026_01_20_000004) do
+ActiveRecord::Schema[7.1].define(version: 2026_01_21_131818) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -193,9 +193,11 @@ ActiveRecord::Schema[7.1].define(version: 2026_01_20_000004) do
     t.decimal "discount_percentage", precision: 5, scale: 4, default: "0.0"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.index ["order_id", "product_id"], name: "index_order_items_on_order_id_and_product_id"
+    t.bigint "product_variant_id"
+    t.index ["order_id", "product_id", "product_variant_id"], name: "idx_order_items_order_product_variant", unique: true
     t.index ["order_id"], name: "index_order_items_on_order_id"
     t.index ["product_id"], name: "index_order_items_on_product_id"
+    t.index ["product_variant_id"], name: "index_order_items_on_product_variant_id"
   end
 
   create_table "orders", force: :cascade do |t|
@@ -269,6 +271,45 @@ ActiveRecord::Schema[7.1].define(version: 2026_01_20_000004) do
     t.index ["slug"], name: "index_organisations_on_slug", unique: true
   end
 
+  create_table "product_attribute_values", force: :cascade do |t|
+    t.bigint "product_attribute_id", null: false
+    t.string "value", null: false
+    t.string "slug", null: false
+    t.string "color_hex"
+    t.integer "position"
+    t.boolean "active", default: true, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["product_attribute_id", "position"], name: "idx_attr_values_on_attr_id_and_position"
+    t.index ["product_attribute_id", "slug"], name: "idx_attr_values_on_attr_id_and_slug", unique: true
+    t.index ["product_attribute_id"], name: "index_product_attribute_values_on_product_attribute_id"
+  end
+
+  create_table "product_attributes", force: :cascade do |t|
+    t.bigint "organisation_id", null: false
+    t.string "name", null: false
+    t.string "slug", null: false
+    t.integer "position"
+    t.boolean "active", default: true, null: false
+    t.datetime "discarded_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["discarded_at"], name: "index_product_attributes_on_discarded_at"
+    t.index ["organisation_id", "position"], name: "index_product_attributes_on_organisation_id_and_position"
+    t.index ["organisation_id", "slug"], name: "index_product_attributes_on_organisation_id_and_slug", unique: true
+    t.index ["organisation_id"], name: "index_product_attributes_on_organisation_id"
+  end
+
+  create_table "product_available_values", force: :cascade do |t|
+    t.bigint "product_id", null: false
+    t.bigint "product_attribute_value_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["product_attribute_value_id"], name: "index_product_available_values_on_product_attribute_value_id"
+    t.index ["product_id", "product_attribute_value_id"], name: "idx_product_available_values_unique", unique: true
+    t.index ["product_id"], name: "index_product_available_values_on_product_id"
+  end
+
   create_table "product_discounts", force: :cascade do |t|
     t.bigint "product_id", null: false
     t.bigint "organisation_id", null: false
@@ -286,6 +327,39 @@ ActiveRecord::Schema[7.1].define(version: 2026_01_20_000004) do
     t.index ["product_id"], name: "index_product_discounts_on_product_id"
   end
 
+  create_table "product_product_attributes", force: :cascade do |t|
+    t.bigint "product_id", null: false
+    t.bigint "product_attribute_id", null: false
+    t.integer "position"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["product_attribute_id"], name: "index_product_product_attributes_on_product_attribute_id"
+    t.index ["product_id", "product_attribute_id"], name: "idx_product_product_attributes_unique", unique: true
+    t.index ["product_id"], name: "index_product_product_attributes_on_product_id"
+  end
+
+  create_table "product_variants", force: :cascade do |t|
+    t.bigint "organisation_id", null: false
+    t.bigint "product_id", null: false
+    t.string "sku"
+    t.string "name"
+    t.integer "unit_price_cents"
+    t.string "unit_price_currency", default: "EUR"
+    t.integer "stock_quantity", default: 0
+    t.boolean "track_stock", default: false, null: false
+    t.boolean "available", default: true, null: false
+    t.boolean "is_default", default: false, null: false
+    t.integer "position"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["organisation_id", "sku"], name: "index_product_variants_on_organisation_id_and_sku", unique: true, where: "((sku IS NOT NULL) AND ((sku)::text <> ''::text))"
+    t.index ["organisation_id"], name: "index_product_variants_on_organisation_id"
+    t.index ["product_id", "available"], name: "index_product_variants_on_product_id_and_available"
+    t.index ["product_id", "is_default"], name: "index_product_variants_on_product_id_and_is_default"
+    t.index ["product_id", "position"], name: "index_product_variants_on_product_id_and_position"
+    t.index ["product_id"], name: "index_product_variants_on_product_id"
+  end
+
   create_table "products", force: :cascade do |t|
     t.bigint "organisation_id", null: false
     t.string "name"
@@ -301,9 +375,21 @@ ActiveRecord::Schema[7.1].define(version: 2026_01_20_000004) do
     t.json "product_attributes"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.boolean "has_variants", default: false, null: false
+    t.boolean "variants_generated", default: false, null: false
     t.index ["category_id"], name: "index_products_on_category_id"
     t.index ["organisation_id"], name: "index_products_on_organisation_id"
     t.index ["slug"], name: "index_products_on_slug", unique: true
+  end
+
+  create_table "variant_attribute_values", force: :cascade do |t|
+    t.bigint "product_variant_id", null: false
+    t.bigint "product_attribute_value_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["product_attribute_value_id"], name: "index_variant_attribute_values_on_product_attribute_value_id"
+    t.index ["product_variant_id", "product_attribute_value_id"], name: "idx_variant_attribute_values_unique", unique: true
+    t.index ["product_variant_id"], name: "index_variant_attribute_values_on_product_variant_id"
   end
 
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
@@ -319,6 +405,7 @@ ActiveRecord::Schema[7.1].define(version: 2026_01_20_000004) do
   add_foreign_key "customers", "organisations"
   add_foreign_key "order_discounts", "organisations"
   add_foreign_key "order_items", "orders"
+  add_foreign_key "order_items", "product_variants"
   add_foreign_key "order_items", "products"
   add_foreign_key "orders", "addresses", column: "billing_address_id"
   add_foreign_key "orders", "addresses", column: "shipping_address_id"
@@ -328,8 +415,18 @@ ActiveRecord::Schema[7.1].define(version: 2026_01_20_000004) do
   add_foreign_key "orders", "organisations"
   add_foreign_key "org_members", "members"
   add_foreign_key "org_members", "organisations"
+  add_foreign_key "product_attribute_values", "product_attributes"
+  add_foreign_key "product_attributes", "organisations"
+  add_foreign_key "product_available_values", "product_attribute_values"
+  add_foreign_key "product_available_values", "products"
   add_foreign_key "product_discounts", "organisations"
   add_foreign_key "product_discounts", "products"
+  add_foreign_key "product_product_attributes", "product_attributes"
+  add_foreign_key "product_product_attributes", "products"
+  add_foreign_key "product_variants", "organisations"
+  add_foreign_key "product_variants", "products"
   add_foreign_key "products", "categories"
   add_foreign_key "products", "organisations"
+  add_foreign_key "variant_attribute_values", "product_attribute_values"
+  add_foreign_key "variant_attribute_values", "product_variants"
 end

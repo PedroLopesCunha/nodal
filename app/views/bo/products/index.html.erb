@@ -59,7 +59,8 @@
       <tr>
         <th><%= t('bo.common.product') %></th>
         <th><%= t('bo.products.form.sku') %></th>
-        <th><%= t('bo.products.form.categories') %></th>
+        <th style="max-width: 200px;"><%= t('bo.products.form.categories') %></th>
+        <th><%= t('bo.products.index.table.type') %></th>
         <th><%= t('bo.common.price') %></th>
         <th class="text-end"><%= t('bo.common.actions_column') %></th>
       </tr>
@@ -71,15 +72,24 @@
             <div class="fw-semibold"><%= product.name %></div>
           </td>
           <td><%= product.sku %></td>
-          <td>
+          <td style="max-width: 200px;">
             <% if product.categories.any? %>
-              <%= product.categories.map(&:name).join(', ') %>
+              <span class="d-inline-block text-truncate" style="max-width: 100%;" title="<%= product.categories.map(&:name).join(', ') %>">
+                <%= product.categories.map(&:name).join(', ') %>
+              </span>
             <% else %>
               <span class="text-muted">-</span>
             <% end %>
           </td>
+          <td>
+            <% if product.variable? %>
+              <span class="badge bg-primary-subtle text-primary"><%= t('bo.products.index.table.variable') %></span>
+            <% else %>
+              <span class="badge bg-secondary-subtle text-secondary"><%= t('bo.products.index.table.simple') %></span>
+            <% end %>
+          </td>
           <td><%= humanized_money_with_symbol(product.price) %></td>
-          <td class="text-end product-actions" onclick="event.stopPropagation();">
+          <td class="text-end product-actions" style="white-space: nowrap;" onclick="event.stopPropagation();">
             <%= link_to bo_product_path(params[:org_slug], product), class: "btn btn-sm btn-link text-muted" do %>
               <i class="fa-solid fa-eye"></i>
             <% end %>

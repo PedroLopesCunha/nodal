@@ -117,7 +117,7 @@
 
             <div class="row mb-3">
               <div class="col-md-4">
-                <%= f.label :status, t('bo.common.status'), class: "form-label" %>
+                <%= f.label :status, t('bo.common.tables.status'), class: "form-label" %>
                 <%= f.select :status, Order::STATUSES.map { |s| [t("bo.common.statuses.#{s}"), s] }, { selected: "in_process" }, class: "form-select" %>
               </div>
               <div class="col-md-4">
