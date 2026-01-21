@@ -36,6 +36,10 @@ class ProductPolicy < ApplicationPolicy
     belongs_to_organisation?
   end
 
+  def update_variant_configuration?
+    belongs_to_organisation?
+  end
+
   private
 
   def belongs_to_organisation?
