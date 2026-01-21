@@ -1,0 +1,102 @@
+<% content_for :bo_main_content do %>
+
+<!-- Sticky Header -->
+<div class="bo-page-header">
+  <div class="d-flex justify-content-between align-items-start">
+    <div>
+      <h1><%= t('bo.product_attributes.index.title') %></h1>
+      <p><%= t('bo.product_attributes.index.subtitle') %></p>
+    </div>
+    <div class="bo-page-actions">
+      <%= link_to new_bo_product_attribute_path(params[:org_slug]), class: "btn btn-primary" do %>
+        <i class="fa-solid fa-plus"></i> <%= t('bo.common.actions.add_new') %>
+      <% end %>
+    </div>
+  </div>
+</div>
+
+<!-- Page Body -->
+<div class="bo-page-body">
+  <div class="card">
+    <div class="card-body">
+      <% if @product_attributes.empty? %>
+        <div class="text-center py-5">
+          <i class="fa-solid fa-tags fa-3x text-muted mb-3"></i>
+          <h5 class="text-muted"><%= t('bo.product_attributes.index.no_attributes') %></h5>
+          <p class="text-muted"><%= t('bo.product_attributes.index.no_attributes_hint') %></p>
+          <%= link_to new_bo_product_attribute_path(params[:org_slug]), class: "btn btn-primary" do %>
+            <i class="fa-solid fa-plus"></i> <%= t('bo.product_attributes.index.create_first') %>
+          <% end %>
+        </div>
+      <% else %>
+        <div class="table-responsive">
+          <table class="table table-hover align-middle">
+            <thead>
+              <tr>
+                <th style="width: 40px;"></th>
+                <th><%= t('bo.product_attributes.index.name') %></th>
+                <th><%= t('bo.product_attributes.index.values') %></th>
+                <th><%= t('bo.product_attributes.index.products') %></th>
+                <th><%= t('bo.product_attributes.index.status') %></th>
+                <th class="text-end"><%= t('bo.common.actions_column') %></th>
+              </tr>
+            </thead>
+            <tbody data-controller="sortable" data-sortable-url-value="<%= reorder_bo_product_attributes_path(params[:org_slug]) %>">
+              <% @product_attributes.each do |attribute| %>
+                <tr data-sortable-id="<%= attribute.id %>">
+                  <td class="text-muted cursor-grab">
+                    <i class="fa-solid fa-grip-vertical"></i>
+                  </td>
+                  <td>
+                    <strong><%= attribute.name %></strong>
+                    <br>
+                    <small class="text-muted"><%= attribute.slug %></small>
+                  </td>
+                  <td>
+                    <% attribute.product_attribute_values.active.by_position.limit(5).each do |value| %>
+                      <% if value.color_hex.present? %>
+                        <span class="badge" style="background-color: <%= value.color_hex %>; color: <%= contrast_color(value.color_hex) %>;">
+                          <%= value.value %>
+                        </span>
+                      <% else %>
+                        <span class="badge bg-secondary"><%= value.value %></span>
+                      <% end %>
+                    <% end %>
+                    <% remaining = attribute.product_attribute_values.active.count - 5 %>
+                    <% if remaining > 0 %>
+                      <span class="badge bg-light text-dark">+<%= remaining %></span>
+                    <% end %>
+                  </td>
+                  <td>
+                    <span class="badge bg-light text-dark">
+                      <%= attribute.products.count %> <%= t('bo.product_attributes.index.products_count') %>
+                    </span>
+                  </td>
+                  <td>
+                    <% if attribute.active? %>
+                      <span class="badge bg-success"><%= t('bo.common.status.active') %></span>
+                    <% else %>
+                      <span class="badge bg-secondary"><%= t('bo.common.status.inactive') %></span>
+                    <% end %>
+                  </td>
+                  <td class="text-end">
+                    <%= link_to edit_bo_product_attribute_path(params[:org_slug], attribute), class: "btn btn-sm btn-link text-muted" do %>
+                      <i class="fa-solid fa-pen-to-square"></i>
+                    <% end %>
+                    <% if attribute.products.empty? %>
+                      <%= button_to bo_product_attribute_path(params[:org_slug], attribute), method: :delete, form: { class: "d-inline" }, class: "btn btn-sm btn-link text-danger", data: { turbo_confirm: t('bo.common.confirm.delete_attribute') } do %>
+                        <i class="fa-solid fa-trash"></i>
+                      <% end %>
+                    <% end %>
+                  </td>
+                </tr>
+              <% end %>
+            </tbody>
+          </table>
+        </div>
+      <% end %>
+    </div>
+  </div>
+</div>
+
+<% end %>
