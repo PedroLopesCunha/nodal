@@ -1,0 +1,52 @@
+// Tenant Branding Styles
+// CSS custom properties for dynamic theming on storefront
+@import "../config/colors";
+
+// Storefront-specific overrides using CSS custom properties
+// These only apply when the --org-primary variable is set
+
+.btn-primary {
+  background-color: var(--org-primary, $teal);
+  border-color: var(--org-primary, $teal);
+  color: var(--org-primary-contrast, #ffffff);
+
+  &:hover,
+  &:focus {
+    background-color: var(--org-primary-hover, $teal-dark);
+    border-color: var(--org-primary-hover, $teal-dark);
+    color: var(--org-primary-contrast, #ffffff);
+  }
+
+  &:active,
+  &.active {
+    background-color: var(--org-primary-hover, $teal-dark);
+    border-color: var(--org-primary-hover, $teal-dark);
+  }
+}
+
+.btn-outline-primary {
+  border-color: var(--org-primary, $teal);
+  color: var(--org-primary, $teal);
+
+  &:hover,
+  &:focus {
+    background-color: var(--org-primary, $teal);
+    border-color: var(--org-primary, $teal);
+    color: var(--org-primary-contrast, #ffffff);
+  }
+}
+
+// Links with primary color
+a.text-primary {
+  color: var(--org-primary, $teal) !important;
+
+  &:hover {
+    color: var(--org-primary-hover, $teal-dark) !important;
+  }
+}
+
+// Badge primary
+.badge.bg-primary {
+  background-color: var(--org-primary, $teal) !important;
+  color: var(--org-primary-contrast, #ffffff);
+}

@@ -5,12 +5,12 @@
 .logo-icon {
   width: 28px;
   height: 28px;
-  background: $teal;
+  background: var(--org-primary, $teal);
   border-radius: 6px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  color: #ffffff;
+  color: var(--org-primary-contrast, #ffffff);
   font-weight: 700;
   font-size: 1rem;
   transition: background 0.2s ease;

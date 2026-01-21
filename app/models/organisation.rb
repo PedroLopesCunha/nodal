@@ -2,9 +2,11 @@ class Organisation < ApplicationRecord
   include Slugable
 
   SUPPORTED_CURRENCIES = %w[EUR CHF USD GBP].freeze
+  HEX_COLOR_REGEX = /\A#[0-9A-Fa-f]{6}\z/
 
   monetize :shipping_cost_cents
 
+  has_one_attached :logo
   has_many :org_members, dependent: :destroy
   has_many :members, through: :org_members, dependent: :destroy
   has_many :customers, dependent: :destroy
@@ -23,10 +25,20 @@ class Organisation < ApplicationRecord
   validates :billing_email, format: { with: URI::MailTo::EMAIL_REGEXP }, allow_blank: true
   validates :currency, presence: true, inclusion: { in: SUPPORTED_CURRENCIES }
   validates :default_locale, inclusion: { in: I18n.available_locales.map(&:to_s) }
+  validates :primary_color, format: { with: HEX_COLOR_REGEX }, allow_blank: true
+  validates :secondary_color, format: { with: HEX_COLOR_REGEX }, allow_blank: true
 
   slugify :name
 
   def currency_symbol
     Money::Currency.new(currency).symbol
+  end
+
+  def effective_primary_color
+    primary_color.presence || '#008060'
+  end
+
+  def effective_secondary_color
+    secondary_color.presence || '#004c3f'
   end
 end
