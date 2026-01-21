@@ -8,6 +8,7 @@ class Bo::ProductVariantsController < Bo::BaseController
 
   def new
     @variant = @product.product_variants.build
+    @variant.organisation = current_organisation
     authorize @variant
   end
 
