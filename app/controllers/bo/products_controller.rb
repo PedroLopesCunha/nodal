@@ -1,7 +1,7 @@
 require "csv"
 
 class Bo::ProductsController < Bo::BaseController
-  before_action :set_product, only: [:show, :edit, :update, :destroy]
+  before_action :set_product, only: [:show, :edit, :update, :destroy, :configure_variants, :update_variant_configuration]
 
   # Import actions
   def import
@@ -123,6 +123,39 @@ class Bo::ProductsController < Bo::BaseController
   def destroy
     @product.destroy
     redirect_to bo_products_path(params[:org_slug]), notice: "Product was successfully deleted."
+  end
+
+  def configure_variants
+    @available_attributes = current_organisation.product_attributes.kept.active.by_position.includes(:product_attribute_values)
+  end
+
+  def update_variant_configuration
+    has_variants = params[:has_variants] == '1'
+    attribute_ids = params.dig(:product, :product_attribute_ids)&.reject(&:blank?) || []
+    available_value_ids = params.dig(:product, :available_attribute_value_ids)&.reject(&:blank?) || []
+
+    ActiveRecord::Base.transaction do
+      # Update has_variants flag
+      @product.update!(has_variants: has_variants)
+
+      # Update assigned attributes
+      @product.product_product_attributes.destroy_all
+      attribute_ids.each_with_index do |attr_id, index|
+        @product.product_product_attributes.create!(product_attribute_id: attr_id, position: index + 1)
+      end
+
+      # Update available values
+      @product.product_available_values.destroy_all
+      available_value_ids.each do |value_id|
+        @product.product_available_values.create!(product_attribute_value_id: value_id)
+      end
+    end
+
+    redirect_to configure_variants_bo_product_path(params[:org_slug], @product), notice: t('bo.flash.variant_configuration_updated')
+  rescue ActiveRecord::RecordInvalid => e
+    @available_attributes = current_organisation.product_attributes.kept.active.by_position.includes(:product_attribute_values)
+    flash.now[:alert] = e.message
+    render :configure_variants, status: :unprocessable_entity
   end
 
   private
