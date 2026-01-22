@@ -1,4 +1,6 @@
 class Customer < ApplicationRecord
+  include ErpSyncable
+
   # Include default devise modules. Others available are:
   # :confirmable, :lockable, :timeoutable, :trackable and :omniauthable
   # Note: :registerable is excluded - Members create customer accounts

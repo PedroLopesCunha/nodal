@@ -83,6 +83,14 @@ gem 'discard'        # Soft delete
 # gem for money handling
 gem 'money-rails', '~> 1.12'
 
+# background jobs
+gem 'sidekiq', '~> 7.0'
+gem 'sidekiq-scheduler', '~> 5.0'
+gem 'redis', '~> 5.0'
+
+# HTTP client for ERP integrations
+gem 'faraday', '~> 2.0'
+
 # sendgrid for mailing
 gem 'sendgrid-ruby'
 

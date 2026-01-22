@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2026_01_22_153842) do
+ActiveRecord::Schema[7.1].define(version: 2026_01_22_185507) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -144,13 +144,56 @@ ActiveRecord::Schema[7.1].define(version: 2026_01_22_153842) do
     t.bigint "invited_by_id"
     t.integer "invitations_count", default: 0
     t.string "locale"
+    t.string "external_id"
+    t.string "external_source"
+    t.datetime "last_synced_at"
+    t.text "sync_error"
     t.index ["email", "organisation_id"], name: "index_customers_on_email_and_organisation_id", unique: true
     t.index ["invitation_token"], name: "index_customers_on_invitation_token", unique: true
     t.index ["invited_by_id"], name: "index_customers_on_invited_by_id"
     t.index ["invited_by_type", "invited_by_id"], name: "index_customers_on_invited_by"
     t.index ["locale"], name: "index_customers_on_locale"
+    t.index ["organisation_id", "external_id", "external_source"], name: "index_customers_on_org_external_id_source", unique: true, where: "(external_id IS NOT NULL)"
     t.index ["organisation_id"], name: "index_customers_on_organisation_id"
     t.index ["reset_password_token"], name: "index_customers_on_reset_password_token", unique: true
+  end
+
+  create_table "erp_configurations", force: :cascade do |t|
+    t.bigint "organisation_id", null: false
+    t.boolean "enabled", default: false
+    t.string "adapter_type"
+    t.text "credentials_ciphertext"
+    t.boolean "sync_products", default: true
+    t.boolean "sync_customers", default: true
+    t.boolean "sync_orders", default: false
+    t.string "sync_frequency", default: "daily"
+    t.datetime "last_sync_at"
+    t.string "last_sync_status"
+    t.text "last_sync_error"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["organisation_id"], name: "index_erp_configurations_on_organisation_id", unique: true
+  end
+
+  create_table "erp_sync_logs", force: :cascade do |t|
+    t.bigint "organisation_id", null: false
+    t.bigint "erp_configuration_id", null: false
+    t.string "sync_type"
+    t.string "entity_type"
+    t.string "status"
+    t.integer "records_processed", default: 0
+    t.integer "records_created", default: 0
+    t.integer "records_updated", default: 0
+    t.integer "records_failed", default: 0
+    t.datetime "started_at"
+    t.datetime "completed_at"
+    t.jsonb "errors", default: []
+    t.text "summary"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["erp_configuration_id"], name: "index_erp_sync_logs_on_erp_configuration_id"
+    t.index ["organisation_id", "created_at"], name: "index_erp_sync_logs_on_organisation_id_and_created_at"
+    t.index ["organisation_id"], name: "index_erp_sync_logs_on_organisation_id"
   end
 
   create_table "members", force: :cascade do |t|
@@ -359,9 +402,14 @@ ActiveRecord::Schema[7.1].define(version: 2026_01_22_153842) do
     t.integer "position"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "external_id"
+    t.string "external_source"
+    t.datetime "last_synced_at"
+    t.text "sync_error"
     t.index ["organisation_id", "sku"], name: "index_product_variants_on_organisation_id_and_sku", unique: true, where: "((sku IS NOT NULL) AND ((sku)::text <> ''::text))"
     t.index ["organisation_id"], name: "index_product_variants_on_organisation_id"
     t.index ["product_id", "available"], name: "index_product_variants_on_product_id_and_available"
+    t.index ["product_id", "external_id", "external_source"], name: "index_product_variants_on_product_external_id_source", unique: true, where: "(external_id IS NOT NULL)"
     t.index ["product_id", "is_default"], name: "index_product_variants_on_product_id_and_is_default"
     t.index ["product_id", "position"], name: "index_product_variants_on_product_id_and_position"
     t.index ["product_id"], name: "index_product_variants_on_product_id"
@@ -384,7 +432,12 @@ ActiveRecord::Schema[7.1].define(version: 2026_01_22_153842) do
     t.datetime "updated_at", null: false
     t.boolean "has_variants", default: false, null: false
     t.boolean "variants_generated", default: false, null: false
+    t.string "external_id"
+    t.string "external_source"
+    t.datetime "last_synced_at"
+    t.text "sync_error"
     t.index ["category_id"], name: "index_products_on_category_id"
+    t.index ["organisation_id", "external_id", "external_source"], name: "index_products_on_org_external_id_source", unique: true, where: "(external_id IS NOT NULL)"
     t.index ["organisation_id"], name: "index_products_on_organisation_id"
     t.index ["slug"], name: "index_products_on_slug", unique: true
   end
@@ -410,6 +463,9 @@ ActiveRecord::Schema[7.1].define(version: 2026_01_22_153842) do
   add_foreign_key "customer_product_discounts", "organisations"
   add_foreign_key "customer_product_discounts", "products"
   add_foreign_key "customers", "organisations"
+  add_foreign_key "erp_configurations", "organisations"
+  add_foreign_key "erp_sync_logs", "erp_configurations"
+  add_foreign_key "erp_sync_logs", "organisations"
   add_foreign_key "order_discounts", "organisations"
   add_foreign_key "order_items", "orders"
   add_foreign_key "order_items", "product_variants"

@@ -73,6 +73,12 @@
           <span><%= t('bo.sidebar.settings') %></span>
         <% end %>
       </li>
+      <li class="bo-sidebar-item <%= 'active' if controller_name == 'erp_settings' %>">
+        <%= link_to edit_bo_erp_settings_path do %>
+          <i class="fa-solid fa-plug"></i>
+          <span><%= t('bo.sidebar.erp_integration', default: 'ERP Integration') %></span>
+        <% end %>
+      </li>
     <% end %>
     <li class="bo-sidebar-item">
       <%= link_to destroy_member_session_path, data: { turbo_method: :delete } do %>

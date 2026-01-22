@@ -1,0 +1,111 @@
+<% content_for :bo_main_content do %>
+
+<div class="mb-4">
+  <div class="d-flex justify-content-between align-items-center">
+    <div class="d-flex align-items-center gap-3">
+      <div class="rounded-circle bg-secondary d-flex align-items-center justify-content-center text-white fw-bold" style="width: 60px; height: 60px; font-size: 1.25rem;">
+        <i class="fa-solid fa-list"></i>
+      </div>
+
+      <div>
+        <h4 class="mb-0">Sync Logs</h4>
+        <span class="text-muted">ERP Integration History</span>
+      </div>
+    </div>
+
+    <div class="d-flex gap-2 align-items-center">
+      <%= link_to edit_bo_erp_settings_path, class: "btn btn-outline-secondary" do %>
+        <i class="fa-solid fa-arrow-left"></i> Back to ERP Settings
+      <% end %>
+    </div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-body">
+    <% if @sync_logs.any? %>
+      <div class="table-responsive">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Type</th>
+              <th>Entity</th>
+              <th>Status</th>
+              <th>Duration</th>
+              <th>Created</th>
+              <th>Updated</th>
+              <th>Failed</th>
+              <th>Summary</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% @sync_logs.each do |log| %>
+            <tr>
+              <td><%= log.created_at.strftime("%b %d, %Y %H:%M") %></td>
+              <td><span class="badge bg-secondary"><%= log.sync_type.capitalize %></span></td>
+              <td><%= log.entity_type.capitalize %></td>
+              <td>
+                <% case log.status %>
+                <% when 'completed' %>
+                  <span class="badge bg-success">Completed</span>
+                <% when 'failed' %>
+                  <span class="badge bg-danger">Failed</span>
+                <% when 'running' %>
+                  <span class="badge bg-warning">Running</span>
+                <% end %>
+              </td>
+              <td><%= log.duration_in_words || '-' %></td>
+              <td class="text-success"><%= log.records_created %></td>
+              <td class="text-primary"><%= log.records_updated %></td>
+              <td class="text-danger"><%= log.records_failed %></td>
+              <td>
+                <% if log.summary.present? %>
+                  <small class="text-muted"><%= truncate(log.summary, length: 50) %></small>
+                <% else %>
+                  -
+                <% end %>
+              </td>
+            </tr>
+            <% if log.errors.present? && log.errors.any? %>
+            <tr>
+              <td colspan="9" class="bg-light">
+                <details>
+                  <summary class="text-danger small">View <%= log.errors.size %> error(s)</summary>
+                  <ul class="list-unstyled mt-2 mb-0 small">
+                    <% log.errors.first(5).each do |error| %>
+                      <li class="text-danger">
+                        <strong><%= error['record'] %>:</strong> <%= error['error'] %>
+                      </li>
+                    <% end %>
+                    <% if log.errors.size > 5 %>
+                      <li class="text-muted">... and <%= log.errors.size - 5 %> more</li>
+                    <% end %>
+                  </ul>
+                </details>
+              </td>
+            </tr>
+            <% end %>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+
+      <% if @sync_logs.respond_to?(:total_pages) && @sync_logs.total_pages > 1 %>
+        <nav class="mt-4">
+          <%= paginate @sync_logs %>
+        </nav>
+      <% end %>
+    <% else %>
+      <div class="text-center py-5">
+        <i class="fa-solid fa-inbox text-muted" style="font-size: 3rem;"></i>
+        <p class="text-muted mt-3">No sync logs yet. Run your first sync to see activity here.</p>
+        <%= link_to edit_bo_erp_settings_path, class: "btn btn-primary" do %>
+          Configure ERP Integration
+        <% end %>
+      </div>
+    <% end %>
+  </div>
+</div>
+
+<% end %>

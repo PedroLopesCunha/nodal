@@ -1,4 +1,6 @@
 class ProductVariant < ApplicationRecord
+  include ErpSyncable
+
   belongs_to :organisation
   belongs_to :product
   has_many :variant_attribute_values, dependent: :destroy
