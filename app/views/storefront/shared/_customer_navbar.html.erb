@@ -1,6 +1,6 @@
 <nav class="navbar navbar-expand-lg navbar-light bg-white border-bottom sticky-top">
   <div class="container">
-    <%= link_to root_path, class: "navbar-brand fw-bold d-flex align-items-center gap-1" do %>
+    <%= link_to products_path(org_slug: params[:org_slug]), class: "navbar-brand fw-bold d-flex align-items-center gap-1" do %>
       <% if current_organisation&.logo&.attached? %>
         <%= image_tag current_organisation.logo, style: "max-height: 32px;", alt: current_organisation.name %>
       <% else %>
@@ -21,6 +21,11 @@
         <li class="nav-item">
           <%= link_to t('storefront.navbar.orders'), orders_path(org_slug: params[:org_slug]), class: "nav-link #{'active' if controller_name == 'orders'}" %>
         </li>
+        <% if current_organisation.has_contact_info? %>
+          <li class="nav-item">
+            <%= link_to t('storefront.navbar.contact'), contact_path(org_slug: params[:org_slug]), class: "nav-link #{'active' if controller_name == 'contacts'}" %>
+          </li>
+        <% end %>
       </ul>
 
       <div class="d-flex align-items-center gap-3">

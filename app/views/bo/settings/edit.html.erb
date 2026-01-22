@@ -63,6 +63,78 @@
         </div>
       </div>
 
+      <div class="card mb-3" data-controller="contact-address-toggle">
+        <div class="card-body">
+          <h5 class="card-title mb-4"><%= t('bo.settings.edit.contact_info') %></h5>
+
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label class="form-label"><%= t('bo.settings.edit.contact_email') %></label>
+              <%= f.email_field :contact_email, class: "form-control", placeholder: t('bo.settings.edit.contact_email_placeholder') %>
+              <small class="text-muted"><%= t('bo.settings.edit.contact_email_hint') %></small>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label"><%= t('bo.settings.edit.phone') %></label>
+              <%= f.text_field :phone, class: "form-control", placeholder: t('bo.settings.edit.phone_placeholder') %>
+            </div>
+          </div>
+
+          <div class="row g-3 mt-1">
+            <div class="col-md-6">
+              <label class="form-label"><%= t('bo.settings.edit.whatsapp') %></label>
+              <%= f.text_field :whatsapp, class: "form-control", placeholder: t('bo.settings.edit.whatsapp_placeholder') %>
+              <small class="text-muted"><%= t('bo.settings.edit.whatsapp_hint') %></small>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label"><%= t('bo.settings.edit.business_hours') %></label>
+              <%= f.text_area :business_hours, class: "form-control", rows: 2, placeholder: t('bo.settings.edit.business_hours_placeholder') %>
+            </div>
+          </div>
+
+          <hr class="my-4">
+
+          <h6 class="mb-3"><%= t('bo.settings.edit.contact_address') %></h6>
+
+          <div class="form-check mb-3">
+            <%= f.check_box :use_billing_address_for_contact,
+                            class: "form-check-input",
+                            data: { contact_address_toggle_target: "checkbox", action: "change->contact-address-toggle#toggle" } %>
+            <label class="form-check-label">
+              <%= t('bo.settings.edit.use_billing_address') %>
+            </label>
+          </div>
+
+          <div data-contact-address-toggle-target="addressFields" class="<%= 'd-none' if @organisation.use_billing_address_for_contact? %>">
+            <%= f.fields_for :contact_address do |addr| %>
+              <div class="row g-3">
+                <div class="col-md-8">
+                  <label class="form-label"><%= t('bo.settings.edit.street_name') %></label>
+                  <%= addr.text_field :street_name, class: "form-control" %>
+                </div>
+                <div class="col-md-4">
+                  <label class="form-label"><%= t('bo.settings.edit.street_nr') %></label>
+                  <%= addr.text_field :street_nr, class: "form-control" %>
+                </div>
+              </div>
+              <div class="row g-3 mt-1">
+                <div class="col-md-4">
+                  <label class="form-label"><%= t('bo.settings.edit.postal_code') %></label>
+                  <%= addr.text_field :postal_code, class: "form-control" %>
+                </div>
+                <div class="col-md-4">
+                  <label class="form-label"><%= t('bo.settings.edit.city') %></label>
+                  <%= addr.text_field :city, class: "form-control" %>
+                </div>
+                <div class="col-md-4">
+                  <label class="form-label"><%= t('bo.settings.edit.country') %></label>
+                  <%= addr.text_field :country, class: "form-control" %>
+                </div>
+              </div>
+            <% end %>
+          </div>
+        </div>
+      </div>
+
       <div class="card mb-3">
         <div class="card-body">
           <h5 class="card-title mb-4"><%= t('bo.settings.edit.commerce_settings') %></h5>

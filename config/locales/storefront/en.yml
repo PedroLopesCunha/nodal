@@ -14,9 +14,25 @@ en:
     navbar:
       products: "Products"
       orders: "Orders"
+      contact: "Contact"
       cart: "Cart"
       sign_out: "Sign out"
       order_discounts_available: "Order discounts available!"
+
+    # Footer
+    footer:
+      contact_us: "Contact Us"
+
+    # Contact page
+    contact:
+      title: "Contact Us"
+      get_in_touch: "Get in Touch"
+      email: "Email"
+      phone: "Phone"
+      whatsapp: "WhatsApp"
+      address: "Our Location"
+      business_hours: "Business Hours"
+      no_contact_info: "Contact information is not available at this time."
 
     # Products section
     products:
