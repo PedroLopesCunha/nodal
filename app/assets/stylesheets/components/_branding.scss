@@ -103,3 +103,13 @@ a.text-primary {
   border-color: var(--org-primary, $teal);
   box-shadow: 0 0 0 0.25rem rgba(var(--org-primary-rgb, 0, 128, 96), 0.25);
 }
+
+// Breadcrumb links use org secondary color
+.breadcrumb a {
+  color: var(--org-secondary, $dark);
+  text-decoration: none;
+
+  &:hover {
+    color: var(--org-primary, $teal);
+  }
+}

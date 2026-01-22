@@ -1,6 +1,17 @@
 // Powered by Nodal - Minimal storefront footer
 @import "../config/colors";
 
+// Storefront layout - flex container to push footer to bottom
+.storefront-layout {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+
+  > main {
+    flex: 1;
+  }
+}
+
 .powered-by-nodal {
   padding: 1rem 0;
   text-align: center;
