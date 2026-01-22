@@ -12,14 +12,14 @@
     <%= organisation_branding_styles(current_organisation) %>
   </head>
 
-  <body class="storefront-layout">
+  <body class="storefront-layout d-flex flex-column min-vh-100">
     <%= render "storefront/shared/customer_navbar" %>
 
-    <main class="container py-4">
+    <main class="container py-4 flex-grow-1">
       <%= yield %>
     </main>
 
     <%= render "shared/flashes" %>
-    <%= render "storefront/shared/powered_by_nodal" %>
+    <%= render "storefront/shared/footer" %>
   </body>
 </html>

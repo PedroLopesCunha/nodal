@@ -26,6 +26,7 @@ Rails.application.routes.draw do
 
     # storefront (customer-facing)
     scope module: :storefront do
+      resource :contact, only: [:show]
       resources :products, only: [:index, :show]
 
       # Cart (current draft order)

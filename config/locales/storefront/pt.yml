@@ -14,9 +14,25 @@ pt:
     navbar:
       products: "Produtos"
       orders: "Encomendas"
+      contact: "Contacto"
       cart: "Carrinho"
       sign_out: "Terminar sessão"
       order_discounts_available: "Descontos de encomenda disponíveis!"
+
+    # Rodapé
+    footer:
+      contact_us: "Contacte-nos"
+
+    # Página de contacto
+    contact:
+      title: "Contacte-nos"
+      get_in_touch: "Entre em Contacto"
+      email: "Email"
+      phone: "Telefone"
+      whatsapp: "WhatsApp"
+      address: "A Nossa Localização"
+      business_hours: "Horário de Funcionamento"
+      no_contact_info: "Informações de contacto não disponíveis de momento."
 
     # Secção de produtos
     products:
