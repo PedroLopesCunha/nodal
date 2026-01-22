@@ -1,5 +1,6 @@
 // Category Tree Styles
 // Used in BO category management and storefront sidebar
+@import "../config/colors";
 
 // BO Category Tree
 .category-tree {
@@ -119,12 +120,12 @@
 
     &:hover {
       background-color: rgba(0, 0, 0, 0.05);
-      color: var(--bs-primary);
+      color: var(--org-primary, $teal);
     }
 
     &.active {
-      background-color: rgba(var(--bs-primary-rgb), 0.1);
-      color: var(--bs-primary);
+      background-color: rgba(var(--org-primary-rgb, 0, 128, 96), 0.1);
+      color: var(--org-primary, $teal);
       font-weight: 600;
     }
   }
@@ -141,7 +142,7 @@
     color: inherit;
 
     &:hover {
-      color: var(--bs-primary);
+      color: var(--org-primary, $teal);
     }
   }
 

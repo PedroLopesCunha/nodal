@@ -6,6 +6,7 @@ module BrandingHelper
     secondary = organisation.effective_secondary_color
     primary_hover = darken_color(primary, 15)
     contrast = contrast_color(primary)
+    primary_rgb = hex_to_rgb(primary)
 
     content_tag(:style) do
       <<~CSS.html_safe
@@ -14,6 +15,7 @@ module BrandingHelper
           --org-primary-hover: #{primary_hover};
           --org-secondary: #{secondary};
           --org-primary-contrast: #{contrast};
+          --org-primary-rgb: #{primary_rgb};
         }
       CSS
     end
@@ -33,5 +35,11 @@ module BrandingHelper
     rgb = hex.scan(/../).map { |c| c.to_i(16) }
     luminance = (0.299 * rgb[0] + 0.587 * rgb[1] + 0.114 * rgb[2]) / 255
     luminance > 0.5 ? '#000000' : '#ffffff'
+  end
+
+  def hex_to_rgb(hex_color)
+    hex = hex_color.gsub('#', '')
+    rgb = hex.scan(/../).map { |c| c.to_i(16) }
+    rgb.join(', ')
   end
 end
