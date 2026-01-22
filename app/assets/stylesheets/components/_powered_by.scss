@@ -1,0 +1,66 @@
+// Powered by Nodal - Minimal storefront footer
+@import "../config/colors";
+
+.powered-by-nodal {
+  padding: 1rem 0;
+  text-align: center;
+  margin-top: auto;
+  background: var(--org-primary, $teal);
+}
+
+.powered-by-content {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--org-primary-contrast, #ffffff);
+  text-decoration: none;
+  transition: color 0.2s ease;
+
+  &:hover {
+    color: $teal-light;
+
+    .logo-icon {
+      background: $teal-light;
+      color: var(--org-primary, $teal);
+    }
+
+    .logo-text {
+      color: $teal-light;
+    }
+  }
+}
+
+.store-name {
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.powered-by-text {
+  font-size: 0.875rem;
+  font-weight: 400;
+}
+
+.nodal-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  text-decoration: none;
+  color: inherit;
+
+  .logo-icon {
+    width: 20px;
+    height: 20px;
+    background: var(--org-primary-contrast, #ffffff);
+    color: var(--org-primary, $teal);
+    border-radius: 4px;
+    font-size: 0.75rem;
+    transition: background 0.2s ease, color 0.2s ease;
+  }
+
+  .logo-text {
+    font-size: 1rem;
+    font-weight: 600;
+    color: inherit;
+    transition: color 0.2s ease;
+  }
+}
