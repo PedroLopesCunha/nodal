@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>Nodal - fast, simple, connected</title>
+    <title><%= current_organisation&.effective_storefront_title || "Nodal" %></title>
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <%= favicon_link_tag "/favicon.svg", type: "image/svg+xml" %>
+    <%= organisation_favicon_tag(current_organisation) %>
     <%= csrf_meta_tags %>
     <%= csp_meta_tag %>
 
