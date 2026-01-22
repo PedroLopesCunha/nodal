@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2026_01_21_192307) do
+ActiveRecord::Schema[7.1].define(version: 2026_01_22_105200) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -67,7 +67,6 @@ ActiveRecord::Schema[7.1].define(version: 2026_01_21_192307) do
     t.integer "position"
     t.datetime "discarded_at"
     t.text "description"
-    t.string "icon"
     t.string "color"
     t.jsonb "metadata", default: {}
     t.string "slug"
