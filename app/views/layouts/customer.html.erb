@@ -9,9 +9,10 @@
 
     <%= stylesheet_link_tag "application", "data-turbo-track": "reload" %>
     <%= javascript_importmap_tags %>
+    <%= organisation_branding_styles(current_organisation) %>
   </head>
 
-  <body>
+  <body class="storefront-layout">
     <%= render "storefront/shared/customer_navbar" %>
 
     <main class="container py-4">
@@ -19,5 +20,6 @@
     </main>
 
     <%= render "shared/flashes" %>
+    <%= render "storefront/shared/powered_by_nodal" %>
   </body>
 </html>

@@ -60,12 +60,6 @@
           <h5 class="card-title mb-4"><%= t('bo.categories.form.appearance') %></h5>
 
           <div class="mb-3">
-            <label class="form-label"><%= t('bo.categories.form.icon') %></label>
-            <%= f.text_field :icon, class: "form-control", placeholder: "fa-solid fa-folder" %>
-            <small class="text-muted"><%= t('bo.categories.form.icon_hint') %></small>
-          </div>
-
-          <div class="mb-3">
             <label class="form-label"><%= t('bo.categories.form.color') %></label>
             <div class="input-group">
               <%= f.color_field :color, class: "form-control form-control-color", value: category.color.presence || "#6c757d" %>

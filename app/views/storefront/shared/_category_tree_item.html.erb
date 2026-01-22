@@ -21,11 +21,6 @@
 
     <%= link_to products_path(org_slug: params[:org_slug], category: category.id, query: params[:query]),
         class: "category-link flex-grow-1 py-1 #{'active fw-bold text-primary' if is_current}" do %>
-      <% if category.icon.present? %>
-        <i class="<%= category.icon %> me-2" style="color: <%= category.color.presence || 'inherit' %>;"></i>
-      <% else %>
-        <i class="fa-solid fa-folder me-2" style="color: <%= category.color.presence || 'inherit' %>;"></i>
-      <% end %>
       <%= category.name %>
       <span class="badge bg-secondary-subtle text-secondary ms-1"><%= category.all_products_count %></span>
     <% end %>

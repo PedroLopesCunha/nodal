@@ -18,6 +18,6 @@ class Bo::SettingsController < Bo::BaseController
   private
 
   def organisation_params
-    params.require(:organisation).permit(:name, :billing_email, :tax_rate, :shipping_cost, :default_locale)
+    params.require(:organisation).permit(:name, :billing_email, :tax_rate, :shipping_cost, :default_locale, :logo, :primary_color, :secondary_color)
   end
 end
