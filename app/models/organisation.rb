@@ -7,6 +7,7 @@ class Organisation < ApplicationRecord
   monetize :shipping_cost_cents
 
   has_one_attached :logo
+  has_one_attached :favicon
   has_many :org_members, dependent: :destroy
   has_many :members, through: :org_members, dependent: :destroy
   has_many :customers, dependent: :destroy
@@ -60,5 +61,9 @@ class Organisation < ApplicationRecord
       whatsapp.present? ||
       business_hours.present? ||
       display_contact_address.present?
+  end
+
+  def effective_storefront_title
+    storefront_title.presence || name
   end
 end

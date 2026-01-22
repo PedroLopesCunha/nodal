@@ -21,7 +21,32 @@ module BrandingHelper
     end
   end
 
+  def organisation_favicon_tag(organisation)
+    return favicon_link_tag("/favicon.svg", type: "image/svg+xml") unless organisation
+
+    if organisation.favicon.attached?
+      favicon_link_tag(url_for(organisation.favicon), type: organisation.favicon.content_type)
+    else
+      # Generate dynamic SVG favicon with org's primary color and first letter
+      svg_favicon = generate_favicon_svg(organisation)
+      tag.link(rel: "icon", href: "data:image/svg+xml,#{ERB::Util.url_encode(svg_favicon)}", type: "image/svg+xml")
+    end
+  end
+
   private
+
+  def generate_favicon_svg(organisation)
+    primary_color = organisation.effective_primary_color
+    letter = organisation.name.first.upcase
+    contrast = contrast_color(primary_color)
+
+    <<~SVG
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+        <rect width="32" height="32" rx="6" fill="#{primary_color}"/>
+        <text x="16" y="22" font-family="Arial, sans-serif" font-size="18" font-weight="bold" fill="#{contrast}" text-anchor="middle">#{letter}</text>
+      </svg>
+    SVG
+  end
 
   def darken_color(hex_color, percent)
     hex = hex_color.gsub('#', '')

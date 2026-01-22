@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2026_01_22_115735) do
+ActiveRecord::Schema[7.1].define(version: 2026_01_22_153842) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -273,6 +273,7 @@ ActiveRecord::Schema[7.1].define(version: 2026_01_22_115735) do
     t.string "whatsapp"
     t.text "business_hours"
     t.boolean "use_billing_address_for_contact"
+    t.string "storefront_title"
     t.index ["default_locale"], name: "index_organisations_on_default_locale"
     t.index ["slug"], name: "index_organisations_on_slug", unique: true
   end
