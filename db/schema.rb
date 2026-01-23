@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2026_01_23_000002) do
+ActiveRecord::Schema[7.1].define(version: 2026_01_23_180251) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -319,6 +319,8 @@ ActiveRecord::Schema[7.1].define(version: 2026_01_23_000002) do
     t.boolean "use_billing_address_for_contact"
     t.string "storefront_title"
     t.string "taxpayer_id"
+    t.integer "free_shipping_threshold_cents"
+    t.string "free_shipping_threshold_currency", default: "EUR"
     t.index ["default_locale"], name: "index_organisations_on_default_locale"
     t.index ["slug"], name: "index_organisations_on_slug", unique: true
   end

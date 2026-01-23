@@ -5,13 +5,15 @@ export default class extends Controller {
     static targets = [
         "shippingAmount", "totalAmount", "shippingAddressSection",
         "sameAsShippingOption", "dateLabel", "newShippingAddressForm",
-        "billingAddressFields"
+        "billingAddressFields", "deliveryShippingCost"
     ]
     static values = {
         subtotal: Number,
         tax: Number,
         shippingCost: Number,
-        currencySymbol: String
+        currencySymbol: String,
+        freeShippingThreshold: Number,
+        freeShippingEnabled: Boolean
     }
 
     connect() {
@@ -19,9 +21,16 @@ export default class extends Controller {
         this.toggleBillingAddress()
     }
 
+    qualifiesForFreeShipping() {
+        return this.freeShippingEnabledValue &&
+               this.freeShippingThresholdValue > 0 &&
+               this.subtotalValue >= this.freeShippingThresholdValue
+    }
+
     updateTotal() {
         const isPickup = document.getElementById("delivery_method_pickup").checked
-        const shipping = isPickup ? 0 : this.shippingCostValue
+        const qualifiesForFree = this.qualifiesForFreeShipping()
+        const shipping = isPickup || qualifiesForFree ? 0 : this.shippingCostValue
         const total = this.subtotalValue + this.taxValue + shipping
 
         this.shippingAmountTarget.textContent = this.formatCurrency(shipping)

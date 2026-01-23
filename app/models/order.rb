@@ -111,7 +111,20 @@ class Order < ApplicationRecord
 
   # Calculate shipping based on delivery method and organisation's shipping cost
   def calculated_shipping
-    pickup? ? Money.new(0, organisation.currency) : organisation.shipping_cost
+    return Money.new(0, organisation.currency) if pickup?
+    return Money.new(0, organisation.currency) if qualifies_for_free_shipping?
+    organisation.shipping_cost
+  end
+
+  def qualifies_for_free_shipping?
+    return false unless organisation.free_shipping_enabled?
+    total_with_auto_discount >= organisation.free_shipping_threshold
+  end
+
+  def free_shipping_amount_remaining
+    return nil unless organisation.free_shipping_enabled?
+    return Money.new(0, organisation.currency) if qualifies_for_free_shipping?
+    organisation.free_shipping_threshold - total_with_auto_discount
   end
 
   # Order discount methods

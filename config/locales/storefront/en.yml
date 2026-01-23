@@ -26,6 +26,10 @@ en:
       sign_out: "Sign out"
       order_discounts_available: "Order discounts available!"
 
+    # Free shipping
+    free_shipping:
+      banner: "Free shipping on orders over %{amount}"
+
     # Footer
     footer:
       contact_us: "Contact Us"
@@ -116,6 +120,8 @@ en:
         remove: "Remove"
         sku: "SKU"
         min_order: "Min"
+        free_shipping_applied: "Free shipping applied!"
+        free_shipping_progress: "Spend %{amount} more for free shipping"
 
     # Checkout section
     checkouts:

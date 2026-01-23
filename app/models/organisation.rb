@@ -5,6 +5,7 @@ class Organisation < ApplicationRecord
   HEX_COLOR_REGEX = /\A#[0-9A-Fa-f]{6}\z/
 
   monetize :shipping_cost_cents
+  monetize :free_shipping_threshold_cents, allow_nil: true
 
   has_one_attached :logo
   has_one_attached :favicon
@@ -39,6 +40,10 @@ class Organisation < ApplicationRecord
 
   def currency_symbol
     Money::Currency.new(currency).symbol
+  end
+
+  def free_shipping_enabled?
+    free_shipping_threshold_cents.present? && free_shipping_threshold_cents > 0
   end
 
   def effective_primary_color

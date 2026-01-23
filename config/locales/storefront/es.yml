@@ -26,6 +26,10 @@ es:
       sign_out: "Cerrar sesión"
       order_discounts_available: "¡Descuentos de pedido disponibles!"
 
+    # Envío gratis
+    free_shipping:
+      banner: "Envío gratis en pedidos superiores a %{amount}"
+
     # Pie de página
     footer:
       contact_us: "Contáctenos"
@@ -116,6 +120,8 @@ es:
         remove: "Eliminar"
         sku: "SKU"
         min_order: "Mín"
+        free_shipping_applied: "¡Envío gratis aplicado!"
+        free_shipping_progress: "Gasta %{amount} más para envío gratis"
 
     # Sección de checkout
     checkouts:
