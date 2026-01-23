@@ -77,10 +77,12 @@ class Bo::ErpSettingsController < Bo::BaseController
       return
     end
 
-    ErpSyncJob.perform_later(current_organisation.id, sync_type: 'manual')
+    # Using perform_now for synchronous execution (no Redis/Sidekiq needed)
+    # Change to perform_later when Redis + worker dyno are configured
+    ErpSyncJob.perform_now(current_organisation.id, sync_type: 'manual')
 
     redirect_to edit_bo_erp_settings_path(org_slug: current_organisation.slug),
-                notice: "Sync started. Check the sync logs for progress."
+                notice: "Sync completed. Check the sync logs for details."
   end
 
   def sync_logs
