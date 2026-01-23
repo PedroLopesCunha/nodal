@@ -1,0 +1,67 @@
+# Additional translations at https://github.com/heartcombo/devise/wiki/I18n
+
+pt:
+  devise:
+    confirmations:
+      confirmed: "O teu endereço de email foi confirmado com sucesso."
+      send_instructions: "Vais receber um email com instruções sobre como confirmar o teu endereço de email dentro de alguns minutos."
+      send_paranoid_instructions: "Se o teu endereço de email existir na nossa base de dados, vais receber um email com instruções sobre como confirmar o teu endereço de email dentro de alguns minutos."
+    failure:
+      already_authenticated: "Já tens sessão iniciada."
+      inactive: "A tua conta ainda não foi ativada."
+      invalid: "%{authentication_keys} ou palavra-passe inválidos."
+      locked: "A tua conta está bloqueada."
+      last_attempt: "Tens mais uma tentativa antes da tua conta ser bloqueada."
+      not_found_in_database: "%{authentication_keys} ou palavra-passe inválidos."
+      timeout: "A tua sessão expirou. Por favor, inicia sessão novamente para continuar."
+      unauthenticated: "Precisas de iniciar sessão antes de continuar."
+      unconfirmed: "Precisas de confirmar o teu endereço de email antes de continuar."
+    mailer:
+      confirmation_instructions:
+        subject: "Instruções de confirmação"
+      reset_password_instructions:
+        subject: "Instruções para redefinir palavra-passe"
+      unlock_instructions:
+        subject: "Instruções para desbloquear conta"
+      email_changed:
+        subject: "Email alterado"
+      password_change:
+        subject: "Palavra-passe alterada"
+    omniauth_callbacks:
+      failure: "Não foi possível autenticar-te a partir de %{kind} porque \"%{reason}\"."
+      success: "Autenticado com sucesso a partir da conta %{kind}."
+    passwords:
+      no_token: "Não podes aceder a esta página sem vir de um email de redefinição de palavra-passe. Se vieste de um email de redefinição de palavra-passe, certifica-te de que usaste o URL completo fornecido."
+      send_instructions: "Vais receber um email com instruções sobre como redefinir a tua palavra-passe dentro de alguns minutos."
+      send_paranoid_instructions: "Se o teu endereço de email existir na nossa base de dados, vais receber um link de recuperação de palavra-passe no teu email dentro de alguns minutos."
+      updated: "A tua palavra-passe foi alterada com sucesso. Sessão iniciada."
+      updated_not_active: "A tua palavra-passe foi alterada com sucesso."
+    registrations:
+      destroyed: "Adeus! A tua conta foi cancelada com sucesso. Esperamos ver-te novamente em breve."
+      signed_up: "Bem-vindo! Registaste-te com sucesso."
+      signed_up_but_inactive: "Registaste-te com sucesso. No entanto, não foi possível iniciar sessão porque a tua conta ainda não está ativada."
+      signed_up_but_locked: "Registaste-te com sucesso. No entanto, não foi possível iniciar sessão porque a tua conta está bloqueada."
+      signed_up_but_unconfirmed: "Uma mensagem com um link de confirmação foi enviada para o teu endereço de email. Por favor, segue o link para ativar a tua conta."
+      update_needs_confirmation: "Atualizaste a tua conta com sucesso, mas precisamos verificar o teu novo endereço de email. Por favor, verifica o teu email e segue o link de confirmação para confirmar o teu novo endereço de email."
+      updated: "A tua conta foi atualizada com sucesso."
+      updated_but_not_signed_in: "A tua conta foi atualizada com sucesso, mas como a tua palavra-passe foi alterada, precisas de iniciar sessão novamente."
+    sessions:
+      signed_in: "Sessão iniciada com sucesso."
+      signed_out: "Sessão terminada com sucesso."
+      already_signed_out: "Sessão terminada com sucesso."
+      invalid: "Email ou palavra-passe inválidos."
+      not_member_of_organisation: "Não és membro desta organização."
+    unlocks:
+      send_instructions: "Vais receber um email com instruções sobre como desbloquear a tua conta dentro de alguns minutos."
+      send_paranoid_instructions: "Se a tua conta existir, vais receber um email com instruções sobre como desbloqueá-la dentro de alguns minutos."
+      unlocked: "A tua conta foi desbloqueada com sucesso. Por favor, inicia sessão para continuar."
+  errors:
+    messages:
+      already_confirmed: "já foi confirmado, por favor tenta iniciar sessão"
+      confirmation_period_expired: "precisa de ser confirmado dentro de %{period}, por favor solicita um novo"
+      expired: "expirou, por favor solicita um novo"
+      not_found: "não encontrado"
+      not_locked: "não estava bloqueado"
+      not_saved:
+        one: "1 erro impediu que este %{resource} fosse guardado:"
+        other: "%{count} erros impediram que este %{resource} fosse guardado:"
