@@ -1,34 +1,37 @@
 class CustomerMailer < ApplicationMailer
   helper :application
+  layout 'customer_mailer'
   default template_path: 'customer_mailer'
 
   def invitation_instructions(record, token, opts = {})
-    org = Organisation.find(record.organisation_id)
-    opts[:org_slug] ||= org.slug
+    @organisation = record.organisation
+    opts[:org_slug] ||= @organisation.slug
     @token = token
     @resource = record
-    mail(to: record.email, subject: "Set your password", template_path: 'customer_mailer')
+    mail(to: record.email, subject: "Set your password")
   end
 
   def reset_password_instructions(record, token, opts = {})
+    @organisation = record.organisation
     @token = token
     @resource = record
-    mail(to: record.email, subject: "Reset your password",  template_path: 'customer_mailer')
+    mail(to: record.email, subject: "Reset your password")
   end
 
   def confirm_order
     @customer = params[:customer]
     @order = params[:order]
-    mail(to: @customer.email, subject: "Orderconfirmation for Order #{@order.order_number}", template_path: 'customer_mailer')
+    @organisation = @order.organisation
+    mail(to: @customer.email, subject: "Order confirmation for Order #{@order.order_number}")
   end
 
   def notify_clients_about_discount
     @discount = params[:discount]
     @organisation = params[:organisation]
     mailing_list = @organisation.customers.pluck(:email)
-    if @discount.has_attribute?(:product_id) #ProductDiscount
+    if @discount.has_attribute?(:product_id) # ProductDiscount
       send_product_discount_mail(mailing_list)
-    else #Order Discount
+    else # Order Discount
       send_order_discount_mail(mailing_list)
     end
   end
@@ -37,15 +40,15 @@ class CustomerMailer < ApplicationMailer
     @discount = params[:discount]
     @organisation = params[:organisation]
     @customer = @discount.customer
-    if @discount.has_attribute?(:product_id) #CustomerProductDiscount
+    if @discount.has_attribute?(:product_id) # CustomerProductDiscount
       @product = @discount.product
       subject = "New Discount on #{@product.name}"
       mail(to: @customer.email, subject: subject) do |format|
         format.html { render 'customer_product_discount' }
         format.text { render 'customer_product_discount' }
       end
-    else #CustomerDiscount
-      subject = "New Discount personal Discount for YOU!"
+    else # CustomerDiscount
+      subject = "New personal Discount for YOU!"
       mail(to: @customer.email, subject: subject) do |format|
         format.html { render 'customer_discount' }
         format.text { render 'customer_discount' }

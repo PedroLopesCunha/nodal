@@ -1,7 +1,7 @@
 <!-- Success banner -->
 <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="margin: 0 0 32px 0;">
   <tr>
-    <td style="background: linear-gradient(135deg, #008060 0%, #00a67d 100%); background-color: #008060; border-radius: 12px; padding: 24px; text-align: center;">
+    <td style="background: linear-gradient(135deg, <%= @organisation.effective_primary_color %> 0%, #00a67d 100%); background-color: <%= @organisation.effective_primary_color %>; border-radius: 12px; padding: 24px; text-align: center;">
       <table role="presentation" cellspacing="0" cellpadding="0" border="0" align="center">
         <tr>
           <td style="background-color: rgba(255,255,255,0.2); border-radius: 50%; width: 48px; height: 48px; text-align: center; vertical-align: middle;">
@@ -146,7 +146,7 @@
             <span style="font-size: 16px; font-weight: 700; color: #1a1a1a;">Total</span>
           </td>
           <td align="right" style="padding: 16px 20px; border-top: 1px solid #e5e5e5;">
-            <span style="font-size: 20px; font-weight: 700; color: #008060;"><%= @order.grand_total.format %></span>
+            <span style="font-size: 20px; font-weight: 700; color: <%= @organisation.effective_primary_color %>;"><%= @order.grand_total.format %></span>
           </td>
         </tr>
       </table>
@@ -209,7 +209,7 @@
 <!-- What's next section -->
 <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="margin: 0 0 24px 0;">
   <tr>
-    <td style="padding: 20px; background-color: #f0fdf4; border-radius: 12px; border-left: 4px solid #008060;">
+    <td style="padding: 20px; background-color: #f0fdf4; border-radius: 12px; border-left: 4px solid <%= @organisation.effective_primary_color %>;">
       <p style="margin: 0 0 8px 0; font-size: 14px; font-weight: 600; color: #166534;">What's next?</p>
       <p style="margin: 0; font-size: 14px; color: #4b5563; line-height: 1.5;">
         We're preparing your order now. You'll receive another email when it's ready for <%= @order.pickup? ? 'pickup' : 'delivery' %>.
