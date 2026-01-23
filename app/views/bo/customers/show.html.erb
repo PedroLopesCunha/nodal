@@ -65,6 +65,15 @@
         <div class="row mb-4">
           <div class="col-md-6">
             <div class="d-flex align-items-start gap-3">
+              <i class="fa-solid fa-building text-muted mt-1"></i>
+              <div>
+                <small class="text-muted d-block"><%= t('bo.customers.form.taxpayer_id') %></small>
+                <span><%= @customer.taxpayer_id.presence || t('bo.common.not_provided') %></span>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="d-flex align-items-start gap-3">
               <i class="fa-solid fa-location-dot text-muted mt-1"></i>
               <div>
                 <small class="text-muted d-block"><%= t('bo.customers.form.billing_address') %></small>
@@ -72,7 +81,9 @@
               </div>
             </div>
           </div>
+        </div>
 
+        <div class="row mb-4">
           <div class="col-md-6">
             <div class="d-flex align-items-start gap-3">
               <i class="fa-solid fa-truck text-muted mt-1"></i>

@@ -1,5 +1,12 @@
 pt:
   storefront:
+    # Modo de visualização para membros da equipa
+    member_browse:
+      preview_banner: "Está a visualizar a loja como membro da equipa."
+      return_to_dashboard: "Voltar ao Painel"
+      staff_badge: "Equipa"
+      cart_not_available: "O carrinho está disponível apenas para clientes."
+
     # Traduções comuns
     common:
       back: "Voltar"

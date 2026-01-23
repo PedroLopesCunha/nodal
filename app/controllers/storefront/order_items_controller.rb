@@ -1,4 +1,6 @@
 class Storefront::OrderItemsController < Storefront::BaseController
+  before_action :require_customer!
+
   def create
     @product = current_organisation.products.where(available: true).find(params[:product_id])
     @order = current_cart

@@ -83,6 +83,7 @@ es:
         "true": "Sí"
         "false": "No"
       vs_prev_period: "vs período anterior"
+      not_provided: "No proporcionado"
 
     # Navegación
     navbar:
@@ -101,6 +102,7 @@ es:
       team: "Equipo"
       settings: "Configuración"
       log_out: "Salir"
+      view_storefront: "Ver Tienda"
 
     # Sección Panel
     dashboards:
@@ -201,6 +203,9 @@ es:
         active: "Activo"
         inactive: "Inactivo"
         inactive_hint: "Los clientes inactivos no pueden realizar pedidos"
+        taxpayer_id: "NIF/CIF"
+        taxpayer_id_placeholder: "Introduzca el número de identificación fiscal"
+        taxpayer_id_hint: "Número de identificación fiscal"
         billing_address: "Dirección de Facturación"
         shipping_address: "Dirección de Envío"
         add_shipping_address: "Añadir Dirección de Envío"
@@ -796,6 +801,10 @@ es:
         billing_email: "Correo de Facturación"
         billing_email_placeholder: "Introduzca el correo de facturación"
         billing_email_hint: "Usado para facturas y comunicaciones de facturación"
+        taxpayer_id: "NIF/CIF"
+        taxpayer_id_placeholder: "Introduzca el número de identificación fiscal"
+        taxpayer_id_hint: "Número de identificación fiscal"
+        billing_address: "Dirección de Facturación"
         default_language: "Idioma Predeterminado"
         default_language_hint: "Idioma predeterminado para todos los usuarios de esta organización"
         contact_info: "Información de Contacto"
