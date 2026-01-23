@@ -9,11 +9,7 @@
 
       <div class="rounded d-flex align-items-center justify-content-center text-white"
            style="width: 60px; height: 60px; background-color: <%= @category.color.presence || '#6c757d' %>;">
-        <% if @category.icon.present? %>
-          <i class="<%= @category.icon %> fa-lg"></i>
-        <% else %>
-          <i class="fa-solid fa-folder fa-lg"></i>
-        <% end %>
+        <i class="fa-solid fa-folder fa-lg"></i>
       </div>
 
       <div>
@@ -80,11 +76,7 @@
             <% @subcategories.each do |subcategory| %>
               <li class="list-group-item d-flex justify-content-between align-items-center px-0">
                 <%= link_to bo_category_path(params[:org_slug], subcategory), class: "text-decoration-none" do %>
-                  <% if subcategory.icon.present? %>
-                    <i class="<%= subcategory.icon %> me-2" style="color: <%= subcategory.color.presence || '#6c757d' %>;"></i>
-                  <% else %>
-                    <i class="fa-solid fa-folder me-2" style="color: <%= subcategory.color.presence || '#6c757d' %>;"></i>
-                  <% end %>
+                  <i class="fa-solid fa-folder me-2" style="color: <%= subcategory.color.presence || '#6c757d' %>;"></i>
                   <%= subcategory.name %>
                 <% end %>
                 <span class="badge bg-secondary"><%= subcategory.all_products_count %></span>
