@@ -1,65 +1,275 @@
-<p>Hello <%= @organisation.name %>,</p>
-
-<p><%= @customer.company_name %> has placed new order.</p>
-
-<h3>Order Details</h3>
-<table>
+<!-- Success banner -->
+<table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="margin: 0 0 32px 0;">
   <tr>
-    <td><strong>Order Number:</strong></td>
-    <td><%= @order.order_number %></td>
-  </tr>
-  <tr>
-    <td><strong>Placed At:</strong></td>
-    <td><%= l(@order.placed_at, format: :long) %></td>
-  </tr>
-  <tr>
-    <td><strong>Delivery Method:</strong></td>
-    <td><%= @order.delivery_method.capitalize %></td>
+    <td style="background: linear-gradient(135deg, #008060 0%, #00a67d 100%); background-color: #008060; border-radius: 12px; padding: 24px; text-align: center;">
+      <table role="presentation" cellspacing="0" cellpadding="0" border="0" align="center">
+        <tr>
+          <td style="background-color: rgba(255,255,255,0.2); border-radius: 50%; width: 48px; height: 48px; text-align: center; vertical-align: middle;">
+            <span style="font-size: 24px; line-height: 48px;">📦</span>
+          </td>
+        </tr>
+      </table>
+      <h1 style="margin: 16px 0 0 0; font-size: 24px; font-weight: 700; color: #ffffff;">
+        <%= t('mailers.member_mailer.notificate_customer_order.banner_title') %>
+      </h1>
+    </td>
   </tr>
 </table>
 
-<h3>Customer</h3>
-<p>
-  <%= @customer.contact_name %><br>
-  <%= @customer.company_name %><br>
-  <%= @customer.email %>
+<p style="margin: 0 0 8px 0; font-size: 16px;"><%= t('mailers.member_mailer.notificate_customer_order.greeting', name: @organisation.name).html_safe %></p>
+
+<p style="margin: 0 0 32px 0; color: #4b5563;">
+  <%= t('mailers.member_mailer.notificate_customer_order.intro', company_name: "<strong>#{@customer.company_name}</strong>").html_safe %>
 </p>
 
-<h3>Items</h3>
-<table>
-  <thead>
-    <tr>
-      <th>Product</th>
-      <th>Qty</th>
-      <th>Unit Price</th>
-      <th>Total</th>
-    </tr>
-  </thead>
-  <tbody>
-    <% @order.order_items.each do |item| %>
-      <tr>
-        <td><%= item.product.name %></td>
-        <td><%= item.quantity %></td>
-        <td><%= humanized_money_with_symbol(item.price) %></td>
-        <td><%= humanized_money_with_symbol(item.total_price) %></td>
-      </tr>
-    <% end %>
-  </tbody>
+<!-- Customer Info card -->
+<table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="margin: 0 0 32px 0; border: 1px solid #e5e5e5; border-radius: 12px; overflow: hidden;">
+  <tr>
+    <td style="padding: 16px 20px; background-color: #f9fafb; border-bottom: 1px solid #e5e5e5;">
+      <span style="font-size: 14px; font-weight: 600; color: #1a1a1a; text-transform: uppercase; letter-spacing: 0.5px;"><%= t('mailers.member_mailer.notificate_customer_order.customer_information') %></span>
+    </td>
+  </tr>
+  <tr>
+    <td style="padding: 20px;">
+      <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0">
+        <tr>
+          <td style="padding-bottom: 12px; width: 33%; vertical-align: top;">
+            <span style="font-size: 12px; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.5px;"><%= t('mailers.member_mailer.notificate_customer_order.contact_name') %></span>
+            <p style="margin: 4px 0 0 0; font-size: 15px; font-weight: 500; color: #1a1a1a;"><%= @customer.contact_name %></p>
+          </td>
+          <td style="padding-bottom: 12px; width: 33%; vertical-align: top;">
+            <span style="font-size: 12px; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.5px;"><%= t('mailers.member_mailer.notificate_customer_order.company') %></span>
+            <p style="margin: 4px 0 0 0; font-size: 15px; font-weight: 500; color: #1a1a1a;"><%= @customer.company_name %></p>
+          </td>
+          <td style="padding-bottom: 12px; width: 33%; vertical-align: top;">
+            <span style="font-size: 12px; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.5px;"><%= t('mailers.member_mailer.notificate_customer_order.email') %></span>
+            <p style="margin: 4px 0 0 0; font-size: 15px; font-weight: 500; color: #1a1a1a;"><%= @customer.email %></p>
+          </td>
+        </tr>
+      </table>
+    </td>
+  </tr>
 </table>
 
-<h3>Order Summary</h3>
-<p>Subtotal: <%= humanized_money_with_symbol(@order.total_amount) %></p>
-<% if @order.auto_order_discount_amount.cents > 0 %>
-  <p>Order Discount (<%= @order.auto_discount_display %>): -<%= humanized_money_with_symbol(@order.auto_order_discount_amount) %></p>
-<% end %>
-<% if @order.has_order_discount? %>
-  <p>Manual Discount (<%= @order.order_discount_display %>): -<%= humanized_money_with_symbol(@order.order_discount_amount) %></p>
-<% end %>
-<p>Tax: <%= humanized_money_with_symbol(@order.tax_amount || @order.calculated_tax) %></p>
-<p>Shipping: <%= humanized_money_with_symbol(@order.shipping_amount || @order.calculated_shipping) %></p>
-<p><strong>Grand Total: <%= humanized_money_with_symbol(@order.grand_total) %></strong></p>
+<!-- Order items card -->
+<table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="margin: 0 0 32px 0; border: 1px solid #e5e5e5; border-radius: 12px; overflow: hidden;">
+  <!-- Card header -->
+  <tr>
+    <td colspan="3" style="padding: 16px 20px; background-color: #f9fafb; border-bottom: 1px solid #e5e5e5;">
+      <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0">
+        <tr>
+          <td>
+            <span style="font-size: 14px; font-weight: 600; color: #1a1a1a; text-transform: uppercase; letter-spacing: 0.5px;"><%= t('mailers.common.order_summary') %></span>
+          </td>
+          <td align="right">
+            <span style="font-size: 13px; color: #6b7177;"><%= @order.order_items.count %> <%= @order.order_items.count == 1 ? t('mailers.common.item') : t('mailers.common.items') %></span>
+          </td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+  <!-- Table header -->
+  <tr>
+    <td style="padding: 12px 20px; background-color: #ffffff; border-bottom: 1px solid #f3f4f6; font-size: 12px; font-weight: 600; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.5px;">
+      <%= t('mailers.common.product') %>
+    </td>
+    <td align="center" style="padding: 12px 16px; background-color: #ffffff; border-bottom: 1px solid #f3f4f6; font-size: 12px; font-weight: 600; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.5px; width: 60px;">
+      <%= t('mailers.common.qty') %>
+    </td>
+    <td align="right" style="padding: 12px 20px; background-color: #ffffff; border-bottom: 1px solid #f3f4f6; font-size: 12px; font-weight: 600; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.5px; width: 100px;">
+      <%= t('mailers.common.price') %>
+    </td>
+  </tr>
+  <!-- Order items -->
+  <% @order.order_items.each_with_index do |item, index| %>
+    <tr>
+      <td style="padding: 16px 20px; background-color: #ffffff; <%= index < @order.order_items.count - 1 ? 'border-bottom: 1px solid #f3f4f6;' : '' %>">
+        <span style="font-size: 15px; font-weight: 500; color: #1a1a1a;"><%= item.product.name %></span>
+        <% if item.discount_percentage && item.discount_percentage > 0 %>
+          <span style="display: inline-block; margin-left: 8px; background-color: #dcfce7; color: #166534; font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 10px;">-<%= (item.discount_percentage * 100).round(0) %>%</span>
+        <% end %>
+      </td>
+      <td align="center" style="padding: 16px; background-color: #ffffff; <%= index < @order.order_items.count - 1 ? 'border-bottom: 1px solid #f3f4f6;' : '' %>">
+        <span style="display: inline-block; background-color: #f3f4f6; padding: 4px 12px; border-radius: 20px; font-size: 14px; font-weight: 600; color: #4b5563;"><%= item.quantity %></span>
+      </td>
+      <td align="right" style="padding: 16px 20px; background-color: #ffffff; <%= index < @order.order_items.count - 1 ? 'border-bottom: 1px solid #f3f4f6;' : '' %>">
+        <% if item.discount_percentage && item.discount_percentage > 0 %>
+          <span style="font-size: 13px; color: #9ca3af; text-decoration: line-through; display: block;"><%= (item.price * item.quantity).format %></span>
+        <% end %>
+        <span style="font-size: 15px; font-weight: 500; color: #1a1a1a;"><%= item.total_price.format %></span>
+      </td>
+    </tr>
+  <% end %>
+
+  <!-- Totals section -->
+  <tr>
+    <td colspan="3" style="padding: 0; background-color: #f9fafb; border-top: 2px solid #e5e5e5;">
+      <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0">
+        <!-- Subtotal -->
+        <tr>
+          <td style="padding: 12px 20px;">
+            <span style="font-size: 14px; color: #6b7177;"><%= t('mailers.common.subtotal') %></span>
+          </td>
+          <td align="right" style="padding: 12px 20px;">
+            <span style="font-size: 14px; color: #1a1a1a;"><%= @order.total_amount.format %></span>
+          </td>
+        </tr>
+
+        <% if @order.has_auto_discount_snapshot? %>
+          <!-- Order Tier Discount -->
+          <tr>
+            <td style="padding: 8px 20px;">
+              <span style="font-size: 14px; color: #166534;"><%= t('mailers.common.order_tier_discount') %> (<%= @order.auto_discount_display %>)</span>
+            </td>
+            <td align="right" style="padding: 8px 20px;">
+              <span style="font-size: 14px; color: #166534;">-<%= @order.auto_order_discount_amount.format %></span>
+            </td>
+          </tr>
+        <% end %>
+
+        <% if @order.has_order_discount? %>
+          <!-- Manual Discount -->
+          <tr>
+            <td style="padding: 8px 20px;">
+              <span style="font-size: 14px; color: #166534;">
+                <%= t('mailers.common.discount') %> (<%= @order.order_discount_display %>)
+                <% if @order.discount_reason.present? %>
+                  <span style="display: block; font-size: 12px; color: #9ca3af;"><%= @order.discount_reason %></span>
+                <% end %>
+              </span>
+            </td>
+            <td align="right" style="padding: 8px 20px;">
+              <span style="font-size: 14px; color: #166534;">-<%= @order.order_discount_amount.format %></span>
+            </td>
+          </tr>
+        <% end %>
+
+        <!-- Tax -->
+        <tr>
+          <td style="padding: 8px 20px;">
+            <span style="font-size: 14px; color: #6b7177;"><%= t('mailers.common.tax') %> (<%= (@order.organisation.tax_rate * 100).round(1) %>%)</span>
+          </td>
+          <td align="right" style="padding: 8px 20px;">
+            <span style="font-size: 14px; color: #1a1a1a;"><%= (@order.tax_amount || @order.calculated_tax).format %></span>
+          </td>
+        </tr>
+
+        <!-- Shipping -->
+        <tr>
+          <td style="padding: 8px 20px;">
+            <span style="font-size: 14px; color: #6b7177;">
+              <%= t('mailers.common.shipping') %>
+              <% if @order.pickup? %>
+                <span style="display: inline-block; margin-left: 6px; background-color: #e5e7eb; color: #4b5563; font-size: 11px; font-weight: 500; padding: 2px 8px; border-radius: 10px;"><%= t('mailers.common.pickup') %></span>
+              <% end %>
+            </span>
+          </td>
+          <td align="right" style="padding: 8px 20px;">
+            <span style="font-size: 14px; color: #1a1a1a;"><%= (@order.shipping_amount || @order.calculated_shipping).format %></span>
+          </td>
+        </tr>
+
+        <!-- Grand Total -->
+        <tr>
+          <td style="padding: 16px 20px; border-top: 1px solid #e5e5e5;">
+            <span style="font-size: 16px; font-weight: 700; color: #1a1a1a;"><%= t('mailers.common.total') %></span>
+          </td>
+          <td align="right" style="padding: 16px 20px; border-top: 1px solid #e5e5e5;">
+            <span style="font-size: 20px; font-weight: 700; color: #008060;"><%= @order.grand_total.format %></span>
+          </td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+</table>
+
+<!-- Order Details -->
+<table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="margin: 0 0 32px 0; border: 1px solid #e5e5e5; border-radius: 12px; overflow: hidden;">
+  <tr>
+    <td style="padding: 16px 20px; background-color: #f9fafb; border-bottom: 1px solid #e5e5e5;">
+      <span style="font-size: 14px; font-weight: 600; color: #1a1a1a; text-transform: uppercase; letter-spacing: 0.5px;"><%= t('mailers.common.order_details') %></span>
+    </td>
+  </tr>
+  <tr>
+    <td style="padding: 20px;">
+      <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0">
+        <tr>
+          <td style="padding-bottom: 16px; width: 50%; vertical-align: top;">
+            <span style="font-size: 12px; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.5px;"><%= t('mailers.common.order_number') %></span>
+            <p style="margin: 4px 0 0 0; font-size: 15px; font-weight: 600; color: #1a1a1a;"><%= @order.order_number %></p>
+          </td>
+          <td style="padding-bottom: 16px; width: 50%; vertical-align: top;">
+            <span style="font-size: 12px; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.5px;"><%= t('mailers.common.order_date') %></span>
+            <p style="margin: 4px 0 0 0; font-size: 15px; font-weight: 600; color: #1a1a1a;"><%= l(@order.placed_at || @order.created_at, format: :long) %></p>
+          </td>
+        </tr>
+        <tr>
+          <td style="padding-bottom: 16px; width: 50%; vertical-align: top;">
+            <span style="font-size: 12px; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.5px;"><%= t('mailers.common.delivery_method') %></span>
+            <p style="margin: 4px 0 0 0; font-size: 15px; font-weight: 600; color: #1a1a1a;">
+              <%= @order.pickup? ? t('mailers.common.pickup_icon') : t('mailers.common.delivery_icon') %>
+            </p>
+          </td>
+          <td style="padding-bottom: 16px; width: 50%; vertical-align: top;">
+            <span style="font-size: 12px; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.5px;"><%= @order.pickup? ? t('mailers.common.pickup_date') : t('mailers.common.delivery_date') %></span>
+            <p style="margin: 4px 0 0 0; font-size: 15px; font-weight: 600; color: #1a1a1a;"><%= @order.receive_on.present? ? l(@order.receive_on, format: :long) : t('mailers.common.to_be_confirmed') %></p>
+          </td>
+        </tr>
+        <% if @order.delivery? && @order.shipping_address.present? %>
+          <tr>
+            <td colspan="2" style="padding-bottom: 16px; vertical-align: top;">
+              <span style="font-size: 12px; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.5px;"><%= t('mailers.common.shipping_address') %></span>
+              <p style="margin: 4px 0 0 0; font-size: 15px; color: #1a1a1a;">
+                <%= @order.shipping_address.street_name %><br>
+                <span style="color: #6b7177;"><%= @order.shipping_address.postal_code %> <%= @order.shipping_address.city %>, <%= @order.shipping_address.country %></span>
+              </p>
+            </td>
+          </tr>
+        <% end %>
+      </table>
+    </td>
+  </tr>
+</table>
 
 <% if @order.notes.present? %>
-  <h3>Notes</h3>
-  <p><%= @order.notes %></p>
+  <!-- Notes section -->
+  <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="margin: 0 0 32px 0; border: 1px solid #e5e5e5; border-radius: 12px; overflow: hidden;">
+    <tr>
+      <td style="padding: 16px 20px; background-color: #f9fafb; border-bottom: 1px solid #e5e5e5;">
+        <span style="font-size: 14px; font-weight: 600; color: #1a1a1a; text-transform: uppercase; letter-spacing: 0.5px;"><%= t('mailers.member_mailer.notificate_customer_order.customer_notes') %></span>
+      </td>
+    </tr>
+    <tr>
+      <td style="padding: 20px;">
+        <p style="margin: 0; font-size: 14px; color: #4b5563; line-height: 1.6;"><%= @order.notes %></p>
+      </td>
+    </tr>
+  </table>
 <% end %>
+
+<!-- Action button -->
+<table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="margin: 0 0 32px 0;">
+  <tr>
+    <td align="center">
+      <a href="<%= bo_order_url(@organisation.slug, @order) %>" style="display: inline-block; background: linear-gradient(135deg, #008060 0%, #00a67d 100%); background-color: #008060; color: #ffffff; font-size: 16px; font-weight: 600; text-decoration: none; padding: 14px 32px; border-radius: 8px;">
+        <%= t('mailers.member_mailer.notificate_customer_order.view_order_button') %>
+      </a>
+    </td>
+  </tr>
+</table>
+
+<!-- Footer reminder -->
+<table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="margin: 0 0 24px 0;">
+  <tr>
+    <td style="padding: 20px; background-color: #fef3c7; border-radius: 12px; border-left: 4px solid #f59e0b;">
+      <p style="margin: 0 0 8px 0; font-size: 14px; font-weight: 600; color: #92400e;"><%= t('mailers.member_mailer.notificate_customer_order.action_required_title') %></p>
+      <p style="margin: 0; font-size: 14px; color: #4b5563; line-height: 1.5;">
+        <%= @order.pickup? ? t('mailers.member_mailer.notificate_customer_order.action_required_pickup') : t('mailers.member_mailer.notificate_customer_order.action_required_delivery') %><%= @order.receive_on.present? ? t('mailers.member_mailer.notificate_customer_order.action_required_on_date', date: l(@order.receive_on, format: :long)) : '' %>.
+      </p>
+    </td>
+  </tr>
+</table>
+
+<p style="margin: 0; color: #9ca3af; font-size: 13px; text-align: center;">
+  <%= t('mailers.member_mailer.notificate_customer_order.footer') %>
+</p>

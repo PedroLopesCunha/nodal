@@ -9,6 +9,15 @@
 
     <%= stylesheet_link_tag "application", "data-turbo-track": "reload" %>
     <%= javascript_importmap_tags %>
+
+    <% if @organisation %>
+    <style>
+      :root {
+        --auth-primary: <%= @organisation.effective_primary_color %>;
+        --auth-primary-hover: <%= @organisation.effective_secondary_color %>;
+      }
+    </style>
+    <% end %>
   </head>
 
   <body class="auth-page">

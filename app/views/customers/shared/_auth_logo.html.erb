@@ -1,0 +1,15 @@
+<% if @organisation&.logo&.attached? %>
+  <div class="auth-logo auth-logo--image">
+    <%= image_tag @organisation.logo, alt: @organisation.name, class: "auth-logo-img" %>
+  </div>
+<% elsif @organisation %>
+  <div class="auth-logo">
+    <span class="auth-logo-icon"><%= @organisation.name.first.upcase %></span>
+    <span class="auth-logo-text"><%= @organisation.name[1..] %></span>
+  </div>
+<% else %>
+  <div class="auth-logo">
+    <span class="auth-logo-icon">N</span>
+    <span class="auth-logo-text">odal</span>
+  </div>
+<% end %>
