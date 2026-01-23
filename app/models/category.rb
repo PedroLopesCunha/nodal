@@ -24,6 +24,7 @@ class Category < ApplicationRecord
   before_validation :generate_slug, if: -> { slug.blank? && name.present? }
   before_save :normalize_name
   before_discard :check_children
+  before_discard :remove_product_associations
 
   # Get all products from this category and all descendants
   def all_products
@@ -45,7 +46,7 @@ class Category < ApplicationRecord
   end
 
   def depth_warning?
-    depth >= 3
+    depth >= 5
   end
 
   def full_path
@@ -86,5 +87,9 @@ class Category < ApplicationRecord
       errors.add(:base, "Cannot delete category with subcategories")
       throw :abort
     end
+  end
+
+  def remove_product_associations
+    category_products.destroy_all
   end
 end

@@ -9,11 +9,7 @@
 
       <div class="rounded d-flex align-items-center justify-content-center text-white"
            style="width: 60px; height: 60px; background-color: <%= @category.color.presence || '#6c757d' %>;">
-        <% if @category.icon.present? %>
-          <i class="<%= @category.icon %> fa-lg"></i>
-        <% else %>
-          <i class="fa-solid fa-folder fa-lg"></i>
-        <% end %>
+        <i class="fa-solid fa-folder fa-lg"></i>
       </div>
 
       <div>
@@ -80,11 +76,7 @@
             <% @subcategories.each do |subcategory| %>
               <li class="list-group-item d-flex justify-content-between align-items-center px-0">
                 <%= link_to bo_category_path(params[:org_slug], subcategory), class: "text-decoration-none" do %>
-                  <% if subcategory.icon.present? %>
-                    <i class="<%= subcategory.icon %> me-2" style="color: <%= subcategory.color.presence || '#6c757d' %>;"></i>
-                  <% else %>
-                    <i class="fa-solid fa-folder me-2" style="color: <%= subcategory.color.presence || '#6c757d' %>;"></i>
-                  <% end %>
+                  <i class="fa-solid fa-folder me-2" style="color: <%= subcategory.color.presence || '#6c757d' %>;"></i>
                   <%= subcategory.name %>
                 <% end %>
                 <span class="badge bg-secondary"><%= subcategory.all_products_count %></span>
@@ -174,13 +166,16 @@
 
           <% available_products = current_organisation.products.where.not(id: @category.product_ids).order(:name) %>
           <% if available_products.any? %>
-            <div data-controller="product-search">
+            <div>
               <div class="mb-3">
-                <input type="text" class="form-control" placeholder="<%= t('bo.categories.modal.search_products') %>" data-action="input->product-search#filter">
+                <div class="input-group">
+                  <input type="text" id="productSearchInput" class="form-control" placeholder="<%= t('bo.categories.modal.search_products') %>"
+                         oninput="var q=this.value.toLowerCase(); var modal=this.closest('.modal'); modal.querySelectorAll('.product-item').forEach(function(el){ var n=el.getAttribute('data-name')||''; var s=el.getAttribute('data-sku')||''; var show=(q===''||n.indexOf(q)>=0||s.indexOf(q)>=0); el.style.setProperty('display', show?'flex':'none', 'important'); })">
+                </div>
               </div>
-              <div class="list-group" style="max-height: 400px; overflow-y: auto;">
+              <div id="productList" class="list-group" style="max-height: 400px; overflow-y: auto;">
                 <% available_products.each do |product| %>
-                  <label class="list-group-item list-group-item-action d-flex align-items-center" data-product-search-target="item" data-name="<%= product.name.downcase %>">
+                  <label class="list-group-item list-group-item-action d-flex align-items-center product-item" data-name="<%= product.name.downcase %>" data-sku="<%= product.sku&.downcase %>">
                     <input type="checkbox" name="product_ids[]" value="<%= product.id %>" class="form-check-input me-3">
                     <div class="flex-grow-1">
                       <div class="fw-semibold"><%= product.name %></div>
@@ -207,5 +202,6 @@
     </div>
   </div>
 </div>
+
 
 <% end %>

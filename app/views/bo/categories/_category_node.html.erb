@@ -9,7 +9,7 @@
     </div>
 
     <!-- Expand/Collapse Toggle -->
-    <% if category.has_children? %>
+    <% if category.children.kept.any? %>
       <button type="button"
               class="btn btn-sm btn-link text-muted p-0 me-2 toggle-btn"
               data-action="category-tree#toggleChildren"
@@ -73,7 +73,7 @@
   </div>
 
   <!-- Children -->
-  <% if category.has_children? %>
+  <% if category.children.kept.any? %>
     <ul class="category-children list-unstyled ms-4" data-category-tree-target="children">
       <% category.children.kept.by_position.each do |child| %>
         <%= render 'category_node', category: child %>

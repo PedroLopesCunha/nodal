@@ -9,11 +9,7 @@
 
       <div class="rounded d-flex align-items-center justify-content-center text-white"
            style="width: 60px; height: 60px; background-color: <%= @category.color.presence || '#6c757d' %>;">
-        <% if @category.icon.present? %>
-          <i class="<%= @category.icon %> fa-lg"></i>
-        <% else %>
-          <i class="fa-solid fa-folder fa-lg"></i>
-        <% end %>
+        <i class="fa-solid fa-folder fa-lg"></i>
       </div>
 
       <div>
