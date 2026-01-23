@@ -109,6 +109,84 @@
         </div>
       </div>
 
+      <!-- Field Mapping Section -->
+      <div class="card mb-3" data-erp-settings-target="fieldMappingCard">
+        <div class="card-body">
+          <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+              <h5 class="card-title mb-1">Field Mapping</h5>
+              <small class="text-muted">Map ERP fields to Nodal fields for accurate data sync</small>
+            </div>
+            <button type="button" class="btn btn-outline-primary" data-action="click->erp-settings#fetchSample" data-erp-settings-target="fetchSampleButton">
+              <i class="fa-solid fa-download"></i> Fetch Sample Data
+            </button>
+          </div>
+
+          <div data-erp-settings-target="fetchSampleResult" class="mb-3"></div>
+
+          <!-- Products Mapping -->
+          <div data-erp-settings-target="productsMappingSection" class="d-none">
+            <h6 class="border-bottom pb-2 mb-3">
+              <i class="fa-solid fa-box me-2"></i>Product Field Mapping
+            </h6>
+            <div class="table-responsive">
+              <table class="table table-sm">
+                <thead>
+                  <tr>
+                    <th>Nodal Field</th>
+                    <th>Required</th>
+                    <th>ERP Field</th>
+                    <th>Sample Value</th>
+                  </tr>
+                </thead>
+                <tbody data-erp-settings-target="productsMappingBody">
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Customers Mapping -->
+          <div data-erp-settings-target="customersMappingSection" class="d-none mt-4">
+            <h6 class="border-bottom pb-2 mb-3">
+              <i class="fa-solid fa-users me-2"></i>Customer Field Mapping
+            </h6>
+            <div class="table-responsive">
+              <table class="table table-sm">
+                <thead>
+                  <tr>
+                    <th>Nodal Field</th>
+                    <th>Required</th>
+                    <th>ERP Field</th>
+                    <th>Sample Value</th>
+                  </tr>
+                </thead>
+                <tbody data-erp-settings-target="customersMappingBody">
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Hidden fields to store the mappings -->
+          <div data-erp-settings-target="fieldMappingInputs">
+            <% field_mappings = @erp_configuration.credentials.dig('field_mappings') || {} %>
+            <% products_mappings = field_mappings['products'] || {} %>
+            <% customers_mappings = field_mappings['customers'] || {} %>
+
+            <% %w[external_id name sku description unit_price available].each do |field| %>
+              <%= hidden_field_tag "erp_configuration[credentials][field_mappings][products][#{field}]",
+                                    products_mappings[field],
+                                    data: { erp_settings_target: "productMapping", field: field } %>
+            <% end %>
+
+            <% %w[external_id company_name contact_name email contact_phone active].each do |field| %>
+              <%= hidden_field_tag "erp_configuration[credentials][field_mappings][customers][#{field}]",
+                                    customers_mappings[field],
+                                    data: { erp_settings_target: "customerMapping", field: field } %>
+            <% end %>
+          </div>
+        </div>
+      </div>
+
       <% if @recent_sync_logs&.any? %>
       <div class="card">
         <div class="card-body">

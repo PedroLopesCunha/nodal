@@ -1,5 +1,5 @@
 class Bo::ErpSettingsController < Bo::BaseController
-  skip_before_action :verify_authenticity_token, only: [:test_connection]
+  skip_before_action :verify_authenticity_token, only: [:test_connection, :fetch_sample]
   before_action :set_erp_configuration
 
   def edit
@@ -29,6 +29,41 @@ class Bo::ErpSettingsController < Bo::BaseController
     end
 
     result = @erp_configuration.adapter.test_connection
+
+    render json: result
+  end
+
+  def fetch_sample
+    authorize @erp_configuration, policy_class: ErpSettingPolicy
+
+    # Build a temporary adapter using credentials from the request params
+    raw_credentials = fetch_sample_params[:credentials] || {}
+    temp_credentials = raw_credentials.is_a?(Hash) ? raw_credentials.deep_symbolize_keys : {}
+
+    adapter = Erp::Adapters::CustomApiAdapter.new(temp_credentials)
+
+    unless adapter.valid_credentials?
+      render json: { success: false, error: 'Missing required credentials (base_url and api_key)' }
+      return
+    end
+
+    result = { success: true, products: nil, customers: nil }
+
+    begin
+      if fetch_sample_params[:fetch_products] != 'false'
+        result[:products] = adapter.fetch_sample_product
+      end
+    rescue => e
+      result[:products_error] = e.message
+    end
+
+    begin
+      if fetch_sample_params[:fetch_customers] != 'false'
+        result[:customers] = adapter.fetch_sample_customer
+      end
+    rescue => e
+      result[:customers_error] = e.message
+    end
 
     render json: result
   end
@@ -68,12 +103,49 @@ class Bo::ErpSettingsController < Bo::BaseController
       :sync_products,
       :sync_customers,
       :sync_orders,
-      :sync_frequency,
-      credentials: {}
+      :sync_frequency
     ).tap do |p|
-      if p[:credentials].present?
-        @erp_configuration.credentials = p.delete(:credentials).to_h
+      # Handle credentials separately to support nested field_mappings
+      if params[:erp_configuration][:credentials].present?
+        credentials_params = params[:erp_configuration][:credentials]
+        credentials = extract_credentials(credentials_params)
+        @erp_configuration.credentials = credentials
       end
     end
+  end
+
+  def extract_credentials(credentials_params)
+    credentials = {}
+
+    # Extract simple credential fields
+    %w[base_url api_key auth_type products_endpoint customers_endpoint].each do |key|
+      credentials[key] = credentials_params[key] if credentials_params[key].present?
+    end
+
+    # Extract nested field_mappings
+    if credentials_params[:field_mappings].present?
+      credentials['field_mappings'] = {
+        'products' => extract_field_mapping(credentials_params.dig(:field_mappings, :products)),
+        'customers' => extract_field_mapping(credentials_params.dig(:field_mappings, :customers))
+      }
+    end
+
+    credentials
+  end
+
+  def extract_field_mapping(mapping_params)
+    return {} if mapping_params.blank?
+
+    # Convert to hash and remove empty values
+    mapping_params.to_unsafe_h.transform_values(&:presence).compact
+  end
+
+  def fetch_sample_params
+    result = params.permit(:fetch_products, :fetch_customers).to_h
+    # Handle credentials hash separately to allow arbitrary keys
+    if params[:credentials].present?
+      result[:credentials] = params[:credentials].to_unsafe_h
+    end
+    result.with_indifferent_access
   end
 end

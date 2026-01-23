@@ -11,6 +11,10 @@ class ErpSettingPolicy < ApplicationPolicy
     admin_or_owner?
   end
 
+  def fetch_sample?
+    admin_or_owner?
+  end
+
   def sync_now?
     admin_or_owner?
   end

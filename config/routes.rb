@@ -134,6 +134,7 @@ Rails.application.routes.draw do
       # ERP Integration
       resource :erp_settings, only: [:edit, :update] do
         post :test_connection
+        post :fetch_sample
         post :sync_now
         get :sync_logs
       end
