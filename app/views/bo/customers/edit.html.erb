@@ -64,6 +64,14 @@
               <label class="form-label"><%= t('bo.customers.form.company_name') %></label>
               <%= f.text_field :company_name, class: "form-control", placeholder: t('bo.customers.form.placeholders.company_name') %>
             </div>
+          </div>
+
+          <div class="row g-3 mt-1">
+            <div class="col-md-12">
+              <label class="form-label"><%= t('bo.customers.form.taxpayer_id') %></label>
+              <%= f.text_field :taxpayer_id, class: "form-control", placeholder: t('bo.customers.form.taxpayer_id_placeholder') %>
+              <small class="text-muted"><%= t('bo.customers.form.taxpayer_id_hint') %></small>
+            </div>
 
             <hr class="my-4">
 

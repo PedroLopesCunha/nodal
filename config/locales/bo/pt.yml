@@ -83,6 +83,7 @@ pt:
         "true": "Sim"
         "false": "Não"
       vs_prev_period: "vs período anterior"
+      not_provided: "Não fornecido"
 
     # Navegação
     navbar:
@@ -202,6 +203,9 @@ pt:
         active: "Ativo"
         inactive: "Inativo"
         inactive_hint: "Clientes inativos não podem fazer encomendas"
+        taxpayer_id: "NIF"
+        taxpayer_id_placeholder: "Introduza o número de contribuinte"
+        taxpayer_id_hint: "Número de identificação fiscal"
         billing_address: "Morada de Faturação"
         shipping_address: "Morada de Envio"
         add_shipping_address: "Adicionar Morada de Envio"
@@ -797,6 +801,10 @@ pt:
         billing_email: "E-mail de Faturação"
         billing_email_placeholder: "Introduza o e-mail de faturação"
         billing_email_hint: "Usado para faturas e comunicações de faturação"
+        taxpayer_id: "NIF"
+        taxpayer_id_placeholder: "Introduza o número de contribuinte"
+        taxpayer_id_hint: "Número de identificação fiscal"
+        billing_address: "Morada de Faturação"
         default_language: "Idioma Predefinido"
         default_language_hint: "Idioma predefinido para todos os utilizadores desta organização"
         contact_info: "Informações de Contacto"

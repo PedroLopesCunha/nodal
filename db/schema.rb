@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2026_01_22_185507) do
+ActiveRecord::Schema[7.1].define(version: 2026_01_23_000002) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -148,6 +148,7 @@ ActiveRecord::Schema[7.1].define(version: 2026_01_22_185507) do
     t.string "external_source"
     t.datetime "last_synced_at"
     t.text "sync_error"
+    t.string "taxpayer_id"
     t.index ["email", "organisation_id"], name: "index_customers_on_email_and_organisation_id", unique: true
     t.index ["invitation_token"], name: "index_customers_on_invitation_token", unique: true
     t.index ["invited_by_id"], name: "index_customers_on_invited_by_id"
@@ -317,6 +318,7 @@ ActiveRecord::Schema[7.1].define(version: 2026_01_22_185507) do
     t.text "business_hours"
     t.boolean "use_billing_address_for_contact"
     t.string "storefront_title"
+    t.string "taxpayer_id"
     t.index ["default_locale"], name: "index_organisations_on_default_locale"
     t.index ["slug"], name: "index_organisations_on_slug", unique: true
   end

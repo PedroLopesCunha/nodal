@@ -86,6 +86,7 @@ en:
         "true": "Yes"
         "false": "No"
       vs_prev_period: "vs prev period"
+      not_provided: "Not provided"
 
     # Navigation
     navbar:
@@ -205,6 +206,9 @@ en:
         active: "Active"
         inactive: "Inactive"
         inactive_hint: "Inactive customers cannot place orders"
+        taxpayer_id: "Taxpayer ID"
+        taxpayer_id_placeholder: "Enter taxpayer identification number"
+        taxpayer_id_hint: "Tax identification number (VAT, EIN, etc.)"
         billing_address: "Billing Address"
         shipping_address: "Shipping Address"
         add_shipping_address: "Add Shipping Address"
@@ -800,6 +804,10 @@ en:
         billing_email: "Billing Email"
         billing_email_placeholder: "Enter billing email address"
         billing_email_hint: "Used for invoices and billing communications"
+        taxpayer_id: "Taxpayer ID"
+        taxpayer_id_placeholder: "Enter taxpayer identification number"
+        taxpayer_id_hint: "Tax identification number (VAT, EIN, etc.)"
+        billing_address: "Billing Address"
         default_language: "Default Language"
         default_language_hint: "Default language for all users in this organisation"
         contact_info: "Contact Information"
