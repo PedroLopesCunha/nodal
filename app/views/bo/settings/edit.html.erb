@@ -192,6 +192,14 @@
               <small class="text-muted"><%= t('bo.settings.edit.shipping_cost_hint', currency: @organisation.shipping_cost_currency) %></small>
             </div>
           </div>
+
+          <div class="row g-3 mt-2">
+            <div class="col-md-6">
+              <label class="form-label"><%= t('bo.settings.edit.free_shipping_threshold') %></label>
+              <%= f.number_field :free_shipping_threshold, class: "form-control", step: 0.01, min: 0, placeholder: t('bo.settings.edit.free_shipping_threshold_placeholder') %>
+              <small class="text-muted"><%= t('bo.settings.edit.free_shipping_threshold_hint') %></small>
+            </div>
+          </div>
         </div>
       </div>
 

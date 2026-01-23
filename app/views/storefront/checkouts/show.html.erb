@@ -4,10 +4,12 @@
 
 <div class="row g-4"
      data-controller="checkout"
-     data-checkout-subtotal-value="<%= @order.total_amount.cents %>"
+     data-checkout-subtotal-value="<%= @order.total_with_auto_discount.cents %>"
      data-checkout-tax-value="<%= @order.calculated_tax.cents %>"
      data-checkout-shipping-cost-value="<%= @current_organisation.shipping_cost.cents %>"
-     data-checkout-currency-symbol-value="<%= @current_organisation.currency_symbol %>">
+     data-checkout-currency-symbol-value="<%= @current_organisation.currency_symbol %>"
+     data-checkout-free-shipping-threshold-value="<%= @current_organisation.free_shipping_threshold_cents || 0 %>"
+     data-checkout-free-shipping-enabled-value="<%= @current_organisation.free_shipping_enabled? %>">
   <div class="col-lg-8">
     <!-- Checkout Header -->
     <div class="card border-0 shadow-sm mb-4" style="border-radius: 12px;">
@@ -94,7 +96,14 @@
                   <strong><%= t('storefront.checkouts.show.delivery_method.delivery') %></strong>
                   <div class="text-muted small"><%= t('storefront.checkouts.show.delivery_method.delivery_hint') %></div>
                 </div>
-                <span class="fw-medium"><%= humanized_money_with_symbol(@current_organisation.shipping_cost) %></span>
+                <span data-checkout-target="deliveryShippingCost">
+                  <% if @order.qualifies_for_free_shipping? %>
+                    <span class="text-decoration-line-through text-muted small me-1"><%= humanized_money_with_symbol(@current_organisation.shipping_cost) %></span>
+                    <span class="fw-medium text-success"><%= t('storefront.checkouts.show.delivery_method.free') %></span>
+                  <% else %>
+                    <span class="fw-medium"><%= humanized_money_with_symbol(@current_organisation.shipping_cost) %></span>
+                  <% end %>
+                </span>
               </label>
             </div>
 

@@ -12,6 +12,21 @@
   }
 }
 
+// Storefront header - override fixed navbar positioning
+.storefront-header {
+  position: sticky;
+  top: 0;
+  z-index: 1020;
+
+  .navbar {
+    position: relative;
+    top: auto;
+    left: auto;
+    height: auto;
+    padding: 0;
+  }
+}
+
 .powered-by-nodal {
   padding: 1rem 0;
   text-align: center;
