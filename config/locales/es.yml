@@ -248,3 +248,38 @@ es:
     pt: "Português"
     es: "Español"
     switch: "Idioma"
+
+  # Auth Pages
+  auth:
+    sign_in:
+      welcome_back: "Bienvenido de nuevo"
+      subtitle: "Inicia sesión en tu cuenta para continuar"
+      email: "Email"
+      email_placeholder: "Introduce tu email"
+      password: "Contraseña"
+      password_placeholder: "Introduce tu contraseña"
+      forgot_password: "¿Olvidaste tu contraseña?"
+      remember_me: "Recuérdame durante 30 días"
+      submit: "Iniciar sesión"
+      powered_by: "powered by"
+    forgot_password:
+      title: "¿Olvidaste tu contraseña?"
+      subtitle: "Introduce tu email y te enviaremos instrucciones para restablecerla"
+      email: "Email"
+      email_placeholder: "Introduce tu email"
+      submit: "Enviar instrucciones"
+      or: "o"
+      remember_password: "¿Recuerdas tu contraseña?"
+      sign_in: "Iniciar sesión"
+    reset_password:
+      title: "Cambia tu contraseña"
+      subtitle: "Introduce tu nueva contraseña abajo"
+      new_password: "Nueva contraseña"
+      new_password_placeholder: "Introduce tu nueva contraseña"
+      password_hint: "Mínimo de %{count} caracteres"
+      confirm_password: "Confirma tu nueva contraseña"
+      confirm_password_placeholder: "Confirma tu nueva contraseña"
+      submit: "Cambiar contraseña"
+      or: "o"
+      remember_password: "¿Recuerdas tu contraseña?"
+      sign_in: "Iniciar sesión"
