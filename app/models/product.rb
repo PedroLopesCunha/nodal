@@ -1,5 +1,6 @@
 class Product < ApplicationRecord
   include Slugable
+  include ErpSyncable
 
   belongs_to :organisation
   belongs_to :category, optional: true  # Legacy direct association
@@ -138,4 +139,3 @@ class Product < ApplicationRecord
     )
   end
 end
-

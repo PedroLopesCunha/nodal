@@ -1,0 +1,316 @@
+<% content_for :bo_main_content do %>
+
+<div class="mb-4">
+  <div class="d-flex justify-content-between align-items-center">
+    <div class="d-flex align-items-center gap-3">
+      <div class="rounded-circle bg-secondary d-flex align-items-center justify-content-center text-white fw-bold" style="width: 60px; height: 60px; font-size: 1.25rem;">
+        <i class="fa-solid fa-plug"></i>
+      </div>
+
+      <div>
+        <h4 class="mb-0">ERP Integration</h4>
+        <span class="text-muted"><%= current_organisation.name %></span>
+      </div>
+    </div>
+
+    <div class="d-flex gap-2 align-items-center">
+      <%= link_to edit_bo_settings_path, class: "btn btn-outline-secondary" do %>
+        <i class="fa-solid fa-arrow-left"></i> Back to Settings
+      <% end %>
+      <button type="submit" form="erp-settings-form" class="btn btn-primary">
+        <i class="fa-solid fa-check"></i> Save Changes
+      </button>
+    </div>
+  </div>
+</div>
+
+<%= form_with model: @erp_configuration, url: bo_erp_settings_path, method: :patch, id: "erp-settings-form", data: { controller: "erp-settings" } do |f| %>
+  <div class="row g-3">
+    <div class="col-md-8">
+      <div class="card mb-3">
+        <div class="card-body">
+          <div class="d-flex justify-content-between align-items-center mb-4">
+            <h5 class="card-title mb-0">Integration Settings</h5>
+            <div class="form-check form-switch">
+              <%= f.check_box :enabled, class: "form-check-input", role: "switch", id: "erp_enabled", data: { erp_settings_target: "enabledToggle", action: "change->erp-settings#toggleEnabled" } %>
+              <label class="form-check-label" for="erp_enabled">Enable Integration</label>
+            </div>
+          </div>
+
+          <div data-erp-settings-target="settingsPanel" class="<%= 'd-none' unless @erp_configuration.enabled? %>">
+            <div class="row g-3">
+              <div class="col-md-6">
+                <label class="form-label">ERP System</label>
+                <%= f.select :adapter_type,
+                             options_for_select(@available_adapters.map { |a| [a[:display_name], a[:key]] }, @erp_configuration.adapter_type),
+                             { include_blank: "Select an ERP system..." },
+                             class: "form-control", data: { erp_settings_target: "adapterSelect", action: "change->erp-settings#changeAdapter" } %>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">Sync Frequency</label>
+                <%= f.select :sync_frequency,
+                             options_for_select([
+                               ['Hourly', 'hourly'],
+                               ['Daily', 'daily'],
+                               ['Weekly', 'weekly'],
+                               ['Manual Only', 'manual']
+                             ], @erp_configuration.sync_frequency),
+                             {},
+                             class: "form-control" %>
+              </div>
+            </div>
+
+            <hr class="my-4">
+
+            <h6 class="mb-3">Sync Options</h6>
+            <div class="row g-3">
+              <div class="col-md-4">
+                <div class="form-check">
+                  <%= f.check_box :sync_products, class: "form-check-input", id: "sync_products" %>
+                  <label class="form-check-label" for="sync_products">
+                    <i class="fa-solid fa-box me-1"></i> Sync Products
+                  </label>
+                </div>
+              </div>
+              <div class="col-md-4">
+                <div class="form-check">
+                  <%= f.check_box :sync_customers, class: "form-check-input", id: "sync_customers" %>
+                  <label class="form-check-label" for="sync_customers">
+                    <i class="fa-solid fa-users me-1"></i> Sync Customers
+                  </label>
+                </div>
+              </div>
+              <div class="col-md-4">
+                <div class="form-check">
+                  <%= f.check_box :sync_orders, class: "form-check-input", id: "sync_orders", disabled: true %>
+                  <label class="form-check-label text-muted" for="sync_orders">
+                    <i class="fa-solid fa-shopping-cart me-1"></i> Sync Orders
+                    <small class="d-block text-muted">(Coming soon)</small>
+                  </label>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card mb-3" data-erp-settings-target="credentialsCard" class="<%= 'd-none' if @erp_configuration.adapter_type.blank? %>">
+        <div class="card-body">
+          <h5 class="card-title mb-4">API Credentials</h5>
+
+          <%= render "credentials_fields", f: f, erp_configuration: @erp_configuration %>
+
+          <div class="mt-4">
+            <button type="button" class="btn btn-outline-secondary" data-action="click->erp-settings#testConnection" data-erp-settings-target="testButton">
+              <i class="fa-solid fa-wifi"></i> Test Connection
+            </button>
+            <span data-erp-settings-target="testResult" class="ms-3"></span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Field Mapping Section -->
+      <div class="card mb-3" data-erp-settings-target="fieldMappingCard">
+        <div class="card-body">
+          <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+              <h5 class="card-title mb-1">Field Mapping</h5>
+              <small class="text-muted">Map ERP fields to Nodal fields for accurate data sync</small>
+            </div>
+            <button type="button" class="btn btn-outline-primary" data-action="click->erp-settings#fetchSample" data-erp-settings-target="fetchSampleButton">
+              <i class="fa-solid fa-download"></i> Fetch Sample Data
+            </button>
+          </div>
+
+          <div data-erp-settings-target="fetchSampleResult" class="mb-3"></div>
+
+          <!-- Products Mapping -->
+          <div data-erp-settings-target="productsMappingSection" class="d-none">
+            <h6 class="border-bottom pb-2 mb-3">
+              <i class="fa-solid fa-box me-2"></i>Product Field Mapping
+            </h6>
+            <div class="table-responsive">
+              <table class="table table-sm">
+                <thead>
+                  <tr>
+                    <th>Nodal Field</th>
+                    <th>Required</th>
+                    <th>ERP Field</th>
+                    <th>Sample Value</th>
+                  </tr>
+                </thead>
+                <tbody data-erp-settings-target="productsMappingBody">
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Customers Mapping -->
+          <div data-erp-settings-target="customersMappingSection" class="d-none mt-4">
+            <h6 class="border-bottom pb-2 mb-3">
+              <i class="fa-solid fa-users me-2"></i>Customer Field Mapping
+            </h6>
+            <div class="table-responsive">
+              <table class="table table-sm">
+                <thead>
+                  <tr>
+                    <th>Nodal Field</th>
+                    <th>Required</th>
+                    <th>ERP Field</th>
+                    <th>Sample Value</th>
+                  </tr>
+                </thead>
+                <tbody data-erp-settings-target="customersMappingBody">
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Hidden fields to store the mappings -->
+          <div data-erp-settings-target="fieldMappingInputs">
+            <% field_mappings = @erp_configuration.credentials.dig('field_mappings') || {} %>
+            <% products_mappings = field_mappings['products'] || {} %>
+            <% customers_mappings = field_mappings['customers'] || {} %>
+
+            <% %w[external_id name sku description unit_price available].each do |field| %>
+              <%= hidden_field_tag "erp_configuration[credentials][field_mappings][products][#{field}]",
+                                    products_mappings[field],
+                                    data: { erp_settings_target: "productMapping", field: field } %>
+            <% end %>
+
+            <% %w[external_id company_name contact_name email contact_phone active].each do |field| %>
+              <%= hidden_field_tag "erp_configuration[credentials][field_mappings][customers][#{field}]",
+                                    customers_mappings[field],
+                                    data: { erp_settings_target: "customerMapping", field: field } %>
+            <% end %>
+          </div>
+        </div>
+      </div>
+
+      <% if @recent_sync_logs&.any? %>
+      <div class="card">
+        <div class="card-body">
+          <div class="d-flex justify-content-between align-items-center mb-4">
+            <h5 class="card-title mb-0">Recent Sync Activity</h5>
+            <%= link_to sync_logs_bo_erp_settings_path, class: "btn btn-sm btn-outline-secondary" do %>
+              View All Logs
+            <% end %>
+          </div>
+
+          <div class="table-responsive">
+            <table class="table table-sm">
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>Type</th>
+                  <th>Entity</th>
+                  <th>Status</th>
+                  <th>Records</th>
+                </tr>
+              </thead>
+              <tbody>
+                <% @recent_sync_logs.each do |log| %>
+                <tr>
+                  <td><%= log.created_at.strftime("%b %d, %H:%M") %></td>
+                  <td><span class="badge bg-secondary"><%= log.sync_type.capitalize %></span></td>
+                  <td><%= log.entity_type.capitalize %></td>
+                  <td>
+                    <% case log.status %>
+                    <% when 'completed' %>
+                      <span class="badge bg-success">Completed</span>
+                    <% when 'failed' %>
+                      <span class="badge bg-danger">Failed</span>
+                    <% when 'running' %>
+                      <span class="badge bg-warning">Running</span>
+                    <% end %>
+                  </td>
+                  <td>
+                    <small>
+                      <span class="text-success"><%= log.records_created %> new</span>,
+                      <span class="text-primary"><%= log.records_updated %> updated</span>
+                      <% if log.records_failed > 0 %>
+                      , <span class="text-danger"><%= log.records_failed %> failed</span>
+                      <% end %>
+                    </small>
+                  </td>
+                </tr>
+                <% end %>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+      <% end %>
+    </div>
+
+    <div class="col-md-4">
+      <div class="card mb-3">
+        <div class="card-body">
+          <h5 class="card-title mb-4">Sync Status</h5>
+
+          <% if @erp_configuration.persisted? && @erp_configuration.enabled? %>
+            <div class="border-bottom pb-3 mb-3">
+              <small class="text-muted d-block">Status</small>
+              <% case @erp_configuration.last_sync_status %>
+              <% when 'success' %>
+                <span class="badge bg-success">Last sync successful</span>
+              <% when 'partial' %>
+                <span class="badge bg-warning">Last sync partial</span>
+              <% when 'failed' %>
+                <span class="badge bg-danger">Last sync failed</span>
+              <% else %>
+                <span class="badge bg-secondary">Never synced</span>
+              <% end %>
+            </div>
+
+            <% if @erp_configuration.last_sync_at %>
+            <div class="border-bottom pb-3 mb-3">
+              <small class="text-muted d-block">Last Sync</small>
+              <span><%= time_ago_in_words(@erp_configuration.last_sync_at) %> ago</span>
+            </div>
+            <% end %>
+
+            <% if @erp_configuration.last_sync_error.present? %>
+            <div class="border-bottom pb-3 mb-3">
+              <small class="text-muted d-block">Last Error</small>
+              <span class="text-danger small"><%= truncate(@erp_configuration.last_sync_error, length: 100) %></span>
+            </div>
+            <% end %>
+
+            <div>
+              <%= button_to "Sync Now", sync_now_bo_erp_settings_path, method: :post, class: "btn btn-primary w-100", disabled: !@erp_configuration.can_sync? %>
+            </div>
+          <% else %>
+            <p class="text-muted mb-0">Enable integration and configure credentials to start syncing.</p>
+          <% end %>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-body">
+          <h5 class="card-title mb-4">How It Works</h5>
+          <ul class="list-unstyled mb-0">
+            <li class="mb-2">
+              <i class="fa-solid fa-arrow-right text-primary me-2"></i>
+              Data flows from ERP to Nodal
+            </li>
+            <li class="mb-2">
+              <i class="fa-solid fa-database text-primary me-2"></i>
+              ERP is the source of truth
+            </li>
+            <li class="mb-2">
+              <i class="fa-solid fa-sync text-primary me-2"></i>
+              Records are matched by external ID
+            </li>
+            <li>
+              <i class="fa-solid fa-clock text-primary me-2"></i>
+              Syncs run on your chosen schedule
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+<% end %>
+
+<% end %>

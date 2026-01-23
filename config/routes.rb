@@ -131,6 +131,14 @@ Rails.application.routes.draw do
       resource :profile, only: [:edit, :update]
       resource :settings, only: [:edit, :update]
 
+      # ERP Integration
+      resource :erp_settings, only: [:edit, :update] do
+        post :test_connection
+        post :fetch_sample
+        post :sync_now
+        get :sync_logs
+      end
+
       # Team Management
       resources :team_members, path: 'team', except: [:show] do
         member do
