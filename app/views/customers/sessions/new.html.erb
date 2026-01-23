@@ -1,7 +1,4 @@
-<div class="auth-logo">
-  <span class="auth-logo-icon">N</span>
-  <span class="auth-logo-text">odal</span>
-</div>
+<%= render "customers/shared/auth_logo" %>
 
 <h1 class="auth-title">Welcome back</h1>
 <p class="auth-subtitle">Sign in to your account to continue</p>
@@ -38,3 +35,9 @@
     <%= f.button :submit, "Sign in", class: "auth-submit-btn" %>
   </div>
 <% end %>
+
+<div class="auth-powered-by">
+  <a href="https://www.nodal-seiri.dev" target="_blank" rel="noopener">
+    powered by <span class="auth-powered-logo"><span class="auth-powered-icon">N</span>odal</span>
+  </a>
+</div>

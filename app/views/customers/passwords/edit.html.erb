@@ -1,7 +1,4 @@
-<div class="auth-logo">
-  <span class="auth-logo-icon">N</span>
-  <span class="auth-logo-text">odal</span>
-</div>
+<%= render "customers/shared/auth_logo" %>
 
 <h1 class="auth-title">Change your password</h1>
 <p class="auth-subtitle">Enter your new password below</p>
@@ -41,4 +38,10 @@
 
 <div class="auth-footer">
   <p>Remember your password? <%= link_to "Sign in", new_customer_session_path(org_slug: @organisation.slug), class: "auth-link" %></p>
+</div>
+
+<div class="auth-powered-by">
+  <a href="https://www.nodal-seiri.dev" target="_blank" rel="noopener">
+    powered by <span class="auth-powered-logo"><span class="auth-powered-icon">N</span>odal</span>
+  </a>
 </div>
