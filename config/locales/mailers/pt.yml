@@ -1,6 +1,9 @@
 pt:
   mailers:
     common:
+      hello: "Olá"
+      greeting: "Olá %{name},"
+      questions_footer: "Questões? Responda a este email."
       subtotal: "Subtotal"
       tax: "IVA"
       shipping: "Envio"
@@ -24,24 +27,86 @@ pt:
       pickup_icon: "🏪 Levantamento"
       order_tier_discount: "Desconto por Escalão"
       discount: "Desconto"
+      valid: "Válido"
+      original_price: "Preço Original"
+      min_quantity: "Qtd. Mínima"
+      min_order: "Encomenda Mínima"
+      product_details: "Detalhes do Produto"
+      discount_details: "Detalhes do Desconto"
+      off: "DESC"
+      shop_now: "Comprar Agora →"
+      view_product: "Ver Produto →"
+      dont_miss_out: "Não perca!"
 
     customer_mailer:
       confirm_order:
         subject: "Confirmação da encomenda %{order_number}"
         banner_title: "Encomenda Confirmada!"
-        greeting: "Olá %{name},"
+        greeting: "Olá <strong>%{name}</strong>,"
         intro: "Boas notícias! A sua encomenda foi confirmada e está a ser processada. Aqui está um resumo do que encomendou:"
         whats_next_title: "E agora?"
         whats_next_delivery: "Estamos a preparar a sua encomenda. Receberá outro email quando estiver pronta para entrega."
         whats_next_pickup: "Estamos a preparar a sua encomenda. Receberá outro email quando estiver pronta para levantamento."
         footer: "Questões sobre a sua encomenda? Responda a este email."
 
+      invitation_instructions:
+        subject: "Defina a sua palavra-passe"
+        banner_title: "Bem-vindo! 👋"
+        greeting: "Olá <strong>%{name}</strong>,"
+        intro_html: "Foi convidado a juntar-se a <strong style=\"color: %{color};\">%{organisation}</strong>, onde encomendar simplesmente funciona."
+        accept_button: "Aceitar Convite"
+        ignore_notice: "Se não deseja aceitar o convite, ignore este email."
+
+      reset_password_instructions:
+        subject: "Redefinir a sua palavra-passe"
+        banner_title: "Pedido de Redefinição de Palavra-passe"
+        greeting: "Olá <strong>%{name}</strong>,"
+        intro: "Recebemos um pedido para redefinir a palavra-passe da sua conta. Clique no botão abaixo para criar uma nova palavra-passe."
+        reset_button: "Redefinir Palavra-passe"
+        didnt_request_title: "Não fez este pedido?"
+        didnt_request_body: "Se não pediu a redefinição da palavra-passe, pode ignorar este email com segurança. A sua palavra-passe permanecerá inalterada."
+        expiry_notice: "Este link expira em 6 horas por razões de segurança."
+
+      customer_discount:
+        subject: "Novo Desconto pessoal para SI!"
+        banner_title: "Desconto Exclusivo Só Para Si!"
+        greeting: "Olá %{name},"
+        intro: "Boas notícias! Criámos um desconto pessoal especial só para si como cliente valioso."
+        your_personal_discount: "O Seu Desconto Pessoal"
+        on_all_orders: "em todas as suas encomendas"
+        discount_ready_title: "O seu desconto está pronto!"
+        discount_ready_body: "Este desconto será automaticamente aplicado a todas as suas futuras encomendas."
+
+      customer_product_discount:
+        subject: "Novo Desconto em %{product_name}"
+        banner_title: "Desconto Especial em Produto Para Si!"
+        greeting: "Olá %{name},"
+        intro: "Boas notícias! Criámos um desconto especial num produto só para si."
+        exclusive_to_you: "exclusivo para si"
+        exclusive_awaits_title: "O seu desconto exclusivo espera-o!"
+        exclusive_awaits_body: "Este preço especial está disponível apenas para si."
+
+      product_discount:
+        subject: "Novo Desconto em Produto: %{product_name}"
+        banner_title: "Desconto Especial Disponível!"
+        greeting: "Olá,"
+        intro: "Boas notícias! Temos um desconto especial num dos nossos produtos que pensámos que gostaria de saber."
+        order_now: "Encomende agora para aproveitar este desconto especial."
+
+      order_discount:
+        subject: "Novo Desconto em Encomenda"
+        banner_title: "Desconto em Encomenda Disponível!"
+        greeting: "Olá,"
+        intro: "Boas notícias! Temos um desconto especial na sua próxima encomenda que pensámos que gostaria de saber."
+        on_entire_order: "em toda a sua encomenda"
+        place_order_cta: "Faça uma encomenda de %{amount} ou mais para aproveitar este desconto."
+
     member_mailer:
       notificate_customer_order:
         subject: "Nova encomenda %{order_number} de %{company_name}"
         banner_title: "Nova Encomenda Recebida!"
-        greeting: "Olá %{name},"
-        intro: "Boas notícias! %{company_name} fez uma nova encomenda. Aqui estão os detalhes:"
+        greeting: "Olá <strong>%{name}</strong>,"
+        intro: "Boas notícias! <strong>%{company_name}</strong> fez uma nova encomenda. Aqui estão os detalhes:"
         customer_information: "Informação do Cliente"
         contact_name: "Nome de Contacto"
         company: "Empresa"
@@ -53,3 +118,35 @@ pt:
         action_required_pickup: "Por favor reveja e processe esta encomenda assim que possível. O cliente espera o levantamento"
         action_required_on_date: " em %{date}"
         footer: "Esta é uma notificação automática do Nodal."
+
+      reset_password_instructions:
+        subject: "Redefinir a sua palavra-passe"
+        banner_title: "Pedido de Redefinição de Palavra-passe"
+        greeting: "Olá <strong>%{name}</strong>,"
+        intro: "Recebemos um pedido para redefinir a palavra-passe da sua conta. Clique no botão abaixo para criar uma nova palavra-passe."
+        reset_button: "Redefinir Palavra-passe"
+        didnt_request_title: "Não fez este pedido?"
+        didnt_request_body: "Se não pediu a redefinição da palavra-passe, pode ignorar este email com segurança. A sua palavra-passe permanecerá inalterada."
+        expiry_notice: "Este link expira em 6 horas por razões de segurança."
+
+      team_invitation:
+        subject: "Foi convidado a juntar-se a %{organisation} no Nodal"
+        banner_title: "Está Convidado! 🎉"
+        greeting: "Olá,"
+        intro_html: "<strong>%{inviter}</strong> convidou-o a juntar-se a <strong>%{organisation}</strong> no Nodal."
+        role_assigned: "Foi-lhe atribuído o cargo de <strong>%{role}</strong>."
+        accept_button: "Aceitar Convite"
+        what_you_can_do: "O que poderá fazer"
+        capability_1: "Gerir clientes, produtos e encomendas"
+        capability_2: "Aceder ao painel de administração"
+        capability_3: "Processar encomendas recebidas"
+        ignore_notice: "Se não estava à espera deste convite, pode ignorar este email."
+
+      added_to_organisation:
+        subject: "Foi adicionado a %{organisation} no Nodal"
+        banner_title: "Bem-vindo a %{organisation}! 🎉"
+        greeting: "Olá <strong>%{name}</strong>,"
+        intro_html: "<strong>%{inviter}</strong> adicionou-o a <strong>%{organisation}</strong> no Nodal."
+        role_assigned: "Foi-lhe atribuído o cargo de <strong>%{role}</strong>."
+        go_to_backoffice: "Ir para o Painel"
+        existing_account_notice: "Agora pode aceder ao painel de administração de %{organisation} usando as suas credenciais existentes."

@@ -1,9 +1,42 @@
-<p>Hello <%= @member.first_name %>,</p>
+<!-- Welcome banner -->
+<table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="margin: 0 0 32px 0;">
+  <tr>
+    <td style="background: linear-gradient(135deg, #008060 0%, #00a67d 100%); background-color: #008060; border-radius: 12px; padding: 24px; text-align: center;">
+      <table role="presentation" cellspacing="0" cellpadding="0" border="0" align="center">
+        <tr>
+          <td style="background-color: rgba(255,255,255,0.2); border-radius: 50%; width: 48px; height: 48px; text-align: center; vertical-align: middle;">
+            <span style="font-size: 24px; line-height: 48px;">🎉</span>
+          </td>
+        </tr>
+      </table>
+      <h1 style="margin: 16px 0 0 0; font-size: 24px; font-weight: 700; color: #ffffff;">
+        <%= t('mailers.member_mailer.added_to_organisation.banner_title', organisation: @organisation.name) %>
+      </h1>
+    </td>
+  </tr>
+</table>
 
-<p><%= @inviter&.first_name %> <%= @inviter&.last_name %> has added you to <strong><%= @organisation.name %></strong> on Nodal.</p>
+<p style="margin: 0 0 8px 0; font-size: 16px;"><%= t('mailers.member_mailer.added_to_organisation.greeting', name: @member.first_name).html_safe %></p>
 
-<p>You've been assigned the role of <strong><%= @org_member.role.capitalize %></strong>.</p>
+<p style="margin: 0 0 16px 0; color: #4b5563;">
+  <%= t('mailers.member_mailer.added_to_organisation.intro_html', inviter: "#{@inviter&.first_name} #{@inviter&.last_name}", organisation: @organisation.name).html_safe %>
+</p>
 
-<p><%= link_to 'Go to Back Office', @login_url %></p>
+<p style="margin: 0 0 24px 0; color: #4b5563;">
+  <%= t('mailers.member_mailer.added_to_organisation.role_assigned', role: @org_member.role.capitalize).html_safe %>
+</p>
 
-<p>You can now access the back office for <%= @organisation.name %> using your existing account credentials.</p>
+<!-- Go to Back Office button -->
+<table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="margin: 0 0 32px 0;">
+  <tr>
+    <td align="center">
+      <a href="<%= @login_url %>" style="display: inline-block; background: linear-gradient(135deg, #008060 0%, #00a67d 100%); background-color: #008060; color: #ffffff; text-decoration: none; font-size: 16px; font-weight: 600; padding: 14px 32px; border-radius: 8px;">
+        <%= t('mailers.member_mailer.added_to_organisation.go_to_backoffice') %>
+      </a>
+    </td>
+  </tr>
+</table>
+
+<p style="margin: 0; color: #9ca3af; font-size: 13px; text-align: center;">
+  <%= t('mailers.member_mailer.added_to_organisation.existing_account_notice', organisation: @organisation.name) %>
+</p>

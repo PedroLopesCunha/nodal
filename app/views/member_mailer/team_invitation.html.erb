@@ -1,11 +1,75 @@
-<p>Hello,</p>
+<!-- Invitation banner -->
+<table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="margin: 0 0 32px 0;">
+  <tr>
+    <td style="background: linear-gradient(135deg, #008060 0%, #00a67d 100%); background-color: #008060; border-radius: 12px; padding: 24px; text-align: center;">
+      <table role="presentation" cellspacing="0" cellpadding="0" border="0" align="center">
+        <tr>
+          <td style="background-color: rgba(255,255,255,0.2); border-radius: 50%; width: 48px; height: 48px; text-align: center; vertical-align: middle;">
+            <span style="font-size: 24px; line-height: 48px;">✉️</span>
+          </td>
+        </tr>
+      </table>
+      <h1 style="margin: 16px 0 0 0; font-size: 24px; font-weight: 700; color: #ffffff;">
+        <%= t('mailers.member_mailer.team_invitation.banner_title') %>
+      </h1>
+    </td>
+  </tr>
+</table>
 
-<p><%= @inviter&.first_name %> <%= @inviter&.last_name %> has invited you to join <strong><%= @organisation.name %></strong> on Nodal.</p>
+<p style="margin: 0 0 8px 0; font-size: 16px;"><%= t('mailers.member_mailer.team_invitation.greeting') %></p>
 
-<p>You've been assigned the role of <strong><%= @org_member.role.capitalize %></strong>.</p>
+<p style="margin: 0 0 16px 0; color: #4b5563;">
+  <%= t('mailers.member_mailer.team_invitation.intro_html', inviter: "#{@inviter&.first_name} #{@inviter&.last_name}", organisation: @organisation.name).html_safe %>
+</p>
 
-<p><%= link_to 'Accept Invitation', @invitation_url %></p>
+<p style="margin: 0 0 24px 0; color: #4b5563;">
+  <%= t('mailers.member_mailer.team_invitation.role_assigned', role: @org_member.role.capitalize).html_safe %>
+</p>
 
-<p>This invitation will allow you to access the back office for <%= @organisation.name %>, where you can manage customers, products, and orders.</p>
+<!-- Accept button -->
+<table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="margin: 0 0 32px 0;">
+  <tr>
+    <td align="center">
+      <a href="<%= @invitation_url %>" style="display: inline-block; background: linear-gradient(135deg, #008060 0%, #00a67d 100%); background-color: #008060; color: #ffffff; text-decoration: none; font-size: 16px; font-weight: 600; padding: 14px 32px; border-radius: 8px;">
+        <%= t('mailers.member_mailer.team_invitation.accept_button') %>
+      </a>
+    </td>
+  </tr>
+</table>
 
-<p>If you weren't expecting this invitation, you can ignore this email.</p>
+<!-- What you can do section -->
+<table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="margin: 0 0 32px 0; border: 1px solid #e5e5e5; border-radius: 12px; overflow: hidden;">
+  <tr>
+    <td style="padding: 16px 20px; background-color: #f9fafb; border-bottom: 1px solid #e5e5e5;">
+      <span style="font-size: 14px; font-weight: 600; color: #1a1a1a; text-transform: uppercase; letter-spacing: 0.5px;"><%= t('mailers.member_mailer.team_invitation.what_you_can_do') %></span>
+    </td>
+  </tr>
+  <tr>
+    <td style="padding: 20px;">
+      <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0">
+        <tr>
+          <td style="padding-bottom: 12px;">
+            <span style="font-size: 18px; margin-right: 12px;">📦</span>
+            <span style="font-size: 15px; color: #4b5563;"><%= t('mailers.member_mailer.team_invitation.capability_1') %></span>
+          </td>
+        </tr>
+        <tr>
+          <td style="padding-bottom: 12px;">
+            <span style="font-size: 18px; margin-right: 12px;">📊</span>
+            <span style="font-size: 15px; color: #4b5563;"><%= t('mailers.member_mailer.team_invitation.capability_2') %></span>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <span style="font-size: 18px; margin-right: 12px;">🚀</span>
+            <span style="font-size: 15px; color: #4b5563;"><%= t('mailers.member_mailer.team_invitation.capability_3') %></span>
+          </td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+</table>
+
+<p style="margin: 0; color: #9ca3af; font-size: 13px; text-align: center;">
+  <%= t('mailers.member_mailer.team_invitation.ignore_notice') %>
+</p>

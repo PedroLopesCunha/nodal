@@ -1,6 +1,9 @@
 es:
   mailers:
     common:
+      hello: "Hola"
+      greeting: "Hola %{name},"
+      questions_footer: "¿Preguntas? Responde a este email."
       subtotal: "Subtotal"
       tax: "IVA"
       shipping: "Envío"
@@ -24,24 +27,86 @@ es:
       pickup_icon: "🏪 Recogida"
       order_tier_discount: "Descuento por Volumen"
       discount: "Descuento"
+      valid: "Válido"
+      original_price: "Precio Original"
+      min_quantity: "Cant. Mínima"
+      min_order: "Pedido Mínimo"
+      product_details: "Detalles del Producto"
+      discount_details: "Detalles del Descuento"
+      off: "DESC"
+      shop_now: "Comprar Ahora →"
+      view_product: "Ver Producto →"
+      dont_miss_out: "¡No te lo pierdas!"
 
     customer_mailer:
       confirm_order:
         subject: "Confirmación del pedido %{order_number}"
         banner_title: "¡Pedido Confirmado!"
-        greeting: "Hola %{name},"
+        greeting: "Hola <strong>%{name}</strong>,"
         intro: "¡Buenas noticias! Tu pedido ha sido confirmado y está siendo procesado. Aquí tienes un resumen de lo que pediste:"
         whats_next_title: "¿Qué sigue?"
         whats_next_delivery: "Estamos preparando tu pedido. Recibirás otro email cuando esté listo para entrega."
         whats_next_pickup: "Estamos preparando tu pedido. Recibirás otro email cuando esté listo para recogida."
         footer: "¿Preguntas sobre tu pedido? Responde a este email."
 
+      invitation_instructions:
+        subject: "Establece tu contraseña"
+        banner_title: "¡Bienvenido! 👋"
+        greeting: "Hola <strong>%{name}</strong>,"
+        intro_html: "Has sido invitado a unirte a <strong style=\"color: %{color};\">%{organisation}</strong>, donde pedir simplemente funciona."
+        accept_button: "Aceptar Invitación"
+        ignore_notice: "Si no deseas aceptar la invitación, ignora este email."
+
+      reset_password_instructions:
+        subject: "Restablecer tu contraseña"
+        banner_title: "Solicitud de Restablecimiento de Contraseña"
+        greeting: "Hola <strong>%{name}</strong>,"
+        intro: "Recibimos una solicitud para restablecer la contraseña de tu cuenta. Haz clic en el botón de abajo para crear una nueva contraseña."
+        reset_button: "Restablecer Contraseña"
+        didnt_request_title: "¿No lo solicitaste?"
+        didnt_request_body: "Si no solicitaste un restablecimiento de contraseña, puedes ignorar este email con seguridad. Tu contraseña permanecerá sin cambios."
+        expiry_notice: "Este enlace expirará en 6 horas por razones de seguridad."
+
+      customer_discount:
+        subject: "¡Nuevo Descuento personal para TI!"
+        banner_title: "¡Descuento Exclusivo Solo Para Ti!"
+        greeting: "Hola %{name},"
+        intro: "¡Buenas noticias! Hemos creado un descuento personal especial solo para ti como cliente valioso."
+        your_personal_discount: "Tu Descuento Personal"
+        on_all_orders: "en todos tus pedidos"
+        discount_ready_title: "¡Tu descuento está listo!"
+        discount_ready_body: "Este descuento se aplicará automáticamente a todos tus futuros pedidos."
+
+      customer_product_discount:
+        subject: "Nuevo Descuento en %{product_name}"
+        banner_title: "¡Descuento Especial en Producto Para Ti!"
+        greeting: "Hola %{name},"
+        intro: "¡Buenas noticias! Hemos creado un descuento especial en un producto solo para ti."
+        exclusive_to_you: "exclusivo para ti"
+        exclusive_awaits_title: "¡Tu descuento exclusivo te espera!"
+        exclusive_awaits_body: "Este precio especial está disponible solo para ti."
+
+      product_discount:
+        subject: "Nuevo Descuento en Producto: %{product_name}"
+        banner_title: "¡Descuento Especial Disponible!"
+        greeting: "Hola,"
+        intro: "¡Buenas noticias! Tenemos un descuento especial en uno de nuestros productos que pensamos que te gustaría conocer."
+        order_now: "Pide ahora para aprovechar este descuento especial."
+
+      order_discount:
+        subject: "Nuevo Descuento en Pedido"
+        banner_title: "¡Descuento en Pedido Disponible!"
+        greeting: "Hola,"
+        intro: "¡Buenas noticias! Tenemos un descuento especial en tu próximo pedido que pensamos que te gustaría conocer."
+        on_entire_order: "en todo tu pedido"
+        place_order_cta: "Realiza un pedido de %{amount} o más para aprovechar este descuento."
+
     member_mailer:
       notificate_customer_order:
         subject: "Nuevo pedido %{order_number} de %{company_name}"
         banner_title: "¡Nuevo Pedido Recibido!"
-        greeting: "Hola %{name},"
-        intro: "¡Buenas noticias! %{company_name} ha realizado un nuevo pedido. Aquí están los detalles:"
+        greeting: "Hola <strong>%{name}</strong>,"
+        intro: "¡Buenas noticias! <strong>%{company_name}</strong> ha realizado un nuevo pedido. Aquí están los detalles:"
         customer_information: "Información del Cliente"
         contact_name: "Nombre de Contacto"
         company: "Empresa"
@@ -53,3 +118,35 @@ es:
         action_required_pickup: "Por favor revisa y procesa este pedido lo antes posible. El cliente espera la recogida"
         action_required_on_date: " el %{date}"
         footer: "Esta es una notificación automática de Nodal."
+
+      reset_password_instructions:
+        subject: "Restablecer tu contraseña"
+        banner_title: "Solicitud de Restablecimiento de Contraseña"
+        greeting: "Hola <strong>%{name}</strong>,"
+        intro: "Recibimos una solicitud para restablecer la contraseña de tu cuenta. Haz clic en el botón de abajo para crear una nueva contraseña."
+        reset_button: "Restablecer Contraseña"
+        didnt_request_title: "¿No lo solicitaste?"
+        didnt_request_body: "Si no solicitaste un restablecimiento de contraseña, puedes ignorar este email con seguridad. Tu contraseña permanecerá sin cambios."
+        expiry_notice: "Este enlace expirará en 6 horas por razones de seguridad."
+
+      team_invitation:
+        subject: "Has sido invitado a unirte a %{organisation} en Nodal"
+        banner_title: "¡Estás Invitado! 🎉"
+        greeting: "Hola,"
+        intro_html: "<strong>%{inviter}</strong> te ha invitado a unirte a <strong>%{organisation}</strong> en Nodal."
+        role_assigned: "Se te ha asignado el rol de <strong>%{role}</strong>."
+        accept_button: "Aceptar Invitación"
+        what_you_can_do: "Lo que podrás hacer"
+        capability_1: "Gestionar clientes, productos y pedidos"
+        capability_2: "Acceder al panel de administración"
+        capability_3: "Procesar pedidos entrantes"
+        ignore_notice: "Si no esperabas esta invitación, puedes ignorar este email."
+
+      added_to_organisation:
+        subject: "Has sido añadido a %{organisation} en Nodal"
+        banner_title: "¡Bienvenido a %{organisation}! 🎉"
+        greeting: "Hola <strong>%{name}</strong>,"
+        intro_html: "<strong>%{inviter}</strong> te ha añadido a <strong>%{organisation}</strong> en Nodal."
+        role_assigned: "Se te ha asignado el rol de <strong>%{role}</strong>."
+        go_to_backoffice: "Ir al Panel"
+        existing_account_notice: "Ahora puedes acceder al panel de administración de %{organisation} usando tus credenciales existentes."

@@ -1,6 +1,9 @@
 en:
   mailers:
     common:
+      hello: "Hello"
+      greeting: "Hello %{name},"
+      questions_footer: "Questions? Just reply to this email."
       subtotal: "Subtotal"
       tax: "Tax"
       shipping: "Shipping"
@@ -24,24 +27,86 @@ en:
       pickup_icon: "🏪 Pickup"
       order_tier_discount: "Order Tier Discount"
       discount: "Discount"
+      valid: "Valid"
+      original_price: "Original Price"
+      min_quantity: "Min. Quantity"
+      min_order: "Minimum Order"
+      product_details: "Product Details"
+      discount_details: "Discount Details"
+      off: "OFF"
+      shop_now: "Shop Now →"
+      view_product: "View Product →"
+      dont_miss_out: "Don't miss out!"
 
     customer_mailer:
       confirm_order:
         subject: "Order confirmation for Order %{order_number}"
         banner_title: "Order Confirmed!"
-        greeting: "Hello %{name},"
+        greeting: "Hello <strong>%{name}</strong>,"
         intro: "Great news! Your order has been confirmed and is being processed. Here's a summary of what you ordered:"
         whats_next_title: "What's next?"
         whats_next_delivery: "We're preparing your order now. You'll receive another email when it's ready for delivery."
         whats_next_pickup: "We're preparing your order now. You'll receive another email when it's ready for pickup."
         footer: "Questions about your order? Just reply to this email."
 
+      invitation_instructions:
+        subject: "Set your password"
+        banner_title: "Welcome aboard! 👋"
+        greeting: "Hello <strong>%{name}</strong>,"
+        intro_html: "You have been invited to join <strong style=\"color: %{color};\">%{organisation}</strong>, where ordering just works."
+        accept_button: "Accept Invitation"
+        ignore_notice: "If you don't want to accept the invitation, please ignore this email."
+
+      reset_password_instructions:
+        subject: "Reset your password"
+        banner_title: "Password Reset Request"
+        greeting: "Hello <strong>%{name}</strong>,"
+        intro: "We received a request to reset the password for your account. Click the button below to create a new password."
+        reset_button: "Reset Password"
+        didnt_request_title: "Didn't request this?"
+        didnt_request_body: "If you didn't request a password reset, you can safely ignore this email. Your password will remain unchanged."
+        expiry_notice: "This link will expire in 6 hours for security reasons."
+
+      customer_discount:
+        subject: "New personal Discount for YOU!"
+        banner_title: "Exclusive Discount Just for You!"
+        greeting: "Hello %{name},"
+        intro: "Great news! We've created a special personal discount just for you as a valued customer."
+        your_personal_discount: "Your Personal Discount"
+        on_all_orders: "on all your orders"
+        discount_ready_title: "Your discount is ready!"
+        discount_ready_body: "This discount will be automatically applied to all your future orders."
+
+      customer_product_discount:
+        subject: "New Discount on %{product_name}"
+        banner_title: "Special Product Discount for You!"
+        greeting: "Hello %{name},"
+        intro: "Great news! We've created a special discount on a product just for you."
+        exclusive_to_you: "exclusive to you"
+        exclusive_awaits_title: "Your exclusive discount awaits!"
+        exclusive_awaits_body: "This special price is available only to you."
+
+      product_discount:
+        subject: "New Product Discount on %{product_name}"
+        banner_title: "Special Discount Available!"
+        greeting: "Hello,"
+        intro: "Great news! We have a special discount on one of our products that we thought you'd like to know about."
+        order_now: "Order now to take advantage of this special discount."
+
+      order_discount:
+        subject: "New Discount on new Order"
+        banner_title: "Order Discount Available!"
+        greeting: "Hello,"
+        intro: "Great news! We have a special discount on your next order that we thought you'd like to know about."
+        on_entire_order: "on your entire order"
+        place_order_cta: "Place an order of %{amount} or more to take advantage of this discount."
+
     member_mailer:
       notificate_customer_order:
         subject: "New order %{order_number} from %{company_name}"
         banner_title: "New Order Received!"
-        greeting: "Hello %{name},"
-        intro: "Great news! %{company_name} has placed a new order. Here are the details:"
+        greeting: "Hello <strong>%{name}</strong>,"
+        intro: "Great news! <strong>%{company_name}</strong> has placed a new order. Here are the details:"
         customer_information: "Customer Information"
         contact_name: "Contact Name"
         company: "Company"
@@ -53,3 +118,35 @@ en:
         action_required_pickup: "Please review and process this order at your earliest convenience. The customer is expecting pickup"
         action_required_on_date: " on %{date}"
         footer: "This is an automated notification from Nodal."
+
+      reset_password_instructions:
+        subject: "Reset your password"
+        banner_title: "Password Reset Request"
+        greeting: "Hello <strong>%{name}</strong>,"
+        intro: "We received a request to reset the password for your account. Click the button below to create a new password."
+        reset_button: "Reset Password"
+        didnt_request_title: "Didn't request this?"
+        didnt_request_body: "If you didn't request a password reset, you can safely ignore this email. Your password will remain unchanged."
+        expiry_notice: "This link will expire in 6 hours for security reasons."
+
+      team_invitation:
+        subject: "You've been invited to join %{organisation} on Nodal"
+        banner_title: "You're Invited! 🎉"
+        greeting: "Hello,"
+        intro_html: "<strong>%{inviter}</strong> has invited you to join <strong>%{organisation}</strong> on Nodal."
+        role_assigned: "You've been assigned the role of <strong>%{role}</strong>."
+        accept_button: "Accept Invitation"
+        what_you_can_do: "What you'll be able to do"
+        capability_1: "Manage customers, products, and orders"
+        capability_2: "Access the back office dashboard"
+        capability_3: "Process incoming orders"
+        ignore_notice: "If you weren't expecting this invitation, you can ignore this email."
+
+      added_to_organisation:
+        subject: "You've been added to %{organisation} on Nodal"
+        banner_title: "Welcome to %{organisation}! 🎉"
+        greeting: "Hello <strong>%{name}</strong>,"
+        intro_html: "<strong>%{inviter}</strong> has added you to <strong>%{organisation}</strong> on Nodal."
+        role_assigned: "You've been assigned the role of <strong>%{role}</strong>."
+        go_to_backoffice: "Go to Back Office"
+        existing_account_notice: "You can now access the back office for %{organisation} using your existing account credentials."

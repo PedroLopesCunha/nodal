@@ -8,14 +8,22 @@ class CustomerMailer < ApplicationMailer
     opts[:org_slug] ||= @organisation.slug
     @token = token
     @resource = record
-    mail(to: record.email, subject: "Set your password")
+
+    I18n.with_locale(@organisation.default_locale) do
+      subject = t('mailers.customer_mailer.invitation_instructions.subject')
+      mail(to: record.email, subject: subject)
+    end
   end
 
   def reset_password_instructions(record, token, opts = {})
     @organisation = record.organisation
     @token = token
     @resource = record
-    mail(to: record.email, subject: "Reset your password")
+
+    I18n.with_locale(@organisation.default_locale) do
+      subject = t('mailers.customer_mailer.reset_password_instructions.subject')
+      mail(to: record.email, subject: subject)
+    end
   end
 
   def confirm_order
@@ -34,10 +42,13 @@ class CustomerMailer < ApplicationMailer
     @discount = params[:discount]
     @organisation = params[:organisation]
     mailing_list = @organisation.customers.pluck(:email)
-    if @discount.has_attribute?(:product_id) # ProductDiscount
-      send_product_discount_mail(mailing_list)
-    else # Order Discount
-      send_order_discount_mail(mailing_list)
+
+    I18n.with_locale(@organisation.default_locale) do
+      if @discount.has_attribute?(:product_id) # ProductDiscount
+        send_product_discount_mail(mailing_list)
+      else # Order Discount
+        send_order_discount_mail(mailing_list)
+      end
     end
   end
 
@@ -45,18 +56,22 @@ class CustomerMailer < ApplicationMailer
     @discount = params[:discount]
     @organisation = params[:organisation]
     @customer = @discount.customer
-    if @discount.has_attribute?(:product_id) # CustomerProductDiscount
-      @product = @discount.product
-      subject = "New Discount on #{@product.name}"
-      mail(to: @customer.email, subject: subject) do |format|
-        format.html { render 'customer_product_discount' }
-        format.text { render 'customer_product_discount' }
-      end
-    else # CustomerDiscount
-      subject = "New personal Discount for YOU!"
-      mail(to: @customer.email, subject: subject) do |format|
-        format.html { render 'customer_discount' }
-        format.text { render 'customer_discount' }
+
+    I18n.with_locale(@organisation.default_locale) do
+      if @discount.has_attribute?(:product_id) # CustomerProductDiscount
+        @product = @discount.product
+        subject = t('mailers.customer_mailer.customer_product_discount.subject',
+                    product_name: @product.name)
+        mail(to: @customer.email, subject: subject) do |format|
+          format.html { render 'customer_product_discount' }
+          format.text { render 'customer_product_discount' }
+        end
+      else # CustomerDiscount
+        subject = t('mailers.customer_mailer.customer_discount.subject')
+        mail(to: @customer.email, subject: subject) do |format|
+          format.html { render 'customer_discount' }
+          format.text { render 'customer_discount' }
+        end
       end
     end
   end
@@ -65,12 +80,13 @@ class CustomerMailer < ApplicationMailer
 
   def send_product_discount_mail(mailing_list)
     @product = @discount.product
-    subject = "New Product Discount on #{@product.name}"
+    subject = t('mailers.customer_mailer.product_discount.subject',
+                product_name: @product.name)
     mail(to: mailing_list, subject: subject)
   end
 
   def send_order_discount_mail(mailing_list)
-    subject = "New Discount on new Order"
+    subject = t('mailers.customer_mailer.order_discount.subject')
     mail(to: mailing_list, subject: subject)
   end
 end
