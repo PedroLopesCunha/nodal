@@ -22,7 +22,12 @@ class CustomerMailer < ApplicationMailer
     @customer = params[:customer]
     @order = params[:order]
     @organisation = @order.organisation
-    mail(to: @customer.email, subject: "Order confirmation for Order #{@order.order_number}")
+
+    I18n.with_locale(@organisation.default_locale) do
+      subject = t('mailers.customer_mailer.confirm_order.subject',
+                  order_number: @order.order_number)
+      mail(to: @customer.email, subject: subject)
+    end
   end
 
   def notify_clients_about_discount

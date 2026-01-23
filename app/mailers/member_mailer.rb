@@ -16,8 +16,13 @@ class MemberMailer < ApplicationMailer
     org_slug = params[:org_slug]
     @organisation = Organisation.find_by(slug: org_slug)
     mailing_list = @organisation.members.pluck(:email)
-    subject = "New order #{@order.order_number} from #{@customer.company_name}"
-    mail(to: mailing_list, subject: subject)
+
+    I18n.with_locale(@organisation.default_locale) do
+      subject = t('mailers.member_mailer.notificate_customer_order.subject',
+                  order_number: @order.order_number,
+                  company_name: @customer.company_name)
+      mail(to: mailing_list, subject: subject)
+    end
   end
   
   # Invitation email for new team members
