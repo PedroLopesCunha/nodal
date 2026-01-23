@@ -46,7 +46,7 @@ class Category < ApplicationRecord
   end
 
   def depth_warning?
-    depth >= 3
+    depth >= 5
   end
 
   def full_path
