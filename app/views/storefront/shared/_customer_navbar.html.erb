@@ -1,3 +1,10 @@
+<% if browsing_as_member? %>
+  <div class="bg-info text-white py-2 text-center small">
+    <i class="fa-solid fa-eye me-1"></i>
+    <%= t('storefront.member_browse.preview_banner') %>
+    <%= link_to t('storefront.member_browse.return_to_dashboard'), bo_path(org_slug: current_organisation.slug), class: "text-white ms-2" %>
+  </div>
+<% end %>
 <nav class="navbar navbar-expand-lg navbar-light bg-white border-bottom sticky-top">
   <div class="container">
     <%= link_to products_path(org_slug: params[:org_slug]), class: "navbar-brand fw-bold d-flex align-items-center gap-1" do %>
@@ -18,9 +25,11 @@
         <li class="nav-item">
           <%= link_to t('storefront.navbar.products'), products_path(org_slug: params[:org_slug]), class: "nav-link #{'active' if controller_name == 'products'}" %>
         </li>
-        <li class="nav-item">
-          <%= link_to t('storefront.navbar.orders'), orders_path(org_slug: params[:org_slug]), class: "nav-link #{'active' if controller_name == 'orders'}" %>
-        </li>
+        <% unless browsing_as_member? %>
+          <li class="nav-item">
+            <%= link_to t('storefront.navbar.orders'), orders_path(org_slug: params[:org_slug]), class: "nav-link #{'active' if controller_name == 'orders'}" %>
+          </li>
+        <% end %>
         <% if current_organisation.has_contact_info? %>
           <li class="nav-item">
             <%= link_to t('storefront.navbar.contact'), contact_path(org_slug: params[:org_slug]), class: "nav-link #{'active' if controller_name == 'contacts'}" %>
@@ -91,6 +100,14 @@
               </li>
             </ul>
           </div>
+        <% elsif browsing_as_member? %>
+          <!-- Member browsing info (no cart) -->
+          <span class="badge bg-info me-2">
+            <i class="fa-solid fa-user-tie me-1"></i><%= t('storefront.member_browse.staff_badge') %>
+          </span>
+          <span class="text-muted small">
+            <%= "#{current_member.first_name} #{current_member.last_name}" %>
+          </span>
         <% end %>
       </div>
     </div>

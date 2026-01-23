@@ -101,6 +101,7 @@ pt:
       team: "Equipa"
       settings: "Definições"
       log_out: "Sair"
+      view_storefront: "Ver Loja"
 
     # Secção Dashboard
     dashboards:

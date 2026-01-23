@@ -1,4 +1,6 @@
 class Storefront::CartsController < Storefront::BaseController
+  before_action :require_customer!
+
   def show
     @order = current_cart
     authorize @order, policy_class: OrderPolicy

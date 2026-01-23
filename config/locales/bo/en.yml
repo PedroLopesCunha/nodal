@@ -104,6 +104,7 @@ en:
       team: "Team"
       settings: "Settings"
       log_out: "Log out"
+      view_storefront: "View Storefront"
 
     # Dashboard section
     dashboards:

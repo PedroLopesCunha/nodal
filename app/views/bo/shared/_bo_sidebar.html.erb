@@ -54,6 +54,13 @@
 
   <!-- Bottom Navigation -->
   <ul class="bo-sidebar-nav-bottom">
+    <li class="bo-sidebar-item bo-sidebar-storefront">
+      <%= link_to products_path(org_slug: current_organisation.slug), target: "_blank" do %>
+        <i class="fa-solid fa-store"></i>
+        <span><%= t('bo.sidebar.view_storefront', default: 'View Storefront') %></span>
+        <i class="fa-solid fa-external-link-alt ms-auto" style="font-size: 0.7rem; opacity: 0.6;"></i>
+      <% end %>
+    </li>
     <li class="bo-sidebar-item <%= 'active' if controller_name == 'profiles' %>">
       <%= link_to edit_bo_profile_path do %>
         <i class="fa-solid fa-circle-user"></i>

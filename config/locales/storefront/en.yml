@@ -1,5 +1,12 @@
 en:
   storefront:
+    # Member browse mode (staff previewing storefront)
+    member_browse:
+      preview_banner: "You are previewing the storefront as a staff member."
+      return_to_dashboard: "Return to Dashboard"
+      staff_badge: "Staff"
+      cart_not_available: "Cart is only available for customers."
+
     # Common translations
     common:
       back: "Back"

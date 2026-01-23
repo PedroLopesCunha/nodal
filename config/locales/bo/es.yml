@@ -101,6 +101,7 @@ es:
       team: "Equipo"
       settings: "Configuración"
       log_out: "Salir"
+      view_storefront: "Ver Tienda"
 
     # Sección Panel
     dashboards:

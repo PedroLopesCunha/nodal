@@ -1,4 +1,6 @@
 class Storefront::OrdersController < Storefront::BaseController
+  before_action :require_customer!
+
   def index
     @orders = policy_scope(current_customer.orders.placed, policy_scope_class: OrderPolicy::Scope)
                 .includes(:order_items, :products)
