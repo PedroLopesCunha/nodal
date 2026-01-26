@@ -70,12 +70,14 @@ namespace :import do
           cache_key = "#{attr_name}:#{val.downcase}"
           unless value_cache[cache_key]
             attr = attribute_cache[attr_name]
-            attr_val = attr.product_attribute_values.find_or_create_by!(value: val) do |v|
-              v.slug = val.parameterize
-              v.active = true
+            # Find existing or create new - handle slug uniqueness
+            attr_val = attr.product_attribute_values.find_by(value: val)
+            unless attr_val
+              slug = generate_unique_slug(attr, val)
+              attr_val = attr.product_attribute_values.create!(value: val, slug: slug, active: true)
+              stats[:attribute_values_created] += 1
             end
             value_cache[cache_key] = attr_val
-            stats[:attribute_values_created] += 1 if attr_val.previously_new_record?
           end
         end
       end
@@ -171,9 +173,10 @@ namespace :import do
         unless attr_val
           attr = attribute_cache[attr_name]
           if attr
-            attr_val = attr.product_attribute_values.find_or_create_by!(value: attr_value_str) do |v|
-              v.slug = attr_value_str.parameterize
-              v.active = true
+            attr_val = attr.product_attribute_values.find_by(value: attr_value_str)
+            unless attr_val
+              slug = generate_unique_slug(attr, attr_value_str)
+              attr_val = attr.product_attribute_values.create!(value: attr_value_str, slug: slug, active: true)
             end
             value_cache[cache_key] = attr_val
           end
@@ -254,6 +257,20 @@ namespace :import do
   end
 
   private
+
+  def generate_unique_slug(attribute, value)
+    base_slug = value.parameterize
+    base_slug = "value-#{SecureRandom.hex(4)}" if base_slug.blank?
+    slug = base_slug
+    counter = 1
+
+    while attribute.product_attribute_values.exists?(slug: slug)
+      counter += 1
+      slug = "#{base_slug}-#{counter}"
+    end
+
+    slug
+  end
 
   def parse_price(value)
     return nil if value.blank?
