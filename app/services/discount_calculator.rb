@@ -23,8 +23,9 @@ class DiscountCalculator
   end
 
   # Returns the base price (variant price if available, otherwise product price)
+  # Returns zero money if no price is set
   def base_price
-    variant&.price || product.price
+    variant&.price || product.price || Money.new(0, currency)
   end
 
   # Returns the final price per unit
