@@ -2,6 +2,8 @@ class Product < ApplicationRecord
   include Slugable
   include ErpSyncable
 
+  slugify :name, secondary: :sku
+
   belongs_to :organisation
   belongs_to :category, optional: true  # Legacy direct association
   has_many :order_items, dependent: :restrict_with_error

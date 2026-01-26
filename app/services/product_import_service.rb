@@ -169,23 +169,5 @@ class ProductImportService
     end
 
     product.organisation = @organisation unless product.persisted?
-
-    # Auto-generate slug from name if not set
-    if product.slug.blank? && product.name.present?
-      base_slug = product.name.parameterize
-      product.slug = ensure_unique_slug(base_slug)
-    end
-  end
-
-  def ensure_unique_slug(base_slug)
-    slug = base_slug
-    counter = 1
-    while @organisation.products.where.not(id: nil).exists?(slug: slug) || @seen_slugs&.include?(slug)
-      slug = "#{base_slug}-#{counter}"
-      counter += 1
-    end
-    @seen_slugs ||= Set.new
-    @seen_slugs << slug
-    slug
   end
 end
