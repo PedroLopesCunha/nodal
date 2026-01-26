@@ -55,6 +55,8 @@ es:
         categories: "Categorías"
         all_products: "Todos los Productos"
         clear_filters: "Limpiar filtros"
+        filters:
+          active: "Filtros activos"
         no_products: "No se encontraron productos"
         no_products_hint: "Intente ajustar su búsqueda o filtros."
         empty_catalog: "No hay productos disponibles en este momento."
