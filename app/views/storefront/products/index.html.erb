@@ -9,6 +9,9 @@
 <%# Breadcrumbs when filtering by category %>
 <%= render 'storefront/shared/category_breadcrumbs', breadcrumbs: @breadcrumbs if @breadcrumbs.present? %>
 
+<%# Applied filters breadbox %>
+<%= render 'storefront/products/applied_filters', active_filters: @active_filters %>
+
 <div class="row">
   <%# Sidebar with filters %>
   <div class="col-lg-3 mb-4">
@@ -16,11 +19,14 @@
       <div class="card-body">
         <h6 class="card-title mb-3"><%= t('storefront.products.index.search') %></h6>
         <%= form_with url: products_path(org_slug: params[:org_slug]), method: :get, local: true do %>
-          <% if params[:category].present? %>
-            <%= hidden_field_tag :category, params[:category] %>
+          <% Array(params[:categories]).each do |cat_id| %>
+            <%= hidden_field_tag 'categories[]', cat_id %>
+          <% end %>
+          <% Array(params[:queries]).each do |q| %>
+            <%= hidden_field_tag 'queries[]', q %>
           <% end %>
           <div class="input-group">
-            <%= text_field_tag :query, params[:query], class: "form-control", placeholder: t('storefront.products.index.search_placeholder') %>
+            <%= text_field_tag 'queries[]', nil, class: "form-control", placeholder: t('storefront.products.index.search_placeholder') %>
             <button type="submit" class="btn btn-outline-secondary">
               <i class="fa-solid fa-magnifying-glass"></i>
             </button>
@@ -29,15 +35,7 @@
       </div>
     </div>
 
-    <%= render 'storefront/shared/category_sidebar', categories: @categories, current_category: @current_category %>
-
-    <% if params[:query].present? || params[:category].present? %>
-      <div class="mt-3">
-        <%= link_to products_path(org_slug: params[:org_slug]), class: "btn btn-outline-secondary w-100" do %>
-          <i class="fa-solid fa-times me-1"></i><%= t('storefront.products.index.clear_filters') %>
-        <% end %>
-      </div>
-    <% end %>
+    <%= render 'storefront/shared/category_sidebar', categories: @categories, current_categories: @current_categories %>
   </div>
 
   <%# Product grid %>
@@ -46,7 +44,7 @@
       <div class="row row-cols-1 row-cols-md-2 row-cols-xl-3 g-4">
         <% @products.each do |product| %>
           <div class="col">
-            <%= link_to product_path(org_slug: params[:org_slug], id: product, category: params[:category], query: params[:query]), class: "text-decoration-none" do %>
+            <%= link_to product_path(org_slug: params[:org_slug], id: product, categories: params[:categories], queries: params[:queries]), class: "text-decoration-none" do %>
               <div class="card h-100 product-card">
                 <% discount_info = @product_discounts[product.id] %>
                 <% if product.photo.attached? %>
@@ -98,7 +96,7 @@
         <i class="fa-solid fa-box-open fa-4x text-muted mb-3"></i>
         <h4><%= t('storefront.products.index.no_products') %></h4>
         <p class="text-muted">
-          <% if params[:query].present? || params[:category].present? %>
+          <% if Array(params[:queries]).any? || Array(params[:categories]).any? %>
             <%= t('storefront.products.index.no_products_hint') %>
           <% else %>
             <%= t('storefront.products.index.empty_catalog') %>
