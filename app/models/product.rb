@@ -27,7 +27,7 @@ class Product < ApplicationRecord
   validates :slug, uniqueness: true
   validates :name, presence: true
   validates :description, length: { maximum: 150 }, allow_blank: true
-  monetize :unit_price, as: :price
+  monetize :unit_price, as: :price, allow_nil: true
 
   after_create :create_default_variant
   after_update :sync_default_variant, if: :should_sync_default_variant?
