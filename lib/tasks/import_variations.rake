@@ -52,12 +52,13 @@ namespace :import do
         next if attr_name.blank?
 
         unless attribute_cache[attr_name]
-          attr = organisation.product_attributes.find_or_create_by!(name: attr_name.titleize) do |a|
-            a.slug = attr_name.parameterize
-            a.active = true
+          attr = organisation.product_attributes.find_by(name: attr_name.titleize)
+          unless attr
+            slug = generate_unique_attr_slug(organisation, attr_name)
+            attr = organisation.product_attributes.create!(name: attr_name.titleize, slug: slug, active: true)
+            stats[:attributes_created] += 1
           end
           attribute_cache[attr_name] = attr
-          stats[:attributes_created] += 1 if attr.previously_new_record?
           puts "  Attribute: #{attr.name}"
         end
 
@@ -257,6 +258,20 @@ namespace :import do
   end
 
   private
+
+  def generate_unique_attr_slug(organisation, attr_name)
+    base_slug = attr_name.parameterize
+    base_slug = "attr-#{SecureRandom.hex(4)}" if base_slug.blank?
+    slug = base_slug
+    counter = 1
+
+    while organisation.product_attributes.exists?(slug: slug)
+      counter += 1
+      slug = "#{base_slug}-#{counter}"
+    end
+
+    slug
+  end
 
   def generate_unique_slug(attribute, value)
     base_slug = value.parameterize
