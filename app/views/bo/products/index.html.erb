@@ -88,7 +88,7 @@
               <span class="badge bg-secondary-subtle text-secondary"><%= t('bo.products.index.table.simple') %></span>
             <% end %>
           </td>
-          <td><%= humanized_money_with_symbol(product.price) %></td>
+          <td><%= product.display_price %></td>
           <td class="text-end product-actions" style="white-space: nowrap;" onclick="event.stopPropagation();">
             <%= link_to bo_product_path(params[:org_slug], product), class: "btn btn-sm btn-link text-muted" do %>
               <i class="fa-solid fa-eye"></i>
