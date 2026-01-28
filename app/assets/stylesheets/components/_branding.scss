@@ -75,12 +75,23 @@ a.text-primary {
 }
 
 .btn-success {
-  --bs-btn-bg: var(--org-primary, $teal);
-  --bs-btn-border-color: var(--org-primary, $teal);
-  --bs-btn-hover-bg: var(--org-primary-hover, $teal-dark);
-  --bs-btn-hover-border-color: var(--org-primary-hover, $teal-dark);
-  --bs-btn-active-bg: var(--org-primary-hover, $teal-dark);
-  --bs-btn-active-border-color: var(--org-primary-hover, $teal-dark);
+  background-color: var(--org-primary, $teal);
+  border-color: var(--org-primary, $teal);
+  color: #ffffff;
+
+  &:hover,
+  &:focus {
+    background-color: var(--org-primary-hover, $teal-dark);
+    border-color: var(--org-primary-hover, $teal-dark);
+    color: #ffffff;
+  }
+
+  &:active,
+  &.active {
+    background-color: var(--org-primary-hover, $teal-dark);
+    border-color: var(--org-primary-hover, $teal-dark);
+    color: #ffffff;
+  }
 }
 
 .badge.bg-success {
