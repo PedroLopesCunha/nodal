@@ -67,7 +67,7 @@
                   <td class="ps-4">
                     <div class="d-flex align-items-center">
                       <% photo = item.effective_photo %>
-                      <% if photo&.attached? %>
+                      <% if photo.present? %>
                         <%= image_tag photo, class: "me-3", style: "width: 60px; height: 60px; object-fit: cover; border-radius: 8px;" %>
                       <% else %>
                         <div class="me-3 bg-light d-flex align-items-center justify-content-center" style="width: 60px; height: 60px; border-radius: 8px;">

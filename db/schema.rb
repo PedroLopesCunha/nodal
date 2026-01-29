@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2026_01_23_180251) do
+ActiveRecord::Schema[7.1].define(version: 2026_01_29_174050) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -188,7 +188,7 @@ ActiveRecord::Schema[7.1].define(version: 2026_01_23_180251) do
     t.integer "records_failed", default: 0
     t.datetime "started_at"
     t.datetime "completed_at"
-    t.jsonb "errors", default: []
+    t.jsonb "error_details", default: []
     t.text "summary"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
