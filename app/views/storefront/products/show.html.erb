@@ -296,14 +296,32 @@
 <!-- Image Zoom Modal -->
 <% if @product.photo.attached? %>
   <div class="modal fade" id="imageModal" tabindex="-1" aria-labelledby="imageModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg modal-dialog-centered">
-      <div class="modal-content">
-        <div class="modal-header border-0">
-          <h5 class="modal-title" id="imageModalLabel"><%= @product.name %></h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+    <div class="modal-dialog modal-fullscreen">
+      <div class="modal-content bg-dark">
+        <div class="modal-header border-0 bg-dark position-relative" style="z-index: 10;">
+          <h5 class="modal-title text-white" id="imageModalLabel"><%= @product.name %></h5>
+          <div class="d-flex align-items-center gap-2">
+            <div class="btn-group" role="group">
+              <button type="button" class="btn btn-outline-light btn-sm" data-action="image-zoom#zoomOut" title="Zoom out">
+                <i class="fa-solid fa-minus"></i>
+              </button>
+              <button type="button" class="btn btn-outline-light btn-sm" data-action="image-zoom#reset" title="Reset">
+                <i class="fa-solid fa-expand"></i>
+              </button>
+              <button type="button" class="btn btn-outline-light btn-sm" data-action="image-zoom#zoomIn" title="Zoom in">
+                <i class="fa-solid fa-plus"></i>
+              </button>
+            </div>
+            <button type="button" class="btn-close btn-close-white ms-2" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
         </div>
-        <div class="modal-body text-center p-4">
-          <%= image_tag @product.photo, class: "img-fluid", style: "max-height: 70vh;" %>
+        <div class="modal-body overflow-hidden d-flex align-items-center justify-content-center p-0"
+             data-controller="image-zoom"
+             data-action="wheel->image-zoom#wheel mousedown->image-zoom#mousedown mousemove->image-zoom#mousemove mouseup->image-zoom#mouseup mouseleave->image-zoom#mouseleave dblclick->image-zoom#dblclick touchstart->image-zoom#touchstart touchmove->image-zoom#touchmove touchend->image-zoom#touchend">
+          <%= image_tag @product.photo, style: "max-height: 90vh; cursor: zoom-in;", data: { image_zoom_target: "image" } %>
+        </div>
+        <div class="modal-footer border-0 bg-dark justify-content-center py-2">
+          <small class="text-white-50">Scroll to zoom • Double-click to toggle • Drag to pan</small>
         </div>
       </div>
     </div>
