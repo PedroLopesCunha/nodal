@@ -8,8 +8,8 @@
         <i class="fa-solid fa-arrow-left"></i>
       <% end %>
       <div>
-        <h1 class="h3 mb-0">New Order</h1>
-        <p class="text-muted mb-0">Create a new order for a customer</p>
+        <h1 class="h3 mb-0"><%= t('bo.orders.new.title') %></h1>
+        <p class="text-muted mb-0"><%= t('bo.orders.new.subtitle') %></p>
       </div>
     </div>
   </div>
@@ -20,7 +20,7 @@
 
         <% if @order.errors.any? %>
           <div class="alert alert-danger mb-4">
-            <h6 class="alert-heading">Please fix the following errors:</h6>
+            <h6 class="alert-heading"><%= t('bo.common.fix_errors') %></h6>
             <ul class="mb-0">
               <% @order.errors.full_messages.each do |message| %>
                 <li><%= message %></li>
@@ -32,10 +32,10 @@
         <!-- Customer Selection -->
         <div class="card mb-4">
           <div class="card-body">
-            <h5 class="card-title mb-4">Customer</h5>
+            <h5 class="card-title mb-4"><%= t('bo.orders.form.customer') %></h5>
             <div class="mb-3">
-              <%= f.label :customer_id, "Select Customer", class: "form-label" %>
-              <%= f.collection_select :customer_id, @customers, :id, :company_name, { prompt: "Choose a customer..." }, { class: "form-select" } %>
+              <%= f.label :customer_id, t('bo.orders.form.select_customer'), class: "form-label" %>
+              <%= f.collection_select :customer_id, @customers, :id, :company_name, { prompt: t('bo.orders.form.choose_customer') }, { class: "form-select" } %>
             </div>
           </div>
         </div>
@@ -44,9 +44,9 @@
         <div class="card mb-4" data-controller="order-items">
           <div class="card-body">
             <div class="d-flex justify-content-between align-items-center mb-4">
-              <h5 class="card-title mb-0">Order Items</h5>
+              <h5 class="card-title mb-0"><%= t('bo.orders.show.order_items') %></h5>
               <button type="button" class="btn btn-outline-primary btn-sm" data-action="order-items#add">
-                <i class="fa-solid fa-plus me-1"></i> Add Item
+                <i class="fa-solid fa-plus me-1"></i> <%= t('bo.orders.form.add_item') %>
               </button>
             </div>
 
@@ -54,10 +54,10 @@
               <table class="table align-middle mb-0">
                 <thead class="table-light">
                   <tr>
-                    <th style="width: 40%">Product</th>
-                    <th style="width: 15%">Quantity</th>
-                    <th style="width: 20%">Unit Price</th>
-                    <th style="width: 20%">Total</th>
+                    <th style="width: 40%"><%= t('bo.common.product') %></th>
+                    <th style="width: 15%"><%= t('bo.orders.form.quantity') %></th>
+                    <th style="width: 20%"><%= t('bo.orders.form.unit_price') %></th>
+                    <th style="width: 20%"><%= t('bo.common.total') %></th>
                     <th style="width: 5%"></th>
                   </tr>
                 </thead>
@@ -72,7 +72,7 @@
             <div class="border-top pt-3 mt-3">
               <div class="d-flex justify-content-end">
                 <div class="text-end">
-                  <span class="text-muted me-3">Order Total:</span>
+                  <span class="text-muted me-3"><%= t('bo.orders.form.order_total') %>:</span>
                   <strong class="fs-5">$<span data-order-items-target="total">0.00</span></strong>
                 </div>
               </div>
@@ -83,7 +83,7 @@
             <tr>
               <td>
                 <select name="order[order_items_attributes][NEW_INDEX][product_id]" class="form-select form-select-sm" data-action="change->order-items#updatePrice">
-                  <option value="">Select product...</option>
+                  <option value=""><%= t('bo.orders.form.select_product') %></option>
                   <% @products.each do |product| %>
                     <option value="<%= product.id %>" data-price="<%= product.price %>"><%= product.name %></option>
                   <% end %>
@@ -113,34 +113,34 @@
         <!-- Order Details -->
         <div class="card mb-4">
           <div class="card-body">
-            <h5 class="card-title mb-4">Order Details</h5>
+            <h5 class="card-title mb-4"><%= t('bo.orders.show.order_details') %></h5>
 
             <div class="row mb-3">
               <div class="col-md-4">
-                <%= f.label :status, class: "form-label" %>
-                <%= f.select :status, Order::STATUSES.map { |s| [s.titleize, s] }, { selected: "in_process" }, class: "form-select" %>
+                <%= f.label :status, t('bo.common.tables.status'), class: "form-label" %>
+                <%= f.select :status, Order::STATUSES.map { |s| [t("bo.common.statuses.#{s}"), s] }, { selected: "in_process" }, class: "form-select" %>
               </div>
               <div class="col-md-4">
-                <%= f.label :payment_status, "Payment Status", class: "form-label" %>
-                <%= f.select :payment_status, Order::PAYMENT_STATUSES.map { |s| [s.titleize, s] }, { selected: "pending" }, class: "form-select" %>
+                <%= f.label :payment_status, t('bo.orders.form.payment_status'), class: "form-label" %>
+                <%= f.select :payment_status, Order::PAYMENT_STATUSES.map { |s| [t("bo.common.payment_statuses.#{s}"), s] }, { selected: "pending" }, class: "form-select" %>
               </div>
               <div class="col-md-4">
-                <%= f.label :receive_on, "Expected Delivery Date", class: "form-label" %>
+                <%= f.label :receive_on, t('bo.orders.form.expected_delivery_date'), class: "form-label" %>
                 <%= f.date_field :receive_on, class: "form-control", value: 3.days.from_now.to_date %>
               </div>
             </div>
 
             <div class="mb-3">
-              <%= f.label :notes, "Order Notes", class: "form-label" %>
-              <%= f.text_area :notes, class: "form-control", rows: 3, placeholder: "Add notes about this order..." %>
+              <%= f.label :notes, t('bo.orders.form.order_notes'), class: "form-label" %>
+              <%= f.text_area :notes, class: "form-control", rows: 3, placeholder: t('bo.orders.form.notes_placeholder') %>
             </div>
           </div>
         </div>
 
         <!-- Actions -->
         <div class="d-flex gap-2">
-          <%= f.submit "Create Order", class: "btn btn-primary" %>
-          <%= link_to "Cancel", bo_orders_path(org_slug: @current_organisation.slug), class: "btn btn-outline-secondary" %>
+          <%= f.submit t('bo.orders.new.create_order'), class: "btn btn-primary" %>
+          <%= link_to t('bo.common.actions.cancel'), bo_orders_path(org_slug: @current_organisation.slug), class: "btn btn-outline-secondary" %>
         </div>
       <% end %>
     </div>
@@ -150,14 +150,14 @@
       <div class="card">
         <div class="card-body">
           <h6 class="mb-3">
-            <i class="fa-solid fa-box me-2 text-primary"></i>Available Products
+            <i class="fa-solid fa-box me-2 text-primary"></i><%= t('bo.orders.form.available_products') %>
           </h6>
           <div class="list-group list-group-flush" style="max-height: 400px; overflow-y: auto;">
             <% @products.each do |product| %>
               <div class="list-group-item px-0 py-2">
                 <div class="fw-medium small"><%= product.name %></div>
                 <div class="d-flex justify-content-between text-muted small">
-                  <span><%= product.sku || 'No SKU' %></span>
+                  <span><%= product.sku || t('bo.orders.form.no_sku') %></span>
                   <span>$<%= number_with_precision(product.price, precision: 2) %></span>
                 </div>
               </div>

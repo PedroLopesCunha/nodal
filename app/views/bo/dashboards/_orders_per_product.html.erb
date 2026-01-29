@@ -1,0 +1,30 @@
+<div class="card dashboard__card">
+  <div class="card-header d-flex justify-content-between align-items-center">
+    <h6 class="mb-0">
+      <i class="fa-solid fa-box me-2 text-primary"></i> <%= t('bo.dashboards.orders_per_product.title') %>
+    </h6>
+    <%= link_to bo_products_path(org_slug: organisation.slug), class: "btn btn-sm btn-link" do %>
+      <%= t('bo.common.actions.view_all') %> <i class="fa-solid fa-arrow-right ms-1"></i>
+    <% end %>
+  </div>
+  <div class="card-body p-0">
+    <div class="table-responsive">
+      <table class="table table-sm align-middle mb-0" id="orders-per-product">
+        <thead class="table-light">
+          <tr>
+            <th><%= t('bo.common.product') %></th>
+            <th class="text-center"><%= t('bo.common.orders') %></th>
+            <th style="width: 100px;"><%= t('bo.dashboards.orders_per_product.trend') %></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td colspan="3" class="text-center text-muted py-3">
+              <i class="fa-solid fa-spinner fa-spin"></i> <%= t('bo.common.loading') %>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

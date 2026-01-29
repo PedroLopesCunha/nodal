@@ -12,13 +12,16 @@
     </div>
   </div>
   <div class="d-flex align-items-center gap-2">
+    <%= link_to configure_variants_bo_product_path(params[:org_slug], @product), class: "btn btn-outline-secondary" do %>
+      <i class="fa-solid fa-cubes me-1"></i> <%= t('bo.products.show.manage_variants') %>
+    <% end %>
     <%= link_to edit_bo_product_path(params[:org_slug], @product), class: "btn btn-outline-primary" do %>
-      <i class="fa-solid fa-pen-to-square me-1"></i> Edit
+      <i class="fa-solid fa-pen-to-square me-1"></i> <%= t('bo.common.actions.edit') %>
     <% end %>
     <%= link_to bo_product_path(params[:org_slug], @product),
         class: "btn btn-outline-danger ms-2",
-        data: { turbo_method: :delete, turbo_confirm: "Are you sure you want to delete '#{@product.name}'? This action cannot be undone." } do %>
-      <i class="fa-solid fa-trash me-1"></i> Delete
+        data: { turbo_method: :delete, turbo_confirm: t('bo.common.confirm.delete_product_name', name: @product.name) } do %>
+      <i class="fa-solid fa-trash me-1"></i> <%= t('bo.common.actions.delete') %>
     <% end %>
   </div>
 </div>
@@ -29,10 +32,10 @@
     <%# Product Information Card %>
     <div class="card mb-4">
       <div class="card-body">
-        <h5 class="card-title mb-3">Product Information</h5>
+        <h5 class="card-title mb-3"><%= t('bo.products.show.product_information') %></h5>
 
         <div class="mb-3">
-          <small class="text-muted d-block">Description</small>
+          <small class="text-muted d-block"><%= t('bo.products.form.description') %></small>
           <p class="mb-0"><%= @product.description %></p>
         </div>
 
@@ -40,32 +43,131 @@
 
         <div class="row">
           <div class="col-md-6 mb-3">
-            <small class="text-muted d-block">Category</small>
-            <strong><%= @product.category&.name %></strong>
+            <small class="text-muted d-block"><%= t('bo.products.form.categories') %></small>
+            <% if @product.categories.any? %>
+              <div class="d-flex flex-wrap gap-1">
+                <% @product.categories.each do |category| %>
+                  <%= link_to bo_category_path(params[:org_slug], category), class: "badge bg-secondary text-decoration-none" do %>
+                    <%= category.full_path %>
+                  <% end %>
+                <% end %>
+              </div>
+            <% else %>
+              <span class="text-muted">-</span>
+            <% end %>
           </div>
           <div class="col-md-6 mb-3">
-            <small class="text-muted d-block">Unit of Measure</small>
+            <small class="text-muted d-block"><%= t('bo.products.form.unit_price', currency: @current_organisation.currency_symbol) %></small>
+            <strong><%= humanized_money_with_symbol(@product.price) || '-'  %></strong>
+          </div>
+          <div class="col-md-6 mb-3">
+            <small class="text-muted d-block"><%= t('bo.products.form.unit_description') %></small>
             <strong><%= @product.unit_description || '-' %></strong>
           </div>
         </div>
 
         <div class="row">
           <div class="col-md-6 mb-3">
-            <small class="text-muted d-block">Shelf Life</small>
-            <strong>12 months</strong>
+            <small class="text-muted d-block"><%= t('bo.products.form.min_quantity') %></small>
+            <strong><%= @product.min_quantity %></strong>
           </div>
           <div class="col-md-6 mb-3">
-            <small class="text-muted d-block">Reorder Point</small>
-            <strong>100 <%= @product.unit_description || 'units' %></strong>
+            <small class="text-muted d-block"><%= t('bo.products.form.min_quantity_type') %></small>
+            <strong><%= @product.min_quantity_type || t('bo.products.form.units') %></strong>
           </div>
         </div>
 
         <hr>
 
         <div>
-          <small class="text-muted d-block">Storage Conditions</small>
-          <strong>Cool, dry place away from direct sunlight</strong>
+          <small class="text-muted d-block mb-2"><%= t('bo.products.form.product_images') %></small>
+          <% if @product.photos.attached? && @product.photos.any? %>
+            <div class="d-flex flex-wrap gap-2">
+              <% @product.photos.each_with_index do |photo, index| %>
+                <div class="border rounded p-1 position-relative" style="width: 120px;">
+                  <%= image_tag photo, style: "width: 100%; height: 100px; object-fit: cover; border-radius: 4px;" %>
+                  <% if index == 0 %>
+                    <span class="badge bg-primary position-absolute" style="bottom: 4px; left: 4px; font-size: 10px;"><%= t('bo.products.show.main') %></span>
+                  <% end %>
+                </div>
+              <% end %>
+            </div>
+          <% else %>
+            <p class="text-muted mb-0"><%= t('bo.products.show.no_images') %></p>
+          <% end %>
         </div>
+      </div>
+    </div>
+
+    <%# Variants Card %>
+    <div class="card mb-4">
+      <div class="card-body">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h5 class="card-title mb-0"><%= t('bo.products.show.variants_title') %></h5>
+          <%= link_to bo_product_variants_path(params[:org_slug], @product), class: "btn btn-sm btn-outline-primary" do %>
+            <i class="fa-solid fa-cubes me-1"></i> <%= t('bo.products.show.view_all_variants') %>
+          <% end %>
+        </div>
+
+        <div class="row mb-3">
+          <div class="col-md-4">
+            <small class="text-muted d-block"><%= t('bo.products.show.variant_type') %></small>
+            <% if @product.has_variants? %>
+              <span class="badge bg-primary"><%= t('bo.products.show.variable_product') %></span>
+            <% else %>
+              <span class="badge bg-secondary"><%= t('bo.products.show.simple_product') %></span>
+            <% end %>
+          </div>
+          <div class="col-md-4">
+            <small class="text-muted d-block"><%= t('bo.products.show.total_variants') %></small>
+            <strong><%= @product.product_variants.count %></strong>
+          </div>
+          <div class="col-md-4">
+            <small class="text-muted d-block"><%= t('bo.products.show.price_range') %></small>
+            <strong><%= @product.display_price %></strong>
+          </div>
+        </div>
+
+        <% if @product.product_variants.any? %>
+          <table class="table table-sm mb-0">
+            <thead>
+              <tr>
+                <th><%= t('bo.products.show.variant') %></th>
+                <th><%= t('bo.products.show.sku') %></th>
+                <th><%= t('bo.products.show.price') %></th>
+                <th><%= t('bo.products.show.status') %></th>
+              </tr>
+            </thead>
+            <tbody>
+              <% @product.product_variants.by_position.limit(5).each do |variant| %>
+                <tr>
+                  <td>
+                    <%= variant.option_values_string.presence || t('bo.products.show.default') %>
+                    <% if variant.is_default? %>
+                      <span class="badge bg-info ms-1"><%= t('bo.products.show.default') %></span>
+                    <% end %>
+                  </td>
+                  <td><code><%= variant.sku.presence || '-' %></code></td>
+                  <td><%= variant.price&.format %></td>
+                  <td>
+                    <% if variant.available? %>
+                      <span class="text-success"><i class="fa-solid fa-check"></i></span>
+                    <% else %>
+                      <span class="text-danger"><i class="fa-solid fa-times"></i></span>
+                    <% end %>
+                  </td>
+                </tr>
+              <% end %>
+            </tbody>
+          </table>
+          <% if @product.product_variants.count > 5 %>
+            <p class="text-muted small mt-2 mb-0">
+              <%= t('bo.products.show.and_more_variants', count: @product.product_variants.count - 5) %>
+            </p>
+          <% end %>
+        <% else %>
+          <p class="text-muted mb-0"><%= t('bo.products.show.no_variants') %></p>
+        <% end %>
       </div>
     </div>
 

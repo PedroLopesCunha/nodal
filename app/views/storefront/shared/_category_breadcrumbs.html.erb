@@ -1,0 +1,22 @@
+<% if breadcrumbs.present? %>
+  <nav aria-label="breadcrumb" class="mb-3">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item">
+        <%= link_to products_path(org_slug: params[:org_slug]) do %>
+          <i class="fa-solid fa-home"></i>
+        <% end %>
+      </li>
+      <% breadcrumbs.each_with_index do |category, index| %>
+        <% if index == breadcrumbs.length - 1 %>
+          <li class="breadcrumb-item active" aria-current="page">
+            <%= category.name %>
+          </li>
+        <% else %>
+          <li class="breadcrumb-item">
+            <%= link_to category.name, products_path(org_slug: params[:org_slug], category: category.id) %>
+          </li>
+        <% end %>
+      <% end %>
+    </ol>
+  </nav>
+<% end %>

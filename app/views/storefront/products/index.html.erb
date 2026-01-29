@@ -1,22 +1,32 @@
-<div class="d-flex justify-content-between align-items-center mb-4 mt-5">
+<div data-controller="scroll-restoration">
+<div class="d-flex justify-content-between align-items-center mb-4 mt-2">
   <div>
-    <h1 class="mb-1">Product Catalog</h1>
-    <p class="text-muted mb-0">Browse our products</p>
+    <h1 class="mb-1"><%= t('storefront.products.index.title') %></h1>
+    <p class="text-muted mb-0"><%= t('storefront.products.index.subtitle') %></p>
   </div>
 </div>
+
+<%# Breadcrumbs when filtering by category %>
+<%= render 'storefront/shared/category_breadcrumbs', breadcrumbs: @breadcrumbs if @breadcrumbs.present? %>
+
+<%# Applied filters breadbox %>
+<%= render 'storefront/products/applied_filters', active_filters: @active_filters %>
 
 <div class="row">
   <%# Sidebar with filters %>
   <div class="col-lg-3 mb-4">
     <div class="card">
       <div class="card-body">
-        <h6 class="card-title mb-3">Search</h6>
+        <h6 class="card-title mb-3"><%= t('storefront.products.index.search') %></h6>
         <%= form_with url: products_path(org_slug: params[:org_slug]), method: :get, local: true do %>
-          <% if params[:category].present? %>
-            <%= hidden_field_tag :category, params[:category] %>
+          <% Array(params[:categories]).each do |cat_id| %>
+            <%= hidden_field_tag 'categories[]', cat_id %>
+          <% end %>
+          <% Array(params[:queries]).each do |q| %>
+            <%= hidden_field_tag 'queries[]', q %>
           <% end %>
           <div class="input-group">
-            <%= text_field_tag :query, params[:query], class: "form-control", placeholder: "Search products..." %>
+            <%= text_field_tag 'queries[]', nil, class: "form-control", placeholder: t('storefront.products.index.search_placeholder') %>
             <button type="submit" class="btn btn-outline-secondary">
               <i class="fa-solid fa-magnifying-glass"></i>
             </button>
@@ -25,31 +35,7 @@
       </div>
     </div>
 
-    <div class="card mt-3">
-      <div class="card-body">
-        <h6 class="card-title mb-3">Categories</h6>
-        <div class="list-group list-group-flush">
-          <%= link_to products_path(org_slug: params[:org_slug], query: params[:query]),
-              class: "list-group-item list-group-item-action #{'active' if params[:category].blank?}" do %>
-            All Products
-          <% end %>
-          <% @categories.each do |category| %>
-            <%= link_to products_path(org_slug: params[:org_slug], category: category.id, query: params[:query]),
-                class: "list-group-item list-group-item-action #{'active' if params[:category].to_s == category.id.to_s}" do %>
-              <%= category.name %>
-            <% end %>
-          <% end %>
-        </div>
-      </div>
-    </div>
-
-    <% if params[:query].present? || params[:category].present? %>
-      <div class="mt-3">
-        <%= link_to products_path(org_slug: params[:org_slug]), class: "btn btn-outline-secondary w-100" do %>
-          <i class="fa-solid fa-times me-1"></i>Clear filters
-        <% end %>
-      </div>
-    <% end %>
+    <%= render 'storefront/shared/category_sidebar', categories: @categories, current_categories: @current_categories %>
   </div>
 
   <%# Product grid %>
@@ -58,11 +44,13 @@
       <div class="row row-cols-1 row-cols-md-2 row-cols-xl-3 g-4">
         <% @products.each do |product| %>
           <div class="col">
-            <%= link_to product_path(org_slug: params[:org_slug], id: product), class: "text-decoration-none" do %>
+            <%= link_to product_path(org_slug: params[:org_slug], id: product, categories: params[:categories], queries: params[:queries]), class: "text-decoration-none" do %>
               <div class="card h-100 product-card">
                 <% discount_info = @product_discounts[product.id] %>
-                <% if product.photo.attached? %>
-                  <%= image_tag product.photo, class: "card-img-top", style: "height: 200px; object-fit: cover;" %>
+                <% if product.photo_attached? %>
+                  <div class="card-img-top bg-light d-flex align-items-center justify-content-center" style="height: 200px;">
+                    <%= image_tag product.photo, style: "max-height: 200px; max-width: 100%; object-fit: contain;" %>
+                  </div>
                 <% else %>
                   <div class="card-img-top bg-light d-flex align-items-center justify-content-center" style="height: 200px;">
                     <i class="fa-solid fa-image fa-3x text-muted"></i>
@@ -70,10 +58,9 @@
                 <% end %>
                 <div class="card-body">
                   <div class="d-flex justify-content-between align-items-start mb-2">
-                    <span class="badge bg-secondary-subtle text-secondary"><%= product.category&.name %></span>
+                    <span class="badge bg-secondary-subtle text-secondary"><%= product.primary_category&.name %></span>
                   </div>
-                  <h5 class="card-title text-dark"><%= product.name %></h5>
-                  <p class="card-text text-muted small"><%= truncate(product.description, length: 80) %></p>
+                  <h5 class="card-title text-dark mb-0"><%= product.name %></h5>
                 </div>
                 <div class="card-footer bg-white border-top-0">
                   <div class="d-flex justify-content-between align-items-center">
@@ -89,9 +76,11 @@
                           -<%= (discount_info[:effective_discount][:percentage] * 100).round(0) %>%
                         </span>
                         <% if discount_info[:all_discounts].any? { |d| d[:type] == :product } %>
-                          <span class="badge bg-danger ms-1">SALE</span>
+                          <span class="badge bg-danger ms-1"><%= t('storefront.products.index.sale_badge') %></span>
                         <% end %>
                       </div>
+                    <% elsif product.variable? && product.price_range&.dig(:range) %>
+                      <span class="h5 mb-0 text-primary"><%= product.display_price %></span>
                     <% else %>
                       <span class="h5 mb-0 text-primary"><%= humanized_money_with_symbol(product.price) %></span>
                     <% end %>
@@ -106,12 +95,12 @@
     <% else %>
       <div class="text-center py-5">
         <i class="fa-solid fa-box-open fa-4x text-muted mb-3"></i>
-        <h4>No products found</h4>
+        <h4><%= t('storefront.products.index.no_products') %></h4>
         <p class="text-muted">
-          <% if params[:query].present? || params[:category].present? %>
-            Try adjusting your search or filters.
+          <% if Array(params[:queries]).any? || Array(params[:categories]).any? %>
+            <%= t('storefront.products.index.no_products_hint') %>
           <% else %>
-            No products are available at this time.
+            <%= t('storefront.products.index.empty_catalog') %>
           <% end %>
         </p>
       </div>
@@ -127,4 +116,24 @@
     transform: translateY(-4px);
     box-shadow: 0 4px 12px rgba(0,0,0,0.15);
   }
+  .category-link {
+    text-decoration: none;
+    color: inherit;
+  }
+  .category-link:hover {
+    color: var(--bs-primary);
+  }
+  .category-link.active {
+    color: var(--bs-primary);
+  }
+  .category-children.collapsed {
+    display: none;
+  }
+  .toggle-icon {
+    transition: transform 0.2s ease;
+  }
+  .toggle-icon.rotated {
+    transform: rotate(90deg);
+  }
 </style>
+</div>

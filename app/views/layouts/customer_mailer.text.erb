@@ -1,0 +1,7 @@
+<%= yield %>
+
+--
+<% if @organisation %>
+© <%= Date.today.year %> <%= @organisation.name %>
+<% end %>
+Powered by Nodal - https://www.nodal-seiri.dev

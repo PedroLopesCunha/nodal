@@ -14,6 +14,9 @@ class ProductPolicy < ApplicationPolicy
   end
 
   def create?
+    # When authorizing class-level actions (like import), record is the class itself
+    return true if record == Product
+
     belongs_to_organisation?
   end
 
@@ -26,6 +29,18 @@ class ProductPolicy < ApplicationPolicy
   end
 
   def destroy?
+    belongs_to_organisation?
+  end
+
+  def delete_photo?
+    belongs_to_organisation?
+  end
+
+  def configure_variants?
+    belongs_to_organisation?
+  end
+
+  def update_variant_configuration?
     belongs_to_organisation?
   end
 

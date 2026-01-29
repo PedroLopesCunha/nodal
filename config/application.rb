@@ -35,5 +35,9 @@ module Nodal
     config.i18n.available_locales = [:en, :pt, :es]
     config.i18n.default_locale = :en
     config.i18n.fallbacks = true
+    config.i18n.load_path += Dir[Rails.root.join('config', 'locales', '**', '*.{rb,yml}')]
+
+    # Use Sidekiq for background jobs
+    config.active_job.queue_adapter = :sidekiq
   end
 end

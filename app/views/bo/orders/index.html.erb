@@ -14,18 +14,18 @@
 <div class="bo-page-header">
   <div class="d-flex justify-content-between align-items-start">
     <div>
-      <h1>Orders</h1>
-      <p>Track and manage all customer orders</p>
+      <h1><%= t('bo.orders.index.title') %></h1>
+      <p><%= t('bo.orders.index.subtitle') %></p>
     </div>
     <div class="bo-page-actions">
       <button class="btn btn-outline-secondary">
-        <i class="fa-solid fa-upload"></i> Import
+        <i class="fa-solid fa-upload"></i> <%= t('bo.common.actions.import') %>
       </button>
       <button class="btn btn-outline-secondary">
-        <i class="fa-solid fa-download"></i> Export
+        <i class="fa-solid fa-download"></i> <%= t('bo.common.actions.export') %>
       </button>
       <%= link_to new_bo_order_path(org_slug: @current_organisation.slug), class: "btn btn-primary" do %>
-        <i class="fa-solid fa-plus"></i> Add New
+        <i class="fa-solid fa-plus"></i> <%= t('bo.common.actions.add_new') %>
       <% end %>
     </div>
   </div>
@@ -41,13 +41,13 @@
           <span class="input-group-text bg-white border-end-0">
             <i class="fa-solid fa-magnifying-glass text-muted"></i>
           </span>
-          <%= text_field_tag :search, params[:search], class: "form-control border-start-0", placeholder: "Search orders..." %>
+          <%= text_field_tag :search, params[:search], class: "form-control border-start-0", placeholder: t('bo.orders.index.search_placeholder') %>
         </div>
         <button type="submit" class="btn btn-outline-secondary me-2">
-          <i class="fa-solid fa-magnifying-glass"></i> Search
+          <i class="fa-solid fa-magnifying-glass"></i> <%= t('bo.common.actions.search') %>
         </button>
         <% if params[:search].present? %>
-          <%= link_to "Clear", bo_orders_path(org_slug: @current_organisation.slug), class: "btn btn-outline-secondary" %>
+          <%= link_to t('bo.common.actions.clear'), bo_orders_path(org_slug: @current_organisation.slug), class: "btn btn-outline-secondary" %>
         <% end %>
       <% end %>
     </div>
@@ -59,14 +59,14 @@
       <table class="table table-hover align-middle mb-0">
         <thead class="table-light">
           <tr>
-            <th>Order ID</th>
-            <th>Client</th>
-            <th>Date</th>
-            <th>Items</th>
-            <th>Total</th>
-            <th>Status</th>
-            <th>Payment</th>
-            <th class="text-end">Actions</th>
+            <th><%= t('bo.orders.index.table.order_id') %></th>
+            <th><%= t('bo.orders.index.table.client') %></th>
+            <th><%= t('bo.orders.index.table.date') %></th>
+            <th><%= t('bo.orders.index.table.items') %></th>
+            <th><%= t('bo.common.total') %></th>
+            <th><%= t('bo.common.tables.status') %></th>
+            <th><%= t('bo.orders.index.table.payment') %></th>
+            <th class="text-end"><%= t('bo.common.actions_column') %></th>
           </tr>
         </thead>
         <tbody>
@@ -111,7 +111,7 @@
                 <%= link_to edit_bo_order_path(org_slug: @current_organisation.slug, id: order.id), class: "btn btn-sm btn-link text-muted" do %>
                   <i class="fa-solid fa-pen-to-square"></i>
                 <% end %>
-                <%= button_to bo_order_path(org_slug: @current_organisation.slug, id: order.id), method: :delete, form: { class: "d-inline" }, class: "btn btn-sm btn-link text-danger", data: { turbo_confirm: "Are you sure you want to delete order #{order.order_number}?" } do %>
+                <%= button_to bo_order_path(org_slug: @current_organisation.slug, id: order.id), method: :delete, form: { class: "d-inline" }, class: "btn btn-sm btn-link text-danger", data: { turbo_confirm: t('bo.common.confirm.delete_order', number: order.order_number) } do %>
                   <i class="fa-solid fa-trash"></i>
                 <% end %>
               </td>
@@ -121,7 +121,7 @@
           <% if @orders.empty? %>
             <tr>
               <td colspan="8" class="text-center py-4 text-muted">
-                No orders found
+                <%= t('bo.orders.index.no_orders') %>
               </td>
             </tr>
           <% end %>

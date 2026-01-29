@@ -12,17 +12,17 @@
       </div>
 
       <div>
-        <h4 class="mb-0">New Product</h4>
-        <span class="text-muted">Add a new product to your catalog</span>
+        <h4 class="mb-0"><%= t('bo.products.new.title') %></h4>
+        <span class="text-muted"><%= t('bo.products.new.subtitle') %></span>
       </div>
     </div>
 
     <div class="d-flex gap-2 align-items-center">
       <%= link_to bo_products_path(params[:org_slug]), class: "btn btn-outline-secondary" do %>
-        Cancel
+        <%= t('bo.common.actions.cancel') %>
       <% end %>
       <button type="submit" form="product-form" class="btn btn-primary">
-        <i class="fa-solid fa-check"></i> Create Product
+        <i class="fa-solid fa-check"></i> <%= t('bo.products.new.create_product') %>
       </button>
     </div>
   </div>
@@ -33,36 +33,45 @@
     <div class="col-md-8">
       <div class="card mb-3">
         <div class="card-body">
-          <h5 class="card-title mb-4">Basic Information</h5>
+          <h5 class="card-title mb-4"><%= t('bo.products.form.basic_information') %></h5>
 
           <div class="row g-3">
             <div class="col-md-8">
-              <label class="form-label">Product Name <span class="text-danger">*</span></label>
-              <%= f.text_field :name, class: "form-control", placeholder: "Enter product name", required: true %>
+              <label class="form-label"><%= t('bo.products.form.product_name') %> <span class="text-danger">*</span></label>
+              <%= f.text_field :name, class: "form-control", placeholder: t('bo.products.form.placeholders.product_name'), required: true %>
             </div>
             <div class="col-md-4">
-              <label class="form-label">SKU</label>
-              <%= f.text_field :sku, class: "form-control", placeholder: "e.g., COF-ORG-001" %>
+              <label class="form-label"><%= t('bo.products.form.sku') %></label>
+              <%= f.text_field :sku, class: "form-control", placeholder: t('bo.products.form.placeholders.sku') %>
             </div>
           </div>
 
           <div class="row g-3 mt-1">
             <div class="col-md-12">
-              <label class="form-label">Description <span class="text-danger">*</span></label>
-              <%= f.text_area :description, class: "form-control", placeholder: "Enter product description", rows: 3, required: true %>
-              <small class="text-muted">5-150 characters</small>
+              <label class="form-label"><%= t('bo.products.form.description') %> <span class="text-danger">*</span></label>
+              <%= f.text_area :description, class: "form-control", placeholder: t('bo.products.form.placeholders.description'), rows: 3, required: true %>
+              <small class="text-muted"><%= t('bo.products.form.description_hint') %></small>
             </div>
           </div>
 
           <div class="row g-3 mt-1">
             <div class="col-md-6">
-              <label class="form-label">Category <span class="text-danger">*</span></label>
-              <%= f.collection_select :category_id, Category.where(organisation_id: Organisation.find_by(slug: params[:org_slug])&.id), :id, :name, { prompt: "Select a category" }, { class: "form-select", required: true } %>
+              <label class="form-label"><%= t('bo.products.form.categories') %> <span class="text-danger">*</span></label>
+              <%
+                category_options = current_organisation.categories.kept
+                  .order(:ancestry, :position)
+                  .map { |c| [c.full_path, c.id] }
+              %>
+              <%= f.select :category_ids,
+                    category_options,
+                    {},
+                    { class: "form-select", multiple: true, size: 5, required: true } %>
+              <small class="text-muted"><%= t('bo.products.form.categories_hint') %></small>
             </div>
             <div class="col-md-6">
-              <label class="form-label">Slug</label>
-              <%= f.text_field :slug, class: "form-control", placeholder: "product-url-slug" %>
-              <small class="text-muted">URL-friendly identifier (auto-generated if blank)</small>
+              <label class="form-label"><%= t('bo.products.form.slug') %></label>
+              <%= f.text_field :slug, class: "form-control", placeholder: t('bo.products.form.placeholders.slug') %>
+              <small class="text-muted"><%= t('bo.products.form.slug_hint_auto') %></small>
             </div>
           </div>
         </div>
@@ -70,27 +79,27 @@
 
       <div class="card mb-3">
         <div class="card-body">
-          <h5 class="card-title mb-4">Pricing & Units</h5>
+          <h5 class="card-title mb-4"><%= t('bo.products.form.pricing_units') %></h5>
 
           <div class="row g-3">
             <div class="col-md-6">
-              <label class="form-label">Unit Price (<%= @current_organisation.currency_symbol %>) <span class="text-danger">*</span></label>
+              <label class="form-label"><%= t('bo.products.form.unit_price', currency: @current_organisation.currency_symbol) %> <span class="text-danger">*</span></label>
               <%= f.text_field :price, class: "form-control", placeholder: "24.99", required: true %>
             </div>
             <div class="col-md-6">
-              <label class="form-label">Unit Description</label>
-              <%= f.text_field :unit_description, class: "form-control", placeholder: "e.g., lb, kg, L" %>
+              <label class="form-label"><%= t('bo.products.form.unit_description') %></label>
+              <%= f.text_field :unit_description, class: "form-control", placeholder: t('bo.products.form.placeholders.unit_description') %>
             </div>
           </div>
 
           <div class="row g-3 mt-1">
             <div class="col-md-6">
-              <label class="form-label">Minimum Quantity</label>
+              <label class="form-label"><%= t('bo.products.form.min_quantity') %></label>
               <%= f.number_field :min_quantity, class: "form-control", placeholder: "1", min: 1, value: 1 %>
             </div>
             <div class="col-md-6">
-              <label class="form-label">Minimum Quantity Type</label>
-              <%= f.text_field :min_quantity_type, class: "form-control", placeholder: "e.g., unit, pack, case" %>
+              <label class="form-label"><%= t('bo.products.form.min_quantity_type') %></label>
+              <%= f.text_field :min_quantity_type, class: "form-control", placeholder: t('bo.products.form.placeholders.min_quantity_type') %>
             </div>
           </div>
         </div>
@@ -98,12 +107,12 @@
 
       <div class="card">
         <div class="card-body">
-          <h5 class="card-title mb-4">Product Image</h5>
+          <h5 class="card-title mb-4"><%= t('bo.products.form.product_images') %></h5>
 
           <div>
-            <label class="form-label">Upload Image</label>
-            <%= f.file_field :photo, class: "form-control", accept: "image/*" %>
-            <small class="text-muted">Recommended: 800x800 pixels, JPG or PNG</small>
+            <label class="form-label"><%= t('bo.products.form.upload_images') %></label>
+            <%= f.file_field :photos, class: "form-control", accept: "image/*", multiple: true %>
+            <small class="text-muted"><%= t('bo.products.form.images_hint') %></small>
           </div>
         </div>
       </div>
@@ -112,13 +121,13 @@
     <div class="col-md-4">
       <div class="card">
         <div class="card-body">
-          <h5 class="card-title mb-4">Availability</h5>
+          <h5 class="card-title mb-4"><%= t('bo.products.form.availability') %></h5>
 
           <div class="form-check form-switch">
             <%= f.check_box :available, class: "form-check-input", role: "switch", id: "availableSwitch", checked: true %>
-            <label class="form-check-label" for="availableSwitch">Available for Sale</label>
+            <label class="form-check-label" for="availableSwitch"><%= t('bo.products.form.available_for_sale') %></label>
           </div>
-          <small class="text-muted">Unavailable products won't appear in the catalog</small>
+          <small class="text-muted"><%= t('bo.products.form.unavailable_hint') %></small>
         </div>
       </div>
     </div>

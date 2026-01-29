@@ -75,8 +75,21 @@ gem 'open-uri'
 # gem for authorization
 gem 'pundit'
 
+# gem for hierarchical categories
+gem 'ancestry'       # Tree structure
+gem 'acts_as_list'   # Sibling ordering
+gem 'discard'        # Soft delete
+
 # gem for money handling
 gem 'money-rails', '~> 1.12'
+
+# background jobs
+gem 'sidekiq', '~> 7.0'
+gem 'sidekiq-scheduler', '~> 5.0'
+gem 'redis', '~> 5.0'
+
+# HTTP client for ERP integrations
+gem 'faraday', '~> 2.0'
 
 # sendgrid for mailing
 gem 'sendgrid-ruby'

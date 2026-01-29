@@ -8,17 +8,17 @@
       </div>
 
       <div>
-        <h4 class="mb-0">Organisation Settings</h4>
+        <h4 class="mb-0"><%= t('bo.settings.edit.title') %></h4>
         <span class="text-muted"><%= @organisation.name %></span>
       </div>
     </div>
 
     <div class="d-flex gap-2 align-items-center">
       <%= link_to bo_path, class: "btn btn-outline-secondary" do %>
-        Cancel
+        <%= t('bo.common.actions.cancel') %>
       <% end %>
       <button type="submit" form="settings-form" class="btn btn-primary">
-        <i class="fa-solid fa-check"></i> Save Changes
+        <i class="fa-solid fa-check"></i> <%= t('bo.common.actions.save_changes') %>
       </button>
     </div>
   </div>
@@ -29,39 +29,283 @@
     <div class="col-md-8">
       <div class="card mb-3">
         <div class="card-body">
-          <h5 class="card-title mb-4">General Information</h5>
+          <h5 class="card-title mb-4"><%= t('bo.settings.edit.general_info') %></h5>
 
           <div class="row g-3">
             <div class="col-md-12">
-              <label class="form-label">Organisation Name</label>
-              <%= f.text_field :name, class: "form-control", placeholder: "Enter organisation name" %>
+              <label class="form-label"><%= t('bo.settings.edit.organisation_name') %></label>
+              <%= f.text_field :name, class: "form-control", placeholder: t('bo.settings.edit.organisation_name_placeholder') %>
             </div>
           </div>
 
           <div class="row g-3 mt-1">
             <div class="col-md-12">
-              <label class="form-label">Billing Email</label>
-              <%= f.email_field :billing_email, class: "form-control", placeholder: "Enter billing email address" %>
-              <small class="text-muted">Used for invoices and billing communications</small>
+              <label class="form-label"><%= t('bo.settings.edit.billing_email') %></label>
+              <%= f.email_field :billing_email, class: "form-control", placeholder: t('bo.settings.edit.billing_email_placeholder') %>
+              <small class="text-muted"><%= t('bo.settings.edit.billing_email_hint') %></small>
+            </div>
+          </div>
+
+          <div class="row g-3 mt-1">
+            <div class="col-md-12">
+              <label class="form-label"><%= t('bo.settings.edit.default_language') %></label>
+              <%= f.select :default_locale,
+                           options_for_select([
+                             ['English', 'en'],
+                             ['Português', 'pt'],
+                             ['Español', 'es']
+                           ], @organisation.default_locale),
+                           {},
+                           class: "form-control" %>
+              <small class="text-muted"><%= t('bo.settings.edit.default_language_hint') %></small>
+            </div>
+          </div>
+
+          <div class="row g-3 mt-1">
+            <div class="col-md-12">
+              <label class="form-label"><%= t('bo.settings.edit.taxpayer_id') %></label>
+              <%= f.text_field :taxpayer_id, class: "form-control", placeholder: t('bo.settings.edit.taxpayer_id_placeholder') %>
+              <small class="text-muted"><%= t('bo.settings.edit.taxpayer_id_hint') %></small>
             </div>
           </div>
         </div>
       </div>
 
-      <div class="card">
+      <div class="card mb-3">
         <div class="card-body">
-          <h5 class="card-title mb-4">Commerce Settings</h5>
+          <h5 class="card-title mb-4"><%= t('bo.settings.edit.billing_address') %></h5>
+
+          <%= f.fields_for :billing_address do |addr| %>
+            <div class="row g-3">
+              <div class="col-md-8">
+                <label class="form-label"><%= t('bo.settings.edit.street_name') %></label>
+                <%= addr.text_field :street_name, class: "form-control" %>
+              </div>
+              <div class="col-md-4">
+                <label class="form-label"><%= t('bo.settings.edit.street_nr') %></label>
+                <%= addr.text_field :street_nr, class: "form-control" %>
+              </div>
+            </div>
+            <div class="row g-3 mt-1">
+              <div class="col-md-4">
+                <label class="form-label"><%= t('bo.settings.edit.postal_code') %></label>
+                <%= addr.text_field :postal_code, class: "form-control" %>
+              </div>
+              <div class="col-md-4">
+                <label class="form-label"><%= t('bo.settings.edit.city') %></label>
+                <%= addr.text_field :city, class: "form-control" %>
+              </div>
+              <div class="col-md-4">
+                <label class="form-label"><%= t('bo.settings.edit.country') %></label>
+                <%= addr.text_field :country, class: "form-control" %>
+              </div>
+            </div>
+          <% end %>
+        </div>
+      </div>
+
+      <div class="card mb-3" data-controller="contact-address-toggle">
+        <div class="card-body">
+          <h5 class="card-title mb-4"><%= t('bo.settings.edit.contact_info') %></h5>
 
           <div class="row g-3">
             <div class="col-md-6">
-              <label class="form-label">Default Tax Rate (%)</label>
-              <%= f.number_field :tax_rate, class: "form-control", step: 0.01, min: 0, max: 1, placeholder: "0.08" %>
-              <small class="text-muted">Enter as decimal (e.g., 0.08 for 8%)</small>
+              <label class="form-label"><%= t('bo.settings.edit.contact_email') %></label>
+              <%= f.email_field :contact_email, class: "form-control", placeholder: t('bo.settings.edit.contact_email_placeholder') %>
+              <small class="text-muted"><%= t('bo.settings.edit.contact_email_hint') %></small>
             </div>
             <div class="col-md-6">
-              <label class="form-label">Default Shipping Cost</label>
-              <%= f.number_field :shipping_cost, class: "form-control", step: 0.01, min: 0, placeholder: "15.00" %>
-              <small class="text-muted">In <%= @organisation.shipping_cost_currency %></small>
+              <label class="form-label"><%= t('bo.settings.edit.phone') %></label>
+              <%= f.text_field :phone, class: "form-control", placeholder: t('bo.settings.edit.phone_placeholder') %>
+            </div>
+          </div>
+
+          <div class="row g-3 mt-1">
+            <div class="col-md-6">
+              <label class="form-label"><%= t('bo.settings.edit.whatsapp') %></label>
+              <%= f.text_field :whatsapp, class: "form-control", placeholder: t('bo.settings.edit.whatsapp_placeholder') %>
+              <small class="text-muted"><%= t('bo.settings.edit.whatsapp_hint') %></small>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label"><%= t('bo.settings.edit.business_hours') %></label>
+              <%= f.text_area :business_hours, class: "form-control", rows: 2, placeholder: t('bo.settings.edit.business_hours_placeholder') %>
+            </div>
+          </div>
+
+          <hr class="my-4">
+
+          <h6 class="mb-3"><%= t('bo.settings.edit.contact_address') %></h6>
+
+          <div class="form-check mb-3">
+            <%= f.check_box :use_billing_address_for_contact,
+                            class: "form-check-input",
+                            data: { contact_address_toggle_target: "checkbox", action: "change->contact-address-toggle#toggle" } %>
+            <label class="form-check-label">
+              <%= t('bo.settings.edit.use_billing_address') %>
+            </label>
+          </div>
+
+          <div data-contact-address-toggle-target="addressFields" class="<%= 'd-none' if @organisation.use_billing_address_for_contact? %>">
+            <%= f.fields_for :contact_address do |addr| %>
+              <div class="row g-3">
+                <div class="col-md-8">
+                  <label class="form-label"><%= t('bo.settings.edit.street_name') %></label>
+                  <%= addr.text_field :street_name, class: "form-control" %>
+                </div>
+                <div class="col-md-4">
+                  <label class="form-label"><%= t('bo.settings.edit.street_nr') %></label>
+                  <%= addr.text_field :street_nr, class: "form-control" %>
+                </div>
+              </div>
+              <div class="row g-3 mt-1">
+                <div class="col-md-4">
+                  <label class="form-label"><%= t('bo.settings.edit.postal_code') %></label>
+                  <%= addr.text_field :postal_code, class: "form-control" %>
+                </div>
+                <div class="col-md-4">
+                  <label class="form-label"><%= t('bo.settings.edit.city') %></label>
+                  <%= addr.text_field :city, class: "form-control" %>
+                </div>
+                <div class="col-md-4">
+                  <label class="form-label"><%= t('bo.settings.edit.country') %></label>
+                  <%= addr.text_field :country, class: "form-control" %>
+                </div>
+              </div>
+            <% end %>
+          </div>
+        </div>
+      </div>
+
+      <div class="card mb-3">
+        <div class="card-body">
+          <h5 class="card-title mb-4"><%= t('bo.settings.edit.commerce_settings') %></h5>
+
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label class="form-label"><%= t('bo.settings.edit.tax_rate') %></label>
+              <%= f.number_field :tax_rate, class: "form-control", step: 0.01, min: 0, max: 1, placeholder: t('bo.settings.edit.tax_rate_placeholder') %>
+              <small class="text-muted"><%= t('bo.settings.edit.tax_rate_hint') %></small>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label"><%= t('bo.settings.edit.shipping_cost') %></label>
+              <%= f.number_field :shipping_cost, class: "form-control", step: 0.01, min: 0, placeholder: t('bo.settings.edit.shipping_cost_placeholder') %>
+              <small class="text-muted"><%= t('bo.settings.edit.shipping_cost_hint', currency: @organisation.shipping_cost_currency) %></small>
+            </div>
+          </div>
+
+          <div class="row g-3 mt-2">
+            <div class="col-md-6">
+              <label class="form-label"><%= t('bo.settings.edit.free_shipping_threshold') %></label>
+              <%= f.number_field :free_shipping_threshold, class: "form-control", step: 0.01, min: 0, placeholder: t('bo.settings.edit.free_shipping_threshold_placeholder') %>
+              <small class="text-muted"><%= t('bo.settings.edit.free_shipping_threshold_hint') %></small>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card" data-controller="branding-preview">
+        <div class="card-body">
+          <h5 class="card-title mb-4"><%= t('bo.settings.edit.branding') %></h5>
+
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label class="form-label"><%= t('bo.settings.edit.organisation_logo') %></label>
+              <% if @organisation.logo.attached? %>
+                <div class="mb-2">
+                  <%= image_tag @organisation.logo, style: "max-height: 48px; max-width: 200px;", class: "border rounded p-1" %>
+                </div>
+              <% end %>
+              <%= f.file_field :logo, class: "form-control", accept: "image/png,image/jpeg,image/svg+xml" %>
+              <small class="text-muted"><%= t('bo.settings.edit.logo_hint') %></small>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label"><%= t('bo.settings.edit.favicon') %></label>
+              <% if @organisation.favicon.attached? %>
+                <div class="mb-2">
+                  <%= image_tag @organisation.favicon, style: "max-height: 32px; max-width: 32px;", class: "border rounded p-1" %>
+                </div>
+              <% end %>
+              <%= f.file_field :favicon, class: "form-control", accept: "image/png,image/jpeg,image/svg+xml,image/x-icon,image/vnd.microsoft.icon" %>
+              <small class="text-muted"><%= t('bo.settings.edit.favicon_hint') %></small>
+            </div>
+          </div>
+
+          <div class="row g-3 mt-1">
+            <div class="col-md-12">
+              <label class="form-label"><%= t('bo.settings.edit.storefront_title') %></label>
+              <%= f.text_field :storefront_title, class: "form-control", placeholder: t('bo.settings.edit.storefront_title_placeholder', name: @organisation.name) %>
+              <small class="text-muted"><%= t('bo.settings.edit.storefront_title_hint') %></small>
+            </div>
+          </div>
+
+          <div class="row g-3 mt-1">
+            <div class="col-md-6">
+              <label class="form-label"><%= t('bo.settings.edit.primary_color') %></label>
+              <div class="input-group">
+                <input type="color"
+                       id="primary_color_picker"
+                       value="<%= @organisation.effective_primary_color %>"
+                       class="form-control form-control-color"
+                       data-branding-preview-target="primaryColorPicker"
+                       data-input-target="organisation_primary_color"
+                       data-action="input->branding-preview#syncFromPicker">
+                <%= f.text_field :primary_color,
+                                 class: "form-control",
+                                 placeholder: "#008060",
+                                 data: {
+                                   branding_preview_target: "primaryColorInput",
+                                   picker_target: "primary_color_picker",
+                                   action: "input->branding-preview#syncFromInput"
+                                 } %>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label"><%= t('bo.settings.edit.secondary_color') %></label>
+              <div class="input-group">
+                <input type="color"
+                       id="secondary_color_picker"
+                       value="<%= @organisation.effective_secondary_color %>"
+                       class="form-control form-control-color"
+                       data-branding-preview-target="secondaryColorPicker"
+                       data-input-target="organisation_secondary_color"
+                       data-action="input->branding-preview#syncFromPicker">
+                <%= f.text_field :secondary_color,
+                                 class: "form-control",
+                                 placeholder: "#004c3f",
+                                 data: {
+                                   branding_preview_target: "secondaryColorInput",
+                                   picker_target: "secondary_color_picker",
+                                   action: "input->branding-preview#syncFromInput"
+                                 } %>
+              </div>
+            </div>
+          </div>
+
+          <div class="mt-4">
+            <label class="form-label"><%= t('bo.settings.edit.preview') %></label>
+            <div class="border rounded p-3 bg-light">
+              <div class="d-flex align-items-center gap-3 mb-3">
+                <span class="rounded d-flex align-items-center justify-content-center text-white fw-bold"
+                      style="width: 32px; height: 32px; font-size: 0.9rem; background-color: <%= @organisation.effective_primary_color %>;"
+                      data-branding-preview-target="logoFallback">
+                  <%= @organisation.name.first.upcase %>
+                </span>
+                <span class="fw-bold"><%= @organisation.name %></span>
+              </div>
+              <div class="d-flex gap-2">
+                <button type="button"
+                        class="btn btn-sm"
+                        style="background-color: <%= @organisation.effective_primary_color %>; border-color: <%= @organisation.effective_primary_color %>; color: #ffffff;"
+                        data-branding-preview-target="primaryButton">
+                  Primary Button
+                </button>
+                <button type="button"
+                        class="btn btn-sm btn-outline-primary"
+                        style="border-color: <%= @organisation.effective_primary_color %>; color: <%= @organisation.effective_primary_color %>;"
+                        data-branding-preview-target="outlineButton">
+                  Outline Button
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -71,27 +315,27 @@
     <div class="col-md-4">
       <div class="card mb-3">
         <div class="card-body">
-          <h5 class="card-title mb-4">Organisation Info</h5>
+          <h5 class="card-title mb-4"><%= t('bo.settings.edit.organisation_info') %></h5>
 
           <div class="border-bottom pb-3 mb-3">
-            <small class="text-muted d-block">Slug</small>
+            <small class="text-muted d-block"><%= t('bo.settings.edit.slug') %></small>
             <code><%= @organisation.slug %></code>
           </div>
 
           <div class="border-bottom pb-3 mb-3">
-            <small class="text-muted d-block">Status</small>
+            <small class="text-muted d-block"><%= t('bo.settings.edit.status') %></small>
             <span class="badge <%= @organisation.active? ? 'bg-success' : 'bg-danger' %>">
-              <%= @organisation.active? ? 'Active' : 'Inactive' %>
+              <%= @organisation.active? ? t('bo.common.statuses.active') : t('bo.common.statuses.inactive') %>
             </span>
           </div>
 
           <div class="border-bottom pb-3 mb-3">
-            <small class="text-muted d-block">Created</small>
+            <small class="text-muted d-block"><%= t('bo.settings.edit.created') %></small>
             <span><%= @organisation.created_at.strftime("%-m/%-d/%Y") %></span>
           </div>
 
           <div>
-            <small class="text-muted d-block">Last Updated</small>
+            <small class="text-muted d-block"><%= t('bo.settings.edit.last_updated') %></small>
             <span><%= @organisation.updated_at.strftime("%-m/%-d/%Y") %></span>
           </div>
         </div>

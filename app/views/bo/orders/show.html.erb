@@ -8,7 +8,7 @@
         <i class="fa-solid fa-arrow-left"></i>
       <% end %>
       <div>
-        <h1 class="h3 mb-0">Order</h1>
+        <h1 class="h3 mb-0"><%= t('bo.orders.show.title') %></h1>
         <div class="text-muted">
           <span class="fw-bold text-dark"><%= @order.order_number %></span>
           <span class="ms-2"><%= @order.placed_at&.strftime("%B %d, %Y") || @order.created_at.strftime("%B %d, %Y") %></span>
@@ -22,7 +22,7 @@
          else 'bg-warning'
          end %>
       <span class="badge <%= status_bg_class %> rounded-pill px-3 py-2">
-        <%= @order.status.titleize %>
+        <%= t("bo.common.statuses.#{@order.status}") %>
       </span>
       <% payment_bg_class = case @order.payment_status
          when 'paid' then 'bg-success'
@@ -31,13 +31,13 @@
          else 'bg-info'
          end %>
       <span class="badge <%= payment_bg_class %> rounded-pill px-3 py-2">
-        Payment: <%= @order.payment_status.titleize %>
+        <%= t('bo.orders.show.payment') %>: <%= t("bo.common.payment_statuses.#{@order.payment_status}") %>
       </span>
       <%= link_to edit_bo_order_path(org_slug: @current_organisation.slug, id: @order.id), class: "btn btn-outline-primary" do %>
-        <i class="fa-solid fa-pen-to-square me-1"></i> Edit
+        <i class="fa-solid fa-pen-to-square me-1"></i> <%= t('bo.common.actions.edit') %>
       <% end %>
-      <%= button_to bo_order_path(org_slug: @current_organisation.slug, id: @order.id), method: :delete, form: { class: "d-inline" }, class: "btn btn-outline-danger", data: { turbo_confirm: "Are you sure you want to delete order #{@order.order_number}?" } do %>
-        <i class="fa-solid fa-trash me-1"></i> Delete
+      <%= button_to bo_order_path(org_slug: @current_organisation.slug, id: @order.id), method: :delete, form: { class: "d-inline" }, class: "btn btn-outline-danger", data: { turbo_confirm: t('bo.common.confirm.delete_order', number: @order.order_number) } do %>
+        <i class="fa-solid fa-trash me-1"></i> <%= t('bo.common.actions.delete') %>
       <% end %>
     </div>
   </div>
@@ -48,26 +48,37 @@
       <!-- Order Items -->
       <div class="card mb-4">
         <div class="card-body">
-          <h5 class="card-title mb-1">Order Items</h5>
-          <p class="text-muted small mb-3"><%= @order.order_items.count %> items in this order</p>
+          <h5 class="card-title mb-1"><%= t('bo.orders.show.order_items') %></h5>
+          <p class="text-muted small mb-3"><%= t('bo.orders.show.items_count', count: @order.order_items.count) %></p>
 
           <div class="table-responsive">
             <table class="table table-borderless align-middle mb-0">
               <thead class="border-bottom">
                 <tr>
-                  <th class="text-muted fw-normal">Product</th>
-                  <th class="text-muted fw-normal">SKU</th>
-                  <th class="text-muted fw-normal text-center">Qty</th>
-                  <th class="text-muted fw-normal text-end">Price</th>
-                  <th class="text-muted fw-normal text-center">Discount</th>
-                  <th class="text-muted fw-normal text-end">Total</th>
+                  <th class="text-muted fw-normal"><%= t('bo.common.product') %></th>
+                  <th class="text-muted fw-normal"><%= t('bo.products.form.sku') %></th>
+                  <th class="text-muted fw-normal text-center"><%= t('bo.orders.form.quantity') %></th>
+                  <th class="text-muted fw-normal text-end"><%= t('bo.common.price') %></th>
+                  <th class="text-muted fw-normal text-center"><%= t('bo.common.discount') %></th>
+                  <th class="text-muted fw-normal text-end"><%= t('bo.common.total') %></th>
                 </tr>
               </thead>
               <tbody>
-                <% @order.order_items.includes(:product).each do |item| %>
+                <% @order.order_items.includes(:product, :product_variant).each do |item| %>
                   <tr>
-                    <td><%= item.product.name %></td>
-                    <td class="text-muted"><%= item.product.sku || '-' %></td>
+                    <td>
+                      <div><%= item.product.name %></div>
+                      <% if item.product_variant.present? && item.product.variable? %>
+                        <small class="text-primary"><%= item.product_variant.option_values_string %></small>
+                      <% end %>
+                    </td>
+                    <td class="text-muted">
+                      <% if item.product_variant.present? && item.product_variant.sku.present? %>
+                        <%= item.product_variant.sku %>
+                      <% else %>
+                        <%= item.product.sku || '-' %>
+                      <% end %>
+                    </td>
                     <td class="text-center"><%= item.quantity %> <%= item.product.min_quantity_type %></td>
                     <td class="text-end">
                       <% if item.discount_percentage && item.discount_percentage > 0 %>
@@ -100,14 +111,14 @@
 
           <div class="border-top pt-3 mt-3">
             <div class="d-flex justify-content-between mb-2">
-              <span class="text-muted">Subtotal</span>
+              <span class="text-muted"><%= t('bo.common.subtotal') %></span>
               <span><%= humanized_money_with_symbol(@order.total_amount) %></span>
             </div>
 
             <% if @order.has_auto_discount_snapshot? %>
               <div class="d-flex justify-content-between mb-2 text-success">
                 <span>
-                  Order Tier Discount (<%= @order.auto_discount_display %>)
+                  <%= t('bo.orders.show.order_tier_discount') %> (<%= @order.auto_discount_display %>)
                 </span>
                 <span>-<%= humanized_money_with_symbol(@order.auto_order_discount_amount) %></span>
               </div>
@@ -116,7 +127,7 @@
             <% if @order.has_order_discount? %>
               <div class="d-flex justify-content-between mb-2 text-success">
                 <span>
-                  Manual Discount (<%= @order.order_discount_display %>)
+                  <%= t('bo.orders.show.manual_discount') %> (<%= @order.order_discount_display %>)
                   <% if @order.discount_reason.present? %>
                     <small class="text-muted d-block"><%= @order.discount_reason %></small>
                   <% end %>
@@ -126,20 +137,20 @@
             <% end %>
 
             <div class="d-flex justify-content-between mb-2">
-              <span class="text-muted">Tax (<%= (@current_organisation.tax_rate * 100).round(1) %>%)</span>
+              <span class="text-muted"><%= t('bo.common.tax') %> (<%= (@current_organisation.tax_rate * 100).round(1) %>%)</span>
               <span><%= humanized_money_with_symbol(@order.tax_amount || @order.calculated_tax) %></span>
             </div>
             <div class="d-flex justify-content-between mb-2">
               <span class="text-muted">
-                Shipping
+                <%= t('bo.common.shipping') %>
                 <% if @order.pickup? %>
-                  <span class="badge bg-secondary ms-1">Pickup</span>
+                  <span class="badge bg-secondary ms-1"><%= t('bo.orders.form.pickup') %></span>
                 <% end %>
               </span>
               <span><%= humanized_money_with_symbol(@order.shipping_amount || @order.calculated_shipping) %></span>
             </div>
             <div class="d-flex justify-content-between fw-bold border-top pt-2 mt-2">
-              <span>Total</span>
+              <span><%= t('bo.common.total') %></span>
               <span><%= humanized_money_with_symbol(@order.grand_total) %></span>
             </div>
           </div>
@@ -149,31 +160,31 @@
       <!-- Order Details -->
       <div class="card mb-4">
         <div class="card-body">
-          <h5 class="card-title mb-3">Order Details</h5>
+          <h5 class="card-title mb-3"><%= t('bo.orders.show.order_details') %></h5>
 
           <div class="row">
             <div class="col-md-6 mb-3">
-              <small class="text-muted d-block">Delivery Method</small>
+              <small class="text-muted d-block"><%= t('bo.orders.form.delivery_method') %></small>
               <span class="fw-medium">
                 <% if @order.pickup? %>
-                  <i class="fa-solid fa-store me-1"></i> Pickup
+                  <i class="fa-solid fa-store me-1"></i> <%= t('bo.orders.form.pickup') %>
                 <% else %>
-                  <i class="fa-solid fa-truck me-1"></i> Delivery
+                  <i class="fa-solid fa-truck me-1"></i> <%= t('bo.orders.form.delivery') %>
                 <% end %>
               </span>
             </div>
 
             <div class="col-md-6 mb-3">
-              <small class="text-muted d-block"><%= @order.pickup? ? 'Pickup Date' : 'Delivery Date' %></small>
+              <small class="text-muted d-block"><%= @order.pickup? ? t('bo.orders.form.pickup_date') : t('bo.orders.form.delivery_date') %></small>
               <span class="fw-medium">
-                <%= @order.receive_on&.strftime("%B %d, %Y") || 'Not specified' %>
+                <%= @order.receive_on&.strftime("%B %d, %Y") || t('bo.common.not_specified') %>
               </span>
             </div>
           </div>
 
           <% if @order.delivery? && @order.shipping_address.present? %>
             <div class="mb-3">
-              <small class="text-muted d-block">Shipping Address</small>
+              <small class="text-muted d-block"><%= t('bo.orders.form.shipping_address') %></small>
               <span class="fw-medium"><%= @order.shipping_address.street_name %></span><br>
               <span class="text-muted"><%= @order.shipping_address.postal_code %> <%= @order.shipping_address.city %>, <%= @order.shipping_address.country %></span>
             </div>
@@ -181,7 +192,7 @@
 
           <% if @order.billing_address.present? %>
             <div class="mb-3">
-              <small class="text-muted d-block">Billing Address</small>
+              <small class="text-muted d-block"><%= t('bo.customers.form.billing_address') %></small>
               <span class="fw-medium"><%= @order.billing_address.street_name %></span><br>
               <span class="text-muted"><%= @order.billing_address.postal_code %> <%= @order.billing_address.city %>, <%= @order.billing_address.country %></span>
             </div>
@@ -192,8 +203,8 @@
       <!-- Order Notes -->
       <div class="card">
         <div class="card-body">
-          <h5 class="card-title mb-3">Order Notes</h5>
-          <p class="text-muted mb-0"><%= @order.notes.present? ? @order.notes : 'No notes for this order.' %></p>
+          <h5 class="card-title mb-3"><%= t('bo.orders.form.order_notes') %></h5>
+          <p class="text-muted mb-0"><%= @order.notes.present? ? @order.notes : t('bo.orders.show.no_notes') %></p>
         </div>
       </div>
     </div>
@@ -204,16 +215,16 @@
       <div class="card mb-4">
         <div class="card-body">
           <h6 class="text-muted mb-3">
-            <i class="fa-solid fa-user me-2"></i>Client Information
+            <i class="fa-solid fa-user me-2"></i><%= t('bo.orders.show.client_information') %>
           </h6>
 
           <div class="mb-3">
-            <small class="text-muted">Client Name</small>
+            <small class="text-muted"><%= t('bo.orders.show.client_name') %></small>
             <div><%= @order.customer.contact_name %></div>
           </div>
 
           <div class="mb-3">
-            <small class="text-muted">Company</small>
+            <small class="text-muted"><%= t('bo.orders.show.company') %></small>
             <div><%= @order.customer.company_name %></div>
           </div>
 
@@ -231,7 +242,7 @@
 
           <div class="d-grid mt-3">
             <%= link_to bo_customer_path(org_slug: @current_organisation.slug, id: @order.customer.id), class: "btn btn-outline-secondary btn-sm" do %>
-              View Client Profile
+              <%= t('bo.orders.show.view_client_profile') %>
             <% end %>
           </div>
         </div>
@@ -242,13 +253,13 @@
         <div class="card mb-4">
           <div class="card-body">
             <h6 class="text-muted mb-3">
-              <i class="fa-solid fa-cart-shopping me-2"></i>Order Tier Discount
+              <i class="fa-solid fa-cart-shopping me-2"></i><%= t('bo.orders.show.order_tier_discount') %>
             </h6>
 
             <div class="alert alert-success mb-0">
               <div class="d-flex justify-content-between align-items-center">
                 <div>
-                  <strong><%= @order.auto_discount_display %> off</strong>
+                  <strong><%= @order.auto_discount_display %> <%= t('bo.orders.show.off') %></strong>
                 </div>
                 <span class="badge bg-success fs-6">
                   -<%= humanized_money_with_symbol(@order.auto_order_discount_amount) %>
@@ -263,19 +274,19 @@
       <div class="card mb-4">
         <div class="card-body">
           <h6 class="text-muted mb-3">
-            <i class="fa-solid fa-tag me-2"></i>Manual Discount
+            <i class="fa-solid fa-tag me-2"></i><%= t('bo.orders.show.manual_discount') %>
           </h6>
 
           <% if @order.has_order_discount? %>
             <div class="alert alert-success mb-3">
               <div class="d-flex justify-content-between align-items-center">
                 <div>
-                  <strong><%= @order.order_discount_display %> off</strong>
+                  <strong><%= @order.order_discount_display %> <%= t('bo.orders.show.off') %></strong>
                   <% if @order.discount_reason.present? %>
                     <div class="small text-muted"><%= @order.discount_reason %></div>
                   <% end %>
                   <% if @order.applied_by.present? %>
-                    <div class="small text-muted">Applied by <%= @order.applied_by.email %></div>
+                    <div class="small text-muted"><%= t('bo.orders.show.applied_by', email: @order.applied_by.email) %></div>
                   <% end %>
                 </div>
                 <span class="badge bg-success fs-6">
@@ -287,43 +298,43 @@
             <%= button_to remove_discount_bo_order_path(org_slug: @current_organisation.slug, id: @order.id),
                 method: :delete,
                 class: "btn btn-outline-danger btn-sm w-100",
-                data: { turbo_confirm: "Remove order discount?" } do %>
-              <i class="fa-solid fa-times me-1"></i> Remove Discount
+                data: { turbo_confirm: t('bo.orders.show.remove_discount_confirm') } do %>
+              <i class="fa-solid fa-times me-1"></i> <%= t('bo.orders.show.remove_discount') %>
             <% end %>
           <% else %>
-            <p class="text-muted small mb-3">Apply a discount to the entire order</p>
+            <p class="text-muted small mb-3"><%= t('bo.orders.show.apply_discount_hint') %></p>
 
             <%= form_with url: apply_discount_bo_order_path(org_slug: @current_organisation.slug, id: @order.id),
                 method: :patch,
                 scope: :order,
                 local: true do |f| %>
               <div class="mb-3">
-                <label class="form-label small">Discount Type</label>
+                <label class="form-label small"><%= t('bo.orders.form.discount_type') %></label>
                 <%= f.select :discount_type,
-                    [["Percentage", "percentage"], ["Fixed Amount", "fixed"]],
-                    { prompt: "Select type..." },
+                    [[t('bo.pricing.form.percentage'), "percentage"], [t('bo.pricing.form.fixed_amount'), "fixed"]],
+                    { prompt: t('bo.orders.form.select_type') },
                     { class: "form-select form-select-sm", required: true } %>
               </div>
 
               <div class="mb-3">
-                <label class="form-label small">Value</label>
+                <label class="form-label small"><%= t('bo.orders.form.value') %></label>
                 <%= f.number_field :discount_value,
                     class: "form-control form-control-sm",
                     step: 0.01, min: 0,
-                    placeholder: "0.10 for 10% or 25.00 for fixed",
+                    placeholder: t('bo.orders.form.value_placeholder'),
                     required: true %>
-                <small class="text-muted">For percentage: 0.15 = 15%</small>
+                <small class="text-muted"><%= t('bo.orders.form.percentage_hint') %></small>
               </div>
 
               <div class="mb-3">
-                <label class="form-label small">Reason (optional)</label>
+                <label class="form-label small"><%= t('bo.orders.form.reason') %></label>
                 <%= f.text_field :discount_reason,
                     class: "form-control form-control-sm",
-                    placeholder: "e.g., Loyalty bonus" %>
+                    placeholder: t('bo.orders.form.reason_placeholder') %>
               </div>
 
               <button type="submit" class="btn btn-primary btn-sm w-100">
-                <i class="fa-solid fa-check me-1"></i> Apply Discount
+                <i class="fa-solid fa-check me-1"></i> <%= t('bo.orders.show.apply_discount') %>
               </button>
             <% end %>
           <% end %>

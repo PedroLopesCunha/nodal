@@ -1,13 +1,15 @@
 class DiscountCalculator
-  attr_reader :product, :customer, :quantity, :for_display
+  attr_reader :product, :customer, :quantity, :for_display, :variant
 
   # for_display: true - shows all available discounts (ignoring min_quantity) for product pages
   # for_display: false - only shows applicable discounts (respecting min_quantity) for cart/checkout
-  def initialize(product:, customer: nil, quantity: 1, for_display: false)
+  # variant: optional ProductVariant - if provided, uses variant price as base price
+  def initialize(product:, customer: nil, quantity: 1, for_display: false, variant: nil)
     @product = product
     @customer = customer
     @quantity = quantity
     @for_display = for_display
+    @variant = variant || product.default_variant
   end
 
   # Returns all applicable discounts with metadata
@@ -20,25 +22,32 @@ class DiscountCalculator
     @effective_discount ||= calculate_effective_discount
   end
 
+  # Returns the base price (variant price if available, otherwise product price)
+  # Returns zero money if no price is set
+  def base_price
+    variant&.price || product.price || Money.new(0, currency)
+  end
+
   # Returns the final price per unit
   def final_price
-    apply_discount(product.price, effective_discount)
+    apply_discount(base_price, effective_discount)
   end
 
   # Returns the total savings per unit
   def savings
-    product.price - final_price
+    base_price - final_price
   end
 
   # Returns display-friendly breakdown
   def discount_breakdown
     {
-      base_price: product.price,
+      base_price: base_price,
       all_discounts: all_discounts,
       effective_discount: effective_discount,
       final_price: final_price,
       savings: savings,
-      has_discount: all_discounts.any?
+      has_discount: all_discounts.any?,
+      variant: variant
     }
   end
 
@@ -125,7 +134,7 @@ class DiscountCalculator
 
   def calculate_combined(base_exclusive, stackable_discounts)
     # Start with full price
-    remaining_price = product.price
+    remaining_price = base_price
 
     # Apply the best exclusive (non-stackable) discount first as the base
     if base_exclusive[:savings] && base_exclusive[:savings] > Money.new(0, currency)
@@ -142,14 +151,14 @@ class DiscountCalculator
     end
 
     remaining_price = [remaining_price, Money.new(0, currency)].max
-    savings = product.price - remaining_price
+    total_savings = base_price - remaining_price
 
     # Calculate effective percentage for display
-    effective_pct = (savings.to_f / product.price.to_f).round(4) rescue 0
+    effective_pct = (total_savings.to_f / base_price.to_f).round(4) rescue 0
 
     {
       percentage: effective_pct,
-      savings: savings,
+      savings: total_savings,
       source: :combined,
       label: "Combined Discount",
       base_discount: base_exclusive,
@@ -161,7 +170,7 @@ class DiscountCalculator
     return { percentage: 0, savings: Money.new(0, currency), source: :none, label: nil } if discounts.empty?
 
     # Start with full price
-    remaining_price = product.price
+    remaining_price = base_price
 
     discounts.each do |d|
       if d[:discount_type] == 'percentage'
@@ -172,14 +181,14 @@ class DiscountCalculator
     end
 
     remaining_price = [remaining_price, Money.new(0, currency)].max
-    savings = product.price - remaining_price
+    total_savings = base_price - remaining_price
 
     # Calculate effective percentage for display
-    effective_pct = (savings.to_f / product.price.to_f).round(4) rescue 0
+    effective_pct = (total_savings.to_f / base_price.to_f).round(4) rescue 0
 
     {
       percentage: effective_pct,
-      savings: savings,
+      savings: total_savings,
       source: :stacked,
       label: "Combined Discount",
       discounts: discounts
@@ -193,19 +202,19 @@ class DiscountCalculator
     best_savings = Money.new(0, currency)
 
     discounts.each do |d|
-      savings = if d[:discount_type] == 'percentage'
-        product.price * d[:value]
+      discount_savings = if d[:discount_type] == 'percentage'
+        base_price * d[:value]
       else
         Money.new((d[:value] * 100).to_i, currency)
       end
 
-      if savings > best_savings
-        best_savings = savings
+      if discount_savings > best_savings
+        best_savings = discount_savings
         best = d
       end
     end
 
-    effective_pct = (best_savings.to_f / product.price.to_f).round(4) rescue 0
+    effective_pct = (best_savings.to_f / base_price.to_f).round(4) rescue 0
 
     {
       percentage: effective_pct,

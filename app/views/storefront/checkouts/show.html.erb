@@ -1,19 +1,21 @@
 <%= link_to cart_path(org_slug: params[:org_slug]), class: "btn btn-outline-secondary mb-4 mt-5" do %>
-  <i class="fa-solid fa-arrow-left me-2"></i>Back to Cart
+  <i class="fa-solid fa-arrow-left me-2"></i><%= t('storefront.common.back') %> <%= t('storefront.navbar.cart') %>
 <% end %>
 
 <div class="row g-4"
      data-controller="checkout"
-     data-checkout-subtotal-value="<%= @order.total_amount.cents %>"
+     data-checkout-subtotal-value="<%= @order.total_with_auto_discount.cents %>"
      data-checkout-tax-value="<%= @order.calculated_tax.cents %>"
      data-checkout-shipping-cost-value="<%= @current_organisation.shipping_cost.cents %>"
-     data-checkout-currency-symbol-value="<%= @current_organisation.currency_symbol %>">
+     data-checkout-currency-symbol-value="<%= @current_organisation.currency_symbol %>"
+     data-checkout-free-shipping-threshold-value="<%= @current_organisation.free_shipping_threshold_cents || 0 %>"
+     data-checkout-free-shipping-enabled-value="<%= @current_organisation.free_shipping_enabled? %>">
   <div class="col-lg-8">
     <!-- Checkout Header -->
     <div class="card border-0 shadow-sm mb-4" style="border-radius: 12px;">
       <div class="card-body">
-        <h1 class="h3 mb-1">Checkout</h1>
-        <p class="text-muted mb-0">Review your order and choose delivery method</p>
+        <h1 class="h3 mb-1"><%= t('storefront.checkouts.show.title') %></h1>
+        <p class="text-muted mb-0"><%= t('storefront.checkouts.show.subtitle') %></p>
       </div>
     </div>
 
@@ -22,15 +24,15 @@
       <!-- Order Items -->
       <div class="card border-0 shadow-sm mb-4" style="border-radius: 12px;">
         <div class="card-body">
-          <h5 class="card-title mb-3">Order Items</h5>
+          <h5 class="card-title mb-3"><%= t('storefront.checkouts.show.order_items') %></h5>
 
           <table class="table">
             <thead>
               <tr>
-                <th>Product</th>
-                <th class="text-center">Quantity</th>
-                <th class="text-end">Price</th>
-                <th class="text-end">Total</th>
+                <th><%= t('storefront.checkouts.show.table.product') %></th>
+                <th class="text-center"><%= t('storefront.checkouts.show.table.quantity') %></th>
+                <th class="text-end"><%= t('storefront.checkouts.show.table.price') %></th>
+                <th class="text-end"><%= t('storefront.checkouts.show.table.total') %></th>
               </tr>
             </thead>
             <tbody>
@@ -38,8 +40,8 @@
                 <tr>
                   <td>
                     <div class="d-flex align-items-center">
-                      <% if item.product.photo.attached? %>
-                        <%= image_tag item.product.photo, style: "width: 50px; height: 50px; object-fit: cover; border-radius: 6px;", class: "me-3" %>
+                      <% if item.effective_photo.present? %>
+                        <%= image_tag item.effective_photo, style: "width: 50px; height: 50px; object-fit: cover; border-radius: 6px;", class: "me-3" %>
                       <% else %>
                         <div class="me-3 bg-light d-flex align-items-center justify-content-center" style="width: 50px; height: 50px; border-radius: 6px;">
                           <i class="fa-solid fa-image text-muted"></i>
@@ -47,6 +49,9 @@
                       <% end %>
                       <div>
                         <div class="fw-medium"><%= item.product.name %></div>
+                        <% if item.product_variant.present? && item.product.variable? %>
+                          <small class="text-primary"><%= item.product_variant.option_values_string %></small><br>
+                        <% end %>
                         <small class="text-muted"><%= item.product.category&.name %></small>
                       </div>
                     </div>
@@ -79,7 +84,7 @@
       <div class="card border-0 shadow-sm mb-4" style="border-radius: 12px;">
         <div class="card-body">
           <h5 class="card-title mb-3">
-            <i class="fa-solid fa-truck me-2"></i>Delivery Method
+            <i class="fa-solid fa-truck me-2"></i><%= t('storefront.checkouts.show.delivery_method.title') %>
           </h5>
 
           <div class="mb-3">
@@ -91,10 +96,17 @@
                   data: { action: "checkout#updateTotal checkout#toggleShippingAddress" } %>
               <label class="form-check-label d-flex justify-content-between align-items-center w-100 ms-2" for="delivery_method_delivery">
                 <div>
-                  <strong>Delivery</strong>
-                  <div class="text-muted small">We'll deliver to your address</div>
+                  <strong><%= t('storefront.checkouts.show.delivery_method.delivery') %></strong>
+                  <div class="text-muted small"><%= t('storefront.checkouts.show.delivery_method.delivery_hint') %></div>
                 </div>
-                <span class="fw-medium"><%= humanized_money_with_symbol(@current_organisation.shipping_cost) %></span>
+                <span data-checkout-target="deliveryShippingCost">
+                  <% if @order.qualifies_for_free_shipping? %>
+                    <span class="text-decoration-line-through text-muted small me-1"><%= humanized_money_with_symbol(@current_organisation.shipping_cost) %></span>
+                    <span class="fw-medium text-success"><%= t('storefront.checkouts.show.delivery_method.free') %></span>
+                  <% else %>
+                    <span class="fw-medium"><%= humanized_money_with_symbol(@current_organisation.shipping_cost) %></span>
+                  <% end %>
+                </span>
               </label>
             </div>
 
@@ -105,10 +117,10 @@
                   data: { action: "checkout#updateTotal checkout#toggleShippingAddress" } %>
               <label class="form-check-label d-flex justify-content-between align-items-center w-100 ms-2" for="delivery_method_pickup">
                 <div>
-                  <strong>Pickup</strong>
-                  <div class="text-muted small">Pick up your order yourself</div>
+                  <strong><%= t('storefront.checkouts.show.delivery_method.pickup') %></strong>
+                  <div class="text-muted small"><%= t('storefront.checkouts.show.delivery_method.pickup_hint') %></div>
                 </div>
-                <span class="fw-medium text-success">Free</span>
+                <span class="fw-medium text-success"><%= t('storefront.checkouts.show.delivery_method.free') %></span>
               </label>
             </div>
           </div>
@@ -119,7 +131,7 @@
       <div class="card border-0 shadow-sm mb-4" style="border-radius: 12px;">
         <div class="card-body">
           <h5 class="card-title mb-3">
-            <i class="fa-solid fa-calendar me-2"></i><span data-checkout-target="dateLabel">Delivery Date</span>
+            <i class="fa-solid fa-calendar me-2"></i><span data-checkout-target="dateLabel"><%= t('storefront.checkouts.show.delivery_date.title') %></span>
           </h5>
 
           <div class="mb-3">
@@ -127,7 +139,7 @@
                 class: "form-control",
                 min: Date.tomorrow,
                 value: @order.receive_on || Date.tomorrow %>
-            <div class="form-text">Select when you'd like to receive your order</div>
+            <div class="form-text"><%= t('storefront.checkouts.show.delivery_date.hint') %></div>
           </div>
         </div>
       </div>
@@ -136,15 +148,15 @@
       <div class="card border-0 shadow-sm mb-4" style="border-radius: 12px;" data-checkout-target="shippingAddressSection">
         <div class="card-body">
           <h5 class="card-title mb-3">
-            <i class="fa-solid fa-location-dot me-2"></i>Shipping Address
+            <i class="fa-solid fa-location-dot me-2"></i><%= t('storefront.checkouts.show.shipping_address') %>
           </h5>
 
           <%= f.select :shipping_address_id,
               options_for_select(
-                @shipping_addresses.map { |a| ["#{a.street_name}, #{a.postal_code} #{a.city}", a.id] } + [["+ Add new address", "new"]],
+                @shipping_addresses.map { |a| ["#{a.street_name}, #{a.postal_code} #{a.city}", a.id] } + [[t('storefront.checkouts.show.add_new_address'), "new"]],
                 @order.shipping_address_id || @shipping_addresses.first&.id
               ),
-              { include_blank: @shipping_addresses.empty? ? "Select or add address" : false },
+              { include_blank: @shipping_addresses.empty? ? t('storefront.checkouts.show.select_address') : false },
               class: "form-select mb-3",
               data: { action: "checkout#toggleNewShippingAddress" } %>
 
@@ -154,21 +166,21 @@
               <div class="col-12">
                 <%= f.fields_for :new_shipping_address, Address.new do |af| %>
                   <div class="mb-3">
-                    <%= af.label :street_name, "Street Address", class: "form-label" %>
-                    <%= af.text_field :street_name, class: "form-control", placeholder: "123 Main Street" %>
+                    <%= af.label :street_name, t('storefront.checkouts.show.form.street_address'), class: "form-label" %>
+                    <%= af.text_field :street_name, class: "form-control", placeholder: t('storefront.checkouts.show.form.street_address_placeholder') %>
                   </div>
                   <div class="row g-3">
                     <div class="col-md-4">
-                      <%= af.label :postal_code, "Postal Code", class: "form-label" %>
-                      <%= af.text_field :postal_code, class: "form-control", placeholder: "12345" %>
+                      <%= af.label :postal_code, t('storefront.checkouts.show.form.postal_code'), class: "form-label" %>
+                      <%= af.text_field :postal_code, class: "form-control", placeholder: t('storefront.checkouts.show.form.postal_code_placeholder') %>
                     </div>
                     <div class="col-md-4">
-                      <%= af.label :city, "City", class: "form-label" %>
-                      <%= af.text_field :city, class: "form-control", placeholder: "City" %>
+                      <%= af.label :city, t('storefront.checkouts.show.form.city'), class: "form-label" %>
+                      <%= af.text_field :city, class: "form-control", placeholder: t('storefront.checkouts.show.form.city_placeholder') %>
                     </div>
                     <div class="col-md-4">
-                      <%= af.label :country, "Country", class: "form-label" %>
-                      <%= af.text_field :country, class: "form-control", placeholder: "Country" %>
+                      <%= af.label :country, t('storefront.checkouts.show.form.country'), class: "form-label" %>
+                      <%= af.text_field :country, class: "form-control", placeholder: t('storefront.checkouts.show.form.country_placeholder') %>
                     </div>
                   </div>
                 <% end %>
@@ -182,7 +194,7 @@
       <div class="card border-0 shadow-sm mb-4" style="border-radius: 12px;">
         <div class="card-body">
           <h5 class="card-title mb-3">
-            <i class="fa-solid fa-file-invoice me-2"></i>Billing Address
+            <i class="fa-solid fa-file-invoice me-2"></i><%= t('storefront.checkouts.show.billing_address') %>
           </h5>
 
           <div class="form-check mb-3" data-checkout-target="sameAsShippingOption">
@@ -191,7 +203,7 @@
                 id: "same_as_shipping",
                 data: { action: "checkout#toggleBillingAddress" } %>
             <label class="form-check-label" for="same_as_shipping">
-              Same as shipping address
+              <%= t('storefront.checkouts.show.same_as_shipping') %>
             </label>
           </div>
 
@@ -205,21 +217,21 @@
             <% else %>
               <%= f.fields_for :new_billing_address, Address.new do |af| %>
                 <div class="mb-3">
-                  <%= af.label :street_name, "Street Address", class: "form-label" %>
-                  <%= af.text_field :street_name, class: "form-control", placeholder: "123 Main Street" %>
+                  <%= af.label :street_name, t('storefront.checkouts.show.form.street_address'), class: "form-label" %>
+                  <%= af.text_field :street_name, class: "form-control", placeholder: t('storefront.checkouts.show.form.street_address_placeholder') %>
                 </div>
                 <div class="row g-3">
                   <div class="col-md-4">
-                    <%= af.label :postal_code, "Postal Code", class: "form-label" %>
-                    <%= af.text_field :postal_code, class: "form-control", placeholder: "12345" %>
+                    <%= af.label :postal_code, t('storefront.checkouts.show.form.postal_code'), class: "form-label" %>
+                    <%= af.text_field :postal_code, class: "form-control", placeholder: t('storefront.checkouts.show.form.postal_code_placeholder') %>
                   </div>
                   <div class="col-md-4">
-                    <%= af.label :city, "City", class: "form-label" %>
-                    <%= af.text_field :city, class: "form-control", placeholder: "City" %>
+                    <%= af.label :city, t('storefront.checkouts.show.form.city'), class: "form-label" %>
+                    <%= af.text_field :city, class: "form-control", placeholder: t('storefront.checkouts.show.form.city_placeholder') %>
                   </div>
                   <div class="col-md-4">
-                    <%= af.label :country, "Country", class: "form-label" %>
-                    <%= af.text_field :country, class: "form-control", placeholder: "Country" %>
+                    <%= af.label :country, t('storefront.checkouts.show.form.country'), class: "form-label" %>
+                    <%= af.text_field :country, class: "form-control", placeholder: t('storefront.checkouts.show.form.country_placeholder') %>
                   </div>
                 </div>
               <% end %>
@@ -232,13 +244,13 @@
       <div class="card border-0 shadow-sm mb-4" style="border-radius: 12px;">
         <div class="card-body">
           <h5 class="card-title mb-3">
-            <i class="fa-solid fa-comment me-2"></i>Order Notes <span class="text-muted fw-normal">(optional)</span>
+            <i class="fa-solid fa-comment me-2"></i><%= t('storefront.checkouts.show.order_notes.title') %> <span class="text-muted fw-normal"><%= t('storefront.checkouts.show.order_notes.optional') %></span>
           </h5>
 
           <%= f.text_area :notes,
               class: "form-control",
               rows: 3,
-              placeholder: "Any special instructions for your order..." %>
+              placeholder: t('storefront.checkouts.show.order_notes.placeholder') %>
         </div>
       </div>
 
@@ -249,43 +261,43 @@
     <!-- Order Summary -->
     <div class="card border-0 shadow-sm mb-4" style="border-radius: 12px; position: sticky; top: 20px;">
       <div class="card-body">
-        <h5 class="card-title mb-3">Order Summary</h5>
+        <h5 class="card-title mb-3"><%= t('storefront.carts.show.order_summary') %></h5>
 
         <div class="d-flex justify-content-between mb-2">
-          <span class="text-muted">Subtotal (<%= @order.item_count %> items)</span>
+          <span class="text-muted"><%= t('storefront.checkouts.show.summary.subtotal') %> (<%= @order.item_count %> <%= t('storefront.common.items', count: @order.item_count) %>)</span>
           <span><%= humanized_money_with_symbol(@order.total_amount) %></span>
         </div>
 
         <% if @order.best_order_discount.present? %>
           <div class="d-flex justify-content-between mb-2 text-success">
-            <span>Order Discount (<%= @order.best_order_discount.value_display %>)</span>
+            <span><%= t('storefront.carts.show.order_discount') %> (<%= @order.best_order_discount.value_display %>)</span>
             <span>-<%= humanized_money_with_symbol(@order.auto_order_discount_amount) %></span>
           </div>
         <% end %>
 
         <div class="d-flex justify-content-between mb-2">
-          <span class="text-muted">Tax (<%= (@current_organisation.tax_rate * 100).round(1) %>%)</span>
+          <span class="text-muted"><%= t('storefront.checkouts.show.summary.tax') %> (<%= (@current_organisation.tax_rate * 100).round(1) %>%)</span>
           <span><%= humanized_money_with_symbol(@order.calculated_tax) %></span>
         </div>
 
         <div class="d-flex justify-content-between mb-2">
-          <span class="text-muted">Shipping</span>
+          <span class="text-muted"><%= t('storefront.checkouts.show.summary.shipping') %></span>
           <span data-checkout-target="shippingAmount"><%= humanized_money_with_symbol(@order.calculated_shipping) %></span>
         </div>
 
         <hr>
 
         <div class="d-flex justify-content-between mb-4">
-          <span class="fw-bold">Total</span>
+          <span class="fw-bold"><%= t('storefront.checkouts.show.summary.total') %></span>
           <span class="fw-bold fs-5" data-checkout-target="totalAmount"><%= humanized_money_with_symbol(@order.grand_total) %></span>
         </div>
 
         <button type="submit" form="checkout-form" class="btn btn-primary w-100 btn-lg">
-          <i class="fa-solid fa-check me-2"></i>Place Order
+          <i class="fa-solid fa-check me-2"></i><%= t('storefront.checkouts.show.place_order') %>
         </button>
 
         <p class="text-muted small text-center mt-3 mb-0">
-          By placing your order, you agree to our terms and conditions.
+          <%= t('storefront.checkouts.show.terms_agreement') %>
         </p>
       </div>
     </div>

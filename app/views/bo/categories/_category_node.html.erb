@@ -1,0 +1,83 @@
+<li class="category-tree-item <%= 'depth-warning' if category.depth_warning? %>"
+    data-id="<%= category.id %>"
+    data-ancestry="<%= category.ancestry %>"
+    data-category-tree-target="item">
+  <div class="category-node d-flex align-items-center py-2 px-3 rounded hover-bg">
+    <!-- Drag Handle -->
+    <div class="drag-handle me-2 text-muted" data-category-tree-target="handle">
+      <i class="fa-solid fa-grip-vertical"></i>
+    </div>
+
+    <!-- Expand/Collapse Toggle -->
+    <% if category.children.kept.any? %>
+      <button type="button"
+              class="btn btn-sm btn-link text-muted p-0 me-2 toggle-btn"
+              data-action="category-tree#toggleChildren"
+              data-category-tree-target="toggle">
+        <i class="fa-solid fa-chevron-right toggle-icon"></i>
+      </button>
+    <% else %>
+      <div class="me-4"></div>
+    <% end %>
+
+    <!-- Category Name -->
+    <div class="flex-grow-1">
+      <span class="fw-semibold"><%= category.name %></span>
+      <% if category.depth_warning? %>
+        <span class="badge bg-warning text-dark ms-2" title="<%= t('bo.categories.depth_warning') %>">
+          <i class="fa-solid fa-triangle-exclamation"></i>
+        </span>
+      <% end %>
+    </div>
+
+    <!-- Product Count Badge -->
+    <span class="badge bg-secondary me-3" title="<%= t('bo.categories.products_in_category') %>">
+      <%= category.all_products_count %> <%= t('bo.common.products') %>
+    </span>
+
+    <!-- Actions -->
+    <div class="category-actions">
+      <%= link_to new_bo_category_path(params[:org_slug], parent_id: category.id),
+                  class: "btn btn-sm btn-link text-muted",
+                  title: t('bo.categories.actions.add_subcategory') do %>
+        <i class="fa-solid fa-plus"></i>
+      <% end %>
+      <%= link_to bo_category_path(params[:org_slug], category),
+                  class: "btn btn-sm btn-link text-muted",
+                  title: t('bo.common.actions.view') do %>
+        <i class="fa-solid fa-eye"></i>
+      <% end %>
+      <%= link_to edit_bo_category_path(params[:org_slug], category),
+                  class: "btn btn-sm btn-link text-muted",
+                  title: t('bo.common.actions.edit') do %>
+        <i class="fa-solid fa-pen-to-square"></i>
+      <% end %>
+      <% if category.deletable? %>
+        <%= button_to bo_category_path(params[:org_slug], category),
+                      method: :delete,
+                      form: { class: "d-inline" },
+                      class: "btn btn-sm btn-link text-danger",
+                      title: t('bo.common.actions.delete'),
+                      data: { turbo_confirm: t('bo.common.confirm.delete_category') } do %>
+          <i class="fa-solid fa-trash"></i>
+        <% end %>
+      <% else %>
+        <button type="button"
+                class="btn btn-sm btn-link text-muted"
+                disabled
+                title="<%= t('bo.categories.has_children_hint') %>">
+          <i class="fa-solid fa-trash"></i>
+        </button>
+      <% end %>
+    </div>
+  </div>
+
+  <!-- Children -->
+  <% if category.children.kept.any? %>
+    <ul class="category-children list-unstyled ms-4" data-category-tree-target="children">
+      <% category.children.kept.by_position.each do |child| %>
+        <%= render 'category_node', category: child %>
+      <% end %>
+    </ul>
+  <% end %>
+</li>

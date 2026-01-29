@@ -1,9 +1,19 @@
 class Storefront::OrderItemsController < Storefront::BaseController
+  before_action :require_customer!
+
   def create
     @product = current_organisation.products.where(available: true).find(params[:product_id])
     @order = current_cart
 
-    @order_item = @order.order_items.find_by(product: @product)
+    # Find or default to the product's default variant
+    @variant = if params[:variant_id].present?
+      @product.product_variants.find(params[:variant_id])
+    else
+      @product.default_variant
+    end
+
+    # Find existing order item by product + variant combination
+    @order_item = @order.order_items.find_by(product: @product, product_variant: @variant)
 
     if @order_item
       @order_item.quantity += order_item_params[:quantity].to_i
@@ -11,15 +21,17 @@ class Storefront::OrderItemsController < Storefront::BaseController
       # OrderItem callback set_discount_from_product will use DiscountCalculator
       # to apply the effective discount from all sources (ProductDiscount,
       # CustomerDiscount, CustomerProductDiscount)
-      @order_item = @order.order_items.build(order_item_params.merge(product: @product))
+      @order_item = @order.order_items.build(
+        order_item_params.merge(product: @product, product_variant: @variant)
+      )
     end
 
     authorize @order_item
 
     if @order_item.save
-      redirect_to products_path(org_slug: params[:org_slug]), notice: "Added to cart."
+      redirect_to products_path(org_slug: params[:org_slug]), notice: t('storefront.cart.item_added')
     else
-      redirect_to product_path(org_slug: params[:org_slug], product_id: @product.id),
+      redirect_to product_path(org_slug: params[:org_slug], id: @product.id),
                     alert: @order_item.errors.full_messages.join(", ")
     end
   end

@@ -4,26 +4,26 @@
 <div class="bo-page-header">
   <div class="d-flex justify-content-between align-items-start">
     <div>
-      <h1>Pricing & Discounts</h1>
-      <p class="text-muted mb-0">Manage product discounts, client pricing tiers, and custom pricing rules</p>
+      <h1><%= t('bo.pricing.index.title') %></h1>
+      <p class="text-muted mb-0"><%= t('bo.pricing.index.subtitle') %></p>
     </div>
     <div class="bo-page-actions">
       <% case @tab %>
       <% when 'product_discounts' %>
         <%= link_to new_bo_product_discount_path(params[:org_slug]), class: "btn btn-primary" do %>
-          <i class="fa-solid fa-plus me-1"></i> Add Discount
+          <i class="fa-solid fa-plus me-1"></i> <%= t('bo.pricing.add_discount') %>
         <% end %>
       <% when 'client_tiers' %>
         <%= link_to new_bo_customer_discount_path(params[:org_slug]), class: "btn btn-primary" do %>
-          <i class="fa-solid fa-plus me-1"></i> Add Discount
+          <i class="fa-solid fa-plus me-1"></i> <%= t('bo.pricing.add_discount') %>
         <% end %>
       <% when 'custom_pricing' %>
         <%= link_to new_bo_customer_product_discount_path(params[:org_slug]), class: "btn btn-primary" do %>
-          <i class="fa-solid fa-plus me-1"></i> Add Discount
+          <i class="fa-solid fa-plus me-1"></i> <%= t('bo.pricing.add_discount') %>
         <% end %>
       <% when 'order_tiers' %>
         <%= link_to new_bo_order_discount_path(params[:org_slug]), class: "btn btn-primary" do %>
-          <i class="fa-solid fa-plus me-1"></i> Add Discount
+          <i class="fa-solid fa-plus me-1"></i> <%= t('bo.pricing.add_discount') %>
         <% end %>
       <% end %>
     </div>
@@ -39,25 +39,25 @@
         <li class="nav-item" role="presentation">
           <%= link_to bo_pricing_path(params[:org_slug], tab: 'product_discounts'),
               class: "nav-link rounded-0 py-3 #{'active' if @tab == 'product_discounts'}" do %>
-            <i class="fa-solid fa-tag me-2"></i>Product Discounts
+            <i class="fa-solid fa-tag me-2"></i><%= t('bo.pricing.tabs.product_discounts') %>
           <% end %>
         </li>
         <li class="nav-item" role="presentation">
           <%= link_to bo_pricing_path(params[:org_slug], tab: 'client_tiers'),
               class: "nav-link rounded-0 py-3 #{'active' if @tab == 'client_tiers'}" do %>
-            <i class="fa-solid fa-users me-2"></i>Client Tiers
+            <i class="fa-solid fa-users me-2"></i><%= t('bo.pricing.tabs.client_tiers') %>
           <% end %>
         </li>
         <li class="nav-item" role="presentation">
           <%= link_to bo_pricing_path(params[:org_slug], tab: 'custom_pricing'),
               class: "nav-link rounded-0 py-3 #{'active' if @tab == 'custom_pricing'}" do %>
-            <i class="fa-solid fa-dollar-sign me-2"></i>Custom Pricing
+            <i class="fa-solid fa-dollar-sign me-2"></i><%= t('bo.pricing.tabs.custom_pricing') %>
           <% end %>
         </li>
         <li class="nav-item" role="presentation">
           <%= link_to bo_pricing_path(params[:org_slug], tab: 'order_tiers'),
               class: "nav-link rounded-0 py-3 #{'active' if @tab == 'order_tiers'}" do %>
-            <i class="fa-solid fa-cart-shopping me-2"></i>Order Tiers
+            <i class="fa-solid fa-cart-shopping me-2"></i><%= t('bo.pricing.tabs.order_tiers') %>
           <% end %>
         </li>
       </ul>

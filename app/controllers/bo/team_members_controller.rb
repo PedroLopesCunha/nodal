@@ -50,12 +50,12 @@ class Bo::TeamMembersController < Bo::BaseController
     if @org_member.save
       if @org_member.member.present?
         # Existing member - send "added to org" notification
-        MemberMailer.added_to_organisation(@org_member).deliver_later
+        MemberMailer.added_to_organisation(@org_member).deliver_now
         redirect_to bo_team_members_path(params[:org_slug]), notice: "#{existing_member.first_name} has been added to the team."
       else
         # New member - send invitation
         @org_member.generate_invitation_token!
-        MemberMailer.team_invitation(@org_member).deliver_later
+        MemberMailer.team_invitation(@org_member).deliver_now
         redirect_to bo_team_members_path(params[:org_slug]), notice: "Invitation sent to #{email}."
       end
     else
@@ -90,7 +90,7 @@ class Bo::TeamMembersController < Bo::BaseController
   def resend_invitation
     if @org_member.pending_invitation?
       @org_member.generate_invitation_token!
-      MemberMailer.team_invitation(@org_member).deliver_later
+      MemberMailer.team_invitation(@org_member).deliver_now
       redirect_to bo_team_members_path(params[:org_slug]), notice: "Invitation resent to #{@org_member.invited_email}."
     else
       redirect_to bo_team_members_path(params[:org_slug]), alert: "Cannot resend invitation - member has already joined."

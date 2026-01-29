@@ -1,3 +1,5 @@
+@import "../config/colors";
+
 .price-with-discount {
   display: inline-flex;
   flex-wrap: wrap;
@@ -10,7 +12,7 @@
   }
 
   .discounted-price {
-    color: var(--bs-success);
+    color: var(--org-primary, $teal);
     font-weight: 600;
   }
 

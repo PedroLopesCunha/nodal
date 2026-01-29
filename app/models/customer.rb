@@ -1,4 +1,6 @@
 class Customer < ApplicationRecord
+  include ErpSyncable
+
   # Include default devise modules. Others available are:
   # :confirmable, :lockable, :timeoutable, :trackable and :omniauthable
   # Note: :registerable is excluded - Members create customer accounts
@@ -13,14 +15,17 @@ class Customer < ApplicationRecord
 
   belongs_to :organisation
   has_many :orders, dependent: :destroy
-  has_one :billing_address, -> { billing }, class_name: "Address", as: :addressable, dependent: :destroy
-  has_many :shipping_addresses, -> { shipping }, class_name: "Address", as: :addressable, dependent: :destroy
+  has_one :billing_address, -> { billing.active }, class_name: "Address", as: :addressable, dependent: :destroy
+  has_many :shipping_addresses, -> { shipping.active }, class_name: "Address", as: :addressable, dependent: :destroy
+  has_one :billing_address_with_archived, -> { billing }, class_name: "Address", as: :addressable, dependent: :destroy
+  has_many :shipping_addresses_with_archived, -> { shipping }, class_name: "Address", as: :addressable, dependent: :destroy
   has_many :customer_product_discounts, dependent: :destroy
   has_many :customer_discounts, dependent: :destroy
 
   validates :company_name, presence: true
   validates :contact_name, presence: true
   validates :active, inclusion: { in: [true, false] }
+  validates :locale, inclusion: { in: I18n.available_locales.map(&:to_s) }, allow_nil: true
 
   # Email validations (from Devise::Models::Validatable, with scoped uniqueness)
   validates :email, presence: true, if: :email_required?
@@ -33,6 +38,14 @@ class Customer < ApplicationRecord
   validates :password, presence: true, if: :password_required?
   validates :password, confirmation: true, if: :password_required?
   validates :password, length: { within: Devise.password_length, allow_blank: true }
+
+  # Addresses validation (PEDRO)
+  #accepts_nested_attributes_for :billing_address, update_only: true
+  #accepts_nested_attributes_for :shipping_addresses
+  #new below
+  accepts_nested_attributes_for :billing_address_with_archived, update_only: true
+  accepts_nested_attributes_for :shipping_addresses_with_archived
+
 
   def self.find_for_database_authentication(warden_conditions)
      raise

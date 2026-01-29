@@ -2,8 +2,11 @@
 // Clean, modern login form with video background - Shopify green style
 
 // Variables - Consistent with site colors
-$teal: #008060;              // Shopify green
-$teal-hover: #004c3f;
+// Use CSS custom properties with SCSS fallbacks for organisation branding
+$teal-default: #008060;              // Shopify green
+$teal-hover-default: #004c3f;
+$teal: var(--auth-primary, #{$teal-default});
+$teal-hover: var(--auth-primary-hover, #{$teal-hover-default});
 $teal-light: #5cb88e;
 $dark: #1a1a1a;
 $gray-text: #637381;
@@ -119,6 +122,18 @@ $error-red: #d82c0d;
   font-weight: 700;
   color: $dark;
   letter-spacing: -0.5px;
+}
+
+// Image-based organisation logo
+.auth-logo--image {
+  margin-bottom: 32px;
+  text-align: center;
+}
+
+.auth-logo-img {
+  max-height: 60px;
+  max-width: 200px;
+  object-fit: contain;
 }
 
 // ========================================
@@ -445,6 +460,46 @@ $error-red: #d82c0d;
     font-size: 0.8125rem;
     margin-top: 6px;
   }
+}
+
+// ========================================
+// POWERED BY NODAL
+// ========================================
+.auth-powered-by {
+  text-align: center;
+  margin-top: 24px;
+  padding-top: 16px;
+  border-top: 1px solid $border-color;
+
+  a {
+    font-size: 0.75rem;
+    color: $gray-text;
+    text-decoration: none;
+
+    &:hover {
+      color: $dark;
+    }
+  }
+}
+
+.auth-powered-logo {
+  font-weight: 600;
+  color: $teal-default;
+}
+
+.auth-powered-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  background: $teal-default;
+  color: white;
+  border-radius: 3px;
+  font-size: 0.625rem;
+  font-weight: 800;
+  margin-right: 1px;
+  vertical-align: middle;
 }
 
 // ========================================

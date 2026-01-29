@@ -12,17 +12,17 @@
       </div>
 
       <div>
-        <h4 class="mb-0">Edit Customer</h4>
+        <h4 class="mb-0"><%= t('bo.customers.edit.title') %></h4>
         <span class="text-muted"><%= @customer.company_name %></span>
       </div>
     </div>
 
     <div class="d-flex gap-2 align-items-center">
       <%= link_to bo_customer_path(params[:org_slug], @customer), class: "btn btn-outline-secondary" do %>
-        Cancel
+        <%= t('bo.common.actions.cancel') %>
       <% end %>
       <button type="submit" form="customer-form" class="btn btn-primary">
-        <i class="fa-solid fa-check"></i> Save Changes
+        <i class="fa-solid fa-check"></i> <%= t('bo.common.actions.save_changes') %>
       </button>
     </div>
   </div>
@@ -33,23 +33,23 @@
     <div class="col-md-8">
       <div class="card mb-3">
         <div class="card-body">
-          <h5 class="card-title mb-4">Contact Information</h5>
+          <h5 class="card-title mb-4"><%= t('bo.customers.form.contact_information') %></h5>
 
           <div class="row g-3">
             <div class="col-md-6">
-              <label class="form-label">Contact Name</label>
-              <%= f.text_field :contact_name, class: "form-control", placeholder: "Enter contact name" %>
+              <label class="form-label"><%= t('bo.customers.form.contact_name') %></label>
+              <%= f.text_field :contact_name, class: "form-control", placeholder: t('bo.customers.form.placeholders.contact_name') %>
             </div>
             <div class="col-md-6">
-              <label class="form-label">Email</label>
-              <%= f.email_field :email, class: "form-control", placeholder: "Enter email address" %>
+              <label class="form-label"><%= t('bo.customers.form.email') %></label>
+              <%= f.email_field :email, class: "form-control", placeholder: t('bo.customers.form.placeholders.email') %>
             </div>
           </div>
 
           <div class="row g-3 mt-1">
             <div class="col-md-6">
-              <label class="form-label">Phone</label>
-              <%= f.text_field :contact_phone, class: "form-control", placeholder: "Enter phone number" %>
+              <label class="form-label"><%= t('bo.customers.form.phone') %></label>
+              <%= f.text_field :contact_phone, class: "form-control", placeholder: t('bo.customers.form.placeholders.phone') %>
             </div>
           </div>
         </div>
@@ -57,13 +57,86 @@
 
       <div class="card">
         <div class="card-body">
-          <h5 class="card-title mb-4">Company Details</h5>
+          <h5 class="card-title mb-4"><%= t('bo.customers.form.company_details') %></h5>
 
           <div class="row g-3">
             <div class="col-md-12">
-              <label class="form-label">Company Name</label>
-              <%= f.text_field :company_name, class: "form-control", placeholder: "Enter company name" %>
+              <label class="form-label"><%= t('bo.customers.form.company_name') %></label>
+              <%= f.text_field :company_name, class: "form-control", placeholder: t('bo.customers.form.placeholders.company_name') %>
             </div>
+          </div>
+
+          <div class="row g-3 mt-1">
+            <div class="col-md-12">
+              <label class="form-label"><%= t('bo.customers.form.taxpayer_id') %></label>
+              <%= f.text_field :taxpayer_id, class: "form-control", placeholder: t('bo.customers.form.taxpayer_id_placeholder') %>
+              <small class="text-muted"><%= t('bo.customers.form.taxpayer_id_hint') %></small>
+            </div>
+
+            <hr class="my-4">
+
+              <h6 class="mb-3"><%= t('bo.customers.form.billing_address') %></h6>
+
+              <%= f.fields_for :billing_address_with_archived do |ba| %>
+                <%= ba.hidden_field :address_type, value: "billing" %>
+
+                <div class="row g-3">
+                  <div class="col-md-8">
+                    <label class="form-label"><%= t('bo.customers.form.address.street') %></label>
+                    <%= ba.text_field :street_name, class: "form-control" %>
+                  </div>
+
+                  <div class="col-md-4">
+                    <label class="form-label"><%= t('bo.customers.form.address.number') %></label>
+                    <%= ba.text_field :street_nr, class: "form-control" %>
+                  </div>
+
+                  <div class="col-md-4">
+                    <label class="form-label"><%= t('bo.customers.form.address.postal_code') %></label>
+                    <%= ba.text_field :postal_code, class: "form-control" %>
+                  </div>
+
+                  <div class="col-md-4">
+                    <label class="form-label"><%= t('bo.customers.form.address.city') %></label>
+                    <%= ba.text_field :city, class: "form-control" %>
+                  </div>
+
+                  <div class="col-md-4">
+                    <label class="form-label"><%= t('bo.customers.form.address.country') %></label>
+                    <%= ba.text_field :country, class: "form-control" %>
+                  </div>
+                </div>
+              <% end %>
+
+            <hr class="my-4">
+
+                <h6 class="mb-3"><%= t('bo.customers.form.shipping_addresses') %></h6>
+
+                  <div data-controller="nested-addresses">
+                    <div data-nested-addresses-target="container">
+                      <%= f.fields_for :shipping_addresses_with_archived do |sa| %>
+                        <%= render "shipping_address_fields", f: sa %>
+                      <% end %>
+                    </div>
+
+                    <template data-nested-addresses-target="template">
+                      <%= f.fields_for(
+                        :shipping_addresses_with_archived,
+                        Address.new(address_type: "shipping", active: true), 
+                        child_index: "NEW_RECORD"
+                      ) do |sa| %>
+                        <%= render "shipping_address_fields", f: sa %>
+                      <% end %>
+                    </template>
+
+                    <button
+                      type="button"
+                      class="btn btn-sm btn-outline-primary mt-2"
+                      data-action="nested-addresses#add"
+                    >
+                      <i class="fa-solid fa-plus"></i> <%= t('bo.customers.form.add_shipping_address') %>
+                    </button>
+                  </div>
           </div>
         </div>
       </div>
@@ -72,32 +145,27 @@
     <div class="col-md-4">
       <div class="card mb-3">
         <div class="card-body">
-          <h5 class="card-title mb-4">Account Status</h5>
+          <h5 class="card-title mb-4"><%= t('bo.customers.form.account_status') %></h5>
 
           <div class="form-check form-switch">
             <%= f.check_box :active, class: "form-check-input", role: "switch", id: "activeSwitch" %>
-            <label class="form-check-label" for="activeSwitch">Active Customer</label>
+            <label class="form-check-label" for="activeSwitch"><%= t('bo.customers.form.active_customer') %></label>
           </div>
-          <small class="text-muted">Inactive customers cannot place orders</small>
+          <small class="text-muted"><%= t('bo.customers.form.inactive_hint') %></small>
         </div>
       </div>
 
       <div class="card">
         <div class="card-body">
-          <h5 class="card-title mb-4">Account Info</h5>
+          <h5 class="card-title mb-4"><%= t('bo.customers.form.account_info') %></h5>
 
           <div class="border-bottom pb-3 mb-3">
-            <small class="text-muted d-block">Client ID</small>
-            <span>C<%= @customer.id.to_s.rjust(3, '0') %></span>
-          </div>
-
-          <div class="border-bottom pb-3 mb-3">
-            <small class="text-muted d-block">Member Since</small>
+            <small class="text-muted d-block"><%= t('bo.customers.show.member_since') %></small>
             <span><%= @customer.created_at.strftime("%-m/%-d/%Y") %></span>
           </div>
 
           <div>
-            <small class="text-muted d-block">Last Updated</small>
+            <small class="text-muted d-block"><%= t('bo.customers.form.last_updated') %></small>
             <span><%= @customer.updated_at.strftime("%-m/%-d/%Y") %></span>
           </div>
         </div>

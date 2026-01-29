@@ -4,13 +4,13 @@
 <div class="bo-page-header">
   <div class="d-flex justify-content-between align-items-start">
     <div>
-      <h1>Team</h1>
-      <p>Manage your organisation's team members</p>
+      <h1><%= t('bo.team_members.index.title') %></h1>
+      <p><%= t('bo.team_members.index.subtitle') %></p>
     </div>
     <% if policy(OrgMember).new? %>
       <div class="bo-page-actions">
         <%= link_to new_bo_team_member_path, class: "btn btn-primary" do %>
-          <i class="fa-solid fa-user-plus"></i> Invite Member
+          <i class="fa-solid fa-user-plus"></i> <%= t('bo.team_members.index.invite_member') %>
         <% end %>
       </div>
     <% end %>
@@ -23,11 +23,11 @@
     <table class="table table-hover mb-0">
       <thead class="table-light">
         <tr>
-          <th>Member</th>
-          <th>Role</th>
-          <th>Status</th>
-          <th>Joined</th>
-          <th class="text-end">Actions</th>
+          <th><%= t('bo.team_members.index.table.member') %></th>
+          <th><%= t('bo.team_members.index.table.role') %></th>
+          <th><%= t('bo.team_members.index.table.status') %></th>
+          <th><%= t('bo.team_members.index.table.joined') %></th>
+          <th class="text-end"><%= t('bo.team_members.index.table.actions') %></th>
         </tr>
       </thead>
       <tbody>
@@ -50,25 +50,25 @@
             </td>
             <td>
               <span class="badge <%= org_member.role == 'owner' ? 'bg-danger' : org_member.role == 'admin' ? 'bg-warning text-dark' : 'bg-secondary' %>">
-                <%= org_member.role.capitalize %>
+                <%= t("bo.team_members.roles.#{org_member.role}") %>
               </span>
             </td>
             <td>
               <% if org_member.pending_invitation? %>
                 <span class="badge rounded-pill bg-info-subtle text-info">
-                  <i class="fa-solid fa-clock"></i> Pending
+                  <i class="fa-solid fa-clock"></i> <%= t('bo.team_members.index.pending') %>
                 </span>
               <% elsif org_member.active? %>
-                <span class="badge rounded-pill bg-success-subtle text-success">Active</span>
+                <span class="badge rounded-pill bg-success-subtle text-success"><%= t('bo.common.statuses.active') %></span>
               <% else %>
-                <span class="badge rounded-pill bg-secondary-subtle text-secondary">Inactive</span>
+                <span class="badge rounded-pill bg-secondary-subtle text-secondary"><%= t('bo.common.statuses.inactive') %></span>
               <% end %>
             </td>
             <td>
               <% if org_member.joined_at.present? %>
                 <%= org_member.joined_at.strftime("%-m/%-d/%Y") %>
               <% elsif org_member.invitation_sent_at.present? %>
-                <small class="text-muted">Invited <%= time_ago_in_words(org_member.invitation_sent_at) %> ago</small>
+                <small class="text-muted"><%= t('bo.team_members.index.invited_ago', time: time_ago_in_words(org_member.invitation_sent_at)) %></small>
               <% else %>
                 -
               <% end %>
@@ -77,31 +77,31 @@
               <% is_self = org_member.member_id == current_member.id %>
 
               <% if org_member.pending_invitation? && policy(org_member).resend_invitation? %>
-                <%= button_to resend_invitation_bo_team_member_path(params[:org_slug], org_member), method: :post, form: { class: "d-inline" }, class: "btn btn-sm btn-link text-primary", title: "Resend invitation" do %>
+                <%= button_to resend_invitation_bo_team_member_path(params[:org_slug], org_member), method: :post, form: { class: "d-inline" }, class: "btn btn-sm btn-link text-primary", title: t('bo.team_members.index.resend_invitation') do %>
                   <i class="fa-solid fa-paper-plane"></i>
                 <% end %>
               <% end %>
 
               <% if !org_member.pending_invitation? && policy(org_member).toggle_active? %>
-                <%= button_to toggle_active_bo_team_member_path(params[:org_slug], org_member), method: :patch, form: { class: "d-inline" }, class: "btn btn-sm btn-link text-muted", title: org_member.active? ? "Deactivate" : "Activate" do %>
+                <%= button_to toggle_active_bo_team_member_path(params[:org_slug], org_member), method: :patch, form: { class: "d-inline" }, class: "btn btn-sm btn-link text-muted", title: org_member.active? ? t('bo.common.actions.deactivate') : t('bo.common.actions.activate') do %>
                   <i class="fa-solid fa-<%= org_member.active? ? 'user-slash' : 'user-check' %>"></i>
                 <% end %>
               <% end %>
 
               <% if policy(org_member).edit? %>
-                <%= link_to edit_bo_team_member_path(params[:org_slug], org_member), class: "btn btn-sm btn-link text-muted", title: "Edit role" do %>
+                <%= link_to edit_bo_team_member_path(params[:org_slug], org_member), class: "btn btn-sm btn-link text-muted", title: t('bo.team_members.index.edit_role') do %>
                   <i class="fa-solid fa-pen-to-square"></i>
                 <% end %>
               <% end %>
 
               <% if policy(org_member).destroy? %>
-                <%= button_to bo_team_member_path(params[:org_slug], org_member), method: :delete, form: { class: "d-inline" }, class: "btn btn-sm btn-link text-danger", title: "Remove from team", data: { turbo_confirm: "Are you sure you want to remove #{org_member.display_name} from the team?" } do %>
+                <%= button_to bo_team_member_path(params[:org_slug], org_member), method: :delete, form: { class: "d-inline" }, class: "btn btn-sm btn-link text-danger", title: t('bo.team_members.index.remove_from_team'), data: { turbo_confirm: t('bo.common.confirm.remove_member', name: org_member.display_name) } do %>
                   <i class="fa-solid fa-trash"></i>
                 <% end %>
               <% end %>
 
               <% if is_self %>
-                <span class="badge bg-light text-muted ms-1">You</span>
+                <span class="badge bg-light text-muted ms-1"><%= t('bo.team_members.index.you') %></span>
               <% end %>
             </td>
           </tr>

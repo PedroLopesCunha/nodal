@@ -1,0 +1,227 @@
+en:
+  storefront:
+    # Member browse mode (staff previewing storefront)
+    member_browse:
+      preview_banner: "You are previewing the storefront as a staff member."
+      return_to_dashboard: "Return to Dashboard"
+      staff_badge: "Staff"
+      cart_not_available: "Cart is only available for customers."
+
+    # Common translations
+    common:
+      back: "Back"
+      continue_shopping: "Continue Shopping"
+      browse_products: "Browse Products"
+      loading: "Loading..."
+      items:
+        one: "%{count} item"
+        other: "%{count} items"
+
+    # Customer navbar
+    navbar:
+      products: "Products"
+      orders: "Orders"
+      contact: "Contact"
+      cart: "Cart"
+      sign_out: "Sign out"
+      order_discounts_available: "Order discounts available!"
+
+    # Free shipping
+    free_shipping:
+      banner: "Free shipping on orders over %{amount}"
+
+    # Footer
+    footer:
+      contact_us: "Contact Us"
+
+    # Contact page
+    contact:
+      title: "Contact Us"
+      get_in_touch: "Get in Touch"
+      email: "Email"
+      phone: "Phone"
+      whatsapp: "WhatsApp"
+      address: "Our Location"
+      business_hours: "Business Hours"
+      no_contact_info: "Contact information is not available at this time."
+
+    # Products section
+    products:
+      index:
+        title: "Product Catalog"
+        subtitle: "Browse our products"
+        search: "Search"
+        search_placeholder: "Search products..."
+        categories: "Categories"
+        all_products: "All Products"
+        clear_filters: "Clear filters"
+        filters:
+          active: "Active filters"
+        no_products: "No products found"
+        no_products_hint: "Try adjusting your search or filters."
+        empty_catalog: "No products are available at this time."
+        sale_badge: "SALE"
+        min_order: "Min. order"
+      show:
+        back_to_products: "Back to products"
+        zoom: "Zoom"
+        available_discounts: "Available Discounts"
+        product_discount: "Product Discount"
+        customer_tier_discount: "Customer Tier Discount"
+        your_special_price: "Your Special Price"
+        min_quantity_met: "Min. quantity met"
+        buy_to_unlock: "Buy %{quantity}+ units to unlock this discount"
+        you_save: "You Save: %{amount} per unit"
+        valid_until: "Valid until %{date}"
+        min_order: "Min. order"
+        category: "Category"
+        availability: "Availability"
+        in_stock: "In Stock"
+        out_of_stock: "Out of Stock"
+        add_to_cart: "Add to cart"
+        estimated_total: "Estimated total:"
+        out_of_stock_message: "This product is currently out of stock"
+        per_unit: "/ unit"
+        quantity: "Quantity"
+        unit_price: "Unit Price"
+        your_price: "Your Price"
+        discount: "discount"
+        stackable: "Stackable"
+        select_options: "Select Options"
+        select_option: "Select %{attribute}..."
+        from_price: "From %{price}"
+
+    # Cart section
+    cart:
+      item_added: "Item added to cart"
+    carts:
+      show:
+        title: "Your Cart"
+        empty_cart: "Your cart is empty"
+        empty_cart_hint: "Browse our products and add items to your cart."
+        order_discounts_available: "Order Discounts Available!"
+        order_discounts_hint: "Save more when your order reaches these thresholds:"
+        table:
+          product: "Product"
+          quantity: "Quantity"
+          price: "Price"
+          total: "Total"
+          actions: "Actions"
+        continue_shopping: "Continue Shopping"
+        clear_cart: "Clear Cart"
+        confirm_remove_item: "Remove this item?"
+        confirm_clear_cart: "Are you sure you want to clear your cart?"
+        order_summary: "Order Summary"
+        subtotal: "Subtotal"
+        subtotal_items: "Subtotal (%{count} items)"
+        order_discount: "Order Discount"
+        available_discounts: "Available Order Discounts"
+        spend_more_to_unlock: "Spend %{amount} more to unlock"
+        discount_applied: "Applied to your order!"
+        proceed_to_checkout: "Proceed to Checkout"
+        remove: "Remove"
+        sku: "SKU"
+        min_order: "Min"
+        free_shipping_applied: "Free shipping applied!"
+        free_shipping_progress: "Spend %{amount} more for free shipping"
+
+    # Checkout section
+    checkouts:
+      show:
+        title: "Checkout"
+        subtitle: "Review your order and choose delivery method"
+        order_items: "Order Items"
+        delivery_method:
+          title: "Delivery Method"
+          delivery: "Delivery"
+          delivery_hint: "We'll deliver to your address"
+          pickup: "Pickup"
+          pickup_hint: "Pick up your order yourself"
+          free: "Free"
+        delivery_date:
+          title: "Delivery Date"
+          hint: "Select when you'd like to receive your order"
+        shipping_address: "Shipping Address"
+        billing_address: "Billing Address"
+        select_address: "Select or add address"
+        add_new_address: "+ Add new address"
+        form:
+          street_address: "Street Address"
+          street_address_placeholder: "Enter street address"
+          postal_code: "Postal Code"
+          postal_code_placeholder: "Enter postal code"
+          city: "City"
+          city_placeholder: "Enter city"
+          country: "Country"
+          country_placeholder: "Enter country"
+        same_as_shipping: "Same as shipping address"
+        order_notes:
+          title: "Order Notes"
+          optional: "(optional)"
+          placeholder: "Any special instructions for your order..."
+        summary:
+          subtotal: "Subtotal"
+          tax: "Tax"
+          shipping: "Shipping"
+          discount: "Discount"
+          total: "Total"
+        place_order: "Place Order"
+        terms_agreement: "By placing your order, you agree to our terms and conditions."
+        table:
+          product: "Product"
+          quantity: "Qty"
+          price: "Price"
+          total: "Total"
+
+    # Orders section
+    orders:
+      index:
+        title: "Order History"
+        table:
+          order_number: "Order Number"
+          date: "Date"
+          items: "Items"
+          status: "Status"
+          total: "Total"
+          actions: "Actions"
+        reorder: "Reorder"
+        view: "View"
+        no_orders: "No orders yet"
+        no_orders_hint: "Once you place an order, it will appear here."
+      show:
+        back_to_orders: "Back to Orders"
+        order_number: "Order #%{number}"
+        placed_on: "Placed on %{date}"
+        draft_order: "Draft order"
+        order_notes: "Order Notes"
+        payment_status: "Payment Status"
+        delivery_method: "Delivery Method"
+        expected_delivery: "Expected Delivery"
+        continue_shopping: "Continue Shopping"
+        order_details: "Order Details"
+        order_items: "Order Items"
+        table:
+          product: "Product"
+          quantity: "Qty"
+          unit_price: "Unit Price"
+          discount: "Discount"
+          total: "Total"
+        summary:
+          subtotal: "Subtotal"
+          tax: "Tax"
+          shipping: "Shipping"
+          discount: "Discount"
+          total: "Total"
+        shipping_address: "Shipping Address"
+        billing_address: "Billing Address"
+        delivery: "Delivery"
+        pickup: "Pickup"
+
+    # Flash messages
+    flash:
+      cart_updated: "Cart updated successfully"
+      item_added: "Item added to cart"
+      item_removed: "Item removed from cart"
+      cart_cleared: "Cart cleared"
+      order_placed: "Order placed successfully!"
+      order_error: "There was an error placing your order"

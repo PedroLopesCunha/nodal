@@ -248,3 +248,38 @@ pt:
     pt: "Português"
     es: "Español"
     switch: "Idioma"
+
+  # Auth Pages
+  auth:
+    sign_in:
+      welcome_back: "Bem-vindo de volta"
+      subtitle: "Inicia sessão na tua conta para continuar"
+      email: "Email"
+      email_placeholder: "Introduz o teu email"
+      password: "Palavra-passe"
+      password_placeholder: "Introduz a tua palavra-passe"
+      forgot_password: "Esqueceste a palavra-passe?"
+      remember_me: "Lembrar-me durante 30 dias"
+      submit: "Entrar"
+      powered_by: "powered by"
+    forgot_password:
+      title: "Esqueceste a tua palavra-passe?"
+      subtitle: "Introduz o teu email e enviamos-te instruções para redefinir"
+      email: "Email"
+      email_placeholder: "Introduz o teu email"
+      submit: "Enviar instruções"
+      or: "ou"
+      remember_password: "Lembras-te da tua palavra-passe?"
+      sign_in: "Entrar"
+    reset_password:
+      title: "Altera a tua palavra-passe"
+      subtitle: "Introduz a tua nova palavra-passe abaixo"
+      new_password: "Nova palavra-passe"
+      new_password_placeholder: "Introduz a tua nova palavra-passe"
+      password_hint: "Mínimo de %{count} caracteres"
+      confirm_password: "Confirma a tua nova palavra-passe"
+      confirm_password_placeholder: "Confirma a tua nova palavra-passe"
+      submit: "Alterar palavra-passe"
+      or: "ou"
+      remember_password: "Lembras-te da tua palavra-passe?"
+      sign_in: "Entrar"
