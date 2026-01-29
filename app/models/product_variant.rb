@@ -46,7 +46,9 @@ class ProductVariant < ApplicationRecord
   end
 
   def effective_photo
-    photo.attached? ? photo : product.photo
+    return photo if photo.attached?
+    return product.photo if product.photo_attached?
+    nil
   end
 
   private

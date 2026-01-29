@@ -84,7 +84,8 @@
                data-variant-selector-variants-value="<%= variants_json.to_json %>"
                data-variant-selector-currency-symbol-value="<%= current_organisation.currency_symbol %>"
                data-variant-selector-default-price-cents-value="<%= @default_variant&.unit_price_cents || @product.unit_price %>"
-               data-variant-selector-min-quantity-value="<%= @product.min_quantity || 1 %>">
+               data-variant-selector-min-quantity-value="<%= @product.min_quantity || 1 %>"
+               data-variant-selector-default-sku-value="<%= @product.sku %>">
         <% end %>
 
         <!-- Price -->
@@ -172,9 +173,7 @@
         <!-- Additional Price Info -->
         <div class="mb-4 text-muted">
           <% display_sku = @product.variable? ? (@default_variant&.sku || @product.sku) : @product.sku %>
-          <% if display_sku.present? %>
-            <div class="sku-container"><i class="fa-solid fa-barcode me-2"></i>SKU: <span data-variant-selector-target="sku"><%= display_sku %></span></div>
-          <% end %>
+          <div class="sku-container <%= 'd-none' unless display_sku.present? %>"><i class="fa-solid fa-barcode me-2"></i>SKU: <span data-variant-selector-target="sku"><%= display_sku || '-' %></span></div>
         </div>
 
         <!-- Info Grid -->
