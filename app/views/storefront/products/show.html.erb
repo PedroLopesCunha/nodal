@@ -2,7 +2,7 @@
   <i class="fa-solid fa-arrow-left me-2"></i><%= t('storefront.products.show.back_to_products') %>
 <% end %>
 
-<div class="row g-4">
+<div class="row g-4" data-controller="image-gallery">
   <!-- Left Column - Product Image -->
   <div class="col-lg-6">
     <div class="card border-0 shadow-sm position-relative" style="background-color: #f8f9fa; border-radius: 12px; overflow: hidden;">
@@ -15,27 +15,33 @@
 
       <!-- Main Image -->
       <div class="d-flex align-items-center justify-content-center" style="min-height: 400px; padding: 40px;">
-        <% if @product.photo.attached? %>
-          <%= image_tag @product.photo, class: "img-fluid", style: "max-height: 350px; object-fit: contain;" %>
+        <% if @product.photo_attached? %>
+          <%= image_tag @product.photo, class: "img-fluid", style: "max-height: 350px; object-fit: contain;", data: { image_gallery_target: "mainImage" } %>
         <% else %>
           <i class="fa-solid fa-image fa-5x text-muted"></i>
         <% end %>
       </div>
 
       <!-- Zoom Button -->
-      <% if @product.photo.attached? %>
+      <% if @product.photo_attached? %>
         <button class="btn btn-dark btn-sm position-absolute" style="bottom: 16px; right: 16px; border-radius: 20px; padding: 6px 16px;" data-bs-toggle="modal" data-bs-target="#imageModal">
           <i class="fa-solid fa-magnifying-glass-plus me-1"></i><%= t('storefront.products.show.zoom') %>
         </button>
       <% end %>
     </div>
 
-    <!-- Thumbnail (if photo exists) -->
-    <% if @product.photo.attached? %>
-      <div class="d-flex justify-content-center mt-3">
-        <div class="border rounded p-1" style="width: 60px; height: 60px; cursor: pointer;">
-          <%= image_tag @product.photo, class: "img-fluid h-100 w-100", style: "object-fit: cover;" %>
-        </div>
+    <!-- Thumbnails (if photos exist) -->
+    <% if @product.photo_attached? %>
+      <div class="d-flex justify-content-center gap-2 mt-3 flex-wrap">
+        <% @product.photos.each do |photo| %>
+          <div class="border rounded p-1"
+               style="width: 60px; height: 60px; cursor: pointer;"
+               data-image-gallery-target="thumbnail"
+               data-image-url="<%= url_for(photo) %>"
+               data-action="click->image-gallery#select">
+            <%= image_tag photo, class: "img-fluid h-100 w-100", style: "object-fit: cover; border-radius: 4px;" %>
+          </div>
+        <% end %>
       </div>
     <% end %>
   </div>
@@ -294,7 +300,7 @@
 </div>
 
 <!-- Image Zoom Modal -->
-<% if @product.photo.attached? %>
+<% if @product.photo_attached? %>
   <div class="modal fade" id="imageModal" tabindex="-1" aria-labelledby="imageModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-fullscreen">
       <div class="modal-content bg-dark">
@@ -318,7 +324,7 @@
         <div class="modal-body overflow-hidden d-flex align-items-center justify-content-center p-0"
              data-controller="image-zoom"
              data-action="wheel->image-zoom#wheel mousedown->image-zoom#mousedown mousemove->image-zoom#mousemove mouseup->image-zoom#mouseup mouseleave->image-zoom#mouseleave dblclick->image-zoom#dblclick touchstart->image-zoom#touchstart touchmove->image-zoom#touchmove touchend->image-zoom#touchend">
-          <%= image_tag @product.photo, style: "max-height: 90vh; cursor: zoom-in;", data: { image_zoom_target: "image" } %>
+          <%= image_tag @product.photo, id: "zoomModalImage", style: "max-height: 90vh; cursor: zoom-in;", data: { image_zoom_target: "image" } %>
         </div>
         <div class="modal-footer border-0 bg-dark justify-content-center py-2">
           <small class="text-white-50">Scroll to zoom • Double-click to toggle • Drag to pan</small>

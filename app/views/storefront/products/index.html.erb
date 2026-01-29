@@ -47,7 +47,7 @@
             <%= link_to product_path(org_slug: params[:org_slug], id: product, categories: params[:categories], queries: params[:queries]), class: "text-decoration-none" do %>
               <div class="card h-100 product-card">
                 <% discount_info = @product_discounts[product.id] %>
-                <% if product.photo.attached? %>
+                <% if product.photo_attached? %>
                   <div class="card-img-top bg-light d-flex align-items-center justify-content-center" style="height: 200px;">
                     <%= image_tag product.photo, style: "max-height: 200px; max-width: 100%; object-fit: contain;" %>
                   </div>

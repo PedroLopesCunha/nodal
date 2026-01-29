@@ -107,12 +107,12 @@
 
       <div class="card">
         <div class="card-body">
-          <h5 class="card-title mb-4"><%= t('bo.products.form.product_image') %></h5>
+          <h5 class="card-title mb-4"><%= t('bo.products.form.product_images') %></h5>
 
           <div>
-            <label class="form-label"><%= t('bo.products.form.upload_image') %></label>
-            <%= f.file_field :photo, class: "form-control", accept: "image/*" %>
-            <small class="text-muted"><%= t('bo.products.form.image_hint') %></small>
+            <label class="form-label"><%= t('bo.products.form.upload_images') %></label>
+            <%= f.file_field :photos, class: "form-control", accept: "image/*", multiple: true %>
+            <small class="text-muted"><%= t('bo.products.form.images_hint') %></small>
           </div>
         </div>
       </div>

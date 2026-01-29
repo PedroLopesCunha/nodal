@@ -22,7 +22,17 @@ class Product < ApplicationRecord
   has_many :product_available_values, dependent: :destroy
   has_many :available_attribute_values, through: :product_available_values, source: :product_attribute_value
 
-  has_one_attached :photo
+  has_many_attached :photos
+
+  # Backward compatibility: returns first photo
+  def photo
+    photos.first
+  end
+
+  # Check if any photos are attached
+  def photo_attached?
+    photos.attached? && photos.any?
+  end
 
   validates :slug, uniqueness: true
   validates :name, presence: true
