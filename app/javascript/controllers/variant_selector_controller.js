@@ -6,7 +6,8 @@ export default class extends Controller {
     variants: Array,
     currencySymbol: String,
     defaultPriceCents: Number,
-    minQuantity: Number
+    minQuantity: Number,
+    defaultSku: String
   }
 
   connect() {
@@ -86,10 +87,11 @@ export default class extends Controller {
       this.originalPriceTarget.classList.add("d-none")
     }
 
-    // Update SKU
+    // Update SKU (fall back to parent product SKU if variant has none)
     if (this.hasSkuTarget) {
-      if (variant.sku) {
-        this.skuTarget.textContent = variant.sku
+      const effectiveSku = variant.sku || this.defaultSkuValue
+      if (effectiveSku) {
+        this.skuTarget.textContent = effectiveSku
         this.skuTarget.closest(".sku-container")?.classList.remove("d-none")
       } else {
         this.skuTarget.textContent = "-"

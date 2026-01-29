@@ -84,7 +84,8 @@
                data-variant-selector-variants-value="<%= variants_json.to_json %>"
                data-variant-selector-currency-symbol-value="<%= current_organisation.currency_symbol %>"
                data-variant-selector-default-price-cents-value="<%= @default_variant&.unit_price_cents || @product.unit_price %>"
-               data-variant-selector-min-quantity-value="<%= @product.min_quantity || 1 %>">
+               data-variant-selector-min-quantity-value="<%= @product.min_quantity || 1 %>"
+               data-variant-selector-default-sku-value="<%= @product.sku %>">
         <% end %>
 
         <!-- Price -->
