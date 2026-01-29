@@ -40,8 +40,8 @@
                 <tr>
                   <td>
                     <div class="d-flex align-items-center">
-                      <% if item.product.photo.attached? %>
-                        <%= image_tag item.product.photo, style: "width: 50px; height: 50px; object-fit: cover; border-radius: 6px;", class: "me-3" %>
+                      <% if item.effective_photo.present? %>
+                        <%= image_tag item.effective_photo, style: "width: 50px; height: 50px; object-fit: cover; border-radius: 6px;", class: "me-3" %>
                       <% else %>
                         <div class="me-3 bg-light d-flex align-items-center justify-content-center" style="width: 50px; height: 50px; border-radius: 6px;">
                           <i class="fa-solid fa-image text-muted"></i>
@@ -49,6 +49,9 @@
                       <% end %>
                       <div>
                         <div class="fw-medium"><%= item.product.name %></div>
+                        <% if item.product_variant.present? && item.product.variable? %>
+                          <small class="text-primary"><%= item.product_variant.option_values_string %></small><br>
+                        <% end %>
                         <small class="text-muted"><%= item.product.category&.name %></small>
                       </div>
                     </div>

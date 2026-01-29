@@ -98,8 +98,8 @@
                 <span class="badge bg-danger fs-6 ms-1"><%= t('storefront.products.index.sale_badge') %></span>
               <% end %>
             </div>
-          <% elsif @product.variable? && @product.price_range&.dig(:range) %>
-            <span class="text-primary" data-variant-selector-target="mainPrice" style="font-size: 2.5rem; font-weight: 700;"><%= @product.display_price %></span>
+          <% elsif @product.variable? %>
+            <span class="text-primary" data-variant-selector-target="mainPrice" style="font-size: 2.5rem; font-weight: 700;"><%= @default_variant&.price ? humanized_money_with_symbol(@default_variant.price) : @product.display_price %></span>
           <% else %>
             <span class="text-primary" style="font-size: 2.5rem; font-weight: 700;"><%= humanized_money_with_symbol(@product.price) %></span>
           <% end %>
@@ -165,8 +165,9 @@
 
         <!-- Additional Price Info -->
         <div class="mb-4 text-muted">
-          <% if @product.sku.present? %>
-            <div><i class="fa-solid fa-barcode me-2"></i>SKU: <%= @product.sku %></div>
+          <% display_sku = @product.variable? ? (@default_variant&.sku || @product.sku) : @product.sku %>
+          <% if display_sku.present? %>
+            <div class="sku-container"><i class="fa-solid fa-barcode me-2"></i>SKU: <span data-variant-selector-target="sku"><%= display_sku %></span></div>
           <% end %>
         </div>
 
