@@ -27,7 +27,7 @@ class OrderItem < ApplicationRecord
   end
 
   def effective_photo
-    product_variant&.effective_photo || product&.photo
+    product_variant&.effective_photo || (product&.photo_attached? ? product.photo : nil)
   end
 
   private
