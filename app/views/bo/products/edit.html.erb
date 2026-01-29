@@ -8,7 +8,7 @@
       <% end %>
 
       <div class="rounded bg-primary d-flex align-items-center justify-content-center text-white" style="width: 60px; height: 60px;">
-        <% if @product.photo.attached? %>
+        <% if @product.photo_attached? %>
           <%= image_tag @product.photo, style: "width: 60px; height: 60px; object-fit: cover; border-radius: 4px;" %>
         <% else %>
           <i class="fa-solid fa-box fa-lg"></i>
@@ -111,21 +111,31 @@
 
       <div class="card">
         <div class="card-body">
-          <h5 class="card-title mb-4"><%= t('bo.products.form.product_image') %></h5>
+          <h5 class="card-title mb-4"><%= t('bo.products.form.product_images') %></h5>
 
-          <% if @product.photo.attached? %>
+          <% if @product.photos.attached? && @product.photos.any? %>
             <div class="mb-3">
-              <label class="form-label"><%= t('bo.products.form.current_image') %></label>
-              <div class="border rounded p-2 d-inline-block">
-                <%= image_tag @product.photo, style: "max-width: 200px; max-height: 200px; object-fit: cover;" %>
+              <label class="form-label"><%= t('bo.products.form.current_images') %></label>
+              <div class="d-flex flex-wrap gap-2">
+                <% @product.photos.each do |photo| %>
+                  <div class="position-relative border rounded p-1" style="width: 120px;">
+                    <%= image_tag photo, style: "width: 100%; height: 100px; object-fit: cover; border-radius: 4px;" %>
+                    <%= link_to delete_photo_bo_product_path(params[:org_slug], @product, photo_id: photo.id),
+                        data: { turbo_method: :delete, turbo_confirm: t('bo.common.confirm.delete_image') },
+                        class: "position-absolute top-0 end-0 btn btn-danger btn-sm rounded-circle",
+                        style: "width: 24px; height: 24px; padding: 0; line-height: 24px; transform: translate(50%, -50%);" do %>
+                      <i class="fa-solid fa-times" style="font-size: 10px;"></i>
+                    <% end %>
+                  </div>
+                <% end %>
               </div>
             </div>
           <% end %>
 
           <div>
-            <label class="form-label"><%= t('bo.products.form.upload_new_image') %></label>
-            <%= f.file_field :photo, class: "form-control", accept: "image/*" %>
-            <small class="text-muted"><%= t('bo.products.form.image_hint') %></small>
+            <label class="form-label"><%= t('bo.products.form.add_images') %></label>
+            <%= f.file_field :photos, class: "form-control", accept: "image/*", multiple: true %>
+            <small class="text-muted"><%= t('bo.products.form.images_hint') %></small>
           </div>
         </div>
       </div>

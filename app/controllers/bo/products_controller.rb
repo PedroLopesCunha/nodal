@@ -1,7 +1,7 @@
 require "csv"
 
 class Bo::ProductsController < Bo::BaseController
-  before_action :set_product, only: [:show, :edit, :update, :destroy, :configure_variants, :update_variant_configuration]
+  before_action :set_product, only: [:show, :edit, :update, :destroy, :configure_variants, :update_variant_configuration, :delete_photo]
 
   # Import actions
   def import
@@ -125,6 +125,12 @@ class Bo::ProductsController < Bo::BaseController
     redirect_to bo_products_path(params[:org_slug]), notice: "Product was successfully deleted."
   end
 
+  def delete_photo
+    photo = @product.photos.find(params[:photo_id])
+    photo.purge
+    redirect_to edit_bo_product_path(params[:org_slug], @product), notice: t('bo.flash.image_deleted')
+  end
+
   def configure_variants
     @available_attributes = current_organisation.product_attributes.kept.active.by_position.includes(:product_attribute_values)
   end
@@ -166,7 +172,7 @@ class Bo::ProductsController < Bo::BaseController
   end
 
   def product_params
-    params.require(:product).permit(:name, :slug, :sku, :description, :price, :unit_description, :min_quantity, :min_quantity_type, :available, :category_id, :photo, category_ids: [])
+    params.require(:product).permit(:name, :slug, :sku, :description, :price, :unit_description, :min_quantity, :min_quantity_type, :available, :category_id, category_ids: [], photos: [])
   end
 
   def detect_csv_delimiter(content)

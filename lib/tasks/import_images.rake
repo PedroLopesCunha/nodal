@@ -66,7 +66,7 @@ namespace :import do
       end
 
       # Skip if product already has an image
-      if product.photo.attached?
+      if product.photo_attached?
         puts "SKIP: [#{sku}] #{product.name} - already has image"
         skipped_count += 1
         next
@@ -81,8 +81,8 @@ namespace :import do
         # Download image
         downloaded_image = URI.open(image_url, read_timeout: 30, open_timeout: 30)
 
-        # Attach to product
-        product.photo.attach(
+        # Attach to product (uses photos collection)
+        product.photos.attach(
           io: downloaded_image,
           filename: filename,
           content_type: downloaded_image.content_type
