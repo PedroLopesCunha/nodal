@@ -56,7 +56,7 @@
               <% @variants.each do |variant| %>
                 <tr>
                   <td>
-                    <% if variant.effective_photo&.attached? %>
+                    <% if variant.effective_photo.present? %>
                       <%= image_tag variant.effective_photo.variant(resize_to_limit: [40, 40]), class: "rounded" %>
                     <% else %>
                       <div class="bg-light rounded d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
