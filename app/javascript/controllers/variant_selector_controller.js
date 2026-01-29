@@ -87,9 +87,14 @@ export default class extends Controller {
     }
 
     // Update SKU
-    if (this.hasSkuTarget && variant.sku) {
-      this.skuTarget.textContent = variant.sku
-      this.skuTarget.closest(".sku-container")?.classList.remove("d-none")
+    if (this.hasSkuTarget) {
+      if (variant.sku) {
+        this.skuTarget.textContent = variant.sku
+        this.skuTarget.closest(".sku-container")?.classList.remove("d-none")
+      } else {
+        this.skuTarget.textContent = "-"
+        this.skuTarget.closest(".sku-container")?.classList.add("d-none")
+      }
     }
 
     // Update stock status

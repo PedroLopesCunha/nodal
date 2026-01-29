@@ -172,9 +172,7 @@
         <!-- Additional Price Info -->
         <div class="mb-4 text-muted">
           <% display_sku = @product.variable? ? (@default_variant&.sku || @product.sku) : @product.sku %>
-          <% if display_sku.present? %>
-            <div class="sku-container"><i class="fa-solid fa-barcode me-2"></i>SKU: <span data-variant-selector-target="sku"><%= display_sku %></span></div>
-          <% end %>
+          <div class="sku-container <%= 'd-none' unless display_sku.present? %>"><i class="fa-solid fa-barcode me-2"></i>SKU: <span data-variant-selector-target="sku"><%= display_sku || '-' %></span></div>
         </div>
 
         <!-- Info Grid -->
