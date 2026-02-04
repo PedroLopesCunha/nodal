@@ -12,6 +12,9 @@
     </div>
   </div>
   <div class="d-flex align-items-center gap-2">
+    <%= link_to related_products_bo_product_path(params[:org_slug], @product), class: "btn btn-outline-secondary" do %>
+      <i class="fa-solid fa-link me-1"></i> <%= t('bo.products.show.manage_related') %>
+    <% end %>
     <%= link_to configure_variants_bo_product_path(params[:org_slug], @product), class: "btn btn-outline-secondary" do %>
       <i class="fa-solid fa-cubes me-1"></i> <%= t('bo.products.show.manage_variants') %>
     <% end %>

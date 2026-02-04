@@ -90,6 +90,7 @@ es:
         select_options: "Seleccionar Opciones"
         select_option: "Seleccione %{attribute}..."
         from_price: "Desde %{price}"
+        related_products: "También te puede interesar"
 
     # Sección del carrito
     cart:

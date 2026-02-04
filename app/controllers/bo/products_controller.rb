@@ -1,7 +1,7 @@
 require "csv"
 
 class Bo::ProductsController < Bo::BaseController
-  before_action :set_product, only: [:show, :edit, :update, :destroy, :configure_variants, :update_variant_configuration, :delete_photo]
+  before_action :set_product, only: [:show, :edit, :update, :destroy, :configure_variants, :update_variant_configuration, :delete_photo, :related_products, :update_related_products, :reorder_related_products]
 
   # Import actions
   def import
@@ -162,6 +162,58 @@ class Bo::ProductsController < Bo::BaseController
     @available_attributes = current_organisation.product_attributes.kept.active.by_position.includes(:product_attribute_values)
     flash.now[:alert] = e.message
     render :configure_variants, status: :unprocessable_entity
+  end
+
+  def related_products
+    # Get related product IDs in order
+    related_ids = @product.related_product_associations.order(:position).pluck(:related_product_id)
+
+    # Fetch products and preserve order
+    if related_ids.any?
+      products_by_id = Product.where(id: related_ids).index_by(&:id)
+      @selected_products = related_ids.map { |id| products_by_id[id] }.compact
+    else
+      @selected_products = []
+    end
+
+    @available_products = current_organisation.products
+                                               .where.not(id: [@product.id] + related_ids)
+                                               .where(available: true)
+                                               .order(:name)
+  end
+
+  def update_related_products
+    related_product_ids = params[:related_product_ids]&.reject(&:blank?) || []
+    hide_related_products = params[:hide_related_products] == "1"
+
+    ActiveRecord::Base.transaction do
+      @product.update!(hide_related_products: hide_related_products)
+
+      @product.related_product_associations.destroy_all
+      related_product_ids.each_with_index do |product_id, index|
+        @product.related_product_associations.create!(related_product_id: product_id, position: index + 1)
+      end
+    end
+
+    redirect_to related_products_bo_product_path(params[:org_slug], @product), notice: t("bo.products.related.updated")
+  rescue ActiveRecord::RecordInvalid => e
+    flash[:alert] = e.message
+    redirect_to related_products_bo_product_path(params[:org_slug], @product)
+  end
+
+  def reorder_related_products
+    positions = params[:positions] || []
+
+    ActiveRecord::Base.transaction do
+      positions.each_with_index do |product_id, index|
+        association = @product.related_product_associations.find_by(related_product_id: product_id)
+        association&.update!(position: index + 1)
+      end
+    end
+
+    head :ok
+  rescue ActiveRecord::RecordInvalid
+    head :unprocessable_entity
   end
 
   private

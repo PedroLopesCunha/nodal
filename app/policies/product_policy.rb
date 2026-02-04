@@ -44,6 +44,18 @@ class ProductPolicy < ApplicationPolicy
     belongs_to_organisation?
   end
 
+  def related_products?
+    belongs_to_organisation?
+  end
+
+  def update_related_products?
+    belongs_to_organisation?
+  end
+
+  def reorder_related_products?
+    belongs_to_organisation?
+  end
+
   private
 
   def belongs_to_organisation?

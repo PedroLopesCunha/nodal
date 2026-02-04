@@ -89,6 +89,13 @@ class Storefront::ProductsController < Storefront::BaseController
       for_display: true,
       variant: @default_variant
     )
+
+    # Fetch related products
+    if @product.show_related_products?
+      fetcher = RelatedProductsFetcher.new(product: @product, limit: 4)
+      @related_products = fetcher.fetch
+      @related_product_discounts = build_discounts_for(@related_products)
+    end
   end
 
   private
@@ -121,5 +128,12 @@ class Storefront::ProductsController < Storefront::BaseController
     end
 
     filters
+  end
+
+  def build_discounts_for(products)
+    products.each_with_object({}) do |product, hash|
+      calculator = DiscountCalculator.new(product: product, customer: current_customer, for_display: true)
+      hash[product.id] = calculator.discount_breakdown
+    end
   end
 end

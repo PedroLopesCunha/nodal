@@ -298,6 +298,8 @@
   </div>
 </div>
 
+<%= render 'related_products' if @related_products&.any? %>
+
 <!-- Image Zoom Modal -->
 <% if @product.photo_attached? %>
   <div class="modal fade" id="imageModal" tabindex="-1" aria-labelledby="imageModalLabel" aria-hidden="true">

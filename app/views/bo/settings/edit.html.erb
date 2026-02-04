@@ -203,6 +203,20 @@
         </div>
       </div>
 
+      <div class="card mb-3">
+        <div class="card-body">
+          <h5 class="card-title mb-4"><%= t('bo.settings.edit.storefront_features') %></h5>
+
+          <div class="form-check form-switch">
+            <%= f.check_box :show_related_products, class: "form-check-input", role: "switch" %>
+            <label class="form-check-label" for="organisation_show_related_products">
+              <%= t('bo.settings.edit.show_related_products') %>
+            </label>
+          </div>
+          <small class="text-muted"><%= t('bo.settings.edit.show_related_products_hint') %></small>
+        </div>
+      </div>
+
       <div class="card" data-controller="branding-preview">
         <div class="card-body">
           <h5 class="card-title mb-4"><%= t('bo.settings.edit.branding') %></h5>
