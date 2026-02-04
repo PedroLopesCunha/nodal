@@ -54,6 +54,8 @@ es:
         search_placeholder: "Buscar productos..."
         categories: "Categorías"
         all_products: "Todos los Productos"
+        filters_button: "Filtros"
+        filters_title: "Filtros y Categorías"
         clear_filters: "Limpiar filtros"
         filters:
           active: "Filtros activos"
@@ -113,6 +115,9 @@ es:
         clear_cart: "Vaciar Carrito"
         confirm_remove_item: "¿Eliminar este artículo?"
         confirm_clear_cart: "¿Está seguro de que desea vaciar el carrito?"
+        remove_item: "Eliminar"
+        decrease_quantity: "Disminuir cantidad"
+        increase_quantity: "Aumentar cantidad"
         order_summary: "Resumen del Pedido"
         subtotal: "Subtotal"
         subtotal_items: "Subtotal (%{count} artículos)"

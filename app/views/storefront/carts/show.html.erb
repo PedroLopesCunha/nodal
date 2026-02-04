@@ -49,7 +49,8 @@
 <% else %>
   <div class="row g-4">
     <div class="col-lg-8">
-      <div class="card border-0 shadow-sm" style="border-radius: 12px;">
+      <%# Desktop table view (hidden on mobile) %>
+      <div class="card border-0 shadow-sm d-none d-lg-block" style="border-radius: 12px;">
         <div class="card-body p-0">
           <table class="table table-hover align-middle mb-0">
             <thead class="table-light">
@@ -123,7 +124,88 @@
         </div>
       </div>
 
-      <div class="d-flex justify-content-between mt-3">
+      <%# Mobile card view (hidden on desktop) %>
+      <div class="d-lg-none">
+        <% @order_items.each do |item| %>
+          <div class="card border-0 shadow-sm mb-3 cart-item-card" style="border-radius: 12px;">
+            <div class="card-body">
+              <%# Product info row %>
+              <div class="d-flex align-items-start mb-3">
+                <% photo = item.effective_photo %>
+                <% if photo.present? %>
+                  <%= image_tag photo, class: "me-3 flex-shrink-0", style: "width: 80px; height: 80px; object-fit: cover; border-radius: 8px;" %>
+                <% else %>
+                  <div class="me-3 flex-shrink-0 bg-light d-flex align-items-center justify-content-center" style="width: 80px; height: 80px; border-radius: 8px;">
+                    <i class="fa-solid fa-image text-muted fa-lg"></i>
+                  </div>
+                <% end %>
+                <div class="flex-grow-1 min-width-0">
+                  <h6 class="fw-semibold mb-1 text-truncate"><%= item.product.name %></h6>
+                  <% if item.product_variant && item.product_variant.attribute_values.any? %>
+                    <div class="text-primary small mb-1"><%= item.variant_name %></div>
+                  <% end %>
+                  <div class="text-muted small"><%= item.product.category&.name %></div>
+                </div>
+              </div>
+
+              <%# Price row %>
+              <div class="d-flex justify-content-between align-items-center mb-3 pb-3 border-bottom">
+                <span class="text-muted small"><%= t('storefront.carts.show.table.price') %></span>
+                <div class="text-end">
+                  <% if item.discount_percentage && item.discount_percentage > 0 %>
+                    <span class="text-muted text-decoration-line-through small me-1"><%= humanized_money_with_symbol(item.price) %></span>
+                    <span class="text-success fw-medium"><%= humanized_money_with_symbol(item.price - (item.price * item.discount_percentage)) %></span>
+                    <span class="badge bg-success-subtle text-success small ms-1">-<%= format_discount_percentage(item.discount_percentage) %></span>
+                  <% else %>
+                    <span class="fw-medium"><%= humanized_money_with_symbol(item.price) %></span>
+                  <% end %>
+                </div>
+              </div>
+
+              <%# Quantity and total row %>
+              <div class="d-flex justify-content-between align-items-center">
+                <%# Touch-friendly quantity controls %>
+                <%= form_with model: item, url: order_item_path(org_slug: params[:org_slug], id: item), method: :patch, local: true, class: "d-flex align-items-center", data: { controller: "cart-quantity" } do |f| %>
+                  <div class="input-group cart-quantity-group">
+                    <button type="button" class="btn btn-outline-secondary cart-quantity-btn" data-action="cart-quantity#decrement" aria-label="<%= t('storefront.carts.show.decrease_quantity') %>">
+                      <i class="fa-solid fa-minus"></i>
+                    </button>
+                    <%= f.number_field :quantity,
+                        min: item.product.min_quantity || 1,
+                        class: "form-control text-center cart-quantity-input",
+                        data: { cart_quantity_target: "input", action: "change->cart-quantity#submit" } %>
+                    <button type="button" class="btn btn-outline-secondary cart-quantity-btn" data-action="cart-quantity#increment" aria-label="<%= t('storefront.carts.show.increase_quantity') %>">
+                      <i class="fa-solid fa-plus"></i>
+                    </button>
+                  </div>
+                  <button type="submit" class="btn btn-sm btn-link text-primary ms-2 d-none" data-cart-quantity-target="submit">
+                    <i class="fa-solid fa-check"></i>
+                  </button>
+                <% end %>
+
+                <div class="text-end">
+                  <div class="text-muted small"><%= t('storefront.carts.show.table.total') %></div>
+                  <% if item.discount_percentage && item.discount_percentage > 0 %>
+                    <span class="text-muted text-decoration-line-through small d-block"><%= humanized_money_with_symbol(item.price * item.quantity) %></span>
+                    <span class="text-success fw-bold"><%= humanized_money_with_symbol(item.total_price) %></span>
+                  <% else %>
+                    <span class="fw-bold"><%= humanized_money_with_symbol(item.total_price) %></span>
+                  <% end %>
+                </div>
+              </div>
+
+              <%# Remove button %>
+              <div class="mt-3 pt-3 border-top">
+                <%= button_to order_item_path(org_slug: params[:org_slug], id: item), method: :delete, class: "btn btn-sm btn-outline-danger w-100", data: { turbo_confirm: t('storefront.carts.show.confirm_remove_item') } do %>
+                  <i class="fa-solid fa-trash me-2"></i><%= t('storefront.carts.show.remove_item') %>
+                <% end %>
+              </div>
+            </div>
+          </div>
+        <% end %>
+      </div>
+
+      <div class="d-flex flex-column flex-sm-row justify-content-between gap-2 mt-3">
         <%= link_to products_path(org_slug: params[:org_slug]), class: "btn btn-outline-secondary" do %>
           <i class="fa-solid fa-arrow-left me-2"></i><%= t('storefront.carts.show.continue_shopping') %>
         <% end %>

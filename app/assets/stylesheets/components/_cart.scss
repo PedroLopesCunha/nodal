@@ -1,0 +1,78 @@
+// Cart Component Styles
+// Responsive cart with table (desktop) and cards (mobile)
+
+// Mobile cart item cards
+.cart-item-card {
+  .min-width-0 {
+    min-width: 0; // Allow text truncation in flex children
+  }
+}
+
+// Touch-friendly quantity controls (44px minimum touch target)
+.cart-quantity-group {
+  width: 140px;
+
+  .cart-quantity-btn {
+    width: 44px;
+    height: 44px;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+
+    &:active {
+      transform: scale(0.95);
+    }
+  }
+
+  .cart-quantity-input {
+    height: 44px;
+    font-size: 1rem;
+    font-weight: 500;
+    border-left: 0;
+    border-right: 0;
+
+    // Hide number input spinners
+    &::-webkit-outer-spin-button,
+    &::-webkit-inner-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+
+    &[type="number"] {
+      -moz-appearance: textfield;
+    }
+  }
+}
+
+// Desktop quantity controls (smaller)
+.table .input-group-sm {
+  .form-control {
+    // Hide number input spinners
+    &::-webkit-outer-spin-button,
+    &::-webkit-inner-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+
+    &[type="number"] {
+      -moz-appearance: textfield;
+    }
+  }
+}
+
+// Checkout mobile item cards
+.checkout-item-card {
+  .min-width-0 {
+    min-width: 0;
+  }
+}
+
+// Checkout summary card - sticky only on desktop
+.checkout-summary-card {
+  @media (min-width: 992px) {
+    position: sticky;
+    top: 20px;
+  }
+}
