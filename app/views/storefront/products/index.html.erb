@@ -4,6 +4,19 @@
     <h1 class="mb-1"><%= t('storefront.products.index.title') %></h1>
     <p class="text-muted mb-0"><%= t('storefront.products.index.subtitle', org_name: current_organisation.name) %></p>
   </div>
+
+  <%# Mobile filter button (visible only on mobile) %>
+  <button class="btn btn-outline-primary d-lg-none"
+          type="button"
+          data-bs-toggle="offcanvas"
+          data-bs-target="#categoryFilterOffcanvas"
+          aria-controls="categoryFilterOffcanvas">
+    <i class="fa-solid fa-filter me-2"></i><%= t('storefront.products.index.filters_button') %>
+    <% active_filter_count = Array(params[:categories]).length + Array(params[:queries]).length %>
+    <% if active_filter_count > 0 %>
+      <span class="badge bg-primary ms-1"><%= active_filter_count %></span>
+    <% end %>
+  </button>
 </div>
 
 <%# Breadcrumbs when filtering by category %>
@@ -12,9 +25,54 @@
 <%# Applied filters breadbox %>
 <%= render 'storefront/products/applied_filters', active_filters: @active_filters %>
 
+<%# Mobile offcanvas sidebar %>
+<div class="offcanvas offcanvas-start d-lg-none"
+     tabindex="-1"
+     id="categoryFilterOffcanvas"
+     aria-labelledby="categoryFilterOffcanvasLabel">
+  <div class="offcanvas-header border-bottom">
+    <h5 class="offcanvas-title" id="categoryFilterOffcanvasLabel">
+      <i class="fa-solid fa-filter me-2"></i><%= t('storefront.products.index.filters_title') %>
+    </h5>
+    <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+  </div>
+  <div class="offcanvas-body">
+    <%# Search %>
+    <div class="mb-4">
+      <h6 class="mb-3"><%= t('storefront.products.index.search') %></h6>
+      <%= form_with url: products_path(org_slug: params[:org_slug]), method: :get, local: true do %>
+        <% Array(params[:categories]).each do |cat_id| %>
+          <%= hidden_field_tag 'categories[]', cat_id %>
+        <% end %>
+        <% Array(params[:queries]).each do |q| %>
+          <%= hidden_field_tag 'queries[]', q %>
+        <% end %>
+        <div class="input-group">
+          <%= text_field_tag 'queries[]', nil, class: "form-control", placeholder: t('storefront.products.index.search_placeholder') %>
+          <button type="submit" class="btn btn-outline-secondary">
+            <i class="fa-solid fa-magnifying-glass"></i>
+          </button>
+        </div>
+      <% end %>
+    </div>
+
+    <%# Categories %>
+    <%= render 'storefront/shared/category_sidebar_content', categories: @categories, current_categories: @current_categories %>
+
+    <%# Clear filters button %>
+    <% if Array(params[:categories]).any? || Array(params[:queries]).any? %>
+      <div class="mt-4 pt-3 border-top">
+        <%= link_to products_path(org_slug: params[:org_slug]), class: "btn btn-outline-secondary w-100" do %>
+          <i class="fa-solid fa-times me-2"></i><%= t('storefront.products.index.clear_filters') %>
+        <% end %>
+      </div>
+    <% end %>
+  </div>
+</div>
+
 <div class="row">
-  <%# Sidebar with filters %>
-  <div class="col-lg-3 mb-4">
+  <%# Desktop sidebar with filters (hidden on mobile) %>
+  <div class="col-lg-3 mb-4 d-none d-lg-block">
     <div class="card">
       <div class="card-body">
         <h6 class="card-title mb-3"><%= t('storefront.products.index.search') %></h6>

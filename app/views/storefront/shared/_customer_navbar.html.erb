@@ -17,9 +17,22 @@
         <% end %>
       <% end %>
 
-      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#customerNav">
-        <span class="navbar-toggler-icon"></span>
-      </button>
+      <%# Mobile cart icon + hamburger (visible only on mobile) %>
+      <div class="d-flex align-items-center d-lg-none">
+        <% if current_customer %>
+          <%= link_to cart_path(org_slug: params[:org_slug]), class: "btn btn-outline-primary position-relative me-2 #{'active' if controller_name == 'carts'}" do %>
+            <i class="fa-solid fa-cart-shopping"></i>
+            <% if cart_line_item_count > 0 %>
+              <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill cart-badge">
+                <%= cart_line_item_count %>
+              </span>
+            <% end %>
+          <% end %>
+        <% end %>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#customerNav">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+      </div>
 
       <div class="collapse navbar-collapse" id="customerNav">
         <ul class="navbar-nav me-auto mb-2 mb-lg-0">
@@ -70,8 +83,8 @@
             </ul>
           </div>
           <% if current_customer %>
-            <!-- Cart Icon -->
-            <%= link_to cart_path(org_slug: params[:org_slug]), class: "btn btn-outline-primary position-relative #{'active' if controller_name == 'carts'}" do %>
+            <!-- Cart Icon (desktop only, mobile cart is in header) -->
+            <%= link_to cart_path(org_slug: params[:org_slug]), class: "btn btn-outline-primary position-relative d-none d-lg-inline-flex #{'active' if controller_name == 'carts'}" do %>
               <i class="fa-solid fa-cart-shopping"></i>
               <% if cart_line_item_count > 0 %>
                 <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill cart-badge">
@@ -84,7 +97,7 @@
                 </span>
               <% end %>
             <% end %>
-            <span class="text-muted small">
+            <span class="text-muted small d-none d-lg-inline">
               <i class="fa-regular fa-building me-1"></i>
               <%= current_customer.company_name %>
             </span>
