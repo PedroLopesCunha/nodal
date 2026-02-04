@@ -73,9 +73,9 @@
             <!-- Cart Icon -->
             <%= link_to cart_path(org_slug: params[:org_slug]), class: "btn btn-outline-primary position-relative #{'active' if controller_name == 'carts'}" do %>
               <i class="fa-solid fa-cart-shopping"></i>
-              <% if cart_item_count > 0 %>
-                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
-                  <%= cart_item_count %>
+              <% if cart_line_item_count > 0 %>
+                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill cart-badge">
+                  <%= cart_line_item_count %>
                 </span>
               <% end %>
               <% if has_order_discounts? %>

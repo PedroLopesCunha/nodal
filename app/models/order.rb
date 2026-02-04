@@ -45,6 +45,10 @@ class Order < ApplicationRecord
     order_items.sum(:quantity)
   end
 
+  def line_item_count
+    order_items.size
+  end
+
   def place!
     update!(placed_at: Time.current)
   end

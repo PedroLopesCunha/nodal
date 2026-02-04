@@ -124,3 +124,39 @@ a.text-primary {
     color: var(--org-primary, $teal);
   }
 }
+
+// Cart badge uses org secondary color
+.cart-badge {
+  background-color: var(--org-secondary, $dark) !important;
+  color: #ffffff;
+}
+
+// Pagination uses org secondary color
+.pagination {
+  .page-link {
+    color: var(--org-secondary, $dark);
+    border-color: #dee2e6;
+
+    &:hover {
+      color: var(--org-primary-contrast, #ffffff);
+      background-color: var(--org-secondary, $dark);
+      border-color: var(--org-secondary, $dark);
+    }
+
+    &:focus {
+      box-shadow: 0 0 0 0.25rem rgba(var(--org-primary-rgb, 0, 128, 96), 0.25);
+    }
+  }
+
+  .page-item.active .page-link {
+    background-color: var(--org-secondary, $dark);
+    border-color: var(--org-secondary, $dark);
+    color: var(--org-primary-contrast, #ffffff);
+  }
+
+  .page-item.disabled .page-link {
+    color: #6c757d;
+    background-color: #fff;
+    border-color: #dee2e6;
+  }
+}
