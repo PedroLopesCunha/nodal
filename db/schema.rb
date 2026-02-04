@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2026_01_29_174050) do
+ActiveRecord::Schema[7.1].define(version: 2026_02_04_145359) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -321,6 +321,7 @@ ActiveRecord::Schema[7.1].define(version: 2026_01_29_174050) do
     t.string "taxpayer_id"
     t.integer "free_shipping_threshold_cents"
     t.string "free_shipping_threshold_currency", default: "EUR"
+    t.boolean "show_related_products", default: true, null: false
     t.index ["default_locale"], name: "index_organisations_on_default_locale"
     t.index ["slug"], name: "index_organisations_on_slug", unique: true
   end
@@ -440,10 +441,21 @@ ActiveRecord::Schema[7.1].define(version: 2026_01_29_174050) do
     t.string "external_source"
     t.datetime "last_synced_at"
     t.text "sync_error"
+    t.boolean "hide_related_products", default: false, null: false
     t.index ["category_id"], name: "index_products_on_category_id"
     t.index ["organisation_id", "external_id", "external_source"], name: "index_products_on_org_external_id_source", unique: true, where: "(external_id IS NOT NULL)"
     t.index ["organisation_id"], name: "index_products_on_organisation_id"
     t.index ["slug"], name: "index_products_on_slug", unique: true
+  end
+
+  create_table "related_products", force: :cascade do |t|
+    t.bigint "product_id", null: false
+    t.bigint "related_product_id", null: false
+    t.integer "position"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["product_id"], name: "index_related_products_on_product_id"
+    t.index ["related_product_id"], name: "index_related_products_on_related_product_id"
   end
 
   create_table "variant_attribute_values", force: :cascade do |t|
@@ -494,6 +506,8 @@ ActiveRecord::Schema[7.1].define(version: 2026_01_29_174050) do
   add_foreign_key "product_variants", "products"
   add_foreign_key "products", "categories"
   add_foreign_key "products", "organisations"
+  add_foreign_key "related_products", "products"
+  add_foreign_key "related_products", "products", column: "related_product_id", name: "fk_rails_related_product_id"
   add_foreign_key "variant_attribute_values", "product_attribute_values"
   add_foreign_key "variant_attribute_values", "product_variants"
 end

@@ -29,7 +29,7 @@ class Storefront::OrderItemsController < Storefront::BaseController
     authorize @order_item
 
     if @order_item.save
-      redirect_to products_path(org_slug: params[:org_slug]), notice: t('storefront.cart.item_added')
+      redirect_to product_path(org_slug: params[:org_slug], id: @product), notice: t('storefront.cart.item_added')
     else
       redirect_to product_path(org_slug: params[:org_slug], id: @product.id),
                     alert: @order_item.errors.full_messages.join(", ")

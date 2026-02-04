@@ -90,6 +90,7 @@ en:
         select_options: "Select Options"
         select_option: "Select %{attribute}..."
         from_price: "From %{price}"
+        related_products: "You may also like"
 
     # Cart section
     cart:

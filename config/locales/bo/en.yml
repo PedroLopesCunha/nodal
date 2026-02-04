@@ -250,6 +250,7 @@ en:
         min_quantity: "Min. Order Quantity"
         edit_product: "Edit Product"
         manage_variants: "Variants"
+        manage_related: "Related"
         discounts: "Product Discounts"
         no_discounts: "No discounts for this product"
         variants_title: "Product Variants"
@@ -368,6 +369,20 @@ en:
         attributes_assigned: "Attributes"
         values_selected: "Values"
         variants_count: "Variants"
+      related:
+        title: "Related Products"
+        selected_products: "Selected Products"
+        selected_description: "Drag to reorder. These products will appear first on the product page."
+        no_products_selected: "No related products selected yet."
+        available_products: "Available Products"
+        search_placeholder: "Search products..."
+        no_products_available: "No available products to add."
+        settings: "Settings"
+        hide_for_product: "Hide related products for this product"
+        hide_description: "When enabled, no related products will be shown on the product page."
+        auto_fill: "Auto-fill"
+        auto_fill_description: "When fewer than 4 products are selected, the system will automatically show products from the same category."
+        updated: "Related products updated successfully"
 
     # Categories section
     categories:
@@ -838,6 +853,9 @@ en:
         free_shipping_threshold: "Free Shipping Threshold"
         free_shipping_threshold_placeholder: "100.00"
         free_shipping_threshold_hint: "Orders above this amount qualify for free shipping. Leave empty to disable."
+        storefront_features: "Storefront Features"
+        show_related_products: "Show related products"
+        show_related_products_hint: "Display related products on product pages"
         branding: "Branding"
         organisation_logo: "Organisation Logo"
         logo_hint: "Recommended: PNG, JPG, or SVG. Max height 48px in navbar."

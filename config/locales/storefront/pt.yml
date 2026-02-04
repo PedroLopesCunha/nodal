@@ -90,6 +90,7 @@ pt:
         select_options: "Selecionar Opções"
         select_option: "Selecione %{attribute}..."
         from_price: "A partir de %{price}"
+        related_products: "Também pode gostar"
 
     # Secção do carrinho
     cart:

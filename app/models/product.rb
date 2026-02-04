@@ -15,6 +15,12 @@ class Product < ApplicationRecord
   has_many :category_products, dependent: :destroy
   has_many :categories, through: :category_products
 
+  # Related products
+  has_many :related_product_associations, class_name: "RelatedProduct", dependent: :destroy
+  has_many :manual_related_products, through: :related_product_associations, source: :related_product
+  has_many :inverse_related_product_associations, class_name: "RelatedProduct",
+           foreign_key: :related_product_id, dependent: :destroy
+
   # Variants and attributes
   has_many :product_variants, dependent: :destroy
   has_many :product_product_attributes, dependent: :destroy
@@ -48,6 +54,10 @@ class Product < ApplicationRecord
   def active_discount_for(customer)
     return nil unless customer
     customer_product_discounts.active.find_by(customer: customer)
+  end
+
+  def show_related_products?
+    organisation.show_related_products? && !hide_related_products?
   end
 
   def discounted_price_for(discount)

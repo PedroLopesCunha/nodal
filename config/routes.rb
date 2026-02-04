@@ -72,6 +72,9 @@ Rails.application.routes.draw do
           get :configure_variants
           patch :update_variant_configuration
           delete :delete_photo
+          get :related_products
+          patch :update_related_products
+          patch :reorder_related_products
         end
         resources :variants, controller: 'product_variants', except: [:show] do
           collection do
