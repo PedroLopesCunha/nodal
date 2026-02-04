@@ -48,10 +48,13 @@ class Storefront::ProductsController < Storefront::BaseController
     # Combine with OR logic: categories OR search
     if @current_categories.any? || @current_queries.any?
       combined_ids = (category_product_ids + search_product_ids).uniq
-      @products = combined_ids.any? ? base_products.where(id: combined_ids) : base_products.none
+      products = combined_ids.any? ? base_products.where(id: combined_ids) : base_products.none
     else
-      @products = base_products
+      products = base_products
     end
+
+    # Paginate results
+    @pagy, @products = pagy(products.order(:name))
 
     # Build discount info for all products using DiscountCalculator
     # for_display: true shows all available discounts (ignoring min_quantity) for display purposes

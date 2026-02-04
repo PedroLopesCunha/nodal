@@ -83,6 +83,9 @@ gem 'discard'        # Soft delete
 # gem for money handling
 gem 'money-rails', '~> 1.12'
 
+# pagination
+gem 'pagy', '~> 9.0'
+
 # background jobs
 gem 'sidekiq', '~> 7.0'
 gem 'sidekiq-scheduler', '~> 5.0'

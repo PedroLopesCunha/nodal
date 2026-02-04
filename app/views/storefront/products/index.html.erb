@@ -2,7 +2,7 @@
 <div class="d-flex justify-content-between align-items-center mb-4 mt-2">
   <div>
     <h1 class="mb-1"><%= t('storefront.products.index.title') %></h1>
-    <p class="text-muted mb-0"><%= t('storefront.products.index.subtitle') %></p>
+    <p class="text-muted mb-0"><%= t('storefront.products.index.subtitle', org_name: current_organisation.name) %></p>
   </div>
 </div>
 
@@ -41,6 +41,16 @@
   <%# Product grid %>
   <div class="col-lg-9">
     <% if @products.any? %>
+      <%# Product count and pagination info %>
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <small class="text-muted">
+          <%= t('storefront.products.index.showing_products',
+                from: @pagy.from,
+                to: @pagy.to,
+                count: @pagy.count) %>
+        </small>
+      </div>
+
       <div class="row row-cols-1 row-cols-md-2 row-cols-xl-3 g-4">
         <% @products.each do |product| %>
           <div class="col">
@@ -92,6 +102,13 @@
           </div>
         <% end %>
       </div>
+
+      <%# Pagination controls %>
+      <% if @pagy.pages > 1 %>
+        <div class="d-flex justify-content-center mt-4">
+          <%== pagy_bootstrap_nav(@pagy) %>
+        </div>
+      <% end %>
     <% else %>
       <div class="text-center py-5">
         <i class="fa-solid fa-box-open fa-4x text-muted mb-3"></i>

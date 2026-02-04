@@ -49,7 +49,7 @@ pt:
     products:
       index:
         title: "Catálogo de Produtos"
-        subtitle: "Explore os nossos produtos"
+        subtitle: "%{org_name}"
         search: "Pesquisar"
         search_placeholder: "Pesquisar produtos..."
         categories: "Categorias"
@@ -62,6 +62,7 @@ pt:
         empty_catalog: "Não existem produtos disponíveis de momento."
         sale_badge: "PROMOÇÃO"
         min_order: "Encomenda mín."
+        showing_products: "A mostrar %{from}-%{to} de %{count} produtos"
       show:
         back_to_products: "Voltar aos produtos"
         zoom: "Ampliar"
