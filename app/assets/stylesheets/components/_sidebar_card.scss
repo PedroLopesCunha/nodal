@@ -1,0 +1,64 @@
+// Sidebar Card Styles
+// Subtle styling to match product cards
+
+.sidebar-card {
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  border-radius: 12px;
+  background-color: #f8f9fa; // Same as product card image area
+
+  .card-body {
+    padding: 1.25rem;
+  }
+
+  .card-title {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #495057;
+    text-transform: uppercase;
+    letter-spacing: 0.025em;
+  }
+
+}
+
+// Minimal underline search style
+.search-minimal {
+  position: relative;
+  width: 320px;
+
+  .form-control {
+    border: none;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.15);
+    border-radius: 0;
+    padding: 0.5rem 2rem 0.5rem 0;
+    background-color: transparent;
+    font-size: 0.875rem;
+    transition: border-color 0.15s ease;
+
+    &::placeholder {
+      color: #adb5bd;
+    }
+
+    &:focus {
+      outline: none;
+      box-shadow: none;
+      border-color: var(--org-primary, #0d6efd);
+    }
+  }
+
+  .search-minimal-btn {
+    position: absolute;
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    border: none;
+    background: none;
+    color: #6c757d;
+    padding: 0.25rem;
+    cursor: pointer;
+    transition: color 0.15s ease;
+
+    &:hover {
+      color: var(--org-primary, #0d6efd);
+    }
+  }
+}
