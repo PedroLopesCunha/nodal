@@ -8,6 +8,7 @@
       <%= link_to t("navbar.product"), "#" %>
       <%= render "shared/sidebar" %>
     </div>
+    <%= link_to t("navbar.why_it_matters"), "#benefits" %>
     <%= link_to t("navbar.how_it_works"), "#how-it-works" %>
     <%= link_to t("navbar.coming_soon"), "#coming-soon" %>
     <%= link_to t("navbar.pricing"), "#pricing" %>
@@ -26,7 +27,7 @@
         <%= link_to t("language.es"), root_path(locale: :es), class: "language-option #{'active' if I18n.locale == :es}" %>
       </div>
     </div>
-    <%= link_to t("navbar.start_free_trial"), "#", class: "nav-cta" %>
+    <%= link_to t("navbar.our_dna"), "https://www.seiri.dev/", class: "nav-cta", target: "_blank", rel: "noopener" %>
   </div>
 
   <div class="menu-toggle">
