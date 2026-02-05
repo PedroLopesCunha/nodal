@@ -201,6 +201,42 @@ $error-red: #d82c0d;
   margin-bottom: 20px;
 }
 
+// Password visibility toggle
+.auth-password-wrapper {
+  position: relative;
+
+  input,
+  .form-control {
+    padding-right: 48px;
+  }
+}
+
+.auth-password-toggle {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  padding: 4px 8px;
+  cursor: pointer;
+  color: $gray-text;
+  transition: color 0.15s ease;
+
+  &:hover {
+    color: $teal;
+  }
+
+  &:focus {
+    outline: none;
+    color: $teal;
+  }
+
+  i {
+    font-size: 1rem;
+  }
+}
+
 // Simple Form overrides
 .auth-form {
   .string,
