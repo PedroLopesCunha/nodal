@@ -283,3 +283,24 @@ $breakpoint-mobile: 768px;
     }
   }
 }
+
+// Storefront user dropdown button
+.user-dropdown-btn {
+  border: none;
+  background: transparent;
+  color: $dark;
+  padding: 0.375rem 0.75rem;
+  border-radius: 0.375rem;
+  transition: all 0.15s ease;
+
+  &:hover,
+  &:focus,
+  &.show {
+    background-color: rgba(var(--org-secondary-rgb, 108, 117, 125), 0.1);
+    color: var(--org-secondary, $dark);
+  }
+
+  &:focus {
+    box-shadow: none;
+  }
+}

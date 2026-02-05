@@ -24,6 +24,7 @@ pt:
       contact: "Contacto"
       cart: "Carrinho"
       sign_out: "Terminar sessão"
+      language: "Idioma"
       order_discounts_available: "Descontos de encomenda disponíveis!"
 
     # Envio grátis

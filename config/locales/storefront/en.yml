@@ -24,6 +24,7 @@ en:
       contact: "Contact"
       cart: "Cart"
       sign_out: "Sign out"
+      language: "Language"
       order_discounts_available: "Order discounts available!"
 
     # Free shipping

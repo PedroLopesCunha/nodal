@@ -2,7 +2,7 @@ import { Controller } from "@hotwired/stimulus"
 
 // Connects to data-controller="storefront-category-tree"
 export default class extends Controller {
-  static targets = ["item", "toggle", "children"]
+  static targets = ["item", "toggle", "children", "icon"]
 
   connect() {
     this.loadExpandedState()
@@ -19,11 +19,13 @@ export default class extends Controller {
 
       if (isExpanded) {
         children.classList.add("collapsed")
-        icon.classList.remove("rotated")
+        icon.classList.remove("fa-minus")
+        icon.classList.add("fa-plus")
         button.setAttribute("aria-expanded", "false")
       } else {
         children.classList.remove("collapsed")
-        icon.classList.add("rotated")
+        icon.classList.remove("fa-plus")
+        icon.classList.add("fa-minus")
         button.setAttribute("aria-expanded", "true")
       }
 
@@ -44,11 +46,17 @@ export default class extends Controller {
         if (children) {
           if (expandedIds.includes(categoryId)) {
             children.classList.remove("collapsed")
-            if (icon) icon.classList.add("rotated")
+            if (icon) {
+              icon.classList.remove("fa-plus")
+              icon.classList.add("fa-minus")
+            }
             if (toggle) toggle.setAttribute("aria-expanded", "true")
           } else {
             children.classList.add("collapsed")
-            if (icon) icon.classList.remove("rotated")
+            if (icon) {
+              icon.classList.remove("fa-minus")
+              icon.classList.add("fa-plus")
+            }
             if (toggle) toggle.setAttribute("aria-expanded", "false")
           }
         }
