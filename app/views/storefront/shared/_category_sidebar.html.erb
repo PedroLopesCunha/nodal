@@ -1,4 +1,4 @@
-<div class="card sidebar-card">
+<div class="card sidebar-card sidebar-sticky">
   <div class="card-body">
     <h6 class="card-title mb-3"><%= t('storefront.products.index.categories') %></h6>
     <div class="category-sidebar" data-controller="storefront-category-tree">
@@ -15,5 +15,12 @@
         <% end %>
       </ul>
     </div>
+    <% if Array(params[:categories]).any? || Array(params[:queries]).any? %>
+      <div class="mt-3 pt-3 border-top">
+        <%= link_to products_path(org_slug: params[:org_slug]), class: "btn btn-outline-secondary btn-sm w-100" do %>
+          <i class="fa-solid fa-times me-2"></i><%= t('storefront.products.index.clear_filters') %>
+        <% end %>
+      </div>
+    <% end %>
   </div>
 </div>

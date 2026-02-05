@@ -19,20 +19,20 @@
   <div class="d-flex align-items-center">
     <% if has_children %>
       <button type="button"
-              class="btn btn-sm btn-link text-muted p-0 me-1 toggle-btn"
+              class="toggle-btn text-muted"
               data-action="storefront-category-tree#toggle"
               data-storefront-category-tree-target="toggle"
               aria-expanded="<%= is_expanded %>">
-        <i class="fa-solid fa-chevron-right toggle-icon <%= 'rotated' if is_expanded %>"></i>
+        <i class="fa-solid <%= is_expanded ? 'fa-minus' : 'fa-plus' %> toggle-icon" data-storefront-category-tree-target="icon"></i>
       </button>
     <% else %>
-      <span class="me-3"></span>
+      <span class="toggle-btn-spacer"></span>
     <% end %>
 
     <%= link_to products_path(**link_params),
         class: "category-link flex-grow-1 py-1 #{'active fw-bold text-primary' if is_selected}" do %>
       <%= category.name %>
-      <span class="badge bg-secondary-subtle text-secondary ms-1"><%= category.all_products_count %></span>
+      <span class="category-count">(<%= category.all_products_count %>)</span>
     <% end %>
   </div>
 
