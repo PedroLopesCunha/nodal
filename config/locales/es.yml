@@ -2,10 +2,11 @@ es:
   # Navigation
   navbar:
     product: "Producto"
+    why_it_matters: "Por qué importa"
     how_it_works: "Cómo funciona"
     coming_soon: "Próximamente"
     pricing: "Precios"
-    where_we_come_from: "De dónde venimos"
+    our_dna: "Nuestro DNA"
 
   # Product Dropdown Sidebar
   sidebar:
@@ -80,6 +81,30 @@ es:
         title: "Insights completos"
         description: "Saber exactamente qué se vende y a quién"
 
+  # Benefits Section
+  benefits:
+    label: "POR QUÉ IMPORTA"
+    title: "Lo que cambia para tu negocio"
+    subtitle: "Resultados reales que impactan tu rentabilidad"
+    always_open:
+      title: "Tu negocio funciona mientras duermes"
+      description: "Los clientes navegan y piden cuando quieran — noches, fines de semana, festivos. Sin llamadas de ventas."
+    upsell:
+      title: "Cada pedido es una oportunidad de venta"
+      description: "Los clientes descubren todo tu catálogo, no solo lo que suelen comprar. Más visibilidad, más ingresos."
+    update_once:
+      title: "Actualiza una vez. Llega a todos."
+      description: "Cambia un precio y todos los clientes lo ven instantáneamente. No más 50 llamadas o mensajes individuales."
+    direct_fulfillment:
+      title: "De su carrito a tu almacén"
+      description: "Los pedidos van directamente a tu equipo o ERP. Sin intermediarios — tú solo entregas."
+    transparency:
+      title: "No más 'déjame verificar y te digo'"
+      description: "Los clientes ven precios y stock en tiempo real. Saben qué esperar antes de pedir."
+    no_emails:
+      title: "Cero tiempo en emails de confirmación"
+      description: "Confirmaciones y notificaciones automáticas. Tú te enfocas en enviar, no en escribir."
+
   # How It Works Section
   how_it_works:
     label: "CÓMO FUNCIONA"
@@ -123,7 +148,7 @@ es:
       affordable:
         number: "02"
         title: "Accesible desde el primer día"
-        description: "Empieza gratis, crece gradualmente. Nuestros precios escalan con tu negocio — no con presupuestos enterprise."
+        description: "Nuestros precios escalan con tu negocio — no con presupuestos enterprise."
       tools:
         number: "03"
         title: "Funciona con tus herramientas"

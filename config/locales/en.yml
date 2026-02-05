@@ -2,10 +2,11 @@ en:
   # Navigation
   navbar:
     product: "Product"
+    why_it_matters: "Why it matters"
     how_it_works: "How it works"
     coming_soon: "Coming soon"
     pricing: "Pricing"
-    where_we_come_from: "Where we come from"
+    our_dna: "Our DNA"
 
   # Product Dropdown Sidebar
   sidebar:
@@ -80,6 +81,30 @@ en:
         title: "Complete insights"
         description: "Know exactly what's selling and to whom"
 
+  # Benefits Section
+  benefits:
+    label: "WHY IT MATTERS"
+    title: "What changes for your business"
+    subtitle: "Real outcomes that impact your bottom line"
+    always_open:
+      title: "Your business runs while you sleep"
+      description: "Clients browse and order whenever they want — nights, weekends, holidays. No sales calls needed."
+    upsell:
+      title: "Every order is an upsell opportunity"
+      description: "Clients discover your full catalog, not just what they usually buy. More visibility, more revenue."
+    update_once:
+      title: "Update once. Reach everyone."
+      description: "Change a price and every client sees it instantly. No more 50 phone calls or individual messages."
+    direct_fulfillment:
+      title: "From their cart to your warehouse"
+      description: "Orders flow directly to your team or ERP. Skip the middleman — you just fulfill."
+    transparency:
+      title: "No more 'let me check and get back to you'"
+      description: "Clients see real-time prices and stock. They know what to expect before they order."
+    no_emails:
+      title: "Zero time on confirmation emails"
+      description: "Automatic order confirmations and notifications. You focus on shipping, not typing."
+
   # How It Works Section
   how_it_works:
     label: "HOW IT WORKS"
@@ -123,7 +148,7 @@ en:
       affordable:
         number: "02"
         title: "Affordable from day one"
-        description: "Start free, grow gradually. Our pricing scales with your business — not enterprise budgets."
+        description: "Our pricing scales with your business — not enterprise budgets."
       tools:
         number: "03"
         title: "Works with your tools"

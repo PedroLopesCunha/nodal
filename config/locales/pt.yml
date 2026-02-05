@@ -2,10 +2,11 @@ pt:
   # Navigation
   navbar:
     product: "Produto"
+    why_it_matters: "Porquê isto importa"
     how_it_works: "Como funciona"
     coming_soon: "Em breve"
     pricing: "Preços"
-    where_we_come_from: "De onde viemos"
+    our_dna: "O nosso ADN"
 
   # Product Dropdown Sidebar
   sidebar:
@@ -30,7 +31,7 @@ pt:
 
   # Hero Section
   hero:
-    headline_html: "O novo padrão<br><span class=\"text-primary\">para B2B</span>"
+    headline_html: "O novo standard<br><span class=\"text-primary\">para B2B</span>"
     subheadline: "Uma plataforma profissional para gerir encomendas, clientes e transações — substituindo o caos."
     cta_primary: "Começar"
     cta_secondary: "Agendar Demo"
@@ -80,6 +81,30 @@ pt:
         title: "Insights completos"
         description: "Saber exatamente o que vende e a quem"
 
+  # Benefits Section
+  benefits:
+    label: "PORQUÊ ISTO IMPORTA"
+    title: "O que muda no teu negócio"
+    subtitle: "Resultados reais que impactam os teus resultados"
+    always_open:
+      title: "O teu negócio funciona enquanto dormes"
+      description: "Os clientes navegam e encomendam quando quiserem — noites, fins de semana, feriados. Sem chamadas de vendas."
+    upsell:
+      title: "Cada encomenda é uma oportunidade de venda"
+      description: "Os clientes descobrem todo o teu catálogo, não só o que costumam comprar. Mais visibilidade, mais receita."
+    update_once:
+      title: "Atualiza uma vez. Chega a todos."
+      description: "Muda um preço e todos os clientes veem instantaneamente. Chega de 50 telefonemas ou mensagens individuais."
+    direct_fulfillment:
+      title: "Do carrinho deles para o teu armazém"
+      description: "As encomendas vão diretamente para a tua equipa ou ERP. Sem intermediários — tu só entregas."
+    transparency:
+      title: "Chega de 'deixa-me verificar e já te digo'"
+      description: "Os clientes veem preços e stock em tempo real. Sabem o que esperar antes de encomendar."
+    no_emails:
+      title: "Zero tempo em emails de confirmação"
+      description: "Confirmações e notificações automáticas. Tu focas-te em enviar, não em escrever."
+
   # How It Works Section
   how_it_works:
     label: "COMO FUNCIONA"
@@ -123,7 +148,7 @@ pt:
       affordable:
         number: "02"
         title: "Acessível desde o primeiro dia"
-        description: "Começa grátis, cresce gradualmente. Os nossos preços escalam com o teu negócio — não com orçamentos enterprise."
+        description: "Os nossos preços escalam com o teu negócio — não com orçamentos enterprise."
       tools:
         number: "03"
         title: "Funciona com as tuas ferramentas"
