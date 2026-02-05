@@ -5,7 +5,28 @@ pt:
     how_it_works: "Como funciona"
     coming_soon: "Em breve"
     pricing: "Preços"
-    start_free_trial: "Começar grátis"
+    where_we_come_from: "De onde viemos"
+
+  # Product Dropdown Sidebar
+  sidebar:
+    smart_pricing:
+      title: "Motor de Preços Inteligente"
+      description: "Descontos por volume, escalões de cliente e preços personalizados que acumulam automaticamente."
+    product_variants:
+      title: "Variantes de Produto"
+      description: "Tamanho, cor e atributos personalizados com preços e stock individuais."
+    multi_currency:
+      title: "Multi-Moeda"
+      description: "EUR, CHF, USD, GBP com formatação automática e cálculo de impostos."
+    customer_management:
+      title: "Gestão de Clientes"
+      description: "Acesso apenas por convite, descontos por escalão e moradas completas."
+    analytics_dashboard:
+      title: "Painel de Analytics"
+      description: "Tendências de vendas, melhores clientes, impacto de descontos e carrinhos abertos."
+    stock_inventory:
+      title: "Stock e Inventário"
+      description: "Disponibilidade em tempo real, alertas de stock baixo e controlo por variante."
 
   # Hero Section
   hero:
@@ -16,7 +37,7 @@ pt:
     trust_badges:
       live_minutes: "Online em 15 minutos"
       no_technical: "Sem configuração técnica"
-      free_beta: "Grátis durante o Beta"
+      multi_currency: "Suporte multi-moeda"
 
   # Stats Bar
   stats:
@@ -66,28 +87,28 @@ pt:
     features:
       self_service:
         title: "Os teus clientes encomendam sozinhos"
-        description: "Dá a cada cliente o seu próprio login num portal personalizado. Navegam no teu catálogo, veem os seus preços e fazem encomendas — a qualquer hora, sem te ligar."
+        description: "Cada cliente tem o seu próprio login no teu portal personalizado. Navegam, veem os seus preços personalizados e encomendam — 24/7, sem te ligar."
         benefit_1: "Encomendas self-service 24/7"
-        benefit_2: "Interface mobile-friendly"
-        benefit_3: "Histórico e re-encomendas"
+        benefit_2: "Loja com a tua marca e logo"
+        benefit_3: "Histórico e re-encomendas com um clique"
       pricing:
-        title: "Preços em piloto automático"
-        description: "Define as tuas regras uma vez: descontos por volume, preços específicos por cliente, promoções sazonais. O Nodal calcula tudo automaticamente."
-        benefit_1: "Tabelas de preços por cliente"
-        benefit_2: "Descontos por volume"
-        benefit_3: "Promoções acumuláveis"
+        title: "Motor de Preços Inteligente"
+        description: "Quatro tipos de desconto que acumulam: volume, escalões de cliente, preços personalizados e limites de encomenda. Define as regras — o Nodal faz as contas."
+        benefit_1: "4 tipos de desconto que acumulam"
+        benefit_2: "Preços específicos por cliente"
+        benefit_3: "Descontos automáticos por valor"
       catalog:
-        title: "O teu catálogo, sempre atualizado"
-        description: "Carrega produtos uma vez. Mudas um preço? Todos veem instantaneamente. Chega de PDFs desatualizados ou \"deixa-me verificar o preço atual\"."
-        benefit_1: "Atualizações de preços em tempo real"
-        benefit_2: "Categorias de produtos"
-        benefit_3: "Visibilidade de stock"
+        title: "Catálogo de Produtos Completo"
+        description: "Produtos com variantes (tamanho, cor, atributos), categorias, fotos e controlo de stock. Importa do Excel ou adiciona manualmente — sempre atualizado."
+        benefit_1: "Variantes e atributos de produto"
+        benefit_2: "Importação CSV e categorias"
+        benefit_3: "Controlo de stock em tempo real"
       analytics:
-        title: "Insights que impulsionam crescimento"
-        description: "Vê o que funciona e o que não funciona. O teu dashboard mostra tendências de receita, carrinhos abertos, desempenho de produtos e impacto de descontos — tudo em tempo real."
-        benefit_1: "Analytics de receita e encomendas"
-        benefit_2: "Carrinhos abertos e conversão"
-        benefit_3: "Desempenho de produtos e descontos"
+        title: "Analytics em Tempo Real"
+        description: "Sabe exatamente o que vende, quem compra e onde estás a perder dinheiro. Acompanha receita, retenção, impacto de descontos e carrinhos abertos."
+        benefit_1: "Insights de receita e clientes"
+        benefit_2: "Análise de impacto de descontos"
+        benefit_3: "Recuperação de carrinhos abertos"
 
   # Why Nodal Section
   why_nodal:
@@ -141,42 +162,10 @@ pt:
   # Pricing Section
   pricing:
     label: "PREÇOS"
-    title: "Preços simples e transparentes"
-    subtitle: "Começa grátis. Atualiza quando estiveres pronto. Sem surpresas."
-    disclaimer: "Não é necessário cartão de crédito para começar."
-    per_month: "/mês"
-    tiers:
-      free:
-        badge: "BETA"
-        name: "Grátis"
-        description: "Grátis durante a fase Beta"
-        feature_1: "Até 10 produtos"
-        feature_2: "3 contas de cliente"
-        feature_3: "Gestão básica de encomendas"
-        feature_4: "Suporte por email"
-        cta: "Começar"
-      pro:
-        badge: "RECOMENDADO"
-        name: "Pro"
-        description: "Para negócios em crescimento"
-        feature_1: "Produtos ilimitados"
-        feature_2: "Clientes ilimitados"
-        feature_3: "Preços específicos por cliente"
-        feature_4: "Dashboard analytics avançado"
-        feature_5: "Branding personalizado"
-        feature_6: "Suporte prioritário"
-        cta: "Começar"
-      business:
-        name: "Business"
-        price: "Vamos conversar"
-        description: "Para operações estabelecidas"
-        feature_1: "Tudo do Pro"
-        feature_2: "Acesso API"
-        feature_3: "Integrações personalizadas"
-        feature_4: "Gestor de conta dedicado"
-        feature_5: "Garantia SLA"
-        feature_6: "Suporte telefónico"
-        cta: "Contactar"
+    title: "Adaptado ao Teu Negócio"
+    subtitle: "Os nossos lugares de teste Beta estão preenchidos. Agora trabalhamos diretamente com cada cliente para criar uma proposta que se adapte às tuas necessidades, volume e objetivos."
+    note: "Cada negócio é diferente — vamos encontrar o que funciona para ti."
+    cta: "Vamos Conversar"
 
   # Results Section
   results:
