@@ -54,7 +54,7 @@ namespace :sync do
         attr_name = row["Atributo #{i + 1} nome"]&.strip
         attr_vals = row["Atributo #{i + 1} valor(es)"]&.strip
         next if attr_name.blank? || attr_vals.blank?
-        attr_vals.split(",").each { |v| csv_attr_values[attr_name] << v.strip }
+        attr_vals.split(", ").each { |v| csv_attr_values[attr_name] << v.strip }
       end
 
       if tipo == "variation"
@@ -384,6 +384,39 @@ namespace :sync do
         end
       end
 
+      # Step 2b: Rebuild available values for existing variable products
+      puts "  Rebuilding available values for existing variable products..."
+      rebuilt_count = 0
+      csv_products.each do |sku, row|
+        next unless row["Tipo"] == "variable"
+        product = db_products[sku]
+        next unless product
+
+        product.product_available_values.delete_all
+        product.product_product_attributes.delete_all
+
+        4.times do |i|
+          attr_name = row["Atributo #{i + 1} nome"]&.strip
+          attr_vals_str = row["Atributo #{i + 1} valor(es)"]&.strip
+          next if attr_name.blank? || attr_vals_str.blank?
+
+          attr = org.product_attributes.find_or_create_by!(name: attr_name) do |a|
+            a.slug = attr_name.parameterize
+          end
+
+          product.product_product_attributes.find_or_create_by!(product_attribute: attr)
+
+          attr_vals_str.split(", ").each do |val_str|
+            val = val_str.strip
+            next if val.blank?
+            av = attr.product_attribute_values.find_or_create_by!(value: val)
+            product.product_available_values.find_or_create_by!(product_attribute_value: av)
+          end
+        end
+        rebuilt_count += 1
+      end
+      puts "    Rebuilt available values for #{rebuilt_count} variable products"
+
       # Step 3: Create new products
       puts "  Creating new products..."
       created_products = {} # sku => product (for variation linking)
@@ -419,7 +452,7 @@ namespace :sync do
               product.product_product_attributes.find_or_create_by!(product_attribute: attr)
 
               # Create and link available values
-              attr_vals_str.split(",").each do |val_str|
+              attr_vals_str.split(", ").each do |val_str|
                 val = val_str.strip
                 next if val.blank?
 
