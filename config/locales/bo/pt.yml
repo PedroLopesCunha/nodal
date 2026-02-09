@@ -228,6 +228,12 @@ pt:
         title: "Catálogo de Produtos"
         subtitle: "Ver e gerir o seu catálogo de produtos"
         search_placeholder: "Pesquisar catálogo..."
+        filters:
+          category: "Categoria"
+          all_categories: "Todas as Categorias"
+          product_type: "Tipo de Produto"
+          all_types: "Todos os Tipos"
+          active_filters: "Filtros ativos"
         table:
           product: "Produto"
           sku: "SKU"

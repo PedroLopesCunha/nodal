@@ -231,6 +231,12 @@ en:
         title: "Product Catalog"
         subtitle: "View and manage your product catalog"
         search_placeholder: "Search catalog..."
+        filters:
+          category: "Category"
+          all_categories: "All Categories"
+          product_type: "Product Type"
+          all_types: "All Types"
+          active_filters: "Active filters"
         table:
           product: "Product"
           sku: "SKU"

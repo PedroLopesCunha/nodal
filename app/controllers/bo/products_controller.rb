@@ -83,6 +83,28 @@ class Bo::ProductsController < Bo::BaseController
       ).select("products.id").distinct
       @products = @products.where(id: matching_ids)
     end
+
+    # Category filter
+    if params[:category_id].present?
+      category = current_organisation.categories.kept.find_by(id: params[:category_id])
+      if category
+        @current_category = category
+        all_category_ids = category.subtree_ids
+        product_ids_in_category = CategoryProduct.where(category_id: all_category_ids).select(:product_id)
+        @products = @products.where(id: product_ids_in_category)
+      end
+    end
+
+    # Product type filter
+    if params[:product_type].present?
+      case params[:product_type]
+      when "simple" then @products = @products.simple
+      when "variable" then @products = @products.variable
+      end
+    end
+
+    # Load categories for filter dropdown
+    @categories = current_organisation.categories.kept.order(:name)
   end
 
   def show
@@ -219,7 +241,13 @@ class Bo::ProductsController < Bo::BaseController
     head :unprocessable_entity
   end
 
+  helper_method :filter_params_hash
+
   private
+
+  def filter_params_hash
+    { query: params[:query], category_id: params[:category_id], product_type: params[:product_type] }.compact_blank
+  end
 
   def set_product
     @product = current_organisation.products.find(params[:id])
