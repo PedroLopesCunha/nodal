@@ -160,6 +160,9 @@ en:
         title: "Customers"
         subtitle: "View and manage your customers"
         search_placeholder: "Search customers..."
+        filters:
+          all_statuses: "All Statuses"
+          active_filters: "Active filters"
         table:
           customer: "Customer"
           company: "Company"
