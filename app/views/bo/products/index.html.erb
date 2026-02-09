@@ -67,7 +67,7 @@
     </thead>
     <tbody>
       <% @products.each do |product| %>
-        <tr class="product-row" data-href="<%= bo_product_path(params[:org_slug], product) %>" style="cursor: pointer;">
+        <tr class="product-row" data-href="<%= bo_product_path(params[:org_slug], product, query: params[:query]) %>" style="cursor: pointer;">
           <td>
             <div class="fw-semibold"><%= product.name %></div>
           </td>
