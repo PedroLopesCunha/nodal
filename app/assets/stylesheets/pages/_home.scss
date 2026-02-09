@@ -135,8 +135,8 @@ $section-padding-mobile: 64px 0;
 
   @media (max-width: 576px) {
     flex-direction: column;
+    align-items: center;
     width: 100%;
-    max-width: 300px;
   }
 }
 
