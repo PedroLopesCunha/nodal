@@ -6,11 +6,6 @@
   <!-- Left Column - Product Image -->
   <div class="col-lg-6">
     <div class="card border-0 shadow-sm position-relative" style="background-color: #f8f9fa; border-radius: 12px; overflow: hidden;">
-      <!-- Category Badge on Image -->
-      <span class="badge bg-dark position-absolute" style="top: 16px; left: 16px; z-index: 10; padding: 8px 14px; border-radius: 20px;">
-        <i class="fa-solid fa-tag me-1"></i><%= @product.category&.name %>
-      </span>
-
       <% discount_breakdown = @discount_calculator.discount_breakdown %>
 
       <!-- Main Image -->
@@ -50,13 +45,8 @@
   <div class="col-lg-6">
     <div class="card border-0 shadow-sm h-100" style="border-radius: 12px;">
       <div class="card-body p-4">
-        <!-- Product Name & Category -->
-        <div class="d-flex align-items-center gap-2 mb-2">
-          <h1 class="mb-0" style="font-size: 2rem; font-weight: 600;"><%= @product.name %></h1>
-          <span class="badge bg-secondary-subtle text-secondary" style="padding: 6px 12px; border-radius: 20px;">
-            <i class="fa-solid fa-box me-1"></i><%= @product.category&.name %>
-          </span>
-        </div>
+        <!-- Product Name -->
+        <h1 class="mb-2" style="font-size: 2rem; font-weight: 600;"><%= @product.name %></h1>
 
         <!-- Description -->
         <p class="text-muted mb-4"><%= @product.description %></p>
