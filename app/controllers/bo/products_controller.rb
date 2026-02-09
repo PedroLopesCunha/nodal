@@ -103,6 +103,11 @@ class Bo::ProductsController < Bo::BaseController
       end
     end
 
+    # Sorting
+    @sort_column = %w[name sku unit_price has_variants].include?(params[:sort]) ? params[:sort] : "name"
+    @sort_direction = %w[asc desc].include?(params[:direction]) ? params[:direction] : "asc"
+    @products = @products.order(@sort_column => @sort_direction)
+
     # Load categories for filter dropdown
     @categories = current_organisation.categories.kept.order(:name)
   end
@@ -241,12 +246,18 @@ class Bo::ProductsController < Bo::BaseController
     head :unprocessable_entity
   end
 
-  helper_method :filter_params_hash
+  helper_method :filter_params_hash, :sort_link_params
 
   private
 
   def filter_params_hash
-    { query: params[:query], category_id: params[:category_id], product_type: params[:product_type] }.compact_blank
+    { query: params[:query], category_id: params[:category_id], product_type: params[:product_type],
+      sort: params[:sort], direction: params[:direction] }.compact_blank
+  end
+
+  def sort_link_params(column)
+    direction = (@sort_column == column && @sort_direction == "asc") ? "desc" : "asc"
+    filter_params_hash.merge(sort: column, direction: direction)
   end
 
   def set_product
