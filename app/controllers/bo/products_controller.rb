@@ -83,6 +83,33 @@ class Bo::ProductsController < Bo::BaseController
       ).select("products.id").distinct
       @products = @products.where(id: matching_ids)
     end
+
+    # Category filter
+    if params[:category_id].present?
+      category = current_organisation.categories.kept.find_by(id: params[:category_id])
+      if category
+        @current_category = category
+        all_category_ids = category.subtree_ids
+        product_ids_in_category = CategoryProduct.where(category_id: all_category_ids).select(:product_id)
+        @products = @products.where(id: product_ids_in_category)
+      end
+    end
+
+    # Product type filter
+    if params[:product_type].present?
+      case params[:product_type]
+      when "simple" then @products = @products.simple
+      when "variable" then @products = @products.variable
+      end
+    end
+
+    # Sorting
+    @sort_column = %w[name sku unit_price has_variants].include?(params[:sort]) ? params[:sort] : "name"
+    @sort_direction = %w[asc desc].include?(params[:direction]) ? params[:direction] : "asc"
+    @products = @products.order(@sort_column => @sort_direction)
+
+    # Load categories for filter dropdown
+    @categories = current_organisation.categories.kept.order(:name)
   end
 
   def show
@@ -219,7 +246,19 @@ class Bo::ProductsController < Bo::BaseController
     head :unprocessable_entity
   end
 
+  helper_method :filter_params_hash, :sort_link_params
+
   private
+
+  def filter_params_hash
+    { query: params[:query], category_id: params[:category_id], product_type: params[:product_type],
+      sort: params[:sort], direction: params[:direction] }.compact_blank
+  end
+
+  def sort_link_params(column)
+    direction = (@sort_column == column && @sort_direction == "asc") ? "desc" : "asc"
+    filter_params_hash.merge(sort: column, direction: direction)
+  end
 
   def set_product
     @product = current_organisation.products.find(params[:id])

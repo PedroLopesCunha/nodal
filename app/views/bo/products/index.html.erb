@@ -35,39 +35,114 @@
 <div class="bo-page-body">
   <div class="card mb-4">
   <div class="card-body">
-    <%= form_with url: bo_products_path(params[:org_slug]), method: :get, class: "d-flex align-items-center" do %>
-      <div class="input-group flex-grow-1 me-3">
-        <span class="input-group-text bg-white border-end-0">
-          <i class="fa-solid fa-magnifying-glass text-muted"></i>
-        </span>
-        <%= text_field_tag :query,
-              params[:query],
-              class: "form-control border-start-0",
-              placeholder: t('bo.products.index.search_placeholder')
-        %>
+    <%= form_with url: bo_products_path(params[:org_slug]), method: :get do %>
+      <%= hidden_field_tag :sort, params[:sort] if params[:sort].present? %>
+      <%= hidden_field_tag :direction, params[:direction] if params[:direction].present? %>
+      <div class="d-flex align-items-center mb-0">
+        <div class="input-group flex-grow-1 me-3">
+          <span class="input-group-text bg-white border-end-0">
+            <i class="fa-solid fa-magnifying-glass text-muted"></i>
+          </span>
+          <%= text_field_tag :query,
+                params[:query],
+                class: "form-control border-start-0",
+                placeholder: t('bo.products.index.search_placeholder')
+          %>
+        </div>
+        <button type="submit" class="btn btn-outline-secondary me-2">
+          <i class="fa-solid fa-magnifying-glass"></i> <%= t('bo.common.actions.search') %>
+        </button>
+        <% if filter_params_hash.any? %>
+          <%= link_to bo_products_path(params[:org_slug]), class: "btn btn-outline-danger" do %>
+            <i class="fa-solid fa-xmark"></i> <%= t('bo.common.actions.clear') %>
+          <% end %>
+        <% end %>
       </div>
-      <button type="submit" class="btn btn-outline-secondary me-2">
-        <i class="fa-solid fa-magnifying-glass"></i> <%= t('bo.common.actions.search') %>
-      </button>
+      <div class="row mt-3">
+        <div class="col-md-4">
+          <select name="category_id" class="form-select form-select-sm" onchange="this.form.submit()">
+            <option value=""><%= t('bo.products.index.filters.all_categories') %></option>
+            <% @categories.each do |category| %>
+              <option value="<%= category.id %>" <%= 'selected' if params[:category_id].to_s == category.id.to_s %>><%= category.full_path %></option>
+            <% end %>
+          </select>
+        </div>
+        <div class="col-md-4">
+          <select name="product_type" class="form-select form-select-sm" onchange="this.form.submit()">
+            <option value=""><%= t('bo.products.index.filters.all_types') %></option>
+            <option value="simple" <%= 'selected' if params[:product_type] == 'simple' %>><%= t('bo.products.index.table.simple') %></option>
+            <option value="variable" <%= 'selected' if params[:product_type] == 'variable' %>><%= t('bo.products.index.table.variable') %></option>
+          </select>
+        </div>
+      </div>
     <% end %>
   </div>
 </div>
+
+<% if filter_params_hash.any? %>
+  <div class="mb-3 d-flex align-items-center gap-2 flex-wrap">
+    <small class="text-muted"><%= t('bo.products.index.filters.active_filters') %>:</small>
+    <% if params[:query].present? %>
+      <%= link_to bo_products_path(params[:org_slug], filter_params_hash.except(:query)), class: "badge bg-secondary text-decoration-none" do %>
+        "<%= params[:query] %>" <i class="fa-solid fa-xmark ms-1"></i>
+      <% end %>
+    <% end %>
+    <% if @current_category %>
+      <%= link_to bo_products_path(params[:org_slug], filter_params_hash.except(:category_id)), class: "badge bg-secondary text-decoration-none" do %>
+        <%= @current_category.name %> <i class="fa-solid fa-xmark ms-1"></i>
+      <% end %>
+    <% end %>
+    <% if params[:product_type].present? %>
+      <%= link_to bo_products_path(params[:org_slug], filter_params_hash.except(:product_type)), class: "badge bg-secondary text-decoration-none" do %>
+        <%= params[:product_type] == 'simple' ? t('bo.products.index.table.simple') : t('bo.products.index.table.variable') %> <i class="fa-solid fa-xmark ms-1"></i>
+      <% end %>
+    <% end %>
+  </div>
+<% end %>
 
 <div class="card">
   <table class="table table-hover mb-0">
     <thead class="table-light">
       <tr>
-        <th><%= t('bo.common.product') %></th>
-        <th><%= t('bo.products.form.sku') %></th>
+        <th>
+          <%= link_to bo_products_path(params[:org_slug], sort_link_params("name")), class: "text-decoration-none text-dark" do %>
+            <%= t('bo.common.product') %>
+            <% if @sort_column == "name" %>
+              <i class="fa-solid fa-sort-<%= @sort_direction == 'asc' ? 'up' : 'down' %> ms-1 small"></i>
+            <% end %>
+          <% end %>
+        </th>
+        <th>
+          <%= link_to bo_products_path(params[:org_slug], sort_link_params("sku")), class: "text-decoration-none text-dark" do %>
+            <%= t('bo.products.form.sku') %>
+            <% if @sort_column == "sku" %>
+              <i class="fa-solid fa-sort-<%= @sort_direction == 'asc' ? 'up' : 'down' %> ms-1 small"></i>
+            <% end %>
+          <% end %>
+        </th>
         <th style="max-width: 200px;"><%= t('bo.products.form.categories') %></th>
-        <th><%= t('bo.products.index.table.type') %></th>
-        <th><%= t('bo.common.price') %></th>
+        <th>
+          <%= link_to bo_products_path(params[:org_slug], sort_link_params("has_variants")), class: "text-decoration-none text-dark" do %>
+            <%= t('bo.products.index.table.type') %>
+            <% if @sort_column == "has_variants" %>
+              <i class="fa-solid fa-sort-<%= @sort_direction == 'asc' ? 'up' : 'down' %> ms-1 small"></i>
+            <% end %>
+          <% end %>
+        </th>
+        <th>
+          <%= link_to bo_products_path(params[:org_slug], sort_link_params("unit_price")), class: "text-decoration-none text-dark" do %>
+            <%= t('bo.common.price') %>
+            <% if @sort_column == "unit_price" %>
+              <i class="fa-solid fa-sort-<%= @sort_direction == 'asc' ? 'up' : 'down' %> ms-1 small"></i>
+            <% end %>
+          <% end %>
+        </th>
         <th class="text-end"><%= t('bo.common.actions_column') %></th>
       </tr>
     </thead>
     <tbody>
       <% @products.each do |product| %>
-        <tr class="product-row" data-href="<%= bo_product_path(params[:org_slug], product) %>" style="cursor: pointer;">
+        <tr class="product-row" data-href="<%= bo_product_path(params[:org_slug], product, filter_params_hash) %>" style="cursor: pointer;">
           <td>
             <div class="fw-semibold"><%= product.name %></div>
           </td>
@@ -90,10 +165,10 @@
           </td>
           <td><%= product.display_price %></td>
           <td class="text-end product-actions" style="white-space: nowrap;" onclick="event.stopPropagation();">
-            <%= link_to bo_product_path(params[:org_slug], product), class: "btn btn-sm btn-link text-muted" do %>
+            <%= link_to bo_product_path(params[:org_slug], product, filter_params_hash), class: "btn btn-sm btn-link text-muted" do %>
               <i class="fa-solid fa-eye"></i>
             <% end %>
-            <%= link_to edit_bo_product_path(params[:org_slug], product), class: "btn btn-sm btn-link text-muted" do %>
+            <%= link_to edit_bo_product_path(params[:org_slug], product, filter_params_hash), class: "btn btn-sm btn-link text-muted" do %>
               <i class="fa-solid fa-pen-to-square"></i>
             <% end %>
             <%= button_to bo_product_path(params[:org_slug], product), method: :delete, form: { class: "d-inline" }, class: "btn btn-sm btn-link text-danger", data: { turbo_confirm: t('bo.common.confirm.delete_product') } do %>

@@ -3,12 +3,24 @@ class Bo::CustomersController < Bo::BaseController
 
   def index
     @customers = policy_scope(current_organisation.customers)
+
     if params[:query].present?
       @customers = @customers.where(
         "company_name ILIKE :q OR contact_name ILIKE :q OR email ILIKE :q",
         q: "%#{params[:query]}%"
       )
     end
+
+    # Status filter
+    case params[:status]
+    when "active" then @customers = @customers.where(active: true)
+    when "inactive" then @customers = @customers.where(active: false)
+    end
+
+    # Sorting
+    @sort_column = %w[company_name contact_name email active].include?(params[:sort]) ? params[:sort] : "company_name"
+    @sort_direction = %w[asc desc].include?(params[:direction]) ? params[:direction] : "asc"
+    @customers = @customers.order(@sort_column => @sort_direction)
   end
 
   def show
@@ -57,7 +69,19 @@ class Bo::CustomersController < Bo::BaseController
                 notice: "Invitation sent to #{@customer.email}"
   end
 
+  helper_method :filter_params_hash, :sort_link_params
+
   private
+
+  def filter_params_hash
+    { query: params[:query], status: params[:status],
+      sort: params[:sort], direction: params[:direction] }.compact_blank
+  end
+
+  def sort_link_params(column)
+    direction = (@sort_column == column && @sort_direction == "asc") ? "desc" : "asc"
+    filter_params_hash.merge(sort: column, direction: direction)
+  end
 
   def customer_params
     params.require(:customer).permit(:company_name, :contact_name, :email, :contact_phone, :active, :password, :password_confirmation, :taxpayer_id, billing_address_with_archived_attributes: [:id, :street_name, :street_nr, :postal_code, :city, :country, :address_type, :active], shipping_addresses_with_archived_attributes: [:id, :street_name, :street_nr, :postal_code, :city, :country, :address_type, :_destroy, :active])

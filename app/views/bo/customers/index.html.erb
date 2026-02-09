@@ -35,38 +35,100 @@
 <div class="bo-page-body">
   <div class="card mb-4">
   <div class="card-body">
-    <%= form_with url: bo_customers_path(params[:org_slug]), method: :get, class: "d-flex align-items-center" do %>
-      <div class="input-group flex-grow-1 me-3">
-        <span class="input-group-text bg-white border-end-0">
-          <i class="fa-solid fa-magnifying-glass text-muted"></i>
-        </span>
-        <%= text_field_tag :query,
-              params[:query],
-              class: "form-control border-start-0",
-              placeholder: t('bo.customers.index.search_placeholder')
-        %>
+    <%= form_with url: bo_customers_path(params[:org_slug]), method: :get do %>
+      <%= hidden_field_tag :sort, params[:sort] if params[:sort].present? %>
+      <%= hidden_field_tag :direction, params[:direction] if params[:direction].present? %>
+      <div class="d-flex align-items-center mb-0">
+        <div class="input-group flex-grow-1 me-3">
+          <span class="input-group-text bg-white border-end-0">
+            <i class="fa-solid fa-magnifying-glass text-muted"></i>
+          </span>
+          <%= text_field_tag :query,
+                params[:query],
+                class: "form-control border-start-0",
+                placeholder: t('bo.customers.index.search_placeholder')
+          %>
+        </div>
+        <button type="submit" class="btn btn-outline-secondary me-2">
+          <i class="fa-solid fa-magnifying-glass"></i> <%= t('bo.common.actions.search') %>
+        </button>
+        <% if filter_params_hash.any? %>
+          <%= link_to bo_customers_path(params[:org_slug]), class: "btn btn-outline-danger" do %>
+            <i class="fa-solid fa-xmark"></i> <%= t('bo.common.actions.clear') %>
+          <% end %>
+        <% end %>
       </div>
-      <button type="submit" class="btn btn-outline-secondary">
-        <i class="fa-solid fa-magnifying-glass"></i> <%= t('bo.common.actions.search') %>
-      </button>
+      <div class="row mt-3">
+        <div class="col-md-4">
+          <select name="status" class="form-select form-select-sm" onchange="this.form.submit()">
+            <option value=""><%= t('bo.customers.index.filters.all_statuses') %></option>
+            <option value="active" <%= 'selected' if params[:status] == 'active' %>><%= t('bo.common.statuses.active') %></option>
+            <option value="inactive" <%= 'selected' if params[:status] == 'inactive' %>><%= t('bo.common.statuses.inactive') %></option>
+          </select>
+        </div>
+      </div>
     <% end %>
   </div>
 </div>
+
+<% if filter_params_hash.any? %>
+  <div class="mb-3 d-flex align-items-center gap-2 flex-wrap">
+    <small class="text-muted"><%= t('bo.customers.index.filters.active_filters') %>:</small>
+    <% if params[:query].present? %>
+      <%= link_to bo_customers_path(params[:org_slug], filter_params_hash.except(:query)), class: "badge bg-secondary text-decoration-none" do %>
+        "<%= params[:query] %>" <i class="fa-solid fa-xmark ms-1"></i>
+      <% end %>
+    <% end %>
+    <% if params[:status].present? %>
+      <%= link_to bo_customers_path(params[:org_slug], filter_params_hash.except(:status)), class: "badge bg-secondary text-decoration-none" do %>
+        <%= params[:status] == 'active' ? t('bo.common.statuses.active') : t('bo.common.statuses.inactive') %> <i class="fa-solid fa-xmark ms-1"></i>
+      <% end %>
+    <% end %>
+  </div>
+<% end %>
 
 <div class="card">
   <table class="table table-hover mb-0">
     <thead class="table-light">
       <tr>
-        <th><%= t('bo.customers.index.table.customer') %></th>
-        <th><%= t('bo.customers.index.table.company') %></th>
-        <th><%= t('bo.customers.index.table.contact') %></th>
-        <th><%= t('bo.customers.index.table.status') %></th>
+        <th>
+          <%= link_to bo_customers_path(params[:org_slug], sort_link_params("contact_name")), class: "text-decoration-none text-dark" do %>
+            <%= t('bo.customers.index.table.customer') %>
+            <% if @sort_column == "contact_name" %>
+              <i class="fa-solid fa-sort-<%= @sort_direction == 'asc' ? 'up' : 'down' %> ms-1 small"></i>
+            <% end %>
+          <% end %>
+        </th>
+        <th>
+          <%= link_to bo_customers_path(params[:org_slug], sort_link_params("company_name")), class: "text-decoration-none text-dark" do %>
+            <%= t('bo.customers.index.table.company') %>
+            <% if @sort_column == "company_name" %>
+              <i class="fa-solid fa-sort-<%= @sort_direction == 'asc' ? 'up' : 'down' %> ms-1 small"></i>
+            <% end %>
+          <% end %>
+        </th>
+        <th>
+          <%= link_to bo_customers_path(params[:org_slug], sort_link_params("email")), class: "text-decoration-none text-dark" do %>
+            <%= t('bo.customers.index.table.contact') %>
+            <% if @sort_column == "email" %>
+              <i class="fa-solid fa-sort-<%= @sort_direction == 'asc' ? 'up' : 'down' %> ms-1 small"></i>
+            <% end %>
+          <% end %>
+        </th>
+        <th>
+          <%= link_to bo_customers_path(params[:org_slug], sort_link_params("active")), class: "text-decoration-none text-dark" do %>
+            <%= t('bo.customers.index.table.status') %>
+            <% if @sort_column == "active" %>
+              <i class="fa-solid fa-sort-<%= @sort_direction == 'asc' ? 'up' : 'down' %> ms-1 small"></i>
+            <% end %>
+          <% end %>
+        </th>
         <th class="text-end"><%= t('bo.common.actions_column') %></th>
       </tr>
     </thead>
     <tbody>
       <% @customers.each do |customer| %>
-        <tr class="customer-row" data-href="<%= bo_customer_path(params[:org_slug], customer) %>" style="cursor: pointer;">
+        <tr class="customer-row" data-href="<%= bo_customer_path(params[:org_slug], customer, filter_params_hash) %>" style="cursor: pointer;">
           <td>
             <div class="fw-semibold"><%= customer.contact_name %></div>
           </td>
@@ -82,11 +144,11 @@
               <span class="badge rounded-pill bg-secondary-subtle text-secondary"><%= t('bo.common.statuses.inactive') %></span>
             <% end %>
           </td>
-          <td class="text-end customer-actions" onclick="event.stopPropagation();">
-            <%= link_to bo_customer_path(params[:org_slug], customer), class: "btn btn-sm btn-link text-muted" do %>
+          <td class="text-end customer-actions" style="white-space: nowrap;" onclick="event.stopPropagation();">
+            <%= link_to bo_customer_path(params[:org_slug], customer, filter_params_hash), class: "btn btn-sm btn-link text-muted" do %>
               <i class="fa-solid fa-eye"></i>
             <% end %>
-            <%= link_to edit_bo_customer_path(params[:org_slug], customer), class: "btn btn-sm btn-link text-muted" do %>
+            <%= link_to edit_bo_customer_path(params[:org_slug], customer, filter_params_hash), class: "btn btn-sm btn-link text-muted" do %>
               <i class="fa-solid fa-pen-to-square"></i>
             <% end %>
             <%= button_to bo_customer_path(params[:org_slug], customer), method: :delete, form: { class: "d-inline" }, class: "btn btn-sm btn-link text-danger", data: { turbo_confirm: t('bo.common.confirm.delete_customer') } do %>

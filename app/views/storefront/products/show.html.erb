@@ -1,4 +1,4 @@
-<%= link_to products_path(org_slug: params[:org_slug], category: params[:category], query: params[:query]), class: "btn btn-outline-secondary mb-4 mt-5" do %>
+<%= link_to products_path(org_slug: params[:org_slug], categories: params[:categories], queries: params[:queries], page: params[:page]), class: "btn btn-outline-secondary mb-4 mt-5" do %>
   <i class="fa-solid fa-arrow-left me-2"></i><%= t('storefront.products.show.back_to_products') %>
 <% end %>
 

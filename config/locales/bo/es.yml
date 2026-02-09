@@ -228,6 +228,12 @@ es:
         title: "Catálogo de Productos"
         subtitle: "Ver y gestionar su catálogo de productos"
         search_placeholder: "Buscar catálogo..."
+        filters:
+          category: "Categoría"
+          all_categories: "Todas las Categorías"
+          product_type: "Tipo de Producto"
+          all_types: "Todos los Tipos"
+          active_filters: "Filtros activos"
         table:
           product: "Producto"
           sku: "SKU"
