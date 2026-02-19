@@ -71,13 +71,14 @@ class Bo::ProductAttributesController < Bo::BaseController
   end
 
   def collect_nested_errors
-    messages = @product_attribute.errors.full_messages
+    messages = @product_attribute.errors.full_messages.reject { |m| m.include?("Product attribute values") }
     @product_attribute.product_attribute_values.each do |value|
+      next if value.errors.empty?
       value.errors.full_messages.each do |msg|
-        messages << "#{value.value.presence || 'Value'}: #{msg}"
+        messages << "\"#{value.value.presence || 'Value'}\": #{msg}"
       end
     end
-    messages.join(". ")
+    messages.uniq.join(". ")
   end
 
   def product_attribute_params
