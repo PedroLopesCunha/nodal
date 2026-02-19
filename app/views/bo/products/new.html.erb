@@ -57,15 +57,28 @@
           <div class="row g-3 mt-1">
             <div class="col-md-6">
               <label class="form-label"><%= t('bo.products.form.categories') %> <span class="text-danger">*</span></label>
-              <%
-                category_options = current_organisation.categories.kept
-                  .order(:ancestry, :position)
-                  .map { |c| [c.full_path, c.id] }
-              %>
-              <%= f.select :category_ids,
-                    category_options,
-                    {},
-                    { class: "form-select", multiple: true, size: 5, required: true } %>
+              <div data-controller="checkbox-select">
+                <input type="text"
+                       class="form-control form-control-sm mb-2"
+                       placeholder="<%= t('bo.products.form.search_categories') %>"
+                       data-checkbox-select-target="search"
+                       data-action="input->checkbox-select#filter">
+                <div class="border rounded p-2" style="max-height: 200px; overflow-y: auto;">
+                  <% current_organisation.categories.kept.order(:ancestry, :position).each do |category| %>
+                    <div class="form-check" data-checkbox-select-target="item" data-label="<%= category.full_path %>">
+                      <input type="checkbox"
+                             name="product[category_ids][]"
+                             value="<%= category.id %>"
+                             class="form-check-input"
+                             id="category_<%= category.id %>"
+                             <%= 'checked' if @product.category_ids.include?(category.id) %>>
+                      <label class="form-check-label" for="category_<%= category.id %>">
+                        <%= category.full_path %>
+                      </label>
+                    </div>
+                  <% end %>
+                </div>
+              </div>
               <small class="text-muted"><%= t('bo.products.form.categories_hint') %></small>
             </div>
             <div class="col-md-6">
