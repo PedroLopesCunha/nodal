@@ -39,7 +39,7 @@ class Storefront::ProductsController < Storefront::BaseController
                                           .where("categories.name ILIKE ?", query)
                                           .pluck(:id)
       ids_by_product = base_products.where(
-        "products.name ILIKE ? OR products.description ILIKE ?", query, query
+        "products.name ILIKE ? OR products.description ILIKE ? OR products.sku ILIKE ?", query, query, query
       ).pluck(:id)
       search_product_ids += ids_by_product + ids_by_category_name
     end
