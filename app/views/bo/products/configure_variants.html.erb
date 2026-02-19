@@ -73,6 +73,12 @@
 
                   <div class="values-section <%= 'd-none' unless @product.product_attributes.include?(attribute) %>" data-variant-configuration-target="valuesSection">
                     <p class="small text-muted mb-2"><%= t('bo.products.configure_variants.select_values') %></p>
+                    <% if attribute.product_attribute_values.active.size > 10 %>
+                      <input type="text"
+                             class="form-control form-control-sm mb-2"
+                             placeholder="<%= t('bo.products.configure_variants.filter_values') %>"
+                             data-action="input->variant-configuration#filterValues">
+                    <% end %>
                     <div class="d-flex flex-wrap gap-2">
                       <% attribute.product_attribute_values.active.by_position.each do |value| %>
                         <div class="form-check">

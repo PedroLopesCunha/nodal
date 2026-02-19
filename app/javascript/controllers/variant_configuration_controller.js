@@ -28,4 +28,17 @@ export default class extends Controller {
       }
     }
   }
+
+  filterValues(event) {
+    const query = event.target.value.toLowerCase().trim()
+    const card = event.target.closest("[data-variant-configuration-target='attributeCard']")
+    const checkboxes = card.querySelectorAll(".form-check")
+
+    checkboxes.forEach(item => {
+      const label = item.querySelector(".form-check-label")
+      if (!label) return
+      const text = label.textContent.toLowerCase().trim()
+      item.style.display = (!query || text.includes(query)) ? "" : "none"
+    })
+  }
 }

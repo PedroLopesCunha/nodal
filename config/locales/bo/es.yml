@@ -359,6 +359,7 @@ es:
         create_attributes: "Crear atributos"
         select_attributes_hint: "Elija qué atributos se aplican a este producto y seleccione los valores disponibles."
         select_values: "Seleccionar valores disponibles:"
+        filter_values: "Buscar valores..."
         generate_variants: "Generar Variantes"
         generate_hint: "Después de seleccionar atributos y valores, genere variantes automáticamente o créelas manualmente."
         save_configuration: "Guardar Configuración"
