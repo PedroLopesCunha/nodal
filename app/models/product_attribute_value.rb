@@ -7,7 +7,7 @@ class ProductAttributeValue < ApplicationRecord
 
   acts_as_list scope: :product_attribute
 
-  validates :value, presence: true
+  validates :value, presence: true, uniqueness: { scope: :product_attribute_id, message: :value_already_exists }
   validates :slug, presence: true, uniqueness: { scope: :product_attribute_id }
   validates :color_hex, format: { with: /\A#[0-9A-Fa-f]{6}\z/, message: "must be a valid hex color (e.g., #FF5733)" }, allow_blank: true
 

@@ -1,4 +1,12 @@
 es:
+  activerecord:
+    errors:
+      models:
+        product_attribute_value:
+          attributes:
+            value:
+              value_already_exists: "ya existe en este atributo"
+
   # Navigation
   navbar:
     product: "Producto"
