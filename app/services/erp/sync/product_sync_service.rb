@@ -53,13 +53,20 @@ module Erp
       end
 
       def update_product_attributes(product, data)
-        product.assign_attributes(
+        attrs = {
           name: data[:name],
           sku: data[:sku],
           description: data[:description],
           unit_price: data[:unit_price_cents],
           available: data[:available]
-        )
+        }
+
+        if data[:stock_quantity].present?
+          attrs[:stock_quantity] = data[:stock_quantity]
+          attrs[:track_stock] = true
+        end
+
+        product.assign_attributes(attrs)
 
         generate_slug(product) if product.new_record?
       end

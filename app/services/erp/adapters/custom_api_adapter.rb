@@ -163,6 +163,7 @@ module Erp
           sku: get_mapped_value(item, mappings, :sku, ['sku', 'code', 'product_code']),
           description: get_mapped_value(item, mappings, :description, ['description', 'desc']),
           unit_price_cents: parse_price(get_mapped_value(item, mappings, :unit_price, ['price', 'unit_price'])),
+          stock_quantity: parse_integer(get_mapped_value(item, mappings, :stock_quantity, ['stock', 'quantity', 'stock_quantity', 'inventory', 'qty'])),
           available: parse_boolean(get_mapped_value(item, mappings, :available, ['available', 'active', 'enabled']) || true),
           raw_data: item
         }.compact
@@ -251,6 +252,12 @@ module Erp
         end
 
         (numeric * 100).round
+      end
+
+      def parse_integer(value)
+        return nil if value.nil?
+
+        value.to_i
       end
 
       def parse_boolean(value)
