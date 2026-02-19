@@ -31,6 +31,7 @@ module Erp
         update_product_attributes(product, data)
 
         if product.save
+          update_variant_stock(product, data)
           product.mark_synced!(source: external_source)
 
           if was_new
@@ -53,22 +54,27 @@ module Erp
       end
 
       def update_product_attributes(product, data)
-        attrs = {
+        product.assign_attributes(
           name: data[:name],
           sku: data[:sku],
           description: data[:description],
           unit_price: data[:unit_price_cents],
           available: data[:available]
-        }
-
-        if data[:stock_quantity].present?
-          attrs[:stock_quantity] = data[:stock_quantity]
-          attrs[:track_stock] = true
-        end
-
-        product.assign_attributes(attrs)
+        )
 
         generate_slug(product) if product.new_record?
+      end
+
+      def update_variant_stock(product, data)
+        return unless data[:stock_quantity].present?
+
+        variant = product.default_variant
+        return unless variant
+
+        variant.update(
+          stock_quantity: data[:stock_quantity],
+          track_stock: true
+        )
       end
 
       def generate_slug(product)
