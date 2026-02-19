@@ -92,7 +92,24 @@
         </div>
       </div>
 
-      <% if variant.persisted? && variant.attribute_values.any? %>
+      <% if !variant.persisted? && @available_values_by_attribute.present? %>
+        <div class="card">
+          <div class="card-body">
+            <h5 class="card-title mb-3"><%= t('bo.product_variants.form.options') %></h5>
+            <% @available_values_by_attribute.each do |attribute, values| %>
+              <div class="mb-3">
+                <label class="form-label"><%= attribute.name %></label>
+                <select name="product_variant[attribute_value_ids][]" class="form-select">
+                  <option value=""><%= t('bo.product_variants.form.select_option', attribute: attribute.name) %></option>
+                  <% values.each do |value| %>
+                    <option value="<%= value.id %>"><%= value.value %></option>
+                  <% end %>
+                </select>
+              </div>
+            <% end %>
+          </div>
+        </div>
+      <% elsif variant.persisted? && variant.attribute_values.any? %>
         <div class="card">
           <div class="card-body">
             <h5 class="card-title mb-3"><%= t('bo.product_variants.form.options') %></h5>

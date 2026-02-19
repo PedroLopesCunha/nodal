@@ -536,6 +536,7 @@ en:
         set_as_default: "Set as default variant"
         default_hint: "The default variant is selected initially in the storefront"
         options: "Variant Options"
+        select_option: "Select %{attribute}..."
         placeholders:
           name: "e.g., T-Shirt - Red / Large"
           sku: "e.g., TSHIRT-RED-L"

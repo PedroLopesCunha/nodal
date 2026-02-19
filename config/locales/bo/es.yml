@@ -515,6 +515,7 @@ es:
         set_as_default: "Establecer como variante predeterminada"
         default_hint: "La variante predeterminada se selecciona inicialmente en la tienda"
         options: "Opciones de la Variante"
+        select_option: "Seleccionar %{attribute}..."
         placeholders:
           name: "ej: Camiseta - Rojo / Grande"
           sku: "ej: CAMISETA-ROJO-G"

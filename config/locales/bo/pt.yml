@@ -515,6 +515,7 @@ pt:
         set_as_default: "Definir como variante padrão"
         default_hint: "A variante padrão é selecionada inicialmente na loja"
         options: "Opções da Variante"
+        select_option: "Selecionar %{attribute}..."
         placeholders:
           name: "ex: T-Shirt - Vermelho / Grande"
           sku: "ex: TSHIRT-RED-L"
