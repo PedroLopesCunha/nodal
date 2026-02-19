@@ -244,16 +244,13 @@ module Erp
       def parse_price(value)
         return nil if value.nil?
 
-        case value
-        when Integer
-          value
-        when Float
-          (value * 100).round
-        when String
-          (value.to_f * 100).round
-        else
-          nil
+        numeric = case value
+        when Numeric then value
+        when String then value.to_f
+        else return nil
         end
+
+        (numeric * 100).round
       end
 
       def parse_boolean(value)

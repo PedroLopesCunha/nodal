@@ -67,19 +67,19 @@
                 <% end %>
               </td>
             </tr>
-            <% if log.errors.present? && log.errors.any? %>
+            <% if log.error_details.present? && log.error_details.any? %>
             <tr>
               <td colspan="9" class="bg-light">
                 <details>
-                  <summary class="text-danger small">View <%= log.errors.size %> error(s)</summary>
+                  <summary class="text-danger small">View <%= log.error_details.size %> error(s)</summary>
                   <ul class="list-unstyled mt-2 mb-0 small">
-                    <% log.errors.first(5).each do |error| %>
+                    <% log.error_details.first(5).each do |error| %>
                       <li class="text-danger">
                         <strong><%= error['record'] %>:</strong> <%= error['error'] %>
                       </li>
                     <% end %>
-                    <% if log.errors.size > 5 %>
-                      <li class="text-muted">... and <%= log.errors.size - 5 %> more</li>
+                    <% if log.error_details.size > 5 %>
+                      <li class="text-muted">... and <%= log.error_details.size - 5 %> more</li>
                     <% end %>
                   </ul>
                 </details>
