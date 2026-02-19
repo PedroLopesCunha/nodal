@@ -270,6 +270,8 @@ en:
         total_variants: "Variants"
         price_range: "Price Range"
         variant: "Variant"
+        stock: "Stock"
+        unlimited: "Unlimited"
         status: "Status"
         default: "Default"
         and_more_variants: "...and %{count} more variant(s)"

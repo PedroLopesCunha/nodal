@@ -263,6 +263,8 @@ pt:
         total_variants: "Variantes"
         price_range: "Gama de Preços"
         variant: "Variante"
+        stock: "Stock"
+        unlimited: "Ilimitado"
         status: "Estado"
         default: "Padrão"
         and_more_variants: "...e mais %{count} variante(s)"

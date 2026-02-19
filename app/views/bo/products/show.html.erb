@@ -138,6 +138,7 @@
                 <th><%= t('bo.products.show.variant') %></th>
                 <th><%= t('bo.products.show.sku') %></th>
                 <th><%= t('bo.products.show.price') %></th>
+                <th><%= t('bo.products.show.stock') %></th>
                 <th><%= t('bo.products.show.status') %></th>
               </tr>
             </thead>
@@ -152,6 +153,13 @@
                   </td>
                   <td><code><%= variant.sku.presence || '-' %></code></td>
                   <td><%= variant.price&.format %></td>
+                  <td>
+                    <% if variant.track_stock? %>
+                      <span class="text-<%= variant.in_stock? ? 'success' : 'danger' %>"><%= variant.stock_quantity %></span>
+                    <% else %>
+                      <span class="text-muted"><%= t('bo.products.show.unlimited') %></span>
+                    <% end %>
+                  </td>
                   <td>
                     <% if variant.available? %>
                       <span class="text-success"><i class="fa-solid fa-check"></i></span>
