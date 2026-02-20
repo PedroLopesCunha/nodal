@@ -2,7 +2,31 @@
   <i class="fa-solid fa-arrow-left me-2"></i><%= t('storefront.products.show.back_to_products') %>
 <% end %>
 
-<div class="row g-4" data-controller="image-gallery">
+<%
+  controllers = "image-gallery"
+  row_data = {}
+  if @product.has_variants? && @attributes_with_values.present?
+    controllers += " variant-selector"
+    row_data.merge!(
+      "variant-selector-variants-value" => @variants.map { |v|
+        {
+          id: v.id, name: v.name, sku: v.sku,
+          price_cents: v.unit_price_cents,
+          original_price_cents: @product.unit_price,
+          attribute_value_ids: v.attribute_values.pluck(:id),
+          in_stock: v.in_stock?, stock_quantity: v.stock_quantity,
+          track_stock: v.track_stock?, purchasable: v.purchasable?,
+          photo_url: v.photo.attached? ? url_for(v.photo.variant(resize_to_limit: [400, 400])) : nil
+        }
+      }.to_json,
+      "variant-selector-currency-symbol-value" => current_organisation.currency_symbol,
+      "variant-selector-default-price-cents-value" => @default_variant&.unit_price_cents || @product.unit_price,
+      "variant-selector-min-quantity-value" => @product.min_quantity || 1,
+      "variant-selector-default-sku-value" => @product.sku
+    )
+  end
+%>
+<div class="row g-4" data-controller="<%= controllers %>" <%= row_data.map { |k, v| "data-#{k}=\"#{ERB::Util.html_escape(v)}\"" }.join(" ").html_safe %>>
   <!-- Left Column - Product Image -->
   <div class="col-lg-6">
     <div class="card border-0 shadow-sm position-relative" style="background-color: #f8f9fa; border-radius: 12px; overflow: hidden;">
@@ -11,7 +35,7 @@
       <!-- Main Image -->
       <div class="d-flex align-items-center justify-content-center" style="min-height: 400px; padding: 40px;">
         <% if @product.photo_attached? %>
-          <%= image_tag @product.photo, class: "img-fluid", style: "max-height: 350px; object-fit: contain;", data: { image_gallery_target: "mainImage" } %>
+          <%= image_tag @product.photo, class: "img-fluid", style: "max-height: 350px; object-fit: contain;", data: { image_gallery_target: "mainImage", variant_selector_target: "image" } %>
         <% else %>
           <i class="fa-solid fa-image fa-5x text-muted"></i>
         <% end %>
@@ -50,33 +74,6 @@
 
         <!-- Description -->
         <p class="text-muted mb-4"><%= @product.description %></p>
-
-        <%# Build variants JSON for Stimulus controller if product has variants %>
-        <% if @product.has_variants? && @attributes_with_values.present? %>
-          <%
-            variants_json = @variants.map do |v|
-              {
-                id: v.id,
-                name: v.name,
-                sku: v.sku,
-                price_cents: v.unit_price_cents,
-                original_price_cents: @product.unit_price,
-                attribute_value_ids: v.attribute_values.pluck(:id),
-                in_stock: v.in_stock?,
-                stock_quantity: v.stock_quantity,
-                track_stock: v.track_stock?,
-                purchasable: v.purchasable?,
-                photo_url: v.photo.attached? ? url_for(v.photo.variant(resize_to_limit: [400, 400])) : nil
-              }
-            end
-          %>
-          <div data-controller="variant-selector"
-               data-variant-selector-variants-value="<%= variants_json.to_json %>"
-               data-variant-selector-currency-symbol-value="<%= current_organisation.currency_symbol %>"
-               data-variant-selector-default-price-cents-value="<%= @default_variant&.unit_price_cents || @product.unit_price %>"
-               data-variant-selector-min-quantity-value="<%= @product.min_quantity || 1 %>"
-               data-variant-selector-default-sku-value="<%= @product.sku %>">
-        <% end %>
 
         <!-- Price -->
         <div class="mb-3">
@@ -249,7 +246,6 @@
               <% end %>
             <% end %>
           </div>
-          </div><%# Close variant-selector controller wrapper %>
         <% else %>
           <!-- Add to Cart Section (simple product) -->
           <% unless browsing_as_member? %>

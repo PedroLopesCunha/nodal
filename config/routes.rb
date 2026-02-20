@@ -72,6 +72,7 @@ Rails.application.routes.draw do
           get :configure_variants
           patch :update_variant_configuration
           delete :delete_photo
+          patch :set_main_photo
           get :related_products
           patch :update_related_products
           patch :reorder_related_products

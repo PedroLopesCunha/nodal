@@ -303,6 +303,8 @@ en:
         image: "Product Image"
         current_image: "Current Image"
         remove_image: "Remove Image"
+        main: "Main"
+        set_as_main: "Set as main photo"
         placeholders:
           name: "Enter product name"
           product_name: "Enter product name"
@@ -951,6 +953,7 @@ en:
       variants_generated: "Generated %{created} variant(s), skipped %{skipped} existing"
       products_added_to_category: "%{count} product(s) added to category"
       product_removed_from_category: "%{name} removed from category"
+      main_photo_set: "Main photo updated successfully"
       settings_updated: "Settings updated successfully"
       profile_updated: "Profile updated successfully"
       member_invited: "Invitation sent successfully"

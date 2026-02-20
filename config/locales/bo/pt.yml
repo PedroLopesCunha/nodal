@@ -296,6 +296,8 @@ pt:
         image: "Imagem do Produto"
         current_image: "Imagem Atual"
         remove_image: "Remover Imagem"
+        main: "Principal"
+        set_as_main: "Definir como foto principal"
         placeholders:
           name: "Introduza o nome do produto"
           product_name: "Introduza o nome do produto"
@@ -927,6 +929,7 @@ pt:
       variants_generated: "Gerada(s) %{created} variante(s), ignorada(s) %{skipped} existente(s)"
       products_added_to_category: "%{count} produto(s) adicionado(s) à categoria"
       product_removed_from_category: "%{name} removido da categoria"
+      main_photo_set: "Foto principal atualizada com sucesso"
       settings_updated: "Definições atualizadas com sucesso"
       profile_updated: "Perfil atualizado com sucesso"
       member_invited: "Convite enviado com sucesso"

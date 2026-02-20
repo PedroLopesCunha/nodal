@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2026_02_04_145359) do
+ActiveRecord::Schema[7.1].define(version: 2026_02_20_153023) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -442,6 +442,7 @@ ActiveRecord::Schema[7.1].define(version: 2026_02_04_145359) do
     t.datetime "last_synced_at"
     t.text "sync_error"
     t.boolean "hide_related_products", default: false, null: false
+    t.bigint "cover_photo_blob_id"
     t.index ["category_id"], name: "index_products_on_category_id"
     t.index ["organisation_id", "external_id", "external_source"], name: "index_products_on_org_external_id_source", unique: true, where: "(external_id IS NOT NULL)"
     t.index ["organisation_id"], name: "index_products_on_organisation_id"

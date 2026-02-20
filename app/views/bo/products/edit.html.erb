@@ -129,10 +129,26 @@
           <% if @product.photos.attached? && @product.photos.any? %>
             <div class="mb-3">
               <label class="form-label"><%= t('bo.products.form.current_images') %></label>
-              <div class="d-flex flex-wrap gap-2">
+              <div class="d-flex flex-wrap gap-2" data-controller="lightbox">
+                <% main_blob_id = @product.cover_photo_blob_id || @product.photos.first&.blob_id %>
                 <% @product.photos.each do |photo| %>
                   <div class="position-relative border rounded p-1" style="width: 120px;">
-                    <%= image_tag photo, style: "width: 100%; height: 100px; object-fit: cover; border-radius: 4px;" %>
+                    <a href="#" data-action="lightbox#open" data-lightbox-url="<%= url_for(photo) %>" style="cursor: zoom-in;">
+                      <%= image_tag photo, style: "width: 100%; height: 100px; object-fit: cover; border-radius: 4px;" %>
+                    </a>
+                    <% if photo.blob_id == main_blob_id %>
+                      <span class="position-absolute badge bg-primary" style="bottom: 4px; left: 50%; transform: translateX(-50%); font-size: 10px;">
+                        <%= t('bo.products.form.main') %>
+                      </span>
+                    <% else %>
+                      <%= link_to set_main_photo_bo_product_path(params[:org_slug], @product, photo_id: photo.blob_id),
+                          data: { turbo_method: :patch },
+                          class: "position-absolute btn btn-primary btn-sm",
+                          style: "bottom: 4px; left: 50%; transform: translateX(-50%); font-size: 9px; padding: 1px 6px;",
+                          title: t('bo.products.form.set_as_main') do %>
+                        <i class="fa-solid fa-star" style="font-size: 9px;"></i>
+                      <% end %>
+                    <% end %>
                     <%= link_to delete_photo_bo_product_path(params[:org_slug], @product, photo_id: photo.id),
                         data: { turbo_method: :delete, turbo_confirm: t('bo.common.confirm.delete_image') },
                         class: "position-absolute top-0 end-0 btn btn-danger btn-sm rounded-circle",
@@ -141,6 +157,7 @@
                     <% end %>
                   </div>
                 <% end %>
+                <%= render "shared/lightbox" %>
               </div>
             </div>
           <% end %>

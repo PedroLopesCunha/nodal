@@ -85,15 +85,19 @@
         <div>
           <small class="text-muted d-block mb-2"><%= t('bo.products.form.product_images') %></small>
           <% if @product.photos.attached? && @product.photos.any? %>
-            <div class="d-flex flex-wrap gap-2">
-              <% @product.photos.each_with_index do |photo, index| %>
+            <div class="d-flex flex-wrap gap-2" data-controller="lightbox">
+              <% main_blob_id = @product.cover_photo_blob_id || @product.photos.first&.blob_id %>
+              <% @product.photos.each do |photo| %>
                 <div class="border rounded p-1 position-relative" style="width: 120px;">
-                  <%= image_tag photo, style: "width: 100%; height: 100px; object-fit: cover; border-radius: 4px;" %>
-                  <% if index == 0 %>
+                  <a href="#" data-action="lightbox#open" data-lightbox-url="<%= url_for(photo) %>" style="cursor: zoom-in;">
+                    <%= image_tag photo, style: "width: 100%; height: 100px; object-fit: cover; border-radius: 4px;" %>
+                  </a>
+                  <% if photo.blob_id == main_blob_id %>
                     <span class="badge bg-primary position-absolute" style="bottom: 4px; left: 4px; font-size: 10px;"><%= t('bo.products.show.main') %></span>
                   <% end %>
                 </div>
               <% end %>
+              <%= render "shared/lightbox" %>
             </div>
           <% else %>
             <p class="text-muted mb-0"><%= t('bo.products.show.no_images') %></p>
