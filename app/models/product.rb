@@ -30,9 +30,13 @@ class Product < ApplicationRecord
 
   has_many_attached :photos
 
-  # Backward compatibility: returns first photo
+  # Returns the cover photo if set, otherwise falls back to first photo
   def photo
-    photos.first
+    if cover_photo_blob_id.present?
+      photos.find { |p| p.blob_id == cover_photo_blob_id } || photos.first
+    else
+      photos.first
+    end
   end
 
   # Check if any photos are attached

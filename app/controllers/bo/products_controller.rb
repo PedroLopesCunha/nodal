@@ -1,7 +1,7 @@
 require "csv"
 
 class Bo::ProductsController < Bo::BaseController
-  before_action :set_product, only: [:show, :edit, :update, :destroy, :configure_variants, :update_variant_configuration, :delete_photo, :related_products, :update_related_products, :reorder_related_products]
+  before_action :set_product, only: [:show, :edit, :update, :destroy, :configure_variants, :update_variant_configuration, :delete_photo, :set_main_photo, :related_products, :update_related_products, :reorder_related_products]
 
   # Import actions
   def import
@@ -161,6 +161,11 @@ class Bo::ProductsController < Bo::BaseController
     photo = @product.photos.find(params[:photo_id])
     photo.purge
     redirect_to edit_bo_product_path(params[:org_slug], @product), notice: t('bo.flash.image_deleted')
+  end
+
+  def set_main_photo
+    @product.update!(cover_photo_blob_id: params[:photo_id].to_i)
+    redirect_to edit_bo_product_path(params[:org_slug], @product), notice: t('bo.flash.main_photo_set')
   end
 
   def configure_variants
