@@ -12,6 +12,7 @@ export default class extends Controller {
 
   connect() {
     this.selectedVariant = null
+    this.originalImageUrl = this.hasImageTarget ? this.imageTarget.src : null
     this.updateSelection()
     this.updateTotal()
   }
@@ -112,9 +113,9 @@ export default class extends Controller {
       }
     }
 
-    // Update image if variant has specific photo
-    if (this.hasImageTarget && variant.photo_url) {
-      this.imageTarget.src = variant.photo_url
+    // Update image if variant has specific photo, otherwise revert to original
+    if (this.hasImageTarget) {
+      this.imageTarget.src = variant.photo_url || this.originalImageUrl
     }
   }
 
