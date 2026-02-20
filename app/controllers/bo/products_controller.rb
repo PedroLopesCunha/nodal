@@ -141,9 +141,11 @@ class Bo::ProductsController < Bo::BaseController
 
   def update
     update_params = product_params
-    update_params.delete(:photos) if update_params[:photos].blank? || update_params[:photos] == [""]
+    new_photos = update_params.delete(:photos)
+    new_photos = nil if new_photos.blank? || new_photos == [""]
 
     if @product.update(update_params)
+      @product.photos.attach(new_photos) if new_photos
       redirect_to bo_product_path(params[:org_slug], @product), notice: "Product was successfully updated."
     else
       render :edit, status: :unprocessable_entity
