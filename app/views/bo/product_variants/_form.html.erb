@@ -37,7 +37,7 @@
           <div class="row g-3">
             <div class="col-md-12">
               <div class="form-check">
-                <%= f.check_box :track_stock, class: "form-check-input", data: { controller: "toggle-field", toggle_field_target_value: "#stock-quantity-field" } %>
+                <%= f.check_box :track_stock, class: "form-check-input", data: { controller: "toggle-field", toggle_field_target_value: "#stock-quantity-field", action: "change->toggle-field#change" } %>
                 <%= f.label :track_stock, t('bo.product_variants.form.track_stock'), class: "form-check-label" %>
               </div>
               <small class="text-muted"><%= t('bo.product_variants.form.track_stock_hint') %></small>
