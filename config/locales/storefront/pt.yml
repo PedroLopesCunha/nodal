@@ -65,6 +65,7 @@ pt:
         empty_catalog: "Não existem produtos disponíveis de momento."
         sale_badge: "PROMOÇÃO"
         min_order: "Encomenda mín."
+        price_on_request: "Preço sob consulta"
         showing_products: "A mostrar %{from}-%{to} de %{count} produtos"
       show:
         back_to_products: "Voltar aos produtos"
@@ -95,6 +96,16 @@ pt:
         select_option: "Selecione %{attribute}..."
         from_price: "A partir de %{price}"
         related_products: "Também pode gostar"
+        price_on_request: "Preço sob consulta"
+        price_on_request_contact: "Por favor, contacte-nos para obter o preço deste produto."
+        price_on_request_not_purchasable: "Este produto requer uma cotação. Por favor, contacte-nos para obter preço."
+        price_on_request_cta_title: "Tem interesse neste produto?"
+        price_on_request_cta_subtitle: "Contacte-nos para obter um orçamento."
+        price_request_email_btn: "Enviar Email"
+        price_request_whatsapp_btn: "WhatsApp"
+        price_request_email_subject: "Pedido de Preço — %{product}"
+        price_request_email_body: "Olá,\n\nGostaria de solicitar o preço do seguinte produto:\n\nProduto: %{product}\nSKU: %{sku}\n\nPor favor envie-me um orçamento.\n\nCom os melhores cumprimentos,\n%{customer}"
+        price_request_whatsapp_body: "Olá, gostaria de solicitar o preço de: *%{product}* (SKU: %{sku}). Poderiam enviar-me um orçamento?"
 
     # Secção do carrinho
     cart:

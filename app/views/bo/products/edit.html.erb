@@ -181,6 +181,12 @@
             <label class="form-check-label" for="availableSwitch"><%= t('bo.products.form.available_for_sale') %></label>
           </div>
           <small class="text-muted"><%= t('bo.products.form.unavailable_hint') %></small>
+
+          <div class="form-check form-switch mt-3">
+            <%= f.check_box :price_on_request, class: "form-check-input", role: "switch", id: "priceOnRequestSwitch" %>
+            <label class="form-check-label" for="priceOnRequestSwitch"><%= t('bo.products.form.price_on_request') %></label>
+          </div>
+          <small class="text-muted"><%= t('bo.products.form.price_on_request_hint') %></small>
         </div>
       </div>
 

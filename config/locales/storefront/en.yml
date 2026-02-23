@@ -65,6 +65,7 @@ en:
         empty_catalog: "No products are available at this time."
         sale_badge: "SALE"
         min_order: "Min. order"
+        price_on_request: "Price on Request"
         showing_products: "Showing %{from}-%{to} of %{count} products"
       show:
         back_to_products: "Back to products"
@@ -95,6 +96,16 @@ en:
         select_option: "Select %{attribute}..."
         from_price: "From %{price}"
         related_products: "You may also like"
+        price_on_request: "Price on Request"
+        price_on_request_contact: "Please contact us for pricing on this product."
+        price_on_request_not_purchasable: "This product requires a price quote. Please contact us for pricing."
+        price_on_request_cta_title: "Interested in this product?"
+        price_on_request_cta_subtitle: "Contact us to get a quote for this product."
+        price_request_email_btn: "Send Email"
+        price_request_whatsapp_btn: "WhatsApp"
+        price_request_email_subject: "Price Request — %{product}"
+        price_request_email_body: "Hello,\n\nI would like to request pricing for the following product:\n\nProduct: %{product}\nSKU: %{sku}\n\nPlease send me a quote.\n\nBest regards,\n%{customer}"
+        price_request_whatsapp_body: "Hello, I would like to request pricing for: *%{product}* (SKU: %{sku}). Could you send me a quote?"
 
     # Cart section
     cart:

@@ -77,7 +77,9 @@
 
         <!-- Price -->
         <div class="mb-3">
-          <% if discount_breakdown[:has_discount] %>
+          <% if @product.price_on_request? %>
+            <span class="text-primary" style="font-size: 2rem; font-weight: 700;"><%= t('storefront.products.show.price_on_request') %></span>
+          <% elsif discount_breakdown[:has_discount] %>
             <div class="price-with-discount">
               <span class="original-price text-muted text-decoration-line-through" style="font-size: 1.5rem;">
                 <%= humanized_money_with_symbol(discount_breakdown[:base_price]) %>
@@ -97,11 +99,13 @@
           <% else %>
             <span class="text-primary" style="font-size: 2.5rem; font-weight: 700;"><%= humanized_money_with_symbol(@product.price) %></span>
           <% end %>
-          <span class="text-muted fs-5">/ <%= @product.unit_description || 'unit' %></span>
+          <% unless @product.price_on_request? %>
+            <span class="text-muted fs-5">/ <%= @product.unit_description || 'unit' %></span>
+          <% end %>
         </div>
 
         <!-- Discount Details Section -->
-        <% if discount_breakdown[:has_discount] %>
+        <% if discount_breakdown[:has_discount] && !@product.price_on_request? %>
           <div class="alert alert-success mb-4" style="border-radius: 10px;">
             <h6 class="alert-heading mb-3">
               <i class="fa-solid fa-tags me-2"></i><%= t('storefront.products.show.available_discounts') %>
@@ -217,7 +221,7 @@
             <% end %>
 
             <!-- Add to Cart Section -->
-            <% unless browsing_as_member? %>
+            <% unless browsing_as_member? || @product.price_on_request? %>
               <%= form_with url: order_items_path(org_slug: params[:org_slug]), method: :post, local: true, class: "d-flex align-items-center gap-3 flex-wrap" do |f| %>
                 <%= hidden_field_tag :product_id, @product.id %>
                 <%= hidden_field_tag :variant_id, @default_variant&.id, data: { variant_selector_target: "variantId" } %>
@@ -248,7 +252,7 @@
           </div>
         <% else %>
           <!-- Add to Cart Section (simple product) -->
-          <% unless browsing_as_member? %>
+          <% unless browsing_as_member? || @product.price_on_request? %>
             <%= form_with url: order_items_path(org_slug: params[:org_slug]), method: :post, local: true, class: "d-flex align-items-center gap-3 flex-wrap" do |f| %>
               <%= hidden_field_tag :product_id, @product.id %>
               <%= hidden_field_tag :variant_id, @default_variant&.id %>
@@ -274,7 +278,43 @@
           <% end %>
         <% end %>
 
-        <% unless @product.available? %>
+        <% if @product.price_on_request? %>
+          <%
+            price_request_subject = t('storefront.products.show.price_request_email_subject', product: @product.name)
+            price_request_body = t('storefront.products.show.price_request_email_body',
+              product: @product.name,
+              sku: @product.sku.presence || '-',
+              customer: current_customer&.contact_name || (current_member ? "#{current_member.first_name} #{current_member.last_name}" : ''))
+            whatsapp_message = t('storefront.products.show.price_request_whatsapp_body',
+              product: @product.name,
+              sku: @product.sku.presence || '-')
+          %>
+          <div class="card border-0 shadow-sm mt-3" style="border-radius: 10px; background-color: #f0f7ff;">
+            <div class="card-body text-center py-4">
+              <h6 class="mb-2"><i class="fa-solid fa-tag me-2"></i><%= t('storefront.products.show.price_on_request_cta_title') %></h6>
+              <p class="text-muted small mb-3"><%= t('storefront.products.show.price_on_request_cta_subtitle') %></p>
+              <div class="d-flex justify-content-center gap-2 flex-wrap">
+                <% if current_organisation.contact_email.present? %>
+                  <%= mail_to current_organisation.contact_email, nil,
+                        subject: price_request_subject,
+                        body: price_request_body,
+                        class: "btn btn-primary px-4",
+                        style: "border-radius: 8px;" do %>
+                    <i class="fa-solid fa-envelope me-2"></i><%= t('storefront.products.show.price_request_email_btn') %>
+                  <% end %>
+                <% end %>
+                <% if current_organisation.whatsapp.present? %>
+                  <%= link_to "https://wa.me/#{current_organisation.whatsapp.gsub(/\D/, '')}?text=#{ERB::Util.url_encode(whatsapp_message)}",
+                        target: "_blank",
+                        class: "btn btn-success px-4",
+                        style: "border-radius: 8px;" do %>
+                    <i class="fa-brands fa-whatsapp me-2"></i><%= t('storefront.products.show.price_request_whatsapp_btn') %>
+                  <% end %>
+                <% end %>
+              </div>
+            </div>
+          </div>
+        <% elsif !@product.available? %>
           <small class="text-danger d-block mt-3">
             <i class="fa-solid fa-circle-xmark me-1"></i><%= t('storefront.products.show.out_of_stock_message') %>
           </small>

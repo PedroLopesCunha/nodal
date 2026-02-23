@@ -85,7 +85,10 @@ class Bo::ProductsController < Bo::BaseController
     end
 
     # Category filter
-    if params[:category_id].present?
+    if params[:category_id] == "none"
+      product_ids_with_category = CategoryProduct.select(:product_id)
+      @products = @products.where.not(id: product_ids_with_category)
+    elsif params[:category_id].present?
       category = current_organisation.categories.kept.find_by(id: params[:category_id])
       if category
         @current_category = category
@@ -101,6 +104,13 @@ class Bo::ProductsController < Bo::BaseController
       when "simple" then @products = @products.simple
       when "variable" then @products = @products.variable
       end
+    end
+
+    # Price status filter
+    case params[:price_status]
+    when "on_request" then @products = @products.where(price_on_request: true)
+    when "zero_price" then @products = @products.where(price_on_request: false, unit_price: [nil, 0])
+    when "has_price" then @products = @products.where(price_on_request: false).where("unit_price > 0")
     end
 
     # Sorting
@@ -259,7 +269,7 @@ class Bo::ProductsController < Bo::BaseController
 
   def filter_params_hash
     { query: params[:query], category_id: params[:category_id], product_type: params[:product_type],
-      sort: params[:sort], direction: params[:direction] }.compact_blank
+      price_status: params[:price_status], sort: params[:sort], direction: params[:direction] }.compact_blank
   end
 
   def sort_link_params(column)
@@ -273,7 +283,7 @@ class Bo::ProductsController < Bo::BaseController
   end
 
   def product_params
-    params.require(:product).permit(:name, :slug, :sku, :description, :price, :unit_description, :min_quantity, :min_quantity_type, :available, :category_id, category_ids: [], photos: [])
+    params.require(:product).permit(:name, :slug, :sku, :description, :price, :unit_description, :min_quantity, :min_quantity_type, :available, :price_on_request, :category_id, category_ids: [], photos: [])
   end
 
   def detect_csv_delimiter(content)

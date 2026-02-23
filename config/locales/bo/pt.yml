@@ -231,8 +231,14 @@ pt:
         filters:
           category: "Categoria"
           all_categories: "Todas as Categorias"
+          no_category: "Sem Categoria"
           product_type: "Tipo de Produto"
           all_types: "Todos os Tipos"
+          all_prices: "Todos os Preços"
+          price_on_request: "Preço sob consulta"
+          on_request: "Preço sob consulta"
+          zero_price: "Preço zero"
+          has_price: "Com preço"
           active_filters: "Filtros ativos"
         table:
           product: "Produto"
@@ -298,6 +304,8 @@ pt:
         remove_image: "Remover Imagem"
         main: "Principal"
         set_as_main: "Definir como foto principal"
+        price_on_request: "Preço sob consulta"
+        price_on_request_hint: "Quando ativado, o preço é ocultado e os clientes devem contactá-lo para obter preço"
         placeholders:
           name: "Introduza o nome do produto"
           product_name: "Introduza o nome do produto"

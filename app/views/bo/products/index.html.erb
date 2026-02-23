@@ -62,6 +62,7 @@
         <div class="col-md-4">
           <select name="category_id" class="form-select form-select-sm" onchange="this.form.submit()">
             <option value=""><%= t('bo.products.index.filters.all_categories') %></option>
+            <option value="none" <%= 'selected' if params[:category_id] == 'none' %>><%= t('bo.products.index.filters.no_category') %></option>
             <% @categories.each do |category| %>
               <option value="<%= category.id %>" <%= 'selected' if params[:category_id].to_s == category.id.to_s %>><%= category.full_path %></option>
             <% end %>
@@ -72,6 +73,14 @@
             <option value=""><%= t('bo.products.index.filters.all_types') %></option>
             <option value="simple" <%= 'selected' if params[:product_type] == 'simple' %>><%= t('bo.products.index.table.simple') %></option>
             <option value="variable" <%= 'selected' if params[:product_type] == 'variable' %>><%= t('bo.products.index.table.variable') %></option>
+          </select>
+        </div>
+        <div class="col-md-4">
+          <select name="price_status" class="form-select form-select-sm" onchange="this.form.submit()">
+            <option value=""><%= t('bo.products.index.filters.all_prices') %></option>
+            <option value="on_request" <%= 'selected' if params[:price_status] == 'on_request' %>><%= t('bo.products.index.filters.price_on_request') %></option>
+            <option value="zero_price" <%= 'selected' if params[:price_status] == 'zero_price' %>><%= t('bo.products.index.filters.zero_price') %></option>
+            <option value="has_price" <%= 'selected' if params[:price_status] == 'has_price' %>><%= t('bo.products.index.filters.has_price') %></option>
           </select>
         </div>
       </div>
@@ -87,7 +96,11 @@
         "<%= params[:query] %>" <i class="fa-solid fa-xmark ms-1"></i>
       <% end %>
     <% end %>
-    <% if @current_category %>
+    <% if params[:category_id] == 'none' %>
+      <%= link_to bo_products_path(params[:org_slug], filter_params_hash.except(:category_id)), class: "badge bg-secondary text-decoration-none" do %>
+        <%= t('bo.products.index.filters.no_category') %> <i class="fa-solid fa-xmark ms-1"></i>
+      <% end %>
+    <% elsif @current_category %>
       <%= link_to bo_products_path(params[:org_slug], filter_params_hash.except(:category_id)), class: "badge bg-secondary text-decoration-none" do %>
         <%= @current_category.name %> <i class="fa-solid fa-xmark ms-1"></i>
       <% end %>
@@ -95,6 +108,11 @@
     <% if params[:product_type].present? %>
       <%= link_to bo_products_path(params[:org_slug], filter_params_hash.except(:product_type)), class: "badge bg-secondary text-decoration-none" do %>
         <%= params[:product_type] == 'simple' ? t('bo.products.index.table.simple') : t('bo.products.index.table.variable') %> <i class="fa-solid fa-xmark ms-1"></i>
+      <% end %>
+    <% end %>
+    <% if params[:price_status].present? %>
+      <%= link_to bo_products_path(params[:org_slug], filter_params_hash.except(:price_status)), class: "badge bg-secondary text-decoration-none" do %>
+        <%= t("bo.products.index.filters.#{params[:price_status]}") %> <i class="fa-solid fa-xmark ms-1"></i>
       <% end %>
     <% end %>
   </div>
@@ -163,7 +181,13 @@
               <span class="badge bg-secondary-subtle text-secondary"><%= t('bo.products.index.table.simple') %></span>
             <% end %>
           </td>
-          <td><%= product.display_price %></td>
+          <td>
+            <% if product.price_on_request? %>
+              <span class="badge bg-warning-subtle text-warning"><i class="fa-solid fa-tag me-1"></i><%= t('bo.products.form.price_on_request') %></span>
+            <% else %>
+              <%= product.display_price %>
+            <% end %>
+          </td>
           <td class="text-end product-actions" style="white-space: nowrap;" onclick="event.stopPropagation();">
             <%= link_to bo_product_path(params[:org_slug], product, filter_params_hash), class: "btn btn-sm btn-link text-muted" do %>
               <i class="fa-solid fa-eye"></i>

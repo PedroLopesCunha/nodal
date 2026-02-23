@@ -30,7 +30,7 @@ class ProductVariant < ApplicationRecord
   end
 
   def purchasable?
-    available? && in_stock?
+    available? && in_stock? && !product.price_on_request?
   end
 
   def option_values_string
