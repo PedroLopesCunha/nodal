@@ -61,7 +61,11 @@
           </div>
           <div class="col-md-6 mb-3">
             <small class="text-muted d-block"><%= t('bo.products.form.unit_price', currency: @current_organisation.currency_symbol) %></small>
-            <strong><%= humanized_money_with_symbol(@product.price) || '-'  %></strong>
+            <% if @product.price_on_request? %>
+              <span class="badge bg-warning-subtle text-warning"><i class="fa-solid fa-tag me-1"></i><%= t('bo.products.form.price_on_request') %></span>
+            <% else %>
+              <strong><%= humanized_money_with_symbol(@product.price) || '-'  %></strong>
+            <% end %>
           </div>
           <div class="col-md-6 mb-3">
             <small class="text-muted d-block"><%= t('bo.products.form.unit_description') %></small>

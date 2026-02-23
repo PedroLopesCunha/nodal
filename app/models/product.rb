@@ -91,6 +91,7 @@ class Product < ApplicationRecord
   end
 
   def purchasable?
+    return false if price_on_request?
     product_variants.available.any?(&:purchasable?)
   end
 

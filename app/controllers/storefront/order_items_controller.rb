@@ -3,6 +3,12 @@ class Storefront::OrderItemsController < Storefront::BaseController
 
   def create
     @product = current_organisation.products.where(available: true).find(params[:product_id])
+
+    if @product.price_on_request?
+      redirect_to product_path(org_slug: params[:org_slug], id: @product), alert: t('storefront.products.show.price_on_request_not_purchasable')
+      return
+    end
+
     @order = current_cart
 
     # Find or default to the product's default variant

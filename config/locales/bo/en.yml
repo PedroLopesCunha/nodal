@@ -237,8 +237,14 @@ en:
         filters:
           category: "Category"
           all_categories: "All Categories"
+          no_category: "No Category"
           product_type: "Product Type"
           all_types: "All Types"
+          all_prices: "All Prices"
+          price_on_request: "Price on Request"
+          on_request: "Price on Request"
+          zero_price: "Zero Price"
+          has_price: "Has Price"
           active_filters: "Active filters"
         table:
           product: "Product"
@@ -305,6 +311,8 @@ en:
         remove_image: "Remove Image"
         main: "Main"
         set_as_main: "Set as main photo"
+        price_on_request: "Price on Request"
+        price_on_request_hint: "When enabled, the price is hidden and customers must contact you for pricing"
         placeholders:
           name: "Enter product name"
           product_name: "Enter product name"
