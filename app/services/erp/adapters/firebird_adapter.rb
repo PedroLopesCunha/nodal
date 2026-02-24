@@ -51,7 +51,7 @@ module Erp
           query_as_hashes(db, "SELECT * FROM #{safe_table_name(products_table)}")
         end
 
-        rows.map { |row| normalize_row(row) }
+        rows.map { |row| normalize_product(normalize_row(row)) }
       rescue => e
         raise_erp_error(e)
       end
@@ -63,7 +63,7 @@ module Erp
           query_as_hashes(db, "SELECT * FROM #{safe_table_name(customers_table)}")
         end
 
-        rows.map { |row| normalize_row(row) }
+        rows.map { |row| normalize_customer(normalize_row(row)) }
       rescue => e
         raise_erp_error(e)
       end
@@ -242,6 +242,77 @@ module Erp
       # Ruby encoding name (used for string conversion)
       def ruby_encoding
         ENCODING_MAP[encoding.upcase] || encoding
+      end
+
+      # Apply field mappings to convert raw Firebird rows into Nodal format
+      def normalize_product(row)
+        mappings = product_field_mappings
+
+        {
+          external_id: get_mapped_value(row, mappings, :external_id)&.to_s,
+          name: get_mapped_value(row, mappings, :name),
+          sku: get_mapped_value(row, mappings, :sku),
+          description: get_mapped_value(row, mappings, :description),
+          unit_price_cents: parse_price(get_mapped_value(row, mappings, :unit_price)),
+          available: parse_boolean(get_mapped_value(row, mappings, :available)),
+          raw_data: row
+        }.compact
+      end
+
+      def normalize_customer(row)
+        mappings = customer_field_mappings
+
+        {
+          external_id: get_mapped_value(row, mappings, :external_id)&.to_s,
+          company_name: get_mapped_value(row, mappings, :company_name),
+          contact_name: get_mapped_value(row, mappings, :contact_name),
+          email: get_mapped_value(row, mappings, :email),
+          phone: get_mapped_value(row, mappings, :contact_phone),
+          active: parse_boolean(get_mapped_value(row, mappings, :active)),
+          raw_data: row
+        }.compact
+      end
+
+      # Get a value from a row using the configured field mapping
+      def get_mapped_value(row, mappings, nodal_field)
+        mapped_key = mappings[nodal_field]
+        return nil if mapped_key.blank?
+
+        # Try both the exact key and case-insensitive match
+        row[mapped_key] || row[mapped_key.upcase] || row[mapped_key.downcase]
+      end
+
+      def parse_price(value)
+        return nil if value.nil?
+
+        numeric = case value
+        when Numeric then value
+        when String then value.to_f
+        else return nil
+        end
+
+        (numeric * 100).round
+      end
+
+      def parse_boolean(value)
+        return true if value.nil?
+        return value if [true, false].include?(value)
+        return true if value.to_s.downcase.in?(%w[true 1 yes active enabled act])
+
+        false
+      end
+
+      # Field mappings from credentials
+      def product_field_mappings
+        mappings = credentials.dig(:field_mappings, :products) ||
+                   credentials.dig('field_mappings', 'products') || {}
+        mappings.transform_keys(&:to_sym)
+      end
+
+      def customer_field_mappings
+        mappings = credentials.dig(:field_mappings, :customers) ||
+                   credentials.dig('field_mappings', 'customers') || {}
+        mappings.transform_keys(&:to_sym)
       end
 
       # Field mappings from credentials
