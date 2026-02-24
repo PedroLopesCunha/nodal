@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2026_02_23_124349) do
+ActiveRecord::Schema[7.1].define(version: 2026_02_24_162009) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -269,12 +269,17 @@ ActiveRecord::Schema[7.1].define(version: 2026_02_23_124349) do
     t.string "auto_discount_type"
     t.decimal "auto_discount_value", precision: 10, scale: 4
     t.integer "auto_discount_amount_cents"
+    t.string "external_id"
+    t.string "external_source"
+    t.datetime "last_synced_at"
+    t.text "sync_error"
     t.index ["applied_by_id"], name: "index_orders_on_applied_by_id"
     t.index ["billing_address_id"], name: "index_orders_on_billing_address_id"
     t.index ["customer_id"], name: "index_orders_on_customer_id"
     t.index ["order_discount_id"], name: "index_orders_on_order_discount_id"
     t.index ["order_number"], name: "index_orders_on_order_number", unique: true
     t.index ["organisation_id", "customer_id"], name: "index_orders_on_organisation_id_and_customer_id"
+    t.index ["organisation_id", "external_id", "external_source"], name: "index_orders_on_org_external_id_source", unique: true, where: "(external_id IS NOT NULL)"
     t.index ["organisation_id", "placed_at"], name: "index_orders_on_organisation_id_and_placed_at"
     t.index ["organisation_id"], name: "index_orders_on_organisation_id"
     t.index ["shipping_address_id"], name: "index_orders_on_shipping_address_id"

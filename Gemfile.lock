@@ -167,6 +167,7 @@ GEM
       net-http (~> 0.5)
     faraday-retry (2.3.2)
       faraday (~> 2.0)
+    fb (0.10.0)
     ffi (1.17.2-aarch64-linux-gnu)
     ffi (1.17.2-aarch64-linux-musl)
     ffi (1.17.2-arm-linux-gnu)
@@ -478,6 +479,7 @@ DEPENDENCIES
   discard
   dotenv-rails
   faraday (~> 2.0)
+  fb (~> 0.9)
   font-awesome-sass (~> 6.1)
   httplog
   image_processing (~> 1.2)

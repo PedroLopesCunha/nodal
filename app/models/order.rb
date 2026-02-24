@@ -1,4 +1,6 @@
 class Order < ApplicationRecord
+  include ErpSyncable
+
   STATUSES = %w[in_process processed completed].freeze
   PAYMENT_STATUSES = %w[pending paid failed refunded].freeze
   DELIVERY_METHODS = %w[pickup delivery].freeze
