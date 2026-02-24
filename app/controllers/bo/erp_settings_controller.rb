@@ -93,12 +93,17 @@ class Bo::ErpSettingsController < Bo::BaseController
       return
     end
 
-    # Using perform_now for synchronous execution (no Redis/Sidekiq needed)
-    # Change to perform_later when Redis + worker dyno are configured
-    ErpSyncJob.perform_now(current_organisation.id, sync_type: 'manual')
+    # Run in a background thread so the response returns immediately
+    # (avoids Heroku's 30-second request timeout on large datasets)
+    org_id = current_organisation.id
+    Thread.new do
+      Rails.application.executor.wrap do
+        ErpSyncJob.perform_now(org_id, sync_type: 'manual')
+      end
+    end
 
     redirect_to edit_bo_erp_settings_path(org_slug: current_organisation.slug),
-                notice: "Sync completed. Check the sync logs for details."
+                notice: "Sync started. Refresh the page to check progress."
   end
 
   def sync_logs
