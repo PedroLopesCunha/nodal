@@ -174,10 +174,11 @@ module Erp
       def with_connection
         raise Erp::ConnectionError, "Firebird client library (fb gem) is not installed" unless self.class.fb_available?
 
+        port = credentials[:port].presence || '3050'
+        connection_string = "#{credentials[:host]}/#{port}:#{credentials[:database_path]}"
+
         db = Fb::Database.new(
-          host: credentials[:host],
-          port: (credentials[:port].presence || '3050').to_i,
-          database: credentials[:database_path],
+          database: connection_string,
           username: credentials[:username],
           password: credentials[:password],
           charset: encoding
