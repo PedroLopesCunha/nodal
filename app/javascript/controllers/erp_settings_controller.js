@@ -23,7 +23,8 @@ export default class extends Controller {
     "productMapping",
     "customerMapping",
     "orderMapping",
-    "orderItemMapping"
+    "orderItemMapping",
+    "adapterCredentials"
   ]
 
   // Nodal field definitions
@@ -76,6 +77,14 @@ export default class extends Controller {
     this.erpCustomerFields = []
     this.erpOrderFields = []
     this.erpOrderItemFields = []
+
+    // Disable inputs in hidden adapter credential panels so they don't submit
+    const activeAdapter = this.adapterSelectTarget.value
+    this.adapterCredentialsTargets.forEach(panel => {
+      if (panel.dataset.adapterType !== activeAdapter) {
+        panel.querySelectorAll("input").forEach(input => { input.disabled = true })
+      }
+    })
   }
 
   toggleEnabled() {
@@ -93,6 +102,15 @@ export default class extends Controller {
     } else {
       this.credentialsCardTarget.classList.add("d-none")
     }
+
+    // Show/hide the correct credentials panel and disable hidden inputs
+    this.adapterCredentialsTargets.forEach(panel => {
+      const isActive = panel.dataset.adapterType === adapterType
+      panel.classList.toggle("d-none", !isActive)
+      panel.querySelectorAll("input").forEach(input => {
+        input.disabled = !isActive
+      })
+    })
   }
 
   async testConnection(event) {
