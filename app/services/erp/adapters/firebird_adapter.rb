@@ -35,7 +35,7 @@ module Erp
         return [] unless valid_credentials?
 
         rows = with_connection do |db|
-          db.query("SELECT * FROM #{safe_table_name(products_table)}")
+          query_as_hashes(db, "SELECT * FROM #{safe_table_name(products_table)}")
         end
 
         rows.map { |row| normalize_row(row) }
@@ -47,7 +47,7 @@ module Erp
         return [] unless valid_credentials?
 
         rows = with_connection do |db|
-          db.query("SELECT * FROM #{safe_table_name(customers_table)}")
+          query_as_hashes(db, "SELECT * FROM #{safe_table_name(customers_table)}")
         end
 
         rows.map { |row| normalize_row(row) }
@@ -59,7 +59,7 @@ module Erp
         return nil unless valid_credentials?
 
         row = with_connection do |db|
-          db.query("SELECT FIRST 1 * FROM #{safe_table_name(products_table)}").first
+          query_as_hashes(db, "SELECT FIRST 1 * FROM #{safe_table_name(products_table)}").first
         end
 
         return nil unless row
@@ -73,7 +73,7 @@ module Erp
         return nil unless valid_credentials?
 
         row = with_connection do |db|
-          db.query("SELECT FIRST 1 * FROM #{safe_table_name(customers_table)}").first
+          query_as_hashes(db, "SELECT FIRST 1 * FROM #{safe_table_name(customers_table)}").first
         end
 
         return nil unless row
@@ -87,7 +87,7 @@ module Erp
         return nil unless valid_credentials?
 
         row = with_connection do |db|
-          db.query("SELECT FIRST 1 * FROM #{safe_table_name(orders_table)}").first
+          query_as_hashes(db, "SELECT FIRST 1 * FROM #{safe_table_name(orders_table)}").first
         end
 
         return nil unless row
@@ -101,7 +101,7 @@ module Erp
         return nil unless valid_credentials?
 
         row = with_connection do |db|
-          db.query("SELECT FIRST 1 * FROM #{safe_table_name(order_items_table)}").first
+          query_as_hashes(db, "SELECT FIRST 1 * FROM #{safe_table_name(order_items_table)}").first
         end
 
         return nil unless row
@@ -187,6 +187,21 @@ module Erp
         yield db
       ensure
         db&.close
+      end
+
+      # Execute a query and return rows as hashes with column names as keys
+      def query_as_hashes(db, sql)
+        cursor = db.execute(sql)
+        columns = cursor.fields.map { |f| f.name.to_s }
+        rows = []
+        while (row = cursor.fetch)
+          hash = {}
+          columns.each_with_index { |col, i| hash[col] = row[i] }
+          rows << hash
+        end
+        rows
+      ensure
+        cursor&.close
       end
 
       # Table/column names
