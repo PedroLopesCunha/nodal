@@ -1,6 +1,6 @@
 class ErpSyncLog < ApplicationRecord
   SYNC_TYPES = %w[full incremental manual].freeze
-  ENTITY_TYPES = %w[products customers].freeze
+  ENTITY_TYPES = %w[products customers orders].freeze
   STATUSES = %w[running completed failed].freeze
 
   belongs_to :organisation

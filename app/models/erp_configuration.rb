@@ -1,5 +1,5 @@
 class ErpConfiguration < ApplicationRecord
-  ADAPTER_TYPES = %w[custom_api].freeze
+  ADAPTER_TYPES = %w[custom_api firebird].freeze
   SYNC_FREQUENCIES = %w[hourly daily weekly manual].freeze
   SYNC_STATUSES = %w[success partial failed].freeze
 

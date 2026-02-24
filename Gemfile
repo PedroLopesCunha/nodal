@@ -94,6 +94,13 @@ gem 'redis', '~> 5.0'
 # HTTP client for ERP integrations
 gem 'faraday', '~> 2.0'
 
+# Firebird database client for direct ERP connections
+# Requires libfbclient native library (installed on Heroku via Aptfile)
+# Install with: bundle config set --local with firebird && bundle install
+group :firebird do
+  gem 'fb', '~> 0.9', require: false
+end
+
 # sendgrid for mailing
 gem 'sendgrid-ruby'
 
