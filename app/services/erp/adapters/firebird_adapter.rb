@@ -3,6 +3,19 @@ module Erp
     class FirebirdAdapter < BaseAdapter
       IDENTIFIER_PATTERN = /\A[A-Za-z_][A-Za-z0-9_\$]{0,30}\z/
 
+      # Map Firebird charset names to Ruby encoding names
+      ENCODING_MAP = {
+        'WIN1252' => 'Windows-1252',
+        'WIN1250' => 'Windows-1250',
+        'WIN1251' => 'Windows-1251',
+        'WIN1253' => 'Windows-1253',
+        'WIN1254' => 'Windows-1254',
+        'ISO8859_1' => 'ISO-8859-1',
+        'ISO8859_15' => 'ISO-8859-15',
+        'UTF8' => 'UTF-8',
+        'NONE' => 'ASCII-8BIT'
+      }.freeze
+
       def self.fb_available?
         require 'fb'
         true
@@ -221,8 +234,14 @@ module Erp
         credentials[:order_items_table].presence || 'ORDER_ITEMS'
       end
 
+      # Firebird charset name (used for connection)
       def encoding
         credentials[:encoding].presence || 'WIN1252'
+      end
+
+      # Ruby encoding name (used for string conversion)
+      def ruby_encoding
+        ENCODING_MAP[encoding.upcase] || encoding
       end
 
       # Field mappings from credentials
@@ -268,7 +287,7 @@ module Erp
       def convert_encoding(value)
         return value unless value.is_a?(String)
 
-        value.encode('UTF-8', encoding, invalid: :replace, undef: :replace, replace: '?')
+        value.encode('UTF-8', ruby_encoding, invalid: :replace, undef: :replace, replace: '?')
       rescue Encoding::InvalidByteSequenceError, Encoding::UndefinedConversionError
         value.force_encoding('UTF-8')
       end
@@ -277,7 +296,7 @@ module Erp
       def encode_values(values)
         values.map do |value|
           next value unless value.is_a?(String)
-          value.encode(encoding, 'UTF-8', invalid: :replace, undef: :replace, replace: '?')
+          value.encode(ruby_encoding, 'UTF-8', invalid: :replace, undef: :replace, replace: '?')
         rescue Encoding::InvalidByteSequenceError, Encoding::UndefinedConversionError
           value
         end
