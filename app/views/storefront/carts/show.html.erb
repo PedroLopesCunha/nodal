@@ -78,7 +78,7 @@
                       <div>
                         <div class="fw-medium"><%= item.product.name %></div>
                         <% if item.product_variant && item.product_variant.attribute_values.any? %>
-                          <small class="text-primary"><%= item.variant_name %></small>
+                          <small class="text-primary"><%= item.product_variant.sku.presence || item.variant_name %></small>
                           <br>
                         <% end %>
                         <small class="text-muted"><%= item.product.category&.name %></small>
@@ -165,7 +165,7 @@
                   <div class="flex-grow-1 min-width-0 text-muted small text-truncate">
                     <% parts = [] %>
                     <% if item.product_variant && item.product_variant.attribute_values.any? %>
-                      <% parts << item.variant_name %>
+                      <% parts << (item.product_variant.sku.presence || item.variant_name) %>
                     <% end %>
                     <% if item.product.category&.name.present? %>
                       <% parts << item.product.category.name %>
