@@ -67,13 +67,11 @@ module Erp
       end
 
       def update_product_attributes(product, data)
-        product.assign_attributes(
-          name: data[:name],
-          sku: data[:sku],
-          description: data[:description],
-          unit_price: data[:unit_price_cents],
-          available: data[:available]
-        )
+        product.name = data[:name] if data.key?(:name)
+        product.sku = data[:sku] if data.key?(:sku)
+        product.description = data[:description] if data.key?(:description)
+        product.unit_price = data[:unit_price_cents] if data.key?(:unit_price_cents)
+        product.available = data[:available] if data.key?(:available)
 
         generate_slug(product) if product.new_record?
       end
