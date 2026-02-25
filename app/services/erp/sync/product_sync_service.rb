@@ -30,17 +30,21 @@ module Erp
 
         update_product_attributes(product, data)
 
-        if product.save
-          update_variant_stock(product, data)
-          product.mark_synced!(source: external_source)
+        if was_new || product.changed?
+          if product.save
+            update_variant_stock(product, data)
+            product.mark_synced!(source: external_source)
 
-          if was_new
-            sync_log.increment_created!
+            if was_new
+              sync_log.increment_created!
+            else
+              sync_log.increment_updated!
+            end
           else
-            sync_log.increment_updated!
+            sync_log.increment_failed!(external_id, product.errors.full_messages.join(', '))
           end
         else
-          sync_log.increment_failed!(external_id, product.errors.full_messages.join(', '))
+          sync_log.increment_processed!
         end
       rescue StandardError => e
         sync_log.increment_failed!(data[:external_id], e.message)
