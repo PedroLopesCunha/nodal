@@ -336,7 +336,7 @@
             <% end %>
 
             <div>
-              <%= button_to "Sync Now", sync_now_bo_erp_settings_path, method: :post, class: "btn btn-primary w-100", disabled: !@erp_configuration.can_sync? %>
+              <%= link_to "Sync Now", sync_now_bo_erp_settings_path, data: { turbo_method: :post }, class: "btn btn-primary w-100 #{'disabled' unless @erp_configuration.can_sync?}" %>
             </div>
           <% else %>
             <p class="text-muted mb-0">Enable integration and configure credentials to start syncing.</p>
