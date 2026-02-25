@@ -77,8 +77,8 @@ class Bo::ProductsController < Bo::BaseController
     @products = policy_scope(current_organisation.products).includes(:categories)
 
     if params[:query].present?
-      matching_ids = @products.left_joins(:categories).where(
-        "products.name ILIKE :q OR products.sku ILIKE :q OR products.description ILIKE :q OR categories.name ILIKE :q",
+      matching_ids = @products.left_joins(:categories, :product_variants).where(
+        "products.name ILIKE :q OR products.sku ILIKE :q OR products.description ILIKE :q OR categories.name ILIKE :q OR product_variants.sku ILIKE :q",
         q: "%#{params[:query]}%"
       ).select("products.id").distinct
       @products = @products.where(id: matching_ids)
