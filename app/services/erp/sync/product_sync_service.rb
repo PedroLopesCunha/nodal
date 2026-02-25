@@ -64,6 +64,8 @@ module Erp
             sync_log.increment_failed!(external_id, product.errors.full_messages.join(', '))
           end
         else
+          # Product attributes unchanged, but still update stock
+          update_variant_stock(product, data)
           sync_log.increment_processed!
         end
       rescue StandardError => e
@@ -94,6 +96,7 @@ module Erp
         return unless variant
 
         update_stock(variant, data)
+        variant.save!
         apply_stock_rules(variant)
       end
 
