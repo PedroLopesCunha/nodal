@@ -2,6 +2,7 @@ class Organisation < ApplicationRecord
   include Slugable
 
   SUPPORTED_CURRENCIES = %w[EUR CHF USD GBP].freeze
+  OUT_OF_STOCK_STRATEGIES = %w[do_nothing deactivate].freeze
   HEX_COLOR_REGEX = /\A#[0-9A-Fa-f]{6}\z/
 
   monetize :shipping_cost_cents
@@ -33,6 +34,7 @@ class Organisation < ApplicationRecord
   validates :contact_email, format: { with: URI::MailTo::EMAIL_REGEXP }, allow_blank: true
   validates :currency, presence: true, inclusion: { in: SUPPORTED_CURRENCIES }
   validates :default_locale, inclusion: { in: I18n.available_locales.map(&:to_s) }
+  validates :out_of_stock_strategy, inclusion: { in: OUT_OF_STOCK_STRATEGIES }
   validates :primary_color, format: { with: HEX_COLOR_REGEX }, allow_blank: true
   validates :secondary_color, format: { with: HEX_COLOR_REGEX }, allow_blank: true
 
@@ -40,6 +42,10 @@ class Organisation < ApplicationRecord
 
   def currency_symbol
     Money::Currency.new(currency).symbol
+  end
+
+  def deactivate_out_of_stock?
+    out_of_stock_strategy == 'deactivate'
   end
 
   def free_shipping_enabled?

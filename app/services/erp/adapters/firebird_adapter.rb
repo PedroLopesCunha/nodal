@@ -255,6 +255,7 @@ module Erp
           description: get_mapped_value(row, mappings, :description),
           unit_price_cents: parse_price(get_mapped_value(row, mappings, :unit_price)),
           available: parse_boolean(get_mapped_value(row, mappings, :available)),
+          stock_quantity: parse_integer(get_mapped_value(row, mappings, :stock_quantity)),
           raw_data: row
         }.compact
       end
@@ -293,6 +294,12 @@ module Erp
         end
 
         (numeric * 100).round
+      end
+
+      def parse_integer(value)
+        return nil if value.nil?
+
+        value.to_i
       end
 
       def parse_boolean(value)

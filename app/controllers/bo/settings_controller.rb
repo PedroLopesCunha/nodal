@@ -23,7 +23,7 @@ class Bo::SettingsController < Bo::BaseController
     params.require(:organisation).permit(
       :name, :billing_email, :tax_rate, :shipping_cost, :free_shipping_threshold, :default_locale, :logo, :primary_color, :secondary_color,
       :contact_email, :phone, :whatsapp, :business_hours, :use_billing_address_for_contact,
-      :storefront_title, :favicon, :taxpayer_id, :show_related_products,
+      :storefront_title, :favicon, :taxpayer_id, :show_related_products, :out_of_stock_strategy,
       contact_address_attributes: [:id, :street_name, :street_nr, :postal_code, :city, :country, :_destroy],
       billing_address_attributes: [:id, :street_name, :street_nr, :postal_code, :city, :country, :_destroy]
     )

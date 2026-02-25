@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2026_02_25_120134) do
+ActiveRecord::Schema[7.1].define(version: 2026_02_25_165643) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -328,6 +328,7 @@ ActiveRecord::Schema[7.1].define(version: 2026_02_25_120134) do
     t.integer "free_shipping_threshold_cents"
     t.string "free_shipping_threshold_currency", default: "EUR"
     t.boolean "show_related_products", default: true, null: false
+    t.string "out_of_stock_strategy", default: "do_nothing", null: false
     t.index ["default_locale"], name: "index_organisations_on_default_locale"
     t.index ["slug"], name: "index_organisations_on_slug", unique: true
   end
@@ -407,7 +408,7 @@ ActiveRecord::Schema[7.1].define(version: 2026_02_25_120134) do
     t.integer "unit_price_cents"
     t.string "unit_price_currency", default: "EUR"
     t.integer "stock_quantity", default: 0
-    t.boolean "track_stock", default: false, null: false
+    t.boolean "track_stock", default: true, null: false
     t.boolean "available", default: true, null: false
     t.boolean "is_default", default: false, null: false
     t.integer "position"

@@ -217,6 +217,26 @@
         </div>
       </div>
 
+      <div class="card mb-3">
+        <div class="card-body">
+          <h5 class="card-title mb-4"><%= t('bo.settings.edit.stock_management') %></h5>
+
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label class="form-label"><%= t('bo.settings.edit.out_of_stock_strategy') %></label>
+              <%= f.select :out_of_stock_strategy,
+                           options_for_select([
+                             [t('bo.settings.edit.out_of_stock_do_nothing'), 'do_nothing'],
+                             [t('bo.settings.edit.out_of_stock_deactivate'), 'deactivate']
+                           ], @organisation.out_of_stock_strategy),
+                           {},
+                           class: "form-control" %>
+              <small class="text-muted"><%= t('bo.settings.edit.out_of_stock_strategy_hint') %></small>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <div class="card" data-controller="branding-preview">
         <div class="card-body">
           <h5 class="card-title mb-4"><%= t('bo.settings.edit.branding') %></h5>

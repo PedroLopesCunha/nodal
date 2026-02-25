@@ -93,10 +93,8 @@ module Erp
         variant = product.default_variant
         return unless variant
 
-        variant.update(
-          stock_quantity: data[:stock_quantity],
-          track_stock: true
-        )
+        update_stock(variant, data)
+        apply_stock_rules(variant)
       end
 
       def find_variant_by_external_id(external_id)
@@ -107,9 +105,11 @@ module Erp
 
       def sync_variant(variant, data)
         update_variant_attributes(variant, data)
+        update_stock(variant, data) if data[:stock_quantity].present?
 
         if variant.changed?
           if variant.save
+            apply_stock_rules(variant) if data[:stock_quantity].present?
             variant.mark_synced!(source: external_source)
             sync_log.increment_updated!
           else
@@ -125,6 +125,33 @@ module Erp
         variant.sku = data[:sku] if data.key?(:sku)
         variant.unit_price_cents = data[:unit_price_cents] if data.key?(:unit_price_cents)
         variant.available = data[:available] if data.key?(:available)
+      end
+
+      def update_stock(variant, data)
+        variant.stock_quantity = data[:stock_quantity]
+        variant.track_stock = true
+      end
+
+      def apply_stock_rules(variant)
+        return unless organisation.deactivate_out_of_stock?
+        return unless variant.track_stock?
+
+        # Update variant availability based on stock
+        if variant.stock_quantity.to_i <= 0
+          variant.update_column(:available, false) unless variant.available == false
+        else
+          variant.update_column(:available, true) unless variant.available == true
+        end
+
+        # Update parent product availability based on tracked variants
+        product = variant.product
+        tracked_variants = product.product_variants.where(track_stock: true)
+
+        if tracked_variants.exists? && tracked_variants.where('stock_quantity > 0').none?
+          product.update(available: false)
+        elsif product.product_variants.where(available: true).exists?
+          product.update(available: true)
+        end
       end
 
       def update_only_mode?
