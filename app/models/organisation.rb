@@ -2,7 +2,7 @@ class Organisation < ApplicationRecord
   include Slugable
 
   SUPPORTED_CURRENCIES = %w[EUR CHF USD GBP].freeze
-  OUT_OF_STOCK_STRATEGIES = %w[do_nothing deactivate].freeze
+  OUT_OF_STOCK_STRATEGIES = %w[do_nothing deactivate hide].freeze
   HEX_COLOR_REGEX = /\A#[0-9A-Fa-f]{6}\z/
 
   monetize :shipping_cost_cents
@@ -45,7 +45,11 @@ class Organisation < ApplicationRecord
   end
 
   def deactivate_out_of_stock?
-    out_of_stock_strategy == 'deactivate'
+    out_of_stock_strategy.in?(%w[deactivate hide])
+  end
+
+  def hide_out_of_stock?
+    out_of_stock_strategy == 'hide'
   end
 
   def free_shipping_enabled?

@@ -861,6 +861,7 @@ pt:
         out_of_stock_strategy_hint: "Controla o que acontece quando o stock de um produto chega a zero durante a sincronização ERP. Produtos individuais podem ser excluídos desativando 'Acompanhar stock'."
         out_of_stock_do_nothing: "Não fazer nada"
         out_of_stock_deactivate: "Desativar quando sem stock"
+        out_of_stock_hide: "Ocultar da loja quando sem stock"
         branding: "Marca"
         organisation_logo: "Logótipo da Organização"
         logo_hint: "Recomendado: PNG, JPG ou SVG. Altura máxima 48px na barra de navegação."

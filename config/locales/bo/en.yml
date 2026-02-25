@@ -885,6 +885,7 @@ en:
         out_of_stock_strategy_hint: "Controls what happens when a product's stock reaches zero during ERP sync. Individual products can opt out by disabling 'Track stock'."
         out_of_stock_do_nothing: "Do nothing"
         out_of_stock_deactivate: "Deactivate when out of stock"
+        out_of_stock_hide: "Hide from storefront when out of stock"
         branding: "Branding"
         organisation_logo: "Organisation Logo"
         logo_hint: "Recommended: PNG, JPG, or SVG. Max height 48px in navbar."

@@ -67,6 +67,7 @@ pt:
         min_order: "Encomenda mín."
         price_on_request: "Preço sob consulta"
         showing_products: "A mostrar %{from}-%{to} de %{count} produtos"
+      not_available: "Este produto já não está disponível."
       show:
         back_to_products: "Voltar aos produtos"
         zoom: "Ampliar"

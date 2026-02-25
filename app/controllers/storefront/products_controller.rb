@@ -1,6 +1,7 @@
 class Storefront::ProductsController < Storefront::BaseController
   def index
     base_products = policy_scope(current_organisation.products).includes(:categories, :product_discounts)
+    base_products = base_products.where(available: true) if current_organisation.hide_out_of_stock?
 
     # Load categories tree for sidebar
     @categories = current_organisation.categories.kept.roots.by_position
@@ -69,6 +70,11 @@ class Storefront::ProductsController < Storefront::BaseController
   def show
     @product = current_organisation.products.find(params[:id])
     authorize @product
+
+    if current_organisation.hide_out_of_stock? && !@product.available?
+      redirect_to storefront_products_path, alert: I18n.t('storefront.products.not_available')
+      return
+    end
 
     # Build breadcrumbs from primary category
     @primary_category = @product.primary_category

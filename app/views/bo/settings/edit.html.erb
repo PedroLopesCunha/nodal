@@ -227,7 +227,8 @@
               <%= f.select :out_of_stock_strategy,
                            options_for_select([
                              [t('bo.settings.edit.out_of_stock_do_nothing'), 'do_nothing'],
-                             [t('bo.settings.edit.out_of_stock_deactivate'), 'deactivate']
+                             [t('bo.settings.edit.out_of_stock_deactivate'), 'deactivate'],
+                             [t('bo.settings.edit.out_of_stock_hide'), 'hide']
                            ], @organisation.out_of_stock_strategy),
                            {},
                            class: "form-control" %>

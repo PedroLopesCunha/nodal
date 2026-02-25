@@ -67,6 +67,7 @@ en:
         min_order: "Min. order"
         price_on_request: "Price on Request"
         showing_products: "Showing %{from}-%{to} of %{count} products"
+      not_available: "This product is no longer available."
       show:
         back_to_products: "Back to products"
         zoom: "Zoom"
