@@ -268,6 +268,7 @@ module Erp
           contact_name: get_mapped_value(row, mappings, :contact_name),
           email: get_mapped_value(row, mappings, :email),
           phone: get_mapped_value(row, mappings, :contact_phone),
+          taxpayer_id: get_mapped_value(row, mappings, :taxpayer_id),
           active: parse_boolean(get_mapped_value(row, mappings, :active)),
           raw_data: row
         }.compact

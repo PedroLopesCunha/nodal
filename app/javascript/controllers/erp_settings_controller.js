@@ -43,6 +43,7 @@ export default class extends Controller {
     { key: 'contact_name', label: 'Contact Name', required: true, description: 'Primary contact person' },
     { key: 'email', label: 'Email', required: true, description: 'Contact email address' },
     { key: 'contact_phone', label: 'Phone', required: false, description: 'Contact phone number' },
+    { key: 'taxpayer_id', label: 'NIF', required: false, description: 'Tax identification number' },
     { key: 'active', label: 'Active', required: false, description: 'Account status (boolean)' }
   ]
 

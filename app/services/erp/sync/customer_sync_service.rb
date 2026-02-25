@@ -81,6 +81,7 @@ module Erp
           contact_name: data[:contact_name],
           email: data[:email],
           contact_phone: data[:phone],
+          taxpayer_id: data[:taxpayer_id],
           active: data[:active]
         )
 
