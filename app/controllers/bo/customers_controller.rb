@@ -6,7 +6,7 @@ class Bo::CustomersController < Bo::BaseController
 
     if params[:query].present?
       @customers = @customers.where(
-        "company_name ILIKE :q OR contact_name ILIKE :q OR email ILIKE :q",
+        "company_name ILIKE :q OR contact_name ILIKE :q OR email ILIKE :q OR external_id ILIKE :q",
         q: "%#{params[:query]}%"
       )
     end

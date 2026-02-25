@@ -112,6 +112,13 @@
       <div class="card-body">
         <h5 class="card-title mb-4"><%= t('bo.customers.show.account_details') %></h5>
 
+        <% if @customer.external_id.present? %>
+        <div class="border-bottom pb-3 mb-3">
+          <small class="text-muted d-block">External ID</small>
+          <span class="font-monospace"><%= @customer.external_id %></span>
+        </div>
+        <% end %>
+
         <div>
           <small class="text-muted d-block"><%= t('bo.customers.show.member_since') %></small>
           <span><%= @customer.created_at.strftime("%-m/%-d/%Y") %></span>
