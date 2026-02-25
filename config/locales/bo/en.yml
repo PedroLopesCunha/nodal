@@ -545,6 +545,7 @@ en:
         variant_image: "Variant Image"
         current_image: "Current image"
         image_hint: "Upload a specific image for this variant (optional)"
+        remove_image: "Remove image"
         availability: "Availability"
         available: "Available for purchase"
         hide_when_unavailable: "Hide from storefront when unavailable"

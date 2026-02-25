@@ -60,7 +60,10 @@
           <% if variant.photo.attached? %>
             <div class="mb-3">
               <%= image_tag variant.photo.variant(resize_to_limit: [200, 200]), class: "rounded mb-2" %>
-              <p class="text-muted small mb-0"><%= t('bo.product_variants.form.current_image') %></p>
+              <div class="form-check mt-1">
+                <%= check_box_tag "product_variant[remove_photo]", "1", false, class: "form-check-input", id: "remove_photo" %>
+                <label class="form-check-label text-danger small" for="remove_photo"><%= t('bo.product_variants.form.remove_image') %></label>
+              </div>
             </div>
           <% end %>
 

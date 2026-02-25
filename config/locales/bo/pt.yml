@@ -524,6 +524,7 @@ pt:
         variant_image: "Imagem da Variante"
         current_image: "Imagem atual"
         image_hint: "Carregue uma imagem específica para esta variante (opcional)"
+        remove_image: "Remover imagem"
         availability: "Disponibilidade"
         available: "Disponível para compra"
         hide_when_unavailable: "Ocultar da loja quando indisponível"

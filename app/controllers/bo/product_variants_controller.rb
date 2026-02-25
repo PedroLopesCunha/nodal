@@ -31,6 +31,8 @@ class Bo::ProductVariantsController < Bo::BaseController
   end
 
   def update
+    @variant.photo.purge if params[:product_variant][:remove_photo] == '1'
+
     if @variant.update(variant_params)
       redirect_to bo_product_variants_path(params[:org_slug], @product), notice: t('bo.flash.variant_updated')
     else
