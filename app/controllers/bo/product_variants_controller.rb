@@ -79,7 +79,7 @@ class Bo::ProductVariantsController < Bo::BaseController
 
   def variant_params
     params.require(:product_variant).permit(
-      :name, :sku, :price, :stock_quantity, :track_stock, :available, :is_default, :photo
+      :name, :sku, :price, :stock_quantity, :track_stock, :available, :is_default, :photo, :hide_when_unavailable
     )
   end
 

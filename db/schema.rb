@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2026_02_25_165643) do
+ActiveRecord::Schema[7.1].define(version: 2026_02_25_184644) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -418,6 +418,7 @@ ActiveRecord::Schema[7.1].define(version: 2026_02_25_165643) do
     t.string "external_source"
     t.datetime "last_synced_at"
     t.text "sync_error"
+    t.boolean "hide_when_unavailable"
     t.index ["organisation_id", "sku"], name: "index_product_variants_on_organisation_id_and_sku", unique: true, where: "((sku IS NOT NULL) AND ((sku)::text <> ''::text))"
     t.index ["organisation_id"], name: "index_product_variants_on_organisation_id"
     t.index ["product_id", "available"], name: "index_product_variants_on_product_id_and_available"

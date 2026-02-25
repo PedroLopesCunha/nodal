@@ -547,6 +547,8 @@ en:
         image_hint: "Upload a specific image for this variant (optional)"
         availability: "Availability"
         available: "Available for purchase"
+        hide_when_unavailable: "Hide from storefront when unavailable"
+        hide_when_unavailable_hint: "Uncheck to show with an 'Out of Stock' badge instead of hiding"
         set_as_default: "Set as default variant"
         default_hint: "The default variant is selected initially in the storefront"
         options: "Variant Options"

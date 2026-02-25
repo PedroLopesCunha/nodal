@@ -82,6 +82,12 @@
             <%= f.label :available, t('bo.product_variants.form.available'), class: "form-check-label" %>
           </div>
 
+          <div class="form-check mb-3">
+            <%= f.check_box :hide_when_unavailable, class: "form-check-input" %>
+            <%= f.label :hide_when_unavailable, t('bo.product_variants.form.hide_when_unavailable'), class: "form-check-label" %>
+            <small class="text-muted d-block"><%= t('bo.product_variants.form.hide_when_unavailable_hint') %></small>
+          </div>
+
           <% if variant.persisted? && !variant.is_default? %>
             <div class="form-check">
               <%= f.check_box :is_default, class: "form-check-input" %>
