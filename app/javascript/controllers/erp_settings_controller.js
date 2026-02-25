@@ -35,7 +35,8 @@ export default class extends Controller {
     { key: 'sku', label: 'SKU', required: false, description: 'Stock keeping unit' },
     { key: 'description', label: 'Description', required: false, description: 'Product description' },
     { key: 'unit_price', label: 'Unit Price', required: false, description: 'Price (will be converted to cents)' },
-    { key: 'available', label: 'Available', required: false, description: 'Availability status (boolean)' }
+    { key: 'available', label: 'Available', required: false, description: 'Availability status (boolean)' },
+    { key: 'stock_quantity', label: 'Stock Quantity', required: false, description: 'Stock quantity (integer)' }
   ]
 
   static customerFields = [
