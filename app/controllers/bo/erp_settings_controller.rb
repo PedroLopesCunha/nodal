@@ -126,7 +126,8 @@ class Bo::ErpSettingsController < Bo::BaseController
       :sync_products,
       :sync_customers,
       :sync_orders,
-      :sync_frequency
+      :sync_frequency,
+      :product_sync_mode
     ).tap do |p|
       # Handle credentials separately to support nested field_mappings
       if params[:erp_configuration][:credentials].present?

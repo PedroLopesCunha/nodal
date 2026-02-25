@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2026_02_24_162009) do
+ActiveRecord::Schema[7.1].define(version: 2026_02_25_120134) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -173,6 +173,7 @@ ActiveRecord::Schema[7.1].define(version: 2026_02_24_162009) do
     t.text "last_sync_error"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "product_sync_mode"
     t.index ["organisation_id"], name: "index_erp_configurations_on_organisation_id", unique: true
   end
 

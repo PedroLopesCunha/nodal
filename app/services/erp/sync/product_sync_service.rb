@@ -25,8 +25,17 @@ module Erp
           return
         end
 
-        product = find_or_initialize_product(external_id)
-        was_new = product.new_record?
+        if update_only_mode?
+          product = organisation.products.find_by(external_id: external_id, external_source: external_source)
+          unless product
+            sync_log.increment_processed!
+            return
+          end
+          was_new = false
+        else
+          product = find_or_initialize_product(external_id)
+          was_new = product.new_record?
+        end
 
         update_product_attributes(product, data)
 
@@ -79,6 +88,10 @@ module Erp
           stock_quantity: data[:stock_quantity],
           track_stock: true
         )
+      end
+
+      def update_only_mode?
+        erp_configuration.product_sync_mode != 'full_sync'
       end
 
       def generate_slug(product)

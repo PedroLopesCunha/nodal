@@ -24,7 +24,8 @@ export default class extends Controller {
     "customerMapping",
     "orderMapping",
     "orderItemMapping",
-    "adapterCredentials"
+    "adapterCredentials",
+    "productSyncMode"
   ]
 
   // Nodal field definitions
@@ -385,6 +386,20 @@ export default class extends Controller {
     const sampleDisplay = select.closest('tr').querySelector('.sample-value')
     if (sampleDisplay) {
       sampleDisplay.textContent = sampleValue || '-'
+    }
+  }
+
+  confirmSyncMode(event) {
+    const select = event.target
+    if (select.value === 'full_sync') {
+      const confirmed = confirm(
+        'Full sync will create new products in Nodal for every product in your ERP that doesn\'t already exist. ' +
+        'This can be dangerous if you manage product variants manually.\n\n' +
+        'Are you sure you want to enable full sync?'
+      )
+      if (!confirmed) {
+        select.value = 'update_only'
+      }
     }
   }
 

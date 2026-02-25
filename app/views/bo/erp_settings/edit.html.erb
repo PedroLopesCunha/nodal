@@ -71,6 +71,17 @@
                     <i class="fa-solid fa-box me-1"></i> Sync Products
                   </label>
                 </div>
+                <div class="mt-2 ms-4">
+                  <label class="form-label small text-muted mb-1">Product sync mode</label>
+                  <%= f.select :product_sync_mode,
+                               options_for_select([
+                                 ['Update only (recommended)', 'update_only'],
+                                 ['Full sync — creates new products', 'full_sync']
+                               ], @erp_configuration.product_sync_mode),
+                               {},
+                               class: "form-select form-select-sm",
+                               data: { erp_settings_target: "productSyncMode", action: "change->erp-settings#confirmSyncMode" } %>
+                </div>
               </div>
               <div class="col-md-4">
                 <div class="form-check">
