@@ -25,18 +25,29 @@ module Erp
           return
         end
 
-        if update_only_mode?
-          product = organisation.products.find_by(external_id: external_id, external_source: external_source)
-          unless product
-            sync_log.increment_processed!
+        # 1. Try matching a product
+        product = organisation.products.find_by(external_id: external_id, external_source: external_source)
+
+        # 2. If no product match, try matching a variant
+        if product.nil?
+          variant = find_variant_by_external_id(external_id)
+          if variant
+            sync_variant(variant, data)
             return
           end
-          was_new = false
-        else
-          product = find_or_initialize_product(external_id)
-          was_new = product.new_record?
         end
 
+        # 3. No match at all — handle per sync mode
+        if product.nil?
+          if update_only_mode?
+            sync_log.increment_processed!
+            return
+          else
+            product = find_or_initialize_product(external_id)
+          end
+        end
+
+        was_new = product.new_record?
         update_product_attributes(product, data)
 
         if was_new || product.changed?
@@ -86,6 +97,34 @@ module Erp
           stock_quantity: data[:stock_quantity],
           track_stock: true
         )
+      end
+
+      def find_variant_by_external_id(external_id)
+        ProductVariant.joins(:product)
+                      .where(products: { organisation_id: organisation.id })
+                      .find_by(external_id: external_id, external_source: external_source)
+      end
+
+      def sync_variant(variant, data)
+        update_variant_attributes(variant, data)
+
+        if variant.changed?
+          if variant.save
+            variant.mark_synced!(source: external_source)
+            sync_log.increment_updated!
+          else
+            sync_log.increment_failed!(data[:external_id], variant.errors.full_messages.join(', '))
+          end
+        else
+          sync_log.increment_processed!
+        end
+      end
+
+      def update_variant_attributes(variant, data)
+        variant.name = data[:name] if data.key?(:name)
+        variant.sku = data[:sku] if data.key?(:sku)
+        variant.unit_price_cents = data[:unit_price_cents] if data.key?(:unit_price_cents)
+        variant.available = data[:available] if data.key?(:available)
       end
 
       def update_only_mode?
