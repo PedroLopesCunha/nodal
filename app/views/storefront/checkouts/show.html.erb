@@ -52,7 +52,7 @@
                         <div>
                           <div class="fw-medium"><%= item.product.name %></div>
                           <% if item.product_variant.present? && item.product.variable? %>
-                            <small class="text-primary"><%= item.product_variant.option_values_string %></small><br>
+                            <small class="text-primary"><%= item.product_variant.sku.presence || item.product_variant.option_values_string %></small><br>
                           <% end %>
                           <small class="text-muted"><%= item.product.category&.name %></small>
                         </div>
@@ -96,7 +96,7 @@
                   <div class="flex-grow-1 min-width-0">
                     <div class="fw-semibold text-truncate"><%= item.product.name %></div>
                     <% if item.product_variant.present? && item.product.variable? %>
-                      <small class="text-primary"><%= item.product_variant.option_values_string %></small><br>
+                      <small class="text-primary"><%= item.product_variant.sku.presence || item.product_variant.option_values_string %></small><br>
                     <% end %>
                     <small class="text-muted"><%= item.product.category&.name %></small>
 
