@@ -108,11 +108,49 @@
   </div>
 
   <div class="col-md-4">
+    <% if @customer.synced_from_erp? %>
+      <div class="card mb-3">
+        <div class="card-body">
+          <h6 class="card-title mb-3"><i class="fa-solid fa-rotate me-1"></i> ERP Sync Status</h6>
+
+          <div class="mb-2">
+            <small class="text-muted d-block">Status</small>
+            <% case @customer.sync_status %>
+            <% when :synced %>
+              <span class="badge bg-success">Synced</span>
+            <% when :error %>
+              <span class="badge bg-danger">Error</span>
+            <% else %>
+              <span class="badge bg-secondary">Not synced</span>
+            <% end %>
+          </div>
+
+          <div class="mb-2">
+            <small class="text-muted d-block">External ID</small>
+            <code><%= @customer.external_id %></code>
+          </div>
+
+          <% if @customer.last_synced_at %>
+            <div class="mb-2">
+              <small class="text-muted d-block">Last synced</small>
+              <span title="<%= l(@customer.last_synced_at) %>"><%= time_ago_in_words(@customer.last_synced_at) %> ago</span>
+            </div>
+          <% end %>
+
+          <% if @customer.has_sync_error? %>
+            <div class="border border-danger rounded bg-danger-subtle py-2 px-3 mb-0 mt-2">
+              <small class="text-danger"><i class="fa-solid fa-triangle-exclamation me-1"></i> <%= @customer.sync_error %></small>
+            </div>
+          <% end %>
+        </div>
+      </div>
+    <% end %>
+
     <div class="card h-100">
       <div class="card-body">
         <h5 class="card-title mb-4"><%= t('bo.customers.show.account_details') %></h5>
 
-        <% if @customer.external_id.present? %>
+        <% if @customer.external_id.present? && !@customer.synced_from_erp? %>
         <div class="border-bottom pb-3 mb-3">
           <small class="text-muted d-block">External ID</small>
           <span class="font-monospace"><%= @customer.external_id %></span>

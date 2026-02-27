@@ -193,6 +193,118 @@
     </div>
 
   </div>
+
+  <%# Right Column — Info Cards %>
+  <div class="col-lg-4">
+    <%# Card A: ERP Sync Status %>
+    <% if @product.synced_from_erp? %>
+      <div class="card mb-4">
+        <div class="card-body">
+          <h6 class="card-title mb-3"><i class="fa-solid fa-rotate me-1"></i> ERP Sync Status</h6>
+
+          <div class="mb-2">
+            <small class="text-muted d-block">Status</small>
+            <% case @product.sync_status %>
+            <% when :synced %>
+              <span class="badge bg-success">Synced</span>
+            <% when :error %>
+              <span class="badge bg-danger">Error</span>
+            <% else %>
+              <span class="badge bg-secondary">Not synced</span>
+            <% end %>
+          </div>
+
+          <div class="mb-2">
+            <small class="text-muted d-block">External ID</small>
+            <code><%= @product.external_id %></code>
+          </div>
+
+          <% if @product.last_synced_at %>
+            <div class="mb-2">
+              <small class="text-muted d-block">Last synced</small>
+              <span title="<%= l(@product.last_synced_at) %>"><%= time_ago_in_words(@product.last_synced_at) %> ago</span>
+            </div>
+          <% end %>
+
+          <% if @product.has_sync_error? %>
+            <div class="border border-danger rounded bg-danger-subtle py-2 px-3 mb-0 mt-2">
+              <small class="text-danger"><i class="fa-solid fa-triangle-exclamation me-1"></i> <%= @product.sync_error %></small>
+            </div>
+          <% end %>
+        </div>
+      </div>
+    <% end %>
+
+    <%# Card B: Storefront Visibility & Stock Rules %>
+    <div class="card mb-4">
+      <div class="card-body">
+        <h6 class="card-title mb-3"><i class="fa-solid fa-eye me-1"></i> Storefront Visibility</h6>
+
+        <div class="mb-2">
+          <small class="text-muted d-block">Product availability</small>
+          <% if @product.available? %>
+            <span class="badge bg-success">Available</span>
+          <% else %>
+            <span class="badge bg-danger">Unavailable</span>
+          <% end %>
+        </div>
+
+        <div class="mb-3">
+          <small class="text-muted d-block">Stock strategy</small>
+          <% case current_organisation.out_of_stock_strategy %>
+          <% when 'do_nothing' %>
+            <span class="badge bg-secondary">Do nothing</span>
+          <% when 'deactivate' %>
+            <span class="badge bg-warning text-dark">Deactivate</span>
+          <% when 'hide' %>
+            <span class="badge bg-danger">Hide</span>
+          <% end %>
+          <small class="text-muted d-block mt-1">
+            <% case current_organisation.out_of_stock_strategy %>
+            <% when 'do_nothing' %>
+              Stock is tracked but products stay visible
+            <% when 'deactivate' %>
+              Out-of-stock products are marked unavailable
+            <% when 'hide' %>
+              Out-of-stock products are hidden from storefront
+            <% end %>
+          </small>
+        </div>
+
+        <hr>
+
+        <% variants = @product.product_variants %>
+        <% total_variants = variants.size %>
+        <% if total_variants > 0 %>
+          <% tracking_stock = variants.count(&:track_stock?) %>
+          <% in_stock = variants.count(&:in_stock?) %>
+
+          <h6 class="mb-2">Variant stock summary</h6>
+          <ul class="list-unstyled mb-0 small">
+            <li class="mb-1">
+              <i class="fa-solid fa-boxes-stacked text-muted me-1"></i>
+              <strong><%= in_stock %></strong> of <%= total_variants %> variants in stock
+            </li>
+            <li class="mb-1">
+              <i class="fa-solid fa-chart-line text-muted me-1"></i>
+              <strong><%= tracking_stock %></strong> variants tracking stock
+            </li>
+            <% if current_organisation.hide_out_of_stock? %>
+              <% opt_out_count = variants.count { |v| !v.hide_when_unavailable? } %>
+              <% if opt_out_count > 0 %>
+                <li>
+                  <i class="fa-solid fa-eye text-muted me-1"></i>
+                  <strong><%= opt_out_count %></strong> variants visible when out of stock
+                </li>
+              <% end %>
+            <% end %>
+          </ul>
+        <% else %>
+          <p class="text-muted small mb-0">No variants</p>
+        <% end %>
+      </div>
+    </div>
+  </div>
 </div>
 </div>
 

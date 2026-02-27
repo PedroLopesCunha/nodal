@@ -33,6 +33,26 @@
 
 <!-- Page Body -->
 <div class="bo-page-body">
+  <% if @last_product_sync %>
+    <div class="border rounded d-flex align-items-center gap-2 py-2 px-3 mb-3 bg-light">
+      <i class="fa-solid fa-rotate text-muted"></i>
+      <small class="text-muted">
+        Last sync: <%= l(@last_product_sync.created_at, format: :short) %>
+        <% if @last_product_sync.records_updated.to_i > 0 || @last_product_sync.records_created.to_i > 0 %>
+          &middot; <%= @last_product_sync.records_updated %> updated, <%= @last_product_sync.records_created %> created
+        <% end %>
+        &middot; Status:
+        <% if @last_product_sync.completed? %>
+          <span class="text-success fw-semibold">Success</span>
+        <% elsif @last_product_sync.failed? %>
+          <span class="text-danger fw-semibold">Failed</span>
+        <% else %>
+          <span class="text-warning fw-semibold">Running</span>
+        <% end %>
+      </small>
+    </div>
+  <% end %>
+
   <div class="card mb-4">
   <div class="card-body">
     <%= form_with url: bo_products_path(params[:org_slug]), method: :get do %>

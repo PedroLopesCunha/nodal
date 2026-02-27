@@ -122,6 +122,9 @@ class Bo::ProductsController < Bo::BaseController
 
     # Load categories for filter dropdown
     @categories = current_organisation.categories.kept.order(:name)
+
+    # Load last ERP product sync log (if ERP enabled)
+    @last_product_sync = current_organisation.erp_sync_logs.for_entity('products').completed.recent.first if current_organisation.erp_configuration&.enabled?
   end
 
   def show
@@ -280,7 +283,7 @@ class Bo::ProductsController < Bo::BaseController
   end
 
   def set_product
-    @product = current_organisation.products.find(params[:id])
+    @product = current_organisation.products.includes(:product_variants).find(params[:id])
     authorize @product
   end
 

@@ -22,6 +22,9 @@ class Bo::CustomersController < Bo::BaseController
     @sort_direction = %w[asc desc].include?(params[:direction]) ? params[:direction] : "asc"
     @customers = @customers.order(@sort_column => @sort_direction)
     @pagy, @customers = pagy(@customers)
+
+    # Load last ERP customer sync log (if ERP enabled)
+    @last_customer_sync = current_organisation.erp_sync_logs.for_entity('customers').completed.recent.first if current_organisation.erp_configuration&.enabled?
   end
 
   def show
