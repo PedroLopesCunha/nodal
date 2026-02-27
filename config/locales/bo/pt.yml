@@ -257,6 +257,10 @@ pt:
           zero_price: "Preço zero"
           has_price: "Com preço"
           active_filters: "Filtros ativos"
+          all_statuses: "Todos os Estados"
+          available: "Disponível"
+          unavailable: "Indisponível"
+          partial: "Parcial"
         table:
           product: "Produto"
           sku: "SKU"
@@ -266,6 +270,10 @@ pt:
           simple: "Simples"
           price: "Preço"
           actions: "Ações"
+          available: "Disponível"
+          unavailable: "Indisponível"
+          partial: "Parcial"
+          variants_available: "%{available} de %{total} variantes disponíveis"
       show:
         title: "Detalhes do Produto"
         product_information: "Informação do Produto"
