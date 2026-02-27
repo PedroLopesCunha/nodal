@@ -8,6 +8,9 @@ class Organisation < ApplicationRecord
   monetize :shipping_cost_cents
   monetize :free_shipping_threshold_cents, allow_nil: true
 
+  has_rich_text :terms_and_conditions
+  has_rich_text :privacy_policy
+
   has_one_attached :logo
   has_one_attached :favicon
   has_many :org_members, dependent: :destroy

@@ -337,9 +337,14 @@
           <i class="fa-solid fa-check me-2"></i><%= t('storefront.checkouts.show.place_order') %>
         </button>
 
-        <p class="text-muted small text-center mt-3 mb-0">
-          <%= t('storefront.checkouts.show.terms_agreement') %>
-        </p>
+        <div class="form-check mt-3 mb-0">
+          <input type="checkbox" name="order[terms_accepted]" value="1" id="terms_accepted" class="form-check-input" required form="checkout-form">
+          <label class="form-check-label small" for="terms_accepted">
+            <%= t('storefront.checkouts.show.terms_checkbox_html',
+                  terms_link: link_to(t('storefront.checkouts.show.terms_link'), terms_path(org_slug: current_organisation.slug), target: "_blank"),
+                  privacy_link: link_to(t('storefront.checkouts.show.privacy_link'), privacy_path(org_slug: current_organisation.slug), target: "_blank")) %>
+          </label>
+        </div>
       </div>
     </div>
   </div>

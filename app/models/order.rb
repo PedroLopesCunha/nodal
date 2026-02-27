@@ -65,6 +65,12 @@ class Order < ApplicationRecord
     self.tax_amount = calculated_tax
     self.shipping_amount = calculated_shipping
     snapshot_auto_discount!
+
+    if terms_accepted_at.blank?
+      errors.add(:base, "You must accept the terms and conditions")
+      raise ActiveRecord::RecordInvalid, self
+    end
+
     place!
   end
 

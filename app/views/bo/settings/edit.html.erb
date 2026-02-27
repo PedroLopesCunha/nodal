@@ -255,6 +255,24 @@
 
       <div class="card mb-3">
         <div class="card-body">
+          <h5 class="card-title mb-4"><%= t('bo.settings.edit.legal') %></h5>
+
+          <div class="mb-4">
+            <label class="form-label"><%= t('bo.settings.edit.terms_and_conditions') %></label>
+            <%= f.rich_text_area :terms_and_conditions, class: "form-control" %>
+            <small class="text-muted"><%= t('bo.settings.edit.terms_and_conditions_hint') %></small>
+          </div>
+
+          <div class="mb-0">
+            <label class="form-label"><%= t('bo.settings.edit.privacy_policy') %></label>
+            <%= f.rich_text_area :privacy_policy, class: "form-control" %>
+            <small class="text-muted"><%= t('bo.settings.edit.privacy_policy_hint') %></small>
+          </div>
+        </div>
+      </div>
+
+      <div class="card mb-3">
+        <div class="card-body">
           <h5 class="card-title mb-4"><%= t('bo.settings.edit.stock_management') %></h5>
 
           <div class="row g-3">

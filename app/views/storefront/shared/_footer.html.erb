@@ -36,5 +36,12 @@
     </div>
   <% end %>
 
+  <div class="container py-2">
+    <div class="d-flex justify-content-center gap-3">
+      <%= link_to t("footer.legal.terms"), terms_path(org_slug: current_organisation.slug), class: "text-muted small text-decoration-none" %>
+      <%= link_to t("footer.legal.privacy"), privacy_path(org_slug: current_organisation.slug), class: "text-muted small text-decoration-none" %>
+    </div>
+  </div>
+
   <%= render "storefront/shared/powered_by_nodal" %>
 </footer>

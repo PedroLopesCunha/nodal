@@ -187,12 +187,22 @@ es:
           discount: "Descuento"
           total: "Total"
         place_order: "Realizar Pedido"
-        terms_agreement: "Al realizar el pedido, acepta nuestros términos y condiciones."
+        terms_checkbox_html: "He leído y acepto los %{terms_link} y la %{privacy_link}."
+        terms_link: "Términos y Condiciones"
+        privacy_link: "Política de Privacidad"
         table:
           product: "Producto"
           quantity: "Cant"
           price: "Precio"
           total: "Total"
+
+    # Páginas legales
+    legal_pages:
+      terms:
+        title: "Términos y Condiciones"
+      privacy:
+        title: "Política de Privacidad"
+      no_content: "Esta página aún no está disponible."
 
     # Sección de pedidos
     orders:
