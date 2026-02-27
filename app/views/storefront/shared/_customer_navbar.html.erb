@@ -77,26 +77,9 @@
                 <%= current_customer.contact_name %>
               </button>
               <ul class="dropdown-menu dropdown-menu-end">
-                <li><h6 class="dropdown-header"><i class="fa-solid fa-globe me-1"></i><%= t('storefront.navbar.language') %></h6></li>
                 <li>
-                  <%= link_to update_locale_path(org_slug: params[:org_slug], locale: 'en'),
-                              data: { turbo_method: :patch },
-                              class: "dropdown-item #{'active' if I18n.locale == :en}" do %>
-                    <i class="fa-solid fa-check me-2 <%= 'invisible' unless I18n.locale == :en %>"></i>English
-                  <% end %>
-                </li>
-                <li>
-                  <%= link_to update_locale_path(org_slug: params[:org_slug], locale: 'pt'),
-                              data: { turbo_method: :patch },
-                              class: "dropdown-item #{'active' if I18n.locale == :pt}" do %>
-                    <i class="fa-solid fa-check me-2 <%= 'invisible' unless I18n.locale == :pt %>"></i>Português
-                  <% end %>
-                </li>
-                <li>
-                  <%= link_to update_locale_path(org_slug: params[:org_slug], locale: 'es'),
-                              data: { turbo_method: :patch },
-                              class: "dropdown-item #{'active' if I18n.locale == :es}" do %>
-                    <i class="fa-solid fa-check me-2 <%= 'invisible' unless I18n.locale == :es %>"></i>Español
+                  <%= link_to account_path(org_slug: params[:org_slug]), class: "dropdown-item" do %>
+                    <i class="fa-solid fa-user-gear me-2"></i><%= t('storefront.navbar.account') %>
                   <% end %>
                 </li>
                 <li><hr class="dropdown-divider"></li>

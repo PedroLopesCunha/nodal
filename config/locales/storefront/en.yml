@@ -23,6 +23,7 @@ en:
       orders: "Orders"
       contact: "Contact"
       cart: "Cart"
+      account: "Account"
       sign_out: "Sign out"
       language: "Language"
       order_discounts_available: "Order discounts available!"
@@ -236,6 +237,39 @@ en:
         billing_address: "Billing Address"
         delivery: "Delivery"
         pickup: "Pickup"
+
+    # Account settings
+    account:
+      show:
+        title: "Account Settings"
+        company_info: "Company & Contact Information"
+        company_name: "Company Name"
+        taxpayer_id: "Taxpayer ID"
+        contact_name: "Contact Name"
+        email: "Email"
+        phone: "Phone"
+        save_profile: "Save Profile"
+        addresses: "Addresses"
+        billing_address: "Billing Address"
+        shipping_addresses: "Shipping Addresses"
+        add_shipping_address: "Add Shipping Address"
+        remove_address: "Remove"
+        save_addresses: "Save Addresses"
+        address:
+          street: "Street"
+          number: "Number"
+          postal_code: "Postal Code"
+          city: "City"
+          country: "Country"
+        language: "Language"
+        change_password: "Change Password"
+        current_password: "Current Password"
+        new_password: "New Password"
+        password_confirmation: "Password Confirmation"
+        update_password: "Update Password"
+      flash:
+        profile_updated: "Profile updated successfully."
+        password_updated: "Password updated successfully."
 
     # Flash messages
     flash:

@@ -23,6 +23,7 @@ pt:
       orders: "Encomendas"
       contact: "Contacto"
       cart: "Carrinho"
+      account: "Conta"
       sign_out: "Terminar sessão"
       language: "Idioma"
       order_discounts_available: "Descontos de encomenda disponíveis!"
@@ -236,6 +237,39 @@ pt:
         billing_address: "Morada de Faturação"
         delivery: "Entrega"
         pickup: "Levantamento"
+
+    # Definições da conta
+    account:
+      show:
+        title: "Definições da Conta"
+        company_info: "Empresa e Informação de Contacto"
+        company_name: "Nome da Empresa"
+        taxpayer_id: "NIF"
+        contact_name: "Nome do Contacto"
+        email: "Email"
+        phone: "Telefone"
+        save_profile: "Guardar Perfil"
+        addresses: "Moradas"
+        billing_address: "Morada de Faturação"
+        shipping_addresses: "Moradas de Envio"
+        add_shipping_address: "Adicionar Morada de Envio"
+        remove_address: "Remover"
+        save_addresses: "Guardar Moradas"
+        address:
+          street: "Rua"
+          number: "Número"
+          postal_code: "Código Postal"
+          city: "Cidade"
+          country: "País"
+        language: "Idioma"
+        change_password: "Alterar Palavra-passe"
+        current_password: "Palavra-passe Atual"
+        new_password: "Nova Palavra-passe"
+        password_confirmation: "Confirmar Palavra-passe"
+        update_password: "Atualizar Palavra-passe"
+      flash:
+        profile_updated: "Perfil atualizado com sucesso."
+        password_updated: "Palavra-passe atualizada com sucesso."
 
     # Mensagens flash
     flash:
