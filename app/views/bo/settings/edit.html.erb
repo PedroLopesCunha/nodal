@@ -138,6 +138,26 @@
 
           <hr class="my-4">
 
+          <h6 class="mb-3"><%= t('bo.settings.edit.social_links') %></h6>
+
+          <div class="row g-3">
+            <div class="col-md-4">
+              <label class="form-label"><i class="fa-brands fa-instagram me-1"></i> Instagram</label>
+              <%= f.text_field :instagram_url, class: "form-control", placeholder: t('bo.settings.edit.instagram_placeholder') %>
+            </div>
+            <div class="col-md-4">
+              <label class="form-label"><i class="fa-brands fa-facebook me-1"></i> Facebook</label>
+              <%= f.text_field :facebook_url, class: "form-control", placeholder: t('bo.settings.edit.facebook_placeholder') %>
+            </div>
+            <div class="col-md-4">
+              <label class="form-label"><i class="fa-brands fa-linkedin me-1"></i> LinkedIn</label>
+              <%= f.text_field :linkedin_url, class: "form-control", placeholder: t('bo.settings.edit.linkedin_placeholder') %>
+            </div>
+          </div>
+          <small class="text-muted"><%= t('bo.settings.edit.social_links_hint') %></small>
+
+          <hr class="my-4">
+
           <h6 class="mb-3"><%= t('bo.settings.edit.contact_address') %></h6>
 
           <div class="form-check mb-3">

@@ -80,7 +80,12 @@ class Organisation < ApplicationRecord
       phone.present? ||
       whatsapp.present? ||
       business_hours.present? ||
-      display_contact_address.present?
+      display_contact_address.present? ||
+      has_social_links?
+  end
+
+  def has_social_links?
+    instagram_url.present? || facebook_url.present? || linkedin_url.present?
   end
 
   def effective_storefront_title
