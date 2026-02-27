@@ -101,6 +101,12 @@
                 </li>
                 <li><hr class="dropdown-divider"></li>
                 <li>
+                  <%= link_to account_path(org_slug: params[:org_slug]), class: "dropdown-item" do %>
+                    <i class="fa-solid fa-user-gear me-2"></i><%= t('storefront.navbar.account') %>
+                  <% end %>
+                </li>
+                <li><hr class="dropdown-divider"></li>
+                <li>
                   <%= link_to destroy_customer_session_path(org_slug: params[:org_slug]), class: "dropdown-item", data: { turbo_method: :delete } do %>
                     <i class="fa-solid fa-right-from-bracket me-2"></i><%= t('storefront.navbar.sign_out') %>
                   <% end %>

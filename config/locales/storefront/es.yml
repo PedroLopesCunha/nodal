@@ -23,6 +23,7 @@ es:
       orders: "Pedidos"
       contact: "Contacto"
       cart: "Carrito"
+      account: "Cuenta"
       sign_out: "Cerrar sesión"
       language: "Idioma"
       order_discounts_available: "¡Descuentos de pedido disponibles!"
@@ -236,6 +237,38 @@ es:
         billing_address: "Dirección de Facturación"
         delivery: "Envío"
         pickup: "Recogida"
+
+    # Configuración de la cuenta
+    account:
+      show:
+        title: "Configuración de la Cuenta"
+        company_info: "Empresa e Información de Contacto"
+        company_name: "Nombre de la Empresa"
+        taxpayer_id: "NIF / CIF"
+        contact_name: "Nombre del Contacto"
+        email: "Correo Electrónico"
+        phone: "Teléfono"
+        save_profile: "Guardar Perfil"
+        addresses: "Direcciones"
+        billing_address: "Dirección de Facturación"
+        shipping_addresses: "Direcciones de Envío"
+        add_shipping_address: "Añadir Dirección de Envío"
+        remove_address: "Eliminar"
+        save_addresses: "Guardar Direcciones"
+        address:
+          street: "Calle"
+          number: "Número"
+          postal_code: "Código Postal"
+          city: "Ciudad"
+          country: "País"
+        change_password: "Cambiar Contraseña"
+        current_password: "Contraseña Actual"
+        new_password: "Nueva Contraseña"
+        password_confirmation: "Confirmar Contraseña"
+        update_password: "Actualizar Contraseña"
+      flash:
+        profile_updated: "Perfil actualizado con éxito."
+        password_updated: "Contraseña actualizada con éxito."
 
     # Mensajes flash
     flash:
