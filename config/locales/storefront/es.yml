@@ -32,6 +32,10 @@ es:
     free_shipping:
       banner: "Envío gratis en pedidos superiores a %{amount}"
 
+    # Botón flotante WhatsApp
+    whatsapp_button:
+      tooltip: "Chatea con nosotros en WhatsApp"
+
     # Pie de página
     footer:
       contact_us: "Contáctenos"

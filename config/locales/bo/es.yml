@@ -879,6 +879,8 @@ es:
         whatsapp: "WhatsApp"
         whatsapp_placeholder: "+34 234 567 890"
         whatsapp_hint: "Incluya el código del país (ej: +34 para España)"
+        show_whatsapp_button: "Mostrar botón flotante de WhatsApp"
+        show_whatsapp_button_hint: "Mostrar un botón de chat WhatsApp en la tienda"
         business_hours: "Horario de Atención"
         business_hours_placeholder: "Lun-Vie: 9:00-18:00\nSáb: 10:00-14:00"
         contact_address: "Dirección de Contacto"

@@ -903,6 +903,8 @@ en:
         whatsapp: "WhatsApp"
         whatsapp_placeholder: "+1 234 567 890"
         whatsapp_hint: "Include country code (e.g., +1 for US)"
+        show_whatsapp_button: "Show floating WhatsApp button"
+        show_whatsapp_button_hint: "Display a WhatsApp chat button on the storefront"
         business_hours: "Business Hours"
         business_hours_placeholder: "Mon-Fri: 9:00-18:00\nSat: 10:00-14:00"
         contact_address: "Contact Address"

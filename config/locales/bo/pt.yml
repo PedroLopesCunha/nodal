@@ -882,6 +882,8 @@ pt:
         whatsapp: "WhatsApp"
         whatsapp_placeholder: "+351 234 567 890"
         whatsapp_hint: "Inclua o código do país (ex: +351 para Portugal)"
+        show_whatsapp_button: "Mostrar botão flutuante do WhatsApp"
+        show_whatsapp_button_hint: "Apresentar um botão de chat WhatsApp na loja"
         business_hours: "Horário de Funcionamento"
         business_hours_placeholder: "Seg-Sex: 9:00-18:00\nSáb: 10:00-14:00"
         contact_address: "Morada de Contacto"

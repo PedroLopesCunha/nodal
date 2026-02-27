@@ -129,6 +129,14 @@
               <label class="form-label"><%= t('bo.settings.edit.whatsapp') %></label>
               <%= f.text_field :whatsapp, class: "form-control", placeholder: t('bo.settings.edit.whatsapp_placeholder') %>
               <small class="text-muted"><%= t('bo.settings.edit.whatsapp_hint') %></small>
+
+              <div class="form-check form-switch mt-2">
+                <%= f.check_box :show_whatsapp_button, class: "form-check-input", role: "switch" %>
+                <label class="form-check-label" for="organisation_show_whatsapp_button">
+                  <%= t('bo.settings.edit.show_whatsapp_button') %>
+                </label>
+              </div>
+              <small class="text-muted"><%= t('bo.settings.edit.show_whatsapp_button_hint') %></small>
             </div>
             <div class="col-md-6">
               <label class="form-label"><%= t('bo.settings.edit.business_hours') %></label>
