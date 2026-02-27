@@ -99,8 +99,8 @@
           <% else %>
             <span class="text-primary" style="font-size: 2.5rem; font-weight: 700;"><%= humanized_money_with_symbol(@product.price) %></span>
           <% end %>
-          <% unless @product.price_on_request? %>
-            <span class="text-muted fs-5">/ <%= @product.unit_description || 'unit' %></span>
+          <% if @product.unit_description.present? && !@product.price_on_request? %>
+            <span class="text-muted fs-5">/ <%= @product.unit_description %></span>
           <% end %>
         </div>
 
@@ -162,40 +162,59 @@
         <% end %>
 
         <!-- Additional Price Info -->
-        <div class="mb-4 text-muted">
-          <% display_sku = @product.variable? ? (@default_variant&.sku || @product.sku) : @product.sku %>
-          <div class="sku-container <%= 'd-none' unless display_sku.present? %>"><i class="fa-solid fa-barcode me-2"></i>SKU: <span data-variant-selector-target="sku"><%= display_sku || '-' %></span></div>
-        </div>
+        <% if current_organisation.show_product_sku? %>
+          <div class="mb-4 text-muted">
+            <% display_sku = @product.variable? ? (@default_variant&.sku || @product.sku) : @product.sku %>
+            <div class="sku-container <%= 'd-none' unless display_sku.present? %>"><i class="fa-solid fa-barcode me-2"></i>SKU: <span data-variant-selector-target="sku"><%= display_sku || '-' %></span></div>
+          </div>
+        <% end %>
 
         <!-- Info Grid -->
-        <div class="row g-3 mb-4 py-3 border-top border-bottom">
-          <div class="col-4">
-            <div class="text-muted small fw-semibold mb-1"><%= t('storefront.products.show.min_order') %></div>
-            <div>
-              <i class="fa-solid fa-layer-group me-1 text-muted"></i>
-              <%= @product.min_quantity || 1 %> <%= @product.min_quantity_type || @product.unit_description || 'unit' %>
-            </div>
+        <% show_min_qty = current_organisation.show_product_min_quantity? %>
+        <% show_category = current_organisation.show_product_category? %>
+        <% show_availability = current_organisation.show_product_availability? %>
+        <% if show_min_qty || show_category || show_availability %>
+          <div class="row g-3 mb-4 py-3 border-top border-bottom">
+            <% if show_min_qty %>
+              <div class="col-4">
+                <div class="text-muted small fw-semibold mb-1"><%= t('storefront.products.show.min_order') %></div>
+                <div>
+                  <i class="fa-solid fa-layer-group me-1 text-muted"></i>
+                  <%= @product.min_quantity || 1 %> <%= @product.min_quantity_type || @product.unit_description || 'unit' %>
+                </div>
+              </div>
+            <% end %>
+            <% if show_category %>
+              <div class="col-4">
+                <div class="text-muted small fw-semibold mb-1"><%= t('storefront.products.show.category') %></div>
+                <div>
+                  <% if @product.categories.any? %>
+                    <%= @product.categories.first.name %>
+                    <% if @product.categories.size > 1 %>
+                      <span class="text-muted small" title="<%= @product.categories.drop(1).map(&:name).join(', ') %>" data-bs-toggle="tooltip">+<%= @product.categories.size - 1 %> more</span>
+                    <% end %>
+                  <% else %>
+                    -
+                  <% end %>
+                </div>
+              </div>
+            <% end %>
+            <% if show_availability %>
+              <div class="col-4">
+                <div class="text-muted small fw-semibold mb-1"><%= t('storefront.products.show.availability') %></div>
+                <div>
+                  <% if @product.available? %>
+                    <i class="fa-solid fa-circle-check me-1 text-success"></i>
+                    <%= t('storefront.products.show.in_stock') %>
+                  <% else %>
+                    <i class="fa-solid fa-circle-xmark me-1 text-danger"></i>
+                    <%= t('storefront.products.show.out_of_stock') %>
+                  <% end %>
+                </div>
+              </div>
+            <% end %>
           </div>
-          <div class="col-4">
-            <div class="text-muted small fw-semibold mb-1"><%= t('storefront.products.show.category') %></div>
-            <div>
-              <i class="fa-solid fa-folder me-1 text-muted"></i>
-              <%= @product.categories.any? ? @product.categories.map(&:name).join(', ') : '-' %>
-            </div>
-          </div>
-          <div class="col-4">
-            <div class="text-muted small fw-semibold mb-1"><%= t('storefront.products.show.availability') %></div>
-            <div>
-              <% if @product.available? %>
-                <i class="fa-solid fa-circle-check me-1 text-success"></i>
-                <%= t('storefront.products.show.in_stock') %>
-              <% else %>
-                <i class="fa-solid fa-circle-xmark me-1 text-danger"></i>
-                <%= t('storefront.products.show.out_of_stock') %>
-              <% end %>
-            </div>
-          </div>
-        </div>
+        <% end %>
 
         <!-- Variant Selector (for variable products) -->
         <% if @product.has_variants? && @attributes_with_values.present? %>

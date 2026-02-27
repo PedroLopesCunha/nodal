@@ -12,6 +12,9 @@
       </div>
     </div>
     <div class="bo-page-actions">
+      <%= link_to product_path(params[:org_slug], @product), class: "btn btn-outline-secondary", target: "_blank" do %>
+        <i class="fa-solid fa-store me-1"></i> <%= t('bo.products.show.view_in_storefront') %>
+      <% end %>
       <%= link_to related_products_bo_product_path(params[:org_slug], @product), class: "btn btn-outline-secondary" do %>
         <i class="fa-solid fa-link me-1"></i> <%= t('bo.products.show.manage_related') %>
       <% end %>
