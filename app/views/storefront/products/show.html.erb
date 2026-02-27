@@ -180,7 +180,7 @@
             <div class="text-muted small fw-semibold mb-1"><%= t('storefront.products.show.category') %></div>
             <div>
               <i class="fa-solid fa-folder me-1 text-muted"></i>
-              <%= @product.category&.name || '-' %>
+              <%= @product.categories.any? ? @product.categories.map(&:name).join(', ') : '-' %>
             </div>
           </div>
           <div class="col-4">
