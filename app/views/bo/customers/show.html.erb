@@ -1,11 +1,10 @@
 <% content_for :bo_main_content do %>
 
-<div class="container-fluid py-4">
-<div class="mb-4">
+<div class="bo-page-header">
   <div class="d-flex justify-content-between align-items-center">
     <div class="d-flex align-items-center gap-3">
-      <%= link_to bo_customers_path(params[:org_slug], filter_params_hash), class: "text-muted" do %>
-        <i class="fa-solid fa-arrow-left"></i>
+      <%= link_to bo_customers_path(params[:org_slug], filter_params_hash), class: "text-muted text-decoration-none" do %>
+        <i class="fa-solid fa-arrow-left fa-lg"></i>
       <% end %>
 
       <div class="rounded-circle bg-primary d-flex align-items-center justify-content-center text-white fw-bold" style="width: 60px; height: 60px; font-size: 1.25rem;">
@@ -13,12 +12,12 @@
       </div>
 
       <div>
-        <h4 class="mb-0"><%= @customer.contact_name %></h4>
-        <span class="text-muted"><%= @customer.company_name %></span>
+        <h1><%= @customer.contact_name %></h1>
+        <p><%= @customer.company_name %></p>
       </div>
     </div>
 
-    <div class="d-flex gap-2 align-items-center">
+    <div class="bo-page-actions">
       <% if @customer.active? %>
         <span class="badge bg-primary rounded-pill px-3 py-2"><%= t('bo.common.statuses.active') %></span>
       <% else %>
@@ -35,6 +34,7 @@
   </div>
 </div>
 
+<div class="bo-page-body">
 <div class="row g-3 mb-4">
   <div class="col-md-8">
     <div class="card h-100">
