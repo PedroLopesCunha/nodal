@@ -85,6 +85,23 @@ pt:
       vs_prev_period: "vs período anterior"
       not_provided: "Não fornecido"
 
+    # Sincronização ERP (partilhado entre produtos e clientes)
+    erp_sync:
+      title: "Estado da Sincronização ERP"
+      last_sync: "Última sincronização"
+      n_updated: "%{count} atualizados"
+      n_created: "%{count} criados"
+      status_label: "Estado"
+      status_success: "Sucesso"
+      status_failed: "Falhou"
+      status_running: "Em execução"
+      synced: "Sincronizado"
+      error: "Erro"
+      not_synced: "Não sincronizado"
+      external_id: "ID Externo"
+      last_synced: "Última sincronização"
+      synced_ago: "há %{time}"
+
     # Navegação
     navbar:
       sign_out: "Terminar sessão"
@@ -275,6 +292,22 @@ pt:
         default: "Padrão"
         and_more_variants: "...e mais %{count} variante(s)"
         no_variants: "Nenhuma variante configurada para este produto."
+        storefront_visibility: "Visibilidade na Loja"
+        product_availability: "Disponibilidade do produto"
+        available_badge: "Disponível"
+        unavailable_badge: "Indisponível"
+        stock_strategy: "Estratégia de stock"
+        stock_do_nothing: "Não fazer nada"
+        stock_deactivate: "Desativar"
+        stock_hide: "Ocultar"
+        stock_do_nothing_desc: "O stock é monitorizado mas os produtos ficam visíveis"
+        stock_deactivate_desc: "Produtos sem stock são marcados como indisponíveis"
+        stock_hide_desc: "Produtos sem stock são ocultados da loja"
+        variant_stock_summary: "Resumo de stock das variantes"
+        variants_in_stock_html: "<strong>%{in_stock}</strong> de %{total} variantes em stock"
+        variants_tracking_html: "<strong>%{count}</strong> variantes a monitorizar stock"
+        variants_visible_oos_html: "<strong>%{count}</strong> variantes visíveis quando sem stock"
+        no_variants_summary: "Sem variantes"
       new:
         title: "Novo Produto"
         subtitle: "Adicionar um novo produto ao catálogo"

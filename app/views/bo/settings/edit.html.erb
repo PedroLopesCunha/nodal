@@ -1,6 +1,6 @@
 <% content_for :bo_main_content do%>
 
-<div class="mb-4">
+<div class="bo-page-header">
   <div class="d-flex justify-content-between align-items-center">
     <div class="d-flex align-items-center gap-3">
       <div class="rounded-circle bg-secondary d-flex align-items-center justify-content-center text-white fw-bold" style="width: 60px; height: 60px; font-size: 1.25rem;">
@@ -8,12 +8,12 @@
       </div>
 
       <div>
-        <h4 class="mb-0"><%= t('bo.settings.edit.title') %></h4>
+        <h1><%= t('bo.settings.edit.title') %></h1>
         <span class="text-muted"><%= @organisation.name %></span>
       </div>
     </div>
 
-    <div class="d-flex gap-2 align-items-center">
+    <div class="bo-page-actions">
       <%= link_to bo_path, class: "btn btn-outline-secondary" do %>
         <%= t('bo.common.actions.cancel') %>
       <% end %>
@@ -23,6 +23,10 @@
     </div>
   </div>
 </div>
+
+<div class="bo-page-body">
+
+<%= render "bo/shared/settings_tabs" %>
 
 <%= form_with model: @organisation, url: bo_settings_path, method: :patch, id: "settings-form" do |f| %>
   <div class="row g-3">
@@ -378,5 +382,7 @@
     </div>
   </div>
 <% end %>
+
+</div>
 
 <% end %>

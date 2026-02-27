@@ -57,14 +57,7 @@
     <li class="bo-sidebar-item bo-sidebar-storefront">
       <%= link_to products_path(org_slug: current_organisation.slug), target: "_blank" do %>
         <i class="fa-solid fa-store"></i>
-        <span><%= t('bo.sidebar.view_storefront', default: 'View Storefront') %></span>
-        <i class="fa-solid fa-external-link-alt ms-auto" style="font-size: 0.7rem; opacity: 0.6;"></i>
-      <% end %>
-    </li>
-    <li class="bo-sidebar-item <%= 'active' if controller_name == 'profiles' %>">
-      <%= link_to edit_bo_profile_path do %>
-        <i class="fa-solid fa-circle-user"></i>
-        <span><%= t('bo.sidebar.profile') %></span>
+        <span><%= t('bo.sidebar.view_storefront', default: 'View Storefront') %> <i class="fa-solid fa-external-link-alt ms-1" style="font-size: 0.7rem; opacity: 0.6;"></i></span>
       <% end %>
     </li>
     <li class="bo-sidebar-item <%= 'active' if controller_name == 'team_members' %>">
@@ -74,16 +67,10 @@
       <% end %>
     </li>
     <% if admin_or_owner? %>
-      <li class="bo-sidebar-item <%= 'active' if controller_name == 'settings' %>">
+      <li class="bo-sidebar-item <%= 'active' if controller_name.in?(%w[settings erp_settings]) %>">
         <%= link_to edit_bo_settings_path do %>
           <i class="fa-solid fa-gear"></i>
           <span><%= t('bo.sidebar.settings') %></span>
-        <% end %>
-      </li>
-      <li class="bo-sidebar-item <%= 'active' if controller_name == 'erp_settings' %>">
-        <%= link_to edit_bo_erp_settings_path do %>
-          <i class="fa-solid fa-plug"></i>
-          <span><%= t('bo.sidebar.erp_integration', default: 'ERP Integration') %></span>
         <% end %>
       </li>
     <% end %>

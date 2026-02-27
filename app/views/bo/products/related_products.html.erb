@@ -1,17 +1,20 @@
 <% content_for :bo_main_content do %>
 
-<div class="container-fluid py-4">
+<div class="bo-page-header">
   <div class="d-flex justify-content-between align-items-start mb-4">
     <div class="d-flex align-items-center gap-3">
       <%= link_to bo_product_path(params[:org_slug], @product), class: "text-muted text-decoration-none" do %>
         <i class="fa-solid fa-arrow-left fa-lg"></i>
       <% end %>
       <div>
-        <h1 class="mb-0"><%= t('bo.products.related.title') %></h1>
+        <h1><%= t('bo.products.related.title') %></h1>
         <span class="text-muted"><%= @product.name %></span>
       </div>
     </div>
   </div>
+</div>
+
+<div class="bo-page-body">
 
   <%= form_with url: update_related_products_bo_product_path(params[:org_slug], @product), method: :patch, local: true, data: { controller: "related-products" } do |f| %>
     <div class="row g-4">

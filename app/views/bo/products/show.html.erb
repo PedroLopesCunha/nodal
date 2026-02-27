@@ -1,34 +1,36 @@
 <% content_for :bo_main_content do %>
 
-<div class="container-fluid py-4">
-<div class="d-flex justify-content-between align-items-start mb-4">
-  <div class="d-flex align-items-center gap-3">
-    <%= link_to bo_products_path(params[:org_slug], filter_params_hash), class: "text-muted text-decoration-none" do %>
-      <i class="fa-solid fa-arrow-left fa-lg"></i>
-    <% end %>
-    <div>
-      <h1 class="mb-0"><%= @product.name %></h1>
-      <span class="text-muted">SKU: <%= @product.sku %></span>
+<div class="bo-page-header">
+  <div class="d-flex justify-content-between align-items-start">
+    <div class="d-flex align-items-center gap-3">
+      <%= link_to bo_products_path(params[:org_slug], filter_params_hash), class: "text-muted text-decoration-none" do %>
+        <i class="fa-solid fa-arrow-left fa-lg"></i>
+      <% end %>
+      <div>
+        <h1><%= @product.name %></h1>
+        <p>SKU: <%= @product.sku %></p>
+      </div>
     </div>
-  </div>
-  <div class="d-flex align-items-center gap-2">
-    <%= link_to related_products_bo_product_path(params[:org_slug], @product), class: "btn btn-outline-secondary" do %>
-      <i class="fa-solid fa-link me-1"></i> <%= t('bo.products.show.manage_related') %>
-    <% end %>
-    <%= link_to configure_variants_bo_product_path(params[:org_slug], @product), class: "btn btn-outline-secondary" do %>
-      <i class="fa-solid fa-cubes me-1"></i> <%= t('bo.products.show.manage_variants') %>
-    <% end %>
-    <%= link_to edit_bo_product_path(params[:org_slug], @product), class: "btn btn-outline-primary" do %>
-      <i class="fa-solid fa-pen-to-square me-1"></i> <%= t('bo.common.actions.edit') %>
-    <% end %>
-    <%= link_to bo_product_path(params[:org_slug], @product),
-        class: "btn btn-outline-danger ms-2",
-        data: { turbo_method: :delete, turbo_confirm: t('bo.common.confirm.delete_product_name', name: @product.name) } do %>
-      <i class="fa-solid fa-trash me-1"></i> <%= t('bo.common.actions.delete') %>
-    <% end %>
+    <div class="bo-page-actions">
+      <%= link_to related_products_bo_product_path(params[:org_slug], @product), class: "btn btn-outline-secondary" do %>
+        <i class="fa-solid fa-link me-1"></i> <%= t('bo.products.show.manage_related') %>
+      <% end %>
+      <%= link_to configure_variants_bo_product_path(params[:org_slug], @product), class: "btn btn-outline-secondary" do %>
+        <i class="fa-solid fa-cubes me-1"></i> <%= t('bo.products.show.manage_variants') %>
+      <% end %>
+      <%= link_to edit_bo_product_path(params[:org_slug], @product), class: "btn btn-outline-primary" do %>
+        <i class="fa-solid fa-pen-to-square me-1"></i> <%= t('bo.common.actions.edit') %>
+      <% end %>
+      <%= link_to bo_product_path(params[:org_slug], @product),
+          class: "btn btn-outline-danger",
+          data: { turbo_method: :delete, turbo_confirm: t('bo.common.confirm.delete_product_name', name: @product.name) } do %>
+        <i class="fa-solid fa-trash me-1"></i> <%= t('bo.common.actions.delete') %>
+      <% end %>
+    </div>
   </div>
 </div>
 
+<div class="bo-page-body">
 <div class="row g-4">
   <%# Left Column %>
   <div class="col-lg-8">
@@ -190,6 +192,118 @@
       </div>
     </div>
 
+  </div>
+
+  <%# Right Column — Info Cards %>
+  <div class="col-lg-4">
+    <%# Card A: ERP Sync Status %>
+    <% if @product.synced_from_erp? %>
+      <div class="card mb-4">
+        <div class="card-body">
+          <h6 class="card-title mb-3"><i class="fa-solid fa-rotate me-1"></i> <%= t('bo.erp_sync.title') %></h6>
+
+          <div class="mb-2">
+            <small class="text-muted d-block"><%= t('bo.erp_sync.status_label') %></small>
+            <% case @product.sync_status %>
+            <% when :synced %>
+              <span class="badge bg-success"><%= t('bo.erp_sync.synced') %></span>
+            <% when :error %>
+              <span class="badge bg-danger"><%= t('bo.erp_sync.error') %></span>
+            <% else %>
+              <span class="badge bg-secondary"><%= t('bo.erp_sync.not_synced') %></span>
+            <% end %>
+          </div>
+
+          <div class="mb-2">
+            <small class="text-muted d-block"><%= t('bo.erp_sync.external_id') %></small>
+            <code><%= @product.external_id %></code>
+          </div>
+
+          <% if @product.last_synced_at %>
+            <div class="mb-2">
+              <small class="text-muted d-block"><%= t('bo.erp_sync.last_synced') %></small>
+              <span title="<%= l(@product.last_synced_at) %>"><%= t('bo.erp_sync.synced_ago', time: time_ago_in_words(@product.last_synced_at)) %></span>
+            </div>
+          <% end %>
+
+          <% if @product.has_sync_error? %>
+            <div class="border border-danger rounded bg-danger-subtle py-2 px-3 mb-0 mt-2">
+              <small class="text-danger"><i class="fa-solid fa-triangle-exclamation me-1"></i> <%= @product.sync_error %></small>
+            </div>
+          <% end %>
+        </div>
+      </div>
+    <% end %>
+
+    <%# Card B: Storefront Visibility & Stock Rules %>
+    <div class="card mb-4">
+      <div class="card-body">
+        <h6 class="card-title mb-3"><i class="fa-solid fa-eye me-1"></i> <%= t('bo.products.show.storefront_visibility') %></h6>
+
+        <div class="mb-2">
+          <small class="text-muted d-block"><%= t('bo.products.show.product_availability') %></small>
+          <% if @product.available? %>
+            <span class="badge bg-success"><%= t('bo.products.show.available_badge') %></span>
+          <% else %>
+            <span class="badge bg-danger"><%= t('bo.products.show.unavailable_badge') %></span>
+          <% end %>
+        </div>
+
+        <div class="mb-3">
+          <small class="text-muted d-block"><%= t('bo.products.show.stock_strategy') %></small>
+          <% case current_organisation.out_of_stock_strategy %>
+          <% when 'do_nothing' %>
+            <span class="badge bg-secondary"><%= t('bo.products.show.stock_do_nothing') %></span>
+          <% when 'deactivate' %>
+            <span class="badge bg-warning text-dark"><%= t('bo.products.show.stock_deactivate') %></span>
+          <% when 'hide' %>
+            <span class="badge bg-danger"><%= t('bo.products.show.stock_hide') %></span>
+          <% end %>
+          <small class="text-muted d-block mt-1">
+            <% case current_organisation.out_of_stock_strategy %>
+            <% when 'do_nothing' %>
+              <%= t('bo.products.show.stock_do_nothing_desc') %>
+            <% when 'deactivate' %>
+              <%= t('bo.products.show.stock_deactivate_desc') %>
+            <% when 'hide' %>
+              <%= t('bo.products.show.stock_hide_desc') %>
+            <% end %>
+          </small>
+        </div>
+
+        <hr>
+
+        <% variants = @product.product_variants %>
+        <% total_variants = variants.size %>
+        <% if total_variants > 0 %>
+          <% tracking_stock = variants.count(&:track_stock?) %>
+          <% in_stock = variants.count(&:in_stock?) %>
+
+          <h6 class="mb-2"><%= t('bo.products.show.variant_stock_summary') %></h6>
+          <ul class="list-unstyled mb-0 small">
+            <li class="mb-1">
+              <i class="fa-solid fa-boxes-stacked text-muted me-1"></i>
+              <%= t('bo.products.show.variants_in_stock_html', in_stock: in_stock, total: total_variants) %>
+            </li>
+            <li class="mb-1">
+              <i class="fa-solid fa-chart-line text-muted me-1"></i>
+              <%= t('bo.products.show.variants_tracking_html', count: tracking_stock) %>
+            </li>
+            <% if current_organisation.hide_out_of_stock? %>
+              <% opt_out_count = variants.count { |v| !v.hide_when_unavailable? } %>
+              <% if opt_out_count > 0 %>
+                <li>
+                  <i class="fa-solid fa-eye text-muted me-1"></i>
+                  <%= t('bo.products.show.variants_visible_oos_html', count: opt_out_count) %>
+                </li>
+              <% end %>
+            <% end %>
+          </ul>
+        <% else %>
+          <p class="text-muted small mb-0"><%= t('bo.products.show.no_variants_summary') %></p>
+        <% end %>
+      </div>
+    </div>
   </div>
 </div>
 </div>

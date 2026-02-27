@@ -33,6 +33,26 @@
 
 <!-- Page Body -->
 <div class="bo-page-body">
+  <% if @last_product_sync %>
+    <div class="border rounded d-flex align-items-center gap-2 py-2 px-3 mb-3 bg-light">
+      <i class="fa-solid fa-rotate text-muted"></i>
+      <small class="text-muted">
+        <%= t('bo.erp_sync.last_sync') %>: <%= l(@last_product_sync.created_at, format: :short) %>
+        <% if @last_product_sync.records_updated.to_i > 0 || @last_product_sync.records_created.to_i > 0 %>
+          &middot; <%= t('bo.erp_sync.n_updated', count: @last_product_sync.records_updated) %>, <%= t('bo.erp_sync.n_created', count: @last_product_sync.records_created) %>
+        <% end %>
+        &middot; <%= t('bo.erp_sync.status_label') %>:
+        <% if @last_product_sync.completed? %>
+          <span class="text-success fw-semibold"><%= t('bo.erp_sync.status_success') %></span>
+        <% elsif @last_product_sync.failed? %>
+          <span class="text-danger fw-semibold"><%= t('bo.erp_sync.status_failed') %></span>
+        <% else %>
+          <span class="text-warning fw-semibold"><%= t('bo.erp_sync.status_running') %></span>
+        <% end %>
+      </small>
+    </div>
+  <% end %>
+
   <div class="card mb-4">
   <div class="card-body">
     <%= form_with url: bo_products_path(params[:org_slug]), method: :get do %>
@@ -119,6 +139,7 @@
 <% end %>
 
 <div class="card">
+  <div class="table-responsive">
   <table class="table table-hover mb-0">
     <thead class="table-light">
       <tr>
@@ -204,6 +225,12 @@
     </tbody>
   </table>
   </div>
+  </div>
+  <% if @pagy.pages > 1 %>
+    <div class="card-footer d-flex justify-content-center">
+      <%== pagy_bootstrap_nav(@pagy) %>
+    </div>
+  <% end %>
 </div>
 
 <% end %>

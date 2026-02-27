@@ -1,11 +1,10 @@
 <% content_for :bo_main_content do %>
 
-<div class="container-fluid py-4">
-<div class="mb-4">
+<div class="bo-page-header">
   <div class="d-flex justify-content-between align-items-center">
     <div class="d-flex align-items-center gap-3">
-      <%= link_to bo_customers_path(params[:org_slug], filter_params_hash), class: "text-muted" do %>
-        <i class="fa-solid fa-arrow-left"></i>
+      <%= link_to bo_customers_path(params[:org_slug], filter_params_hash), class: "text-muted text-decoration-none" do %>
+        <i class="fa-solid fa-arrow-left fa-lg"></i>
       <% end %>
 
       <div class="rounded-circle bg-primary d-flex align-items-center justify-content-center text-white fw-bold" style="width: 60px; height: 60px; font-size: 1.25rem;">
@@ -13,12 +12,12 @@
       </div>
 
       <div>
-        <h4 class="mb-0"><%= @customer.contact_name %></h4>
-        <span class="text-muted"><%= @customer.company_name %></span>
+        <h1><%= @customer.contact_name %></h1>
+        <p><%= @customer.company_name %></p>
       </div>
     </div>
 
-    <div class="d-flex gap-2 align-items-center">
+    <div class="bo-page-actions">
       <% if @customer.active? %>
         <span class="badge bg-primary rounded-pill px-3 py-2"><%= t('bo.common.statuses.active') %></span>
       <% else %>
@@ -35,6 +34,7 @@
   </div>
 </div>
 
+<div class="bo-page-body">
 <div class="row g-3 mb-4">
   <div class="col-md-8">
     <div class="card h-100">
@@ -108,13 +108,51 @@
   </div>
 
   <div class="col-md-4">
+    <% if @customer.synced_from_erp? %>
+      <div class="card mb-3">
+        <div class="card-body">
+          <h6 class="card-title mb-3"><i class="fa-solid fa-rotate me-1"></i> <%= t('bo.erp_sync.title') %></h6>
+
+          <div class="mb-2">
+            <small class="text-muted d-block"><%= t('bo.erp_sync.status_label') %></small>
+            <% case @customer.sync_status %>
+            <% when :synced %>
+              <span class="badge bg-success"><%= t('bo.erp_sync.synced') %></span>
+            <% when :error %>
+              <span class="badge bg-danger"><%= t('bo.erp_sync.error') %></span>
+            <% else %>
+              <span class="badge bg-secondary"><%= t('bo.erp_sync.not_synced') %></span>
+            <% end %>
+          </div>
+
+          <div class="mb-2">
+            <small class="text-muted d-block"><%= t('bo.erp_sync.external_id') %></small>
+            <code><%= @customer.external_id %></code>
+          </div>
+
+          <% if @customer.last_synced_at %>
+            <div class="mb-2">
+              <small class="text-muted d-block"><%= t('bo.erp_sync.last_synced') %></small>
+              <span title="<%= l(@customer.last_synced_at) %>"><%= t('bo.erp_sync.synced_ago', time: time_ago_in_words(@customer.last_synced_at)) %></span>
+            </div>
+          <% end %>
+
+          <% if @customer.has_sync_error? %>
+            <div class="border border-danger rounded bg-danger-subtle py-2 px-3 mb-0 mt-2">
+              <small class="text-danger"><i class="fa-solid fa-triangle-exclamation me-1"></i> <%= @customer.sync_error %></small>
+            </div>
+          <% end %>
+        </div>
+      </div>
+    <% end %>
+
     <div class="card h-100">
       <div class="card-body">
         <h5 class="card-title mb-4"><%= t('bo.customers.show.account_details') %></h5>
 
-        <% if @customer.external_id.present? %>
+        <% if @customer.external_id.present? && !@customer.synced_from_erp? %>
         <div class="border-bottom pb-3 mb-3">
-          <small class="text-muted d-block">External ID</small>
+          <small class="text-muted d-block"><%= t('bo.erp_sync.external_id') %></small>
           <span class="font-monospace"><%= @customer.external_id %></span>
         </div>
         <% end %>

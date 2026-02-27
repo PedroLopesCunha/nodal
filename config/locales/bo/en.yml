@@ -88,6 +88,23 @@ en:
       vs_prev_period: "vs prev period"
       not_provided: "Not provided"
 
+    # ERP Sync (shared across products & customers)
+    erp_sync:
+      title: "ERP Sync Status"
+      last_sync: "Last sync"
+      n_updated: "%{count} updated"
+      n_created: "%{count} created"
+      status_label: "Status"
+      status_success: "Success"
+      status_failed: "Failed"
+      status_running: "Running"
+      synced: "Synced"
+      error: "Error"
+      not_synced: "Not synced"
+      external_id: "External ID"
+      last_synced: "Last synced"
+      synced_ago: "%{time} ago"
+
     # Navigation
     navbar:
       sign_out: "Sign out"
@@ -282,6 +299,22 @@ en:
         default: "Default"
         and_more_variants: "...and %{count} more variant(s)"
         no_variants: "No variants configured for this product."
+        storefront_visibility: "Storefront Visibility"
+        product_availability: "Product availability"
+        available_badge: "Available"
+        unavailable_badge: "Unavailable"
+        stock_strategy: "Stock strategy"
+        stock_do_nothing: "Do nothing"
+        stock_deactivate: "Deactivate"
+        stock_hide: "Hide"
+        stock_do_nothing_desc: "Stock is tracked but products stay visible"
+        stock_deactivate_desc: "Out-of-stock products are marked unavailable"
+        stock_hide_desc: "Out-of-stock products are hidden from storefront"
+        variant_stock_summary: "Variant stock summary"
+        variants_in_stock_html: "<strong>%{in_stock}</strong> of %{total} variants in stock"
+        variants_tracking_html: "<strong>%{count}</strong> variants tracking stock"
+        variants_visible_oos_html: "<strong>%{count}</strong> variants visible when out of stock"
+        no_variants_summary: "No variants"
       new:
         title: "New Product"
         subtitle: "Add a new product to your catalog"

@@ -80,7 +80,7 @@
                 <small class="text-muted"><%= order.customer.contact_name %></small>
               </td>
               <td><%= order.placed_at&.strftime("%m/%d/%Y") || order.created_at.strftime("%m/%d/%Y") %></td>
-              <td><%= order.order_items.count %></td>
+              <td><%= order.order_items.size %></td>
               <td><%= humanized_money_with_symbol(order.total_amount) %></td>
               <td>
                 <% status_class = case order.status
@@ -128,6 +128,11 @@
         </tbody>
       </table>
     </div>
+    <% if @pagy.pages > 1 %>
+      <div class="card-footer d-flex justify-content-center">
+        <%== pagy_bootstrap_nav(@pagy) %>
+      </div>
+    <% end %>
   </div>
 </div>
 
