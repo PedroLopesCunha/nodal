@@ -8,6 +8,9 @@ class Organisation < ApplicationRecord
   monetize :shipping_cost_cents
   monetize :free_shipping_threshold_cents, allow_nil: true
 
+  has_rich_text :terms_and_conditions
+  has_rich_text :privacy_policy
+
   has_one_attached :logo
   has_one_attached :favicon
   has_many :org_members, dependent: :destroy
@@ -77,7 +80,12 @@ class Organisation < ApplicationRecord
       phone.present? ||
       whatsapp.present? ||
       business_hours.present? ||
-      display_contact_address.present?
+      display_contact_address.present? ||
+      has_social_links?
+  end
+
+  def has_social_links?
+    instagram_url.present? || facebook_url.present? || linkedin_url.present?
   end
 
   def effective_storefront_title

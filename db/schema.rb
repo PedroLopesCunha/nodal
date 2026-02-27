@@ -10,9 +10,19 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2026_02_27_123614) do
+ActiveRecord::Schema[7.1].define(version: 2026_02_27_164355) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
+
+  create_table "action_text_rich_texts", force: :cascade do |t|
+    t.string "name", null: false
+    t.text "body"
+    t.string "record_type", null: false
+    t.bigint "record_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["record_type", "record_id", "name"], name: "index_action_text_rich_texts_uniqueness", unique: true
+  end
 
   create_table "active_storage_attachments", force: :cascade do |t|
     t.string "name", null: false
@@ -275,6 +285,7 @@ ActiveRecord::Schema[7.1].define(version: 2026_02_27_123614) do
     t.datetime "last_synced_at"
     t.text "sync_error"
     t.datetime "viewed_at"
+    t.datetime "terms_accepted_at"
     t.index ["applied_by_id"], name: "index_orders_on_applied_by_id"
     t.index ["billing_address_id"], name: "index_orders_on_billing_address_id"
     t.index ["customer_id"], name: "index_orders_on_customer_id"
@@ -334,6 +345,11 @@ ActiveRecord::Schema[7.1].define(version: 2026_02_27_123614) do
     t.boolean "show_product_min_quantity"
     t.boolean "show_product_category"
     t.boolean "show_product_availability"
+    t.string "instagram_url"
+    t.string "facebook_url"
+    t.string "linkedin_url"
+    t.boolean "show_whatsapp_button"
+    t.boolean "show_scroll_to_top"
     t.index ["default_locale"], name: "index_organisations_on_default_locale"
     t.index ["slug"], name: "index_organisations_on_slug", unique: true
   end

@@ -22,9 +22,11 @@ class Bo::SettingsController < Bo::BaseController
   def organisation_params
     params.require(:organisation).permit(
       :name, :billing_email, :tax_rate, :shipping_cost, :free_shipping_threshold, :default_locale, :logo, :primary_color, :secondary_color,
-      :contact_email, :phone, :whatsapp, :business_hours, :use_billing_address_for_contact,
+      :contact_email, :phone, :whatsapp, :business_hours, :use_billing_address_for_contact, :show_whatsapp_button,
+      :instagram_url, :facebook_url, :linkedin_url,
       :storefront_title, :favicon, :taxpayer_id, :show_related_products, :out_of_stock_strategy,
-      :show_product_sku, :show_product_min_quantity, :show_product_category, :show_product_availability,
+      :show_product_sku, :show_product_min_quantity, :show_product_category, :show_product_availability, :show_scroll_to_top,
+      :terms_and_conditions, :privacy_policy,
       contact_address_attributes: [:id, :street_name, :street_nr, :postal_code, :city, :country, :_destroy],
       billing_address_attributes: [:id, :street_name, :street_nr, :postal_code, :city, :country, :_destroy]
     )

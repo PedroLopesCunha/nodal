@@ -24,6 +24,12 @@ Rails.application.routes.draw do
                   passwords: 'customers/passwords'
                 }
 
+    # Legal pages (public, no auth required)
+    scope module: :storefront do
+      get 'terms', to: 'legal_pages#terms', as: :terms
+      get 'privacy', to: 'legal_pages#privacy', as: :privacy
+    end
+
     # storefront (customer-facing)
     scope module: :storefront do
       resource :contact, only: [:show]

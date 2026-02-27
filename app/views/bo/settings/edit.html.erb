@@ -129,12 +129,40 @@
               <label class="form-label"><%= t('bo.settings.edit.whatsapp') %></label>
               <%= f.text_field :whatsapp, class: "form-control", placeholder: t('bo.settings.edit.whatsapp_placeholder') %>
               <small class="text-muted"><%= t('bo.settings.edit.whatsapp_hint') %></small>
+
+              <div class="form-check form-switch mt-2">
+                <%= f.check_box :show_whatsapp_button, class: "form-check-input", role: "switch" %>
+                <label class="form-check-label" for="organisation_show_whatsapp_button">
+                  <%= t('bo.settings.edit.show_whatsapp_button') %>
+                </label>
+              </div>
+              <small class="text-muted"><%= t('bo.settings.edit.show_whatsapp_button_hint') %></small>
             </div>
             <div class="col-md-6">
               <label class="form-label"><%= t('bo.settings.edit.business_hours') %></label>
               <%= f.text_area :business_hours, class: "form-control", rows: 2, placeholder: t('bo.settings.edit.business_hours_placeholder') %>
             </div>
           </div>
+
+          <hr class="my-4">
+
+          <h6 class="mb-3"><%= t('bo.settings.edit.social_links') %></h6>
+
+          <div class="row g-3">
+            <div class="col-md-4">
+              <label class="form-label"><i class="fa-brands fa-instagram me-1"></i> Instagram</label>
+              <%= f.text_field :instagram_url, class: "form-control", placeholder: t('bo.settings.edit.instagram_placeholder') %>
+            </div>
+            <div class="col-md-4">
+              <label class="form-label"><i class="fa-brands fa-facebook me-1"></i> Facebook</label>
+              <%= f.text_field :facebook_url, class: "form-control", placeholder: t('bo.settings.edit.facebook_placeholder') %>
+            </div>
+            <div class="col-md-4">
+              <label class="form-label"><i class="fa-brands fa-linkedin me-1"></i> LinkedIn</label>
+              <%= f.text_field :linkedin_url, class: "form-control", placeholder: t('bo.settings.edit.linkedin_placeholder') %>
+            </div>
+          </div>
+          <small class="text-muted"><%= t('bo.settings.edit.social_links_hint') %></small>
 
           <hr class="my-4">
 
@@ -249,7 +277,33 @@
               <%= t('bo.settings.edit.show_product_availability') %>
             </label>
           </div>
-          <small class="text-muted"><%= t('bo.settings.edit.show_product_availability_hint') %></small>
+          <small class="text-muted d-block mb-3"><%= t('bo.settings.edit.show_product_availability_hint') %></small>
+
+          <div class="form-check form-switch">
+            <%= f.check_box :show_scroll_to_top, class: "form-check-input", role: "switch" %>
+            <label class="form-check-label" for="organisation_show_scroll_to_top">
+              <%= t('bo.settings.edit.show_scroll_to_top') %>
+            </label>
+          </div>
+          <small class="text-muted"><%= t('bo.settings.edit.show_scroll_to_top_hint') %></small>
+        </div>
+      </div>
+
+      <div class="card mb-3">
+        <div class="card-body">
+          <h5 class="card-title mb-4"><%= t('bo.settings.edit.legal') %></h5>
+
+          <div class="mb-4">
+            <label class="form-label"><%= t('bo.settings.edit.terms_and_conditions') %></label>
+            <%= f.rich_text_area :terms_and_conditions, class: "form-control" %>
+            <small class="text-muted"><%= t('bo.settings.edit.terms_and_conditions_hint') %></small>
+          </div>
+
+          <div class="mb-0">
+            <label class="form-label"><%= t('bo.settings.edit.privacy_policy') %></label>
+            <%= f.rich_text_area :privacy_policy, class: "form-control" %>
+            <small class="text-muted"><%= t('bo.settings.edit.privacy_policy_hint') %></small>
+          </div>
         </div>
       </div>
 

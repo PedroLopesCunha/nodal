@@ -32,6 +32,14 @@ pt:
     free_shipping:
       banner: "Envio grátis em encomendas acima de %{amount}"
 
+    # Botão voltar ao topo
+    scroll_to_top:
+      label: "Voltar ao topo"
+
+    # Botão flutuante WhatsApp
+    whatsapp_button:
+      tooltip: "Fale connosco no WhatsApp"
+
     # Rodapé
     footer:
       contact_us: "Contacte-nos"
@@ -187,12 +195,22 @@ pt:
           discount: "Desconto"
           total: "Total"
         place_order: "Efetuar Encomenda"
-        terms_agreement: "Ao efetuar a encomenda, aceita os nossos termos e condições."
+        terms_checkbox_html: "Li e aceito os %{terms_link} e a %{privacy_link}."
+        terms_link: "Termos e Condições"
+        privacy_link: "Política de Privacidade"
         table:
           product: "Produto"
           quantity: "Qtd"
           price: "Preço"
           total: "Total"
+
+    # Páginas legais
+    legal_pages:
+      terms:
+        title: "Termos e Condições"
+      privacy:
+        title: "Política de Privacidade"
+      no_content: "Esta página ainda não está disponível."
 
     # Secção de encomendas
     orders:
