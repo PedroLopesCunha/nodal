@@ -37,17 +37,17 @@
     <div class="border rounded d-flex align-items-center gap-2 py-2 px-3 mb-3 bg-light">
       <i class="fa-solid fa-rotate text-muted"></i>
       <small class="text-muted">
-        Last sync: <%= l(@last_customer_sync.created_at, format: :short) %>
+        <%= t('bo.erp_sync.last_sync') %>: <%= l(@last_customer_sync.created_at, format: :short) %>
         <% if @last_customer_sync.records_updated.to_i > 0 || @last_customer_sync.records_created.to_i > 0 %>
-          &middot; <%= @last_customer_sync.records_updated %> updated, <%= @last_customer_sync.records_created %> created
+          &middot; <%= t('bo.erp_sync.n_updated', count: @last_customer_sync.records_updated) %>, <%= t('bo.erp_sync.n_created', count: @last_customer_sync.records_created) %>
         <% end %>
-        &middot; Status:
+        &middot; <%= t('bo.erp_sync.status_label') %>:
         <% if @last_customer_sync.completed? %>
-          <span class="text-success fw-semibold">Success</span>
+          <span class="text-success fw-semibold"><%= t('bo.erp_sync.status_success') %></span>
         <% elsif @last_customer_sync.failed? %>
-          <span class="text-danger fw-semibold">Failed</span>
+          <span class="text-danger fw-semibold"><%= t('bo.erp_sync.status_failed') %></span>
         <% else %>
-          <span class="text-warning fw-semibold">Running</span>
+          <span class="text-warning fw-semibold"><%= t('bo.erp_sync.status_running') %></span>
         <% end %>
       </small>
     </div>

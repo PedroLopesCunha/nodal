@@ -85,6 +85,23 @@ es:
       vs_prev_period: "vs período anterior"
       not_provided: "No proporcionado"
 
+    # Sincronización ERP (compartido entre productos y clientes)
+    erp_sync:
+      title: "Estado de Sincronización ERP"
+      last_sync: "Última sincronización"
+      n_updated: "%{count} actualizados"
+      n_created: "%{count} creados"
+      status_label: "Estado"
+      status_success: "Éxito"
+      status_failed: "Fallido"
+      status_running: "En ejecución"
+      synced: "Sincronizado"
+      error: "Error"
+      not_synced: "No sincronizado"
+      external_id: "ID Externo"
+      last_synced: "Última sincronización"
+      synced_ago: "hace %{time}"
+
     # Navegación
     navbar:
       sign_out: "Cerrar sesión"
@@ -275,6 +292,22 @@ es:
         default: "Predeterminado"
         and_more_variants: "...y %{count} variante(s) más"
         no_variants: "No hay variantes configuradas para este producto."
+        storefront_visibility: "Visibilidad en la Tienda"
+        product_availability: "Disponibilidad del producto"
+        available_badge: "Disponible"
+        unavailable_badge: "No disponible"
+        stock_strategy: "Estrategia de stock"
+        stock_do_nothing: "No hacer nada"
+        stock_deactivate: "Desactivar"
+        stock_hide: "Ocultar"
+        stock_do_nothing_desc: "El stock se monitoriza pero los productos permanecen visibles"
+        stock_deactivate_desc: "Los productos sin stock se marcan como no disponibles"
+        stock_hide_desc: "Los productos sin stock se ocultan de la tienda"
+        variant_stock_summary: "Resumen de stock de variantes"
+        variants_in_stock_html: "<strong>%{in_stock}</strong> de %{total} variantes en stock"
+        variants_tracking_html: "<strong>%{count}</strong> variantes monitorizando stock"
+        variants_visible_oos_html: "<strong>%{count}</strong> variantes visibles cuando sin stock"
+        no_variants_summary: "Sin variantes"
       new:
         title: "Nuevo Producto"
         subtitle: "Añadir un nuevo producto al catálogo"

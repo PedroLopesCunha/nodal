@@ -200,29 +200,29 @@
     <% if @product.synced_from_erp? %>
       <div class="card mb-4">
         <div class="card-body">
-          <h6 class="card-title mb-3"><i class="fa-solid fa-rotate me-1"></i> ERP Sync Status</h6>
+          <h6 class="card-title mb-3"><i class="fa-solid fa-rotate me-1"></i> <%= t('bo.erp_sync.title') %></h6>
 
           <div class="mb-2">
-            <small class="text-muted d-block">Status</small>
+            <small class="text-muted d-block"><%= t('bo.erp_sync.status_label') %></small>
             <% case @product.sync_status %>
             <% when :synced %>
-              <span class="badge bg-success">Synced</span>
+              <span class="badge bg-success"><%= t('bo.erp_sync.synced') %></span>
             <% when :error %>
-              <span class="badge bg-danger">Error</span>
+              <span class="badge bg-danger"><%= t('bo.erp_sync.error') %></span>
             <% else %>
-              <span class="badge bg-secondary">Not synced</span>
+              <span class="badge bg-secondary"><%= t('bo.erp_sync.not_synced') %></span>
             <% end %>
           </div>
 
           <div class="mb-2">
-            <small class="text-muted d-block">External ID</small>
+            <small class="text-muted d-block"><%= t('bo.erp_sync.external_id') %></small>
             <code><%= @product.external_id %></code>
           </div>
 
           <% if @product.last_synced_at %>
             <div class="mb-2">
-              <small class="text-muted d-block">Last synced</small>
-              <span title="<%= l(@product.last_synced_at) %>"><%= time_ago_in_words(@product.last_synced_at) %> ago</span>
+              <small class="text-muted d-block"><%= t('bo.erp_sync.last_synced') %></small>
+              <span title="<%= l(@product.last_synced_at) %>"><%= t('bo.erp_sync.synced_ago', time: time_ago_in_words(@product.last_synced_at)) %></span>
             </div>
           <% end %>
 
@@ -238,35 +238,35 @@
     <%# Card B: Storefront Visibility & Stock Rules %>
     <div class="card mb-4">
       <div class="card-body">
-        <h6 class="card-title mb-3"><i class="fa-solid fa-eye me-1"></i> Storefront Visibility</h6>
+        <h6 class="card-title mb-3"><i class="fa-solid fa-eye me-1"></i> <%= t('bo.products.show.storefront_visibility') %></h6>
 
         <div class="mb-2">
-          <small class="text-muted d-block">Product availability</small>
+          <small class="text-muted d-block"><%= t('bo.products.show.product_availability') %></small>
           <% if @product.available? %>
-            <span class="badge bg-success">Available</span>
+            <span class="badge bg-success"><%= t('bo.products.show.available_badge') %></span>
           <% else %>
-            <span class="badge bg-danger">Unavailable</span>
+            <span class="badge bg-danger"><%= t('bo.products.show.unavailable_badge') %></span>
           <% end %>
         </div>
 
         <div class="mb-3">
-          <small class="text-muted d-block">Stock strategy</small>
+          <small class="text-muted d-block"><%= t('bo.products.show.stock_strategy') %></small>
           <% case current_organisation.out_of_stock_strategy %>
           <% when 'do_nothing' %>
-            <span class="badge bg-secondary">Do nothing</span>
+            <span class="badge bg-secondary"><%= t('bo.products.show.stock_do_nothing') %></span>
           <% when 'deactivate' %>
-            <span class="badge bg-warning text-dark">Deactivate</span>
+            <span class="badge bg-warning text-dark"><%= t('bo.products.show.stock_deactivate') %></span>
           <% when 'hide' %>
-            <span class="badge bg-danger">Hide</span>
+            <span class="badge bg-danger"><%= t('bo.products.show.stock_hide') %></span>
           <% end %>
           <small class="text-muted d-block mt-1">
             <% case current_organisation.out_of_stock_strategy %>
             <% when 'do_nothing' %>
-              Stock is tracked but products stay visible
+              <%= t('bo.products.show.stock_do_nothing_desc') %>
             <% when 'deactivate' %>
-              Out-of-stock products are marked unavailable
+              <%= t('bo.products.show.stock_deactivate_desc') %>
             <% when 'hide' %>
-              Out-of-stock products are hidden from storefront
+              <%= t('bo.products.show.stock_hide_desc') %>
             <% end %>
           </small>
         </div>
@@ -279,28 +279,28 @@
           <% tracking_stock = variants.count(&:track_stock?) %>
           <% in_stock = variants.count(&:in_stock?) %>
 
-          <h6 class="mb-2">Variant stock summary</h6>
+          <h6 class="mb-2"><%= t('bo.products.show.variant_stock_summary') %></h6>
           <ul class="list-unstyled mb-0 small">
             <li class="mb-1">
               <i class="fa-solid fa-boxes-stacked text-muted me-1"></i>
-              <strong><%= in_stock %></strong> of <%= total_variants %> variants in stock
+              <%= t('bo.products.show.variants_in_stock_html', in_stock: in_stock, total: total_variants) %>
             </li>
             <li class="mb-1">
               <i class="fa-solid fa-chart-line text-muted me-1"></i>
-              <strong><%= tracking_stock %></strong> variants tracking stock
+              <%= t('bo.products.show.variants_tracking_html', count: tracking_stock) %>
             </li>
             <% if current_organisation.hide_out_of_stock? %>
               <% opt_out_count = variants.count { |v| !v.hide_when_unavailable? } %>
               <% if opt_out_count > 0 %>
                 <li>
                   <i class="fa-solid fa-eye text-muted me-1"></i>
-                  <strong><%= opt_out_count %></strong> variants visible when out of stock
+                  <%= t('bo.products.show.variants_visible_oos_html', count: opt_out_count) %>
                 </li>
               <% end %>
             <% end %>
           </ul>
         <% else %>
-          <p class="text-muted small mb-0">No variants</p>
+          <p class="text-muted small mb-0"><%= t('bo.products.show.no_variants_summary') %></p>
         <% end %>
       </div>
     </div>
