@@ -20,6 +20,7 @@ class Bo::OrdersController < Bo::BaseController
     @orders = @orders.where(payment_status: params[:payment_status]) if params[:payment_status].present?
 
     @orders = @orders.order(created_at: :desc)
+    @pagy, @orders = pagy(@orders)
   end
 
   def show

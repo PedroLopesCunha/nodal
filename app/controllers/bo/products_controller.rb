@@ -74,7 +74,7 @@ class Bo::ProductsController < Bo::BaseController
   end
 
   def index
-    @products = policy_scope(current_organisation.products).includes(:categories)
+    @products = policy_scope(current_organisation.products).includes(:categories, :product_variants)
 
     if params[:query].present?
       matching_ids = @products.left_joins(:categories, :product_variants).where(
@@ -117,6 +117,8 @@ class Bo::ProductsController < Bo::BaseController
     @sort_column = %w[name sku unit_price has_variants].include?(params[:sort]) ? params[:sort] : "name"
     @sort_direction = %w[asc desc].include?(params[:direction]) ? params[:direction] : "asc"
     @products = @products.order(@sort_column => @sort_direction)
+
+    @pagy, @products = pagy(@products)
 
     # Load categories for filter dropdown
     @categories = current_organisation.categories.kept.order(:name)

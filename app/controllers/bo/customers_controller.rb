@@ -21,6 +21,7 @@ class Bo::CustomersController < Bo::BaseController
     @sort_column = %w[company_name contact_name email active].include?(params[:sort]) ? params[:sort] : "company_name"
     @sort_direction = %w[asc desc].include?(params[:direction]) ? params[:direction] : "asc"
     @customers = @customers.order(@sort_column => @sort_direction)
+    @pagy, @customers = pagy(@customers)
   end
 
   def show
