@@ -4,19 +4,16 @@
   <div class="d-flex justify-content-between align-items-center">
     <div class="d-flex align-items-center gap-3">
       <div class="rounded-circle bg-secondary d-flex align-items-center justify-content-center text-white fw-bold" style="width: 60px; height: 60px; font-size: 1.25rem;">
-        <i class="fa-solid fa-plug"></i>
+        <i class="fa-solid fa-building"></i>
       </div>
 
       <div>
-        <h1>ERP Integration</h1>
+        <h1><%= t('bo.settings.edit.title') %></h1>
         <span class="text-muted"><%= current_organisation.name %></span>
       </div>
     </div>
 
     <div class="bo-page-actions">
-      <%= link_to edit_bo_settings_path, class: "btn btn-outline-secondary" do %>
-        <i class="fa-solid fa-arrow-left fa-lg"></i> Back to Settings
-      <% end %>
       <button type="submit" form="erp-settings-form" class="btn btn-primary">
         <i class="fa-solid fa-check"></i> Save Changes
       </button>
@@ -25,6 +22,8 @@
 </div>
 
 <div class="bo-page-body">
+
+<%= render "bo/shared/settings_tabs" %>
 
 <%= form_with model: @erp_configuration, url: bo_erp_settings_path, method: :patch, id: "erp-settings-form", data: { controller: "erp-settings" } do |f| %>
   <div class="row g-3">

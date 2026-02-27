@@ -67,16 +67,10 @@
       <% end %>
     </li>
     <% if admin_or_owner? %>
-      <li class="bo-sidebar-item <%= 'active' if controller_name == 'settings' %>">
+      <li class="bo-sidebar-item <%= 'active' if controller_name.in?(%w[settings erp_settings]) %>">
         <%= link_to edit_bo_settings_path do %>
           <i class="fa-solid fa-gear"></i>
           <span><%= t('bo.sidebar.settings') %></span>
-        <% end %>
-      </li>
-      <li class="bo-sidebar-item <%= 'active' if controller_name == 'erp_settings' %>">
-        <%= link_to edit_bo_erp_settings_path do %>
-          <i class="fa-solid fa-plug"></i>
-          <span><%= t('bo.sidebar.erp_integration', default: 'ERP Integration') %></span>
         <% end %>
       </li>
     <% end %>

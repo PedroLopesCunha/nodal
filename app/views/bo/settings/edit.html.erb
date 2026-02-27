@@ -26,6 +26,8 @@
 
 <div class="bo-page-body">
 
+<%= render "bo/shared/settings_tabs" %>
+
 <%= form_with model: @organisation, url: bo_settings_path, method: :patch, id: "settings-form" do |f| %>
   <div class="row g-3">
     <div class="col-md-8">
