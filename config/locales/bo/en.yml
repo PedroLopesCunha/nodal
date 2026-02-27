@@ -945,6 +945,8 @@ en:
         terms_and_conditions_hint: "Write your store's terms and conditions. Customers must accept these at checkout."
         privacy_policy: "Privacy Policy"
         privacy_policy_hint: "Write your store's privacy policy. Displayed publicly and linked at checkout."
+        show_scroll_to_top: "Show scroll to top button"
+        show_scroll_to_top_hint: "Display an arrow button to scroll back to the top of the page"
         stock_management: "Stock Management"
         out_of_stock_strategy: "Out of stock behavior"
         out_of_stock_strategy_hint: "Controls what happens when a product's stock reaches zero during ERP sync. Individual products can opt out by disabling 'Track stock'."

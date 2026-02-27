@@ -32,6 +32,10 @@ en:
     free_shipping:
       banner: "Free shipping on orders over %{amount}"
 
+    # Scroll to top button
+    scroll_to_top:
+      label: "Scroll to top"
+
     # WhatsApp floating button
     whatsapp_button:
       tooltip: "Chat with us on WhatsApp"

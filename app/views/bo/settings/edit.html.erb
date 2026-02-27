@@ -277,7 +277,15 @@
               <%= t('bo.settings.edit.show_product_availability') %>
             </label>
           </div>
-          <small class="text-muted"><%= t('bo.settings.edit.show_product_availability_hint') %></small>
+          <small class="text-muted d-block mb-3"><%= t('bo.settings.edit.show_product_availability_hint') %></small>
+
+          <div class="form-check form-switch">
+            <%= f.check_box :show_scroll_to_top, class: "form-check-input", role: "switch" %>
+            <label class="form-check-label" for="organisation_show_scroll_to_top">
+              <%= t('bo.settings.edit.show_scroll_to_top') %>
+            </label>
+          </div>
+          <small class="text-muted"><%= t('bo.settings.edit.show_scroll_to_top_hint') %></small>
         </div>
       </div>
 

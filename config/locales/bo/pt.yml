@@ -924,6 +924,8 @@ pt:
         terms_and_conditions_hint: "Escreva os termos e condições da sua loja. Os clientes devem aceitá-los no checkout."
         privacy_policy: "Política de Privacidade"
         privacy_policy_hint: "Escreva a política de privacidade da sua loja. Apresentada publicamente e ligada no checkout."
+        show_scroll_to_top: "Mostrar botão voltar ao topo"
+        show_scroll_to_top_hint: "Apresentar um botão de seta para voltar ao topo da página"
         stock_management: "Gestão de Stock"
         out_of_stock_strategy: "Comportamento quando sem stock"
         out_of_stock_strategy_hint: "Controla o que acontece quando o stock de um produto chega a zero durante a sincronização ERP. Produtos individuais podem ser excluídos desativando 'Acompanhar stock'."
