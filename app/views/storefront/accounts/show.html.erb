@@ -136,7 +136,37 @@
       </div>
     </div>
 
-    <%# ── Section 3: Change Password ── %>
+    <%# ── Section 3: Language ── %>
+    <div class="accordion-item border-0 shadow-sm mb-3" style="border-radius: 12px; overflow: hidden;">
+      <h2 class="accordion-header">
+        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#languageSection">
+          <i class="fa-solid fa-globe me-2"></i><%= t('storefront.account.show.language') %>
+        </button>
+      </h2>
+      <div id="languageSection" class="accordion-collapse collapse" data-bs-parent="#accountAccordion">
+        <div class="accordion-body">
+          <div class="d-flex flex-wrap gap-2">
+            <%= link_to update_locale_path(org_slug: params[:org_slug], locale: 'en'),
+                        data: { turbo_method: :patch },
+                        class: "btn #{ I18n.locale == :en ? 'btn-primary' : 'btn-outline-secondary' }" do %>
+              English
+            <% end %>
+            <%= link_to update_locale_path(org_slug: params[:org_slug], locale: 'pt'),
+                        data: { turbo_method: :patch },
+                        class: "btn #{ I18n.locale == :pt ? 'btn-primary' : 'btn-outline-secondary' }" do %>
+              Português
+            <% end %>
+            <%= link_to update_locale_path(org_slug: params[:org_slug], locale: 'es'),
+                        data: { turbo_method: :patch },
+                        class: "btn #{ I18n.locale == :es ? 'btn-primary' : 'btn-outline-secondary' }" do %>
+              Español
+            <% end %>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <%# ── Section 4: Change Password ── %>
     <div class="accordion-item border-0 shadow-sm mb-3" style="border-radius: 12px; overflow: hidden;">
       <h2 class="accordion-header">
         <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#passwordSection">

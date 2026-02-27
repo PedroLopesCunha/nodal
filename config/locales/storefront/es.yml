@@ -261,6 +261,7 @@ es:
           postal_code: "Código Postal"
           city: "Ciudad"
           country: "País"
+        language: "Idioma"
         change_password: "Cambiar Contraseña"
         current_password: "Contraseña Actual"
         new_password: "Nueva Contraseña"

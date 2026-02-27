@@ -261,6 +261,7 @@ en:
           postal_code: "Postal Code"
           city: "City"
           country: "Country"
+        language: "Language"
         change_password: "Change Password"
         current_password: "Current Password"
         new_password: "New Password"
