@@ -42,6 +42,9 @@
       <%= link_to bo_orders_path do %>
         <i class="fa-solid fa-clipboard-list"></i>
         <span><%= t('bo.sidebar.orders') %></span>
+        <% if @unreviewed_orders_count && @unreviewed_orders_count > 0 %>
+          <span class="badge rounded-pill bg-danger ms-auto"><%= @unreviewed_orders_count %></span>
+        <% end %>
       <% end %>
     </li>
     <li class="bo-sidebar-item <%= 'active' if controller_name == 'pricing' || controller_name == 'customer_product_discounts' || controller_name == 'product_discounts' || controller_name == 'customer_discounts' %>">
