@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2026_02_25_184644) do
+ActiveRecord::Schema[7.1].define(version: 2026_02_27_123614) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -274,6 +274,7 @@ ActiveRecord::Schema[7.1].define(version: 2026_02_25_184644) do
     t.string "external_source"
     t.datetime "last_synced_at"
     t.text "sync_error"
+    t.datetime "viewed_at"
     t.index ["applied_by_id"], name: "index_orders_on_applied_by_id"
     t.index ["billing_address_id"], name: "index_orders_on_billing_address_id"
     t.index ["customer_id"], name: "index_orders_on_customer_id"
@@ -329,6 +330,10 @@ ActiveRecord::Schema[7.1].define(version: 2026_02_25_184644) do
     t.string "free_shipping_threshold_currency", default: "EUR"
     t.boolean "show_related_products", default: true, null: false
     t.string "out_of_stock_strategy", default: "do_nothing", null: false
+    t.boolean "show_product_sku"
+    t.boolean "show_product_min_quantity"
+    t.boolean "show_product_category"
+    t.boolean "show_product_availability"
     t.index ["default_locale"], name: "index_organisations_on_default_locale"
     t.index ["slug"], name: "index_organisations_on_slug", unique: true
   end

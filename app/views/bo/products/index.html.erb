@@ -79,7 +79,7 @@
         <% end %>
       </div>
       <div class="row mt-3">
-        <div class="col-md-4">
+        <div class="col-md-3">
           <select name="category_id" class="form-select form-select-sm" onchange="this.form.submit()">
             <option value=""><%= t('bo.products.index.filters.all_categories') %></option>
             <option value="none" <%= 'selected' if params[:category_id] == 'none' %>><%= t('bo.products.index.filters.no_category') %></option>
@@ -88,19 +88,27 @@
             <% end %>
           </select>
         </div>
-        <div class="col-md-4">
+        <div class="col-md-3">
           <select name="product_type" class="form-select form-select-sm" onchange="this.form.submit()">
             <option value=""><%= t('bo.products.index.filters.all_types') %></option>
             <option value="simple" <%= 'selected' if params[:product_type] == 'simple' %>><%= t('bo.products.index.table.simple') %></option>
             <option value="variable" <%= 'selected' if params[:product_type] == 'variable' %>><%= t('bo.products.index.table.variable') %></option>
           </select>
         </div>
-        <div class="col-md-4">
+        <div class="col-md-3">
           <select name="price_status" class="form-select form-select-sm" onchange="this.form.submit()">
             <option value=""><%= t('bo.products.index.filters.all_prices') %></option>
             <option value="on_request" <%= 'selected' if params[:price_status] == 'on_request' %>><%= t('bo.products.index.filters.price_on_request') %></option>
             <option value="zero_price" <%= 'selected' if params[:price_status] == 'zero_price' %>><%= t('bo.products.index.filters.zero_price') %></option>
             <option value="has_price" <%= 'selected' if params[:price_status] == 'has_price' %>><%= t('bo.products.index.filters.has_price') %></option>
+          </select>
+        </div>
+        <div class="col-md-3">
+          <select name="status" class="form-select form-select-sm" onchange="this.form.submit()">
+            <option value=""><%= t('bo.products.index.filters.all_statuses') %></option>
+            <option value="available" <%= 'selected' if params[:status] == 'available' %>><%= t('bo.products.index.filters.available') %></option>
+            <option value="unavailable" <%= 'selected' if params[:status] == 'unavailable' %>><%= t('bo.products.index.filters.unavailable') %></option>
+            <option value="partial" <%= 'selected' if params[:status] == 'partial' %>><%= t('bo.products.index.filters.partial') %></option>
           </select>
         </div>
       </div>
@@ -135,6 +143,11 @@
         <%= t("bo.products.index.filters.#{params[:price_status]}") %> <i class="fa-solid fa-xmark ms-1"></i>
       <% end %>
     <% end %>
+    <% if params[:status].present? %>
+      <%= link_to bo_products_path(params[:org_slug], filter_params_hash.except(:status)), class: "badge bg-secondary text-decoration-none" do %>
+        <%= t("bo.products.index.filters.#{params[:status]}") %> <i class="fa-solid fa-xmark ms-1"></i>
+      <% end %>
+    <% end %>
   </div>
 <% end %>
 
@@ -159,8 +172,7 @@
             <% end %>
           <% end %>
         </th>
-        <th style="max-width: 200px;"><%= t('bo.products.form.categories') %></th>
-        <th>
+        <th class="text-center">
           <%= link_to bo_products_path(params[:org_slug], sort_link_params("has_variants")), class: "text-decoration-none text-dark" do %>
             <%= t('bo.products.index.table.type') %>
             <% if @sort_column == "has_variants" %>
@@ -168,7 +180,7 @@
             <% end %>
           <% end %>
         </th>
-        <th>
+        <th class="text-center">
           <%= link_to bo_products_path(params[:org_slug], sort_link_params("unit_price")), class: "text-decoration-none text-dark" do %>
             <%= t('bo.common.price') %>
             <% if @sort_column == "unit_price" %>
@@ -176,40 +188,67 @@
             <% end %>
           <% end %>
         </th>
-        <th class="text-end"><%= t('bo.common.actions_column') %></th>
+        <th class="text-center">
+          <%= link_to bo_products_path(params[:org_slug], sort_link_params("available")), class: "text-decoration-none text-dark" do %>
+            <%= t('bo.common.tables.status') %>
+            <% if @sort_column == "available" %>
+              <i class="fa-solid fa-sort-<%= @sort_direction == 'asc' ? 'up' : 'down' %> ms-1 small"></i>
+            <% end %>
+          <% end %>
+        </th>
+        <th class="text-center"><%= t('bo.common.actions_column') %></th>
       </tr>
     </thead>
     <tbody>
       <% @products.each do |product| %>
         <tr class="product-row" data-href="<%= bo_product_path(params[:org_slug], product, filter_params_hash) %>" style="cursor: pointer;">
           <td>
-            <div class="fw-semibold"><%= product.name %></div>
+            <div class="d-flex align-items-center gap-2">
+              <% if product.photo.present? %>
+                <%= image_tag product.photo.variant(resize_to_fill: [40, 40]), width: 40, height: 40, class: "rounded", style: "object-fit: cover;" %>
+              <% else %>
+                <div class="rounded bg-light d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                  <i class="fa-solid fa-image text-muted"></i>
+                </div>
+              <% end %>
+              <div class="fw-semibold"><%= product.name %></div>
+            </div>
           </td>
           <td><%= product.sku %></td>
-          <td style="max-width: 200px;">
-            <% if product.categories.any? %>
-              <span class="d-inline-block text-truncate" style="max-width: 100%;" title="<%= product.categories.map(&:name).join(', ') %>">
-                <%= product.categories.map(&:name).join(', ') %>
-              </span>
-            <% else %>
-              <span class="text-muted">-</span>
-            <% end %>
-          </td>
-          <td>
+          <td class="text-center">
             <% if product.variable? %>
               <span class="badge bg-primary-subtle text-primary"><%= t('bo.products.index.table.variable') %></span>
             <% else %>
               <span class="badge bg-secondary-subtle text-secondary"><%= t('bo.products.index.table.simple') %></span>
             <% end %>
           </td>
-          <td>
+          <td class="text-center">
             <% if product.price_on_request? %>
               <span class="badge bg-warning-subtle text-warning"><i class="fa-solid fa-tag me-1"></i><%= t('bo.products.form.price_on_request') %></span>
             <% else %>
               <%= product.display_price %>
             <% end %>
           </td>
-          <td class="text-end product-actions" style="white-space: nowrap;" onclick="event.stopPropagation();">
+          <td class="text-center">
+            <% if product.variable? %>
+              <% available_count = product.product_variants.count { |v| v.available? } %>
+              <% total_count = product.product_variants.size %>
+              <% if available_count == total_count %>
+                <span class="badge bg-success-subtle text-success"><%= t('bo.products.index.table.available') %></span>
+              <% elsif available_count == 0 %>
+                <span class="badge bg-danger-subtle text-danger"><%= t('bo.products.index.table.unavailable') %></span>
+              <% else %>
+                <span class="badge bg-warning-subtle text-warning" data-bs-toggle="tooltip" title="<%= t('bo.products.index.table.variants_available', available: available_count, total: total_count) %>"><%= t('bo.products.index.table.partial') %></span>
+              <% end %>
+            <% else %>
+              <% if product.available? %>
+                <span class="badge bg-success-subtle text-success"><%= t('bo.products.index.table.available') %></span>
+              <% else %>
+                <span class="badge bg-danger-subtle text-danger"><%= t('bo.products.index.table.unavailable') %></span>
+              <% end %>
+            <% end %>
+          </td>
+          <td class="text-center product-actions" style="white-space: nowrap;" onclick="event.stopPropagation();">
             <%= link_to bo_product_path(params[:org_slug], product, filter_params_hash), class: "btn btn-sm btn-link text-muted" do %>
               <i class="fa-solid fa-eye"></i>
             <% end %>

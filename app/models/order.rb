@@ -34,6 +34,7 @@ class Order < ApplicationRecord
   # Scopes for cart functionality
   scope :draft, -> { where(placed_at: nil) }
   scope :placed, -> { where.not(placed_at: nil) }
+  scope :unreviewed, -> { placed.where(viewed_at: nil) }
 
   def draft?
     placed_at.nil?
@@ -41,6 +42,10 @@ class Order < ApplicationRecord
 
   def placed?
     placed_at.present?
+  end
+
+  def mark_as_reviewed!
+    update_column(:viewed_at, Time.current) if viewed_at.nil?
   end
 
   def item_count

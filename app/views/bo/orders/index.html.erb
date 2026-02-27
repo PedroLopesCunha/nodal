@@ -71,9 +71,14 @@
         </thead>
         <tbody>
           <% @orders.each do |order| %>
-            <tr class="order-row" data-href="<%= bo_order_path(org_slug: @current_organisation.slug, id: order.id) %>" style="cursor: pointer;">
+            <tr class="order-row<%= ' table-active fw-semibold' if order.viewed_at.nil? %>" data-href="<%= bo_order_path(org_slug: @current_organisation.slug, id: order.id) %>" style="cursor: pointer;">
               <td>
-                <div class="fw-semibold"><%= order.order_number %></div>
+                <div class="fw-semibold">
+                  <%= order.order_number %>
+                  <% if order.viewed_at.nil? %>
+                    <span class="badge bg-danger ms-1" style="font-size: 0.65rem; vertical-align: middle;"><%= t('bo.orders.index.new_badge', default: 'New') %></span>
+                  <% end %>
+                </div>
               </td>
               <td>
                 <div><%= order.customer.company_name %></div>

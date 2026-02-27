@@ -74,7 +74,7 @@ class Bo::ProductsController < Bo::BaseController
   end
 
   def index
-    @products = policy_scope(current_organisation.products).includes(:categories, :product_variants)
+    @products = policy_scope(current_organisation.products).includes(:categories, :product_variants).with_attached_photos
 
     if params[:query].present?
       matching_ids = @products.left_joins(:categories, :product_variants).where(
@@ -113,8 +113,22 @@ class Bo::ProductsController < Bo::BaseController
     when "has_price" then @products = @products.where(price_on_request: false).where("unit_price > 0")
     end
 
+    # Status filter
+    case params[:status]
+    when "available"
+      @products = @products.where(available: true).where.not(
+        id: Product.joins(:product_variants).where(has_variants: true, product_variants: { available: false }).select(:id)
+      )
+    when "unavailable"
+      @products = @products.where(available: false)
+    when "partial"
+      @products = @products.where(has_variants: true, available: true).where(
+        id: Product.joins(:product_variants).where(has_variants: true, product_variants: { available: false }).select(:id)
+      )
+    end
+
     # Sorting
-    @sort_column = %w[name sku unit_price has_variants].include?(params[:sort]) ? params[:sort] : "name"
+    @sort_column = %w[name sku unit_price has_variants available].include?(params[:sort]) ? params[:sort] : "name"
     @sort_direction = %w[asc desc].include?(params[:direction]) ? params[:direction] : "asc"
     @products = @products.order(@sort_column => @sort_direction)
 
@@ -274,7 +288,7 @@ class Bo::ProductsController < Bo::BaseController
 
   def filter_params_hash
     { query: params[:query], category_id: params[:category_id], product_type: params[:product_type],
-      price_status: params[:price_status], sort: params[:sort], direction: params[:direction] }.compact_blank
+      price_status: params[:price_status], status: params[:status], sort: params[:sort], direction: params[:direction] }.compact_blank
   end
 
   def sort_link_params(column)

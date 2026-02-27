@@ -217,7 +217,39 @@
               <%= t('bo.settings.edit.show_related_products') %>
             </label>
           </div>
-          <small class="text-muted"><%= t('bo.settings.edit.show_related_products_hint') %></small>
+          <small class="text-muted d-block mb-3"><%= t('bo.settings.edit.show_related_products_hint') %></small>
+
+          <div class="form-check form-switch">
+            <%= f.check_box :show_product_sku, class: "form-check-input", role: "switch" %>
+            <label class="form-check-label" for="organisation_show_product_sku">
+              <%= t('bo.settings.edit.show_product_sku') %>
+            </label>
+          </div>
+          <small class="text-muted d-block mb-3"><%= t('bo.settings.edit.show_product_sku_hint') %></small>
+
+          <div class="form-check form-switch">
+            <%= f.check_box :show_product_min_quantity, class: "form-check-input", role: "switch" %>
+            <label class="form-check-label" for="organisation_show_product_min_quantity">
+              <%= t('bo.settings.edit.show_product_min_quantity') %>
+            </label>
+          </div>
+          <small class="text-muted d-block mb-3"><%= t('bo.settings.edit.show_product_min_quantity_hint') %></small>
+
+          <div class="form-check form-switch">
+            <%= f.check_box :show_product_category, class: "form-check-input", role: "switch" %>
+            <label class="form-check-label" for="organisation_show_product_category">
+              <%= t('bo.settings.edit.show_product_category') %>
+            </label>
+          </div>
+          <small class="text-muted d-block mb-3"><%= t('bo.settings.edit.show_product_category_hint') %></small>
+
+          <div class="form-check form-switch">
+            <%= f.check_box :show_product_availability, class: "form-check-input", role: "switch" %>
+            <label class="form-check-label" for="organisation_show_product_availability">
+              <%= t('bo.settings.edit.show_product_availability') %>
+            </label>
+          </div>
+          <small class="text-muted"><%= t('bo.settings.edit.show_product_availability_hint') %></small>
         </div>
       </div>
 

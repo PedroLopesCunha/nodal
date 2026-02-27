@@ -24,6 +24,7 @@ class Bo::OrdersController < Bo::BaseController
   end
 
   def show
+    @order.mark_as_reviewed!
   end
 
   def edit
