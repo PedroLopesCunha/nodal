@@ -134,6 +134,9 @@ Rails.application.routes.draw do
       end
 
       resources :customer_product_discounts, except: [:index, :show] do
+        collection do
+          get :variant_overrides
+        end
         member do
           patch :toggle_active
         end

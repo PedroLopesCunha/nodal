@@ -17,22 +17,37 @@ class Bo::CustomerProductDiscountsController < Bo::BaseController
     authorize @discount
 
     if @discount.save
+      update_variant_overrides
       CustomerMailer.with(discount: @discount, organisation: current_organisation).notify_customer_about_discount.deliver_now
       redirect_to bo_pricing_path(params[:org_slug], tab: 'custom_pricing'),
                   notice: "Custom price created successfully."
     else
+      @variants = @discount.product_id.present? ? current_organisation.products.find_by(id: @discount.product_id)&.product_variants&.by_position || [] : []
       render :new, status: :unprocessable_entity
     end
   end
 
   def edit
+    @variants = @discount.product.product_variants.by_position
+  end
+
+  def variant_overrides
+    authorize CustomerProductDiscount.new(organisation: current_organisation), :new?
+    @variants = []
+    if params[:product_id].present?
+      product = current_organisation.products.find_by(id: params[:product_id])
+      @variants = product.product_variants.by_position if product
+    end
+    render partial: "bo/product_discounts/variant_overrides_frame", locals: { variants: @variants, currency_symbol: current_organisation.currency_symbol }, layout: false
   end
 
   def update
     if @discount.update(customer_product_discount_params)
+      update_variant_overrides
       redirect_to bo_pricing_path(params[:org_slug], tab: 'custom_pricing'),
                   notice: "Custom price updated successfully."
     else
+      @variants = @discount.product.product_variants.by_position
       render :edit, status: :unprocessable_entity
     end
   end
@@ -66,5 +81,21 @@ class Bo::CustomerProductDiscountsController < Bo::BaseController
       :customer_id, :product_id, :discount_percentage, :discount_type,
       :valid_from, :valid_until, :stackable, :active
     )
+  end
+
+  def update_variant_overrides
+    overrides = params[:variant_overrides]
+    return unless overrides
+
+    product = @discount.product
+    variants = product.product_variants.where(id: overrides.keys)
+    variants.each do |variant|
+      data = overrides[variant.id.to_s]
+      variant.update(
+        exclude_from_discounts: data[:exclude_from_discounts] == "1",
+        custom_discount_type: data[:custom_discount_type].presence,
+        custom_discount_value: data[:custom_discount_value].presence
+      )
+    end
   end
 end

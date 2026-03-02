@@ -17,8 +17,8 @@ export default class extends Controller {
     const form = this.element.closest("form")
     if (!form) return
 
-    this.discountTypeField = form.querySelector("[name='product_discount[discount_type]']")
-    this.discountValueField = form.querySelector("[name='product_discount[discount_value]']")
+    this.discountTypeField = form.querySelector("[name$='[discount_type]']")
+    this.discountValueField = form.querySelector("[name$='[discount_value]']") || form.querySelector("[name$='[discount_percentage]']")
 
     if (this.discountTypeField) {
       this.discountTypeField.addEventListener("change", () => this.recalculate())
