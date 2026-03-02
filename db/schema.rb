@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2026_03_02_123829) do
+ActiveRecord::Schema[7.1].define(version: 2026_03_02_134612) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -394,7 +394,7 @@ ActiveRecord::Schema[7.1].define(version: 2026_03_02_123829) do
   end
 
   create_table "product_discounts", force: :cascade do |t|
-    t.bigint "product_id", null: false
+    t.bigint "product_id"
     t.bigint "organisation_id", null: false
     t.string "discount_type", default: "percentage", null: false
     t.decimal "discount_value", precision: 10, scale: 4, null: false
@@ -405,6 +405,8 @@ ActiveRecord::Schema[7.1].define(version: 2026_03_02_123829) do
     t.boolean "active", default: true, null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.bigint "category_id"
+    t.index ["category_id"], name: "index_product_discounts_on_category_id"
     t.index ["organisation_id"], name: "index_product_discounts_on_organisation_id"
     t.index ["product_id", "organisation_id"], name: "index_product_discounts_on_product_id_and_organisation_id"
     t.index ["product_id"], name: "index_product_discounts_on_product_id"
@@ -532,6 +534,7 @@ ActiveRecord::Schema[7.1].define(version: 2026_03_02_123829) do
   add_foreign_key "product_attributes", "organisations"
   add_foreign_key "product_available_values", "product_attribute_values"
   add_foreign_key "product_available_values", "products"
+  add_foreign_key "product_discounts", "categories"
   add_foreign_key "product_discounts", "organisations"
   add_foreign_key "product_discounts", "products"
   add_foreign_key "product_product_attributes", "product_attributes"

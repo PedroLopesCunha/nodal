@@ -15,12 +15,14 @@ class Bo::PricingController < Bo::BaseController
 
   def load_product_discounts
     @product_discounts = policy_scope(current_organisation.product_discounts)
-      .includes(:product)
+      .includes(:product, :category)
       .order(created_at: :desc)
 
     if params[:search].present? && @tab == 'product_discounts'
-      @product_discounts = @product_discounts.joins(:product)
-        .where("products.name ILIKE ?", "%#{params[:search]}%")
+      search_term = "%#{params[:search]}%"
+      @product_discounts = @product_discounts
+        .left_joins(:product, :category)
+        .where("products.name ILIKE :q OR categories.name ILIKE :q", q: search_term)
     end
   end
 

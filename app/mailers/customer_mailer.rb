@@ -80,8 +80,10 @@ class CustomerMailer < ApplicationMailer
 
   def send_product_discount_mail(mailing_list)
     @product = @discount.product
+    @category = @discount.category
+    subject_name = @product&.name || @category&.name
     subject = t('mailers.customer_mailer.product_discount.subject',
-                product_name: @product.name)
+                product_name: subject_name)
     mail(to: mailing_list, subject: subject)
   end
 

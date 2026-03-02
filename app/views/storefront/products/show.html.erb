@@ -117,7 +117,7 @@
               <span class="badge bg-success fs-6">
                 -<%= (discount_breakdown[:effective_discount][:percentage] * 100).round(0) %>% OFF
               </span>
-              <% if discount_breakdown[:applied_discounts].any? { |d| d[:type] == :product } %>
+              <% if discount_breakdown[:applied_discounts].any? { |d| d[:type] == :product || d[:type] == :category } %>
                 <span class="badge bg-danger fs-6 ms-1"><%= t('storefront.products.index.sale_badge') %></span>
               <% end %>
             </div>
@@ -142,6 +142,20 @@
                   <% when :product %>
                     <span class="badge bg-danger me-2"><%= t('storefront.products.index.sale_badge') %></span>
                     <strong><%= t('storefront.products.show.product_discount') %></strong>
+                    <% if discount[:min_quantity_required] && discount[:min_quantity_required] > 1 %>
+                      <% if discount[:meets_min_quantity] %>
+                        <small class="text-success d-block">
+                          <i class="fa-solid fa-check me-1"></i><%= t('storefront.products.show.min_quantity_met') %> (<%= discount[:min_quantity_required] %>+ units)
+                        </small>
+                      <% else %>
+                        <small class="text-warning d-block">
+                          <i class="fa-solid fa-info-circle me-1"></i><%= t('storefront.products.show.buy_to_unlock', quantity: discount[:min_quantity_required]) %>
+                        </small>
+                      <% end %>
+                    <% end %>
+                  <% when :category %>
+                    <span class="badge bg-danger me-2"><%= t('storefront.products.index.sale_badge') %></span>
+                    <strong><%= t('storefront.products.show.category_discount') %></strong>
                     <% if discount[:min_quantity_required] && discount[:min_quantity_required] > 1 %>
                       <% if discount[:meets_min_quantity] %>
                         <small class="text-success d-block">

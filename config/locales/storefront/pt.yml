@@ -140,6 +140,7 @@ pt:
         zoom: "Ampliar"
         available_discounts: "Descontos Disponíveis"
         product_discount: "Desconto de Produto"
+        category_discount: "Desconto de Categoria"
         customer_tier_discount: "Desconto de Cliente"
         your_special_price: "O Seu Preço Especial"
         min_quantity_met: "Quantidade mín. atingida"

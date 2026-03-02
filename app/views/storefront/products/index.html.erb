@@ -144,7 +144,7 @@
                         <span class="badge bg-success product-card-discount-badge">
                           -<%= (discount_info[:effective_discount][:percentage] * 100).round(0) %>%
                         </span>
-                        <% if discount_info[:all_discounts].any? { |d| d[:type] == :product } %>
+                        <% if discount_info[:all_discounts].any? { |d| d[:type] == :product || d[:type] == :category } %>
                           <span class="badge bg-danger product-card-sale-badge ms-1"><%= t('storefront.products.index.sale_badge') %></span>
                         <% end %>
                       </div>

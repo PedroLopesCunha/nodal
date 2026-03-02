@@ -22,23 +22,28 @@ class Bo::CustomerProductDiscountsController < Bo::BaseController
       redirect_to bo_pricing_path(params[:org_slug], tab: 'custom_pricing'),
                   notice: "Custom price created successfully."
     else
-      @variants = @discount.product_id.present? ? current_organisation.products.find_by(id: @discount.product_id)&.product_variants&.by_position || [] : []
+      if @discount.product_id.present?
+        product = current_organisation.products.find_by(id: @discount.product_id)
+        @variants_grouped = product ? { product => product.product_variants.by_position.to_a } : {}
+      else
+        @variants_grouped = {}
+      end
       render :new, status: :unprocessable_entity
     end
   end
 
   def edit
-    @variants = @discount.product.product_variants.by_position
+    @variants_grouped = { @discount.product => @discount.product.product_variants.by_position.to_a }
   end
 
   def variant_overrides
     authorize CustomerProductDiscount.new(organisation: current_organisation), :new?
-    @variants = []
+    @variants_grouped = {}
     if params[:product_id].present?
       product = current_organisation.products.find_by(id: params[:product_id])
-      @variants = product.product_variants.by_position if product
+      @variants_grouped = { product => product.product_variants.by_position.to_a } if product
     end
-    render partial: "bo/product_discounts/variant_overrides_frame", locals: { variants: @variants, currency_symbol: current_organisation.currency_symbol }, layout: false
+    render partial: "bo/product_discounts/variant_overrides_frame", locals: { variants_grouped: @variants_grouped, currency_symbol: current_organisation.currency_symbol }, layout: false
   end
 
   def update
@@ -47,7 +52,7 @@ class Bo::CustomerProductDiscountsController < Bo::BaseController
       redirect_to bo_pricing_path(params[:org_slug], tab: 'custom_pricing'),
                   notice: "Custom price updated successfully."
     else
-      @variants = @discount.product.product_variants.by_position
+      @variants_grouped = { @discount.product => @discount.product.product_variants.by_position.to_a }
       render :edit, status: :unprocessable_entity
     end
   end

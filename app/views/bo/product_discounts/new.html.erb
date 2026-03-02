@@ -48,15 +48,50 @@
         <div class="card-body">
           <h5 class="card-title mb-4"><%= t('bo.pricing.product_discounts.card_title') %></h5>
 
-          <div class="row g-3" data-controller="variant-overrides" data-variant-overrides-url-value="<%= variant_overrides_bo_product_discounts_path(params[:org_slug]) %>">
-            <div class="col-md-12">
+          <div class="row g-3" data-controller="discount-target variant-overrides"
+               data-variant-overrides-url-value="<%= variant_overrides_bo_product_discounts_path(params[:org_slug]) %>"
+               data-discount-target-url-value="<%= variant_overrides_bo_product_discounts_path(params[:org_slug]) %>">
+
+            <div class="col-md-12 mb-2">
+              <label class="form-label"><%= t('bo.pricing.product_discounts.target_type') %></label>
+              <div class="d-flex gap-3">
+                <div class="form-check">
+                  <input class="form-check-input" type="radio" name="target_type" id="target_product" value="product"
+                         data-action="change->discount-target#toggle"
+                         <%= 'checked' unless @discount.category? %>>
+                  <label class="form-check-label" for="target_product"><%= t('bo.pricing.product_discounts.product_target') %></label>
+                </div>
+                <div class="form-check">
+                  <input class="form-check-input" type="radio" name="target_type" id="target_category" value="category"
+                         data-action="change->discount-target#toggle"
+                         <%= 'checked' if @discount.category? %>>
+                  <label class="form-check-label" for="target_category"><%= t('bo.pricing.product_discounts.category_target') %></label>
+                </div>
+              </div>
+            </div>
+
+            <div class="col-md-12" data-discount-target-target="productWrapper">
               <label class="form-label"><%= t('bo.pricing.form.product') %> <span class="text-danger">*</span></label>
-              <select name="product_discount[product_id]" id="product_discount_product_id" class="form-select" required
+              <select name="product_discount[product_id]" id="product_discount_product_id" class="form-select"
                       data-controller="tom-select"
+                      data-discount-target-target="productSelect"
                       data-action="change->variant-overrides#change">
                 <option value=""><%= t('bo.pricing.form.select_product') %></option>
                 <% @products.each do |product| %>
                   <option value="<%= product.id %>" data-sku="<%= product.sku %>" <%= 'selected' if @discount.product_id == product.id %>><%= product.name %></option>
+                <% end %>
+              </select>
+            </div>
+
+            <div class="col-md-12 d-none" data-discount-target-target="categoryWrapper">
+              <label class="form-label"><%= t('bo.pricing.product_discounts.category_target') %> <span class="text-danger">*</span></label>
+              <select name="product_discount[category_id]" id="product_discount_category_id" class="form-select"
+                      data-controller="tom-select"
+                      data-discount-target-target="categorySelect"
+                      data-action="change->discount-target#categoryChanged">
+                <option value=""><%= t('bo.pricing.product_discounts.select_category') %></option>
+                <% @categories_for_select.each do |name, id| %>
+                  <option value="<%= id %>" <%= 'selected' if @discount.category_id == id %>><%= name %></option>
                 <% end %>
               </select>
             </div>
@@ -123,7 +158,7 @@
     </div>
   </div>
 
-  <%= render partial: "variant_overrides_frame", locals: { variants: @variants || [], currency_symbol: @current_organisation.currency_symbol } %>
+  <%= render partial: "variant_overrides_frame", locals: { variants_grouped: @variants_grouped || {}, currency_symbol: @current_organisation.currency_symbol } %>
 <% end %>
 
 </div>

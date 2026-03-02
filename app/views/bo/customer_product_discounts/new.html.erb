@@ -128,7 +128,7 @@
     </div>
   </div>
 
-  <%= render partial: "bo/product_discounts/variant_overrides_frame", locals: { variants: @variants || [], currency_symbol: @current_organisation.currency_symbol } %>
+  <%= render partial: "bo/product_discounts/variant_overrides_frame", locals: { variants_grouped: @variants_grouped || {}, currency_symbol: @current_organisation.currency_symbol } %>
 <% end %>
 
 </div>

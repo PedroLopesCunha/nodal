@@ -117,6 +117,26 @@ class DiscountCalculator
           min_quantity_required: pd.min_quantity
         }
       end
+
+      # Category-level discounts: find active discounts for any category
+      # the product belongs to, including ancestor categories
+      category_discount_records = find_category_discounts
+      category_discount_records.each do |cd|
+        meets_min_quantity = quantity >= cd.min_quantity
+        next if !for_display && !meets_min_quantity
+
+        discounts << {
+          type: :category,
+          discount_type: cd.discount_type,
+          value: cd.discount_value,
+          stackable: cd.stackable,
+          label: "Category Sale",
+          valid_until: cd.valid_until,
+          source: cd,
+          meets_min_quantity: meets_min_quantity,
+          min_quantity_required: cd.min_quantity
+        }
+      end
     end
 
     return discounts unless customer
@@ -271,6 +291,16 @@ class DiscountCalculator
 
     result = price - discount_info[:savings]
     [result, Money.new(0, currency)].max
+  end
+
+  def find_category_discounts
+    # Collect all category IDs the product belongs to, plus their ancestors
+    category_ids = product.categories.flat_map { |cat| cat.path_ids }.uniq
+    return [] if category_ids.empty?
+
+    ProductDiscount.active
+      .for_category
+      .where(organisation: product.organisation, category_id: category_ids)
   end
 
   def currency
