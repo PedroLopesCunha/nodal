@@ -9,6 +9,7 @@
     controllers += " variant-selector"
     row_data.merge!(
       "variant-selector-variants-value" => @variants.map { |v|
+        vd = @variant_discounts[v.id] || { has_discount: false, final_price_cents: v.unit_price_cents, discount_percentage: 0 }
         {
           id: v.id, name: v.name, sku: v.sku,
           price_cents: v.unit_price_cents,
@@ -16,11 +17,17 @@
           attribute_value_ids: v.attribute_values.pluck(:id),
           in_stock: v.in_stock?, stock_quantity: v.stock_quantity,
           track_stock: v.track_stock?, purchasable: v.purchasable?,
-          photo_url: v.photo.attached? ? url_for(v.photo.variant(resize_to_limit: [400, 400])) : nil
+          photo_url: v.photo.attached? ? url_for(v.photo.variant(resize_to_limit: [400, 400])) : nil,
+          has_discount: vd[:has_discount],
+          final_price_cents: vd[:final_price_cents],
+          discount_percentage: vd[:discount_percentage]
         }
       }.to_json,
       "variant-selector-currency-symbol-value" => current_organisation.currency_symbol,
       "variant-selector-default-price-cents-value" => @default_variant&.unit_price_cents || @product.unit_price,
+      "variant-selector-default-final-price-cents-value" => @discount_calculator.final_price.cents,
+      "variant-selector-default-has-discount-value" => @discount_calculator.discount_breakdown[:has_discount].to_s,
+      "variant-selector-default-discount-percentage-value" => (@discount_calculator.discount_breakdown[:has_discount] ? (@discount_calculator.discount_breakdown[:effective_discount][:percentage] * 100).round(0) : 0).to_s,
       "variant-selector-min-quantity-value" => @product.min_quantity || 1,
       "variant-selector-default-sku-value" => @product.sku
     )
@@ -79,6 +86,26 @@
         <div class="mb-3">
           <% if @product.price_on_request? %>
             <span class="text-primary" style="font-size: 2rem; font-weight: 700;"><%= t('storefront.products.show.price_on_request') %></span>
+          <% elsif @product.variable? %>
+            <div class="price-with-discount">
+              <span class="original-price text-muted text-decoration-line-through <%= 'd-none' unless discount_breakdown[:has_discount] %>" style="font-size: 1.5rem;" data-variant-selector-target="originalPrice">
+                <% if discount_breakdown[:has_discount] %>
+                  <%= humanized_money_with_symbol(discount_breakdown[:base_price]) %>
+                <% end %>
+              </span>
+              <span class="<%= discount_breakdown[:has_discount] ? 'text-success' : 'text-primary' %>" data-variant-selector-target="mainPrice" style="font-size: 2.5rem; font-weight: 700;">
+                <% if discount_breakdown[:has_discount] %>
+                  <%= humanized_money_with_symbol(discount_breakdown[:final_price]) %>
+                <% else %>
+                  <%= @default_variant&.price ? humanized_money_with_symbol(@default_variant.price) : @product.display_price %>
+                <% end %>
+              </span>
+              <span class="badge bg-success fs-6 <%= 'd-none' unless discount_breakdown[:has_discount] %>" data-variant-selector-target="discountBadge">
+                <% if discount_breakdown[:has_discount] %>
+                  -<%= (discount_breakdown[:effective_discount][:percentage] * 100).round(0) %>% OFF
+                <% end %>
+              </span>
+            </div>
           <% elsif discount_breakdown[:has_discount] %>
             <div class="price-with-discount">
               <span class="original-price text-muted text-decoration-line-through" style="font-size: 1.5rem;">
@@ -90,12 +117,10 @@
               <span class="badge bg-success fs-6">
                 -<%= (discount_breakdown[:effective_discount][:percentage] * 100).round(0) %>% OFF
               </span>
-              <% if discount_breakdown[:all_discounts].any? { |d| d[:type] == :product } %>
+              <% if discount_breakdown[:applied_discounts].any? { |d| d[:type] == :product } %>
                 <span class="badge bg-danger fs-6 ms-1"><%= t('storefront.products.index.sale_badge') %></span>
               <% end %>
             </div>
-          <% elsif @product.variable? %>
-            <span class="text-primary" data-variant-selector-target="mainPrice" style="font-size: 2.5rem; font-weight: 700;"><%= @default_variant&.price ? humanized_money_with_symbol(@default_variant.price) : @product.display_price %></span>
           <% else %>
             <span class="text-primary" style="font-size: 2.5rem; font-weight: 700;"><%= humanized_money_with_symbol(@product.price) %></span>
           <% end %>
@@ -110,8 +135,8 @@
             <h6 class="alert-heading mb-3">
               <i class="fa-solid fa-tags me-2"></i><%= t('storefront.products.show.available_discounts') %>
             </h6>
-            <% discount_breakdown[:all_discounts].each do |discount| %>
-              <div class="d-flex justify-content-between align-items-center py-2 <%= 'border-bottom' unless discount == discount_breakdown[:all_discounts].last %>">
+            <% discount_breakdown[:applied_discounts].each do |discount| %>
+              <div class="d-flex justify-content-between align-items-center py-2 <%= 'border-bottom' unless discount == discount_breakdown[:applied_discounts].last %>">
                 <div>
                   <% case discount[:type] %>
                   <% when :product %>
@@ -129,9 +154,7 @@
                       <% end %>
                     <% end %>
                   <% when :customer %>
-                    <span class="badge bg-info me-2">VIP</span>
                     <strong><%= t('storefront.products.show.customer_tier_discount') %></strong>
-                    <small class="text-muted d-block">Special pricing for your account</small>
                   <% when :customer_product %>
                     <span class="badge bg-primary me-2">SPECIAL</span>
                     <strong><%= t('storefront.products.show.your_special_price') %></strong>

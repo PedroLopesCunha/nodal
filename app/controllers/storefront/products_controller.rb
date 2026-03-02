@@ -96,6 +96,17 @@ class Storefront::ProductsController < Storefront::BaseController
       @variants = @product.product_variants.available.by_position.includes(:attribute_values)
       @attributes_with_values = @product.available_values_by_attribute
       @default_variant = @product.default_variant
+
+      # Compute per-variant discount data for JS
+      @variant_discounts = @variants.each_with_object({}) do |v, hash|
+        calc = DiscountCalculator.new(product: @product, customer: current_customer, for_display: true, variant: v)
+        bd = calc.discount_breakdown
+        hash[v.id] = {
+          has_discount: bd[:has_discount],
+          final_price_cents: bd[:final_price].cents,
+          discount_percentage: bd[:has_discount] ? (bd[:effective_discount][:percentage] * 100).round(0) : 0
+        }
+      end
     else
       @default_variant = @product.default_variant
     end

@@ -48,10 +48,10 @@
         <div class="card-body">
           <h5 class="card-title mb-4"><%= t('bo.pricing.product_discounts.card_title') %></h5>
 
-          <div class="row g-3">
+          <div class="row g-3" data-controller="variant-overrides" data-variant-overrides-url-value="<%= variant_overrides_bo_product_discounts_path(params[:org_slug]) %>">
             <div class="col-md-12">
               <label class="form-label"><%= t('bo.pricing.form.product') %> <span class="text-danger">*</span></label>
-              <%= f.collection_select :product_id, @products, :id, :name, { prompt: t('bo.pricing.form.select_product') }, { class: "form-select", required: true } %>
+              <%= f.collection_select :product_id, @products, :id, :name, { prompt: t('bo.pricing.form.select_product') }, { class: "form-select", required: true, data: { action: "change->variant-overrides#change" } } %>
             </div>
           </div>
 
@@ -115,6 +115,8 @@
       </div>
     </div>
   </div>
+
+  <%= render partial: "variant_overrides_frame", locals: { variants: @variants || [], currency_symbol: @current_organisation.currency_symbol } %>
 <% end %>
 
 </div>

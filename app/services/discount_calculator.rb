@@ -38,11 +38,34 @@ class DiscountCalculator
     base_price - final_price
   end
 
+  # Returns only the discounts that actually contribute to the final price
+  def applied_discounts
+    @applied_discounts ||= begin
+      return [] if all_discounts.empty?
+
+      stackable = all_discounts.select { |d| d[:stackable] }
+      exclusive = all_discounts.reject { |d| d[:stackable] }
+
+      applied = []
+
+      # Best exclusive discount wins among non-stackable
+      if exclusive.any?
+        best = find_best_exclusive(exclusive)
+        applied << best[:discount] if best[:discount]
+      end
+
+      # All stackable discounts are applied
+      applied += stackable
+      applied
+    end
+  end
+
   # Returns display-friendly breakdown
   def discount_breakdown
     {
       base_price: base_price,
       all_discounts: all_discounts,
+      applied_discounts: applied_discounts,
       effective_discount: effective_discount,
       final_price: final_price,
       savings: savings,
@@ -57,27 +80,43 @@ class DiscountCalculator
     discounts = []
 
     # 1. Product-level discounts (global, for all customers)
-    # for_display: true - show all available discounts (ignore min_quantity)
-    # for_display: false - only applicable discounts (respect min_quantity)
-    product_discounts = if for_display
-      product.product_discounts.active
-    else
-      product.product_discounts.active.where("min_quantity <= ?", quantity)
-    end
-
-    product_discounts.each do |pd|
-      meets_min_quantity = quantity >= pd.min_quantity
+    # Variant-level overrides: custom discount replaces product discounts,
+    # exclude_from_discounts skips them entirely
+    if variant&.has_custom_discount?
       discounts << {
-        type: :product,
-        discount_type: pd.discount_type,
-        value: pd.discount_value,
-        stackable: pd.stackable,
-        label: "Product Sale",
-        valid_until: pd.valid_until,
-        source: pd,
-        meets_min_quantity: meets_min_quantity,
-        min_quantity_required: pd.min_quantity
+        type: :variant,
+        discount_type: variant.custom_discount_type,
+        value: variant.custom_discount_value,
+        stackable: false,
+        label: "Variant Discount",
+        valid_until: nil,
+        source: variant
       }
+    elsif variant&.exclude_from_discounts?
+      # Skip product discounts entirely
+    else
+      # for_display: true - show all available discounts (ignore min_quantity)
+      # for_display: false - only applicable discounts (respect min_quantity)
+      product_discounts = if for_display
+        product.product_discounts.active
+      else
+        product.product_discounts.active.where("min_quantity <= ?", quantity)
+      end
+
+      product_discounts.each do |pd|
+        meets_min_quantity = quantity >= pd.min_quantity
+        discounts << {
+          type: :product,
+          discount_type: pd.discount_type,
+          value: pd.discount_value,
+          stackable: pd.stackable,
+          label: "Product Sale",
+          valid_until: pd.valid_until,
+          source: pd,
+          meets_min_quantity: meets_min_quantity,
+          min_quantity_required: pd.min_quantity
+        }
+      end
     end
 
     return discounts unless customer

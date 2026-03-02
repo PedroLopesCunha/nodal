@@ -1,11 +1,14 @@
 import { Controller } from "@hotwired/stimulus"
 
 export default class extends Controller {
-  static targets = ["select", "variantId", "price", "originalPrice", "sku", "stock", "addToCart", "image", "mainPrice", "quantity"]
+  static targets = ["select", "variantId", "price", "originalPrice", "sku", "stock", "addToCart", "image", "mainPrice", "discountBadge", "quantity"]
   static values = {
     variants: Array,
     currencySymbol: String,
     defaultPriceCents: Number,
+    defaultFinalPriceCents: Number,
+    defaultHasDiscount: Boolean,
+    defaultDiscountPercentage: Number,
     minQuantity: Number,
     defaultSku: String
   }
@@ -24,7 +27,13 @@ export default class extends Controller {
 
   updateTotal() {
     const quantity = this.hasQuantityTarget ? parseInt(this.quantityTarget.value) || this.minQuantityValue || 1 : this.minQuantityValue || 1
-    const priceCents = this.selectedVariant?.price_cents || this.defaultPriceCentsValue
+
+    let priceCents
+    if (this.selectedVariant) {
+      priceCents = this.selectedVariant.has_discount ? this.selectedVariant.final_price_cents : this.selectedVariant.price_cents
+    } else {
+      priceCents = this.defaultHasDiscountValue ? this.defaultFinalPriceCentsValue : this.defaultPriceCentsValue
+    }
 
     if (priceCents && this.hasPriceTarget) {
       const total = priceCents * quantity
@@ -48,8 +57,38 @@ export default class extends Controller {
   }
 
   updateMainPrice(variant) {
-    if (this.hasMainPriceTarget && variant) {
+    if (!this.hasMainPriceTarget || !variant) return
+
+    if (variant.has_discount) {
+      // Show discounted price in green
+      this.mainPriceTarget.textContent = this.formatPrice(variant.final_price_cents)
+      this.mainPriceTarget.classList.remove("text-primary")
+      this.mainPriceTarget.classList.add("text-success")
+
+      // Show original price with strikethrough
+      if (this.hasOriginalPriceTarget) {
+        this.originalPriceTarget.textContent = this.formatPrice(variant.price_cents)
+        this.originalPriceTarget.classList.remove("d-none")
+      }
+
+      // Show discount badge
+      if (this.hasDiscountBadgeTarget) {
+        this.discountBadgeTarget.textContent = `-${variant.discount_percentage}% OFF`
+        this.discountBadgeTarget.classList.remove("d-none")
+      }
+    } else {
+      // Show regular price
       this.mainPriceTarget.textContent = this.formatPrice(variant.price_cents)
+      this.mainPriceTarget.classList.remove("text-success")
+      this.mainPriceTarget.classList.add("text-primary")
+
+      // Hide original price and badge
+      if (this.hasOriginalPriceTarget) {
+        this.originalPriceTarget.classList.add("d-none")
+      }
+      if (this.hasDiscountBadgeTarget) {
+        this.discountBadgeTarget.classList.add("d-none")
+      }
     }
   }
 
@@ -78,15 +117,7 @@ export default class extends Controller {
       this.variantIdTarget.value = variant.id
     }
 
-    // Note: Price display is handled by updateTotal() which includes quantity calculation
-
-    // Update original price if different from base
-    if (this.hasOriginalPriceTarget && variant.original_price_cents !== variant.price_cents) {
-      this.originalPriceTarget.textContent = this.formatPrice(variant.original_price_cents)
-      this.originalPriceTarget.classList.remove("d-none")
-    } else if (this.hasOriginalPriceTarget) {
-      this.originalPriceTarget.classList.add("d-none")
-    }
+    // Note: Price and discount display is handled by updateMainPrice()
 
     // Update SKU (fall back to parent product SKU if variant has none)
     if (this.hasSkuTarget) {
