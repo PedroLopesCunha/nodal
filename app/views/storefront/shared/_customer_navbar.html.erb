@@ -44,7 +44,7 @@
           </li>
           <% unless browsing_as_member? %>
             <li class="nav-item">
-              <%= link_to t('storefront.navbar.orders'), orders_path(org_slug: params[:org_slug]), class: "nav-link #{'active' if controller_name == 'orders'}" %>
+              <%= link_to t('storefront.navbar.orders'), orders_path(org_slug: params[:org_slug]), class: "nav-link #{'active' if controller_name == 'orders' || controller_name == 'shopping_lists'}" %>
             </li>
           <% end %>
           <% if current_organisation.has_contact_info? %>

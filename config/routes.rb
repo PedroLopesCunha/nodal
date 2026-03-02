@@ -49,7 +49,19 @@ Rails.application.routes.draw do
 
       # Order history (placed orders only)
       resources :orders, only: [:index, :show] do
-        post :reorder, on: :member
+        member do
+          post :reorder
+          post :add_to_cart
+        end
+      end
+
+      # Shopping lists
+      resources :shopping_lists, except: [:edit] do
+        member do
+          post :add_to_cart
+          get :product_picker
+        end
+        resources :shopping_list_items, only: [:create, :update, :destroy], as: :items
       end
 
       # Customer account settings

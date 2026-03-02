@@ -11,6 +11,11 @@ class Storefront::HomeController < Storefront::BaseController
                       .order(placed_at: :desc)
                       .first
 
+      @shopping_lists = current_customer.shopping_lists
+                          .ordered
+                          .includes(:shopping_list_items)
+                          .limit(3)
+
       @tier_discount = current_customer.active_customer_discount
       @special_prices_count = current_customer.customer_product_discounts.active.count
       @total_orders_count = current_customer.orders.placed.count

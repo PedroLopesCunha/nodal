@@ -22,6 +22,7 @@ es:
       home: "Inicio"
       products: "Productos"
       orders: "Pedidos"
+      shopping_lists: "Listas"
       contact: "Contacto"
       cart: "Carrito"
       account: "Cuenta"
@@ -69,12 +70,17 @@ es:
         free_label: "Gratis"
         free_shipping_over: "en pedidos superiores a %{amount}"
         auto_applied: "Sus precios se aplican automáticamente en cada pedido."
+      shopping_lists:
+        title: "Sus Listas"
+        view_all: "Ver Todas las Listas"
       quick_links:
         title: "Acceso Rápido"
         group_orders: "Pedidos"
         group_catalog: "Catálogo"
         group_account: "Cuenta"
         all_orders: "Todos los Pedidos"
+        shopping_lists: "Listas de Compras"
+        shopping_lists_hint: "Productos guardados para pedido rápido"
         orders_placed:
           zero: "Ningún pedido realizado"
           one: "%{count} pedido realizado"
@@ -175,6 +181,8 @@ es:
         price_request_email_subject: "Solicitud de Precio — %{product}"
         price_request_email_body: "Hola,\n\nMe gustaría solicitar el precio del siguiente producto:\n\nProducto: %{product}\nSKU: %{sku}\n\nPor favor envíenme un presupuesto.\n\nSaludos cordiales,\n%{customer}"
         price_request_whatsapp_body: "Hola, me gustaría solicitar el precio de: *%{product}* (SKU: %{sku}). ¿Podrían enviarme un presupuesto?"
+        add_to_list: "Guardar en Lista"
+        create_new_list: "Crear Nueva Lista"
 
     # Sección del carrito
     cart:
@@ -283,9 +291,13 @@ es:
           total: "Total"
           actions: "Acciones"
         reorder: "Repetir"
+        add_to_cart: "Añadir al Carrito"
         view: "Ver"
         no_orders: "Aún no tiene pedidos"
         no_orders_hint: "Cuando realice un pedido, aparecerá aquí."
+      add_to_cart:
+        success: "Artículos del pedido %{order_number} añadidos al carrito."
+        skipped: "Algunos artículos no estaban disponibles y se omitieron: %{items}"
       show:
         back_to_orders: "Volver a Pedidos"
         order_number: "Pedido #%{number}"
@@ -347,6 +359,64 @@ es:
       flash:
         profile_updated: "Perfil actualizado con éxito."
         password_updated: "Contraseña actualizada con éxito."
+
+    # Listas de compras
+    shopping_lists:
+      index:
+        title: "Listas de Compras"
+        subtitle: "Guarde sus productos favoritos para pedido rápido"
+        new_list: "Nueva Lista"
+        view: "Ver"
+        add_to_cart: "Añadir al Carrito"
+        empty: "Aún sin listas de compras"
+        empty_hint: "Cree su primera lista para guardar los productos que pide regularmente."
+        create_first: "Crear Primera Lista"
+        lines:
+          one: "%{count} producto"
+          other: "%{count} productos"
+      new:
+        title: "Nueva Lista de Compras"
+        back: "Volver a Listas"
+        name_label: "Nombre de la Lista"
+        name_placeholder: "Ej: Pedido Semanal, Material de Oficina..."
+        notes_label: "Notas"
+        notes_placeholder: "Notas u observaciones sobre esta lista..."
+        optional: "opcional"
+        create: "Crear Lista"
+      show:
+        back: "Volver a Listas"
+        edit_details: "Editar Detalles"
+        add_all_to_cart: "Añadir Todo al Carrito"
+        delete_list: "Eliminar Lista"
+        confirm_delete: "¿Está seguro de que desea eliminar esta lista?"
+        rename: "Renombrar"
+        save: "Guardar"
+        notes_placeholder: "Añadir notas a esta lista..."
+        items_title: "Artículos de la Lista"
+        empty: "Lista vacía"
+        empty_hint: "Use el catálogo de abajo para añadir productos a su lista."
+        add_products: "Añadir Productos"
+        table:
+          product: "Producto"
+          variant: "Variante"
+          quantity: "Cantidad"
+          update: "Actualizar"
+      product_picker:
+        search_placeholder: "Buscar productos..."
+        all_categories: "Todas las Categorías"
+        product: "Producto"
+        price: "Precio"
+        no_products: "No se encontraron productos."
+      flash:
+        created: "Lista de compras creada con éxito."
+        updated: "Lista actualizada con éxito."
+        deleted: "Lista eliminada con éxito."
+        item_added: "Producto añadido a la lista."
+        item_added_to_list: "'%{product}' añadido a '%{list}' con éxito."
+        item_updated: "Cantidad actualizada."
+        item_removed: "Producto eliminado de la lista."
+        add_to_cart_success: "Artículos de la lista '%{name}' añadidos al carrito."
+        add_to_cart_skipped: "Algunos artículos no estaban disponibles y se omitieron: %{items}"
 
     # Mensajes flash
     flash:

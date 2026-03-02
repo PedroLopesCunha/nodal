@@ -22,6 +22,7 @@ en:
       home: "Home"
       products: "Products"
       orders: "Orders"
+      shopping_lists: "Lists"
       contact: "Contact"
       cart: "Cart"
       account: "Account"
@@ -69,12 +70,17 @@ en:
         free_label: "Free"
         free_shipping_over: "on orders over %{amount}"
         auto_applied: "Your account pricing is applied automatically to every order."
+      shopping_lists:
+        title: "Your Lists"
+        view_all: "View All Lists"
       quick_links:
         title: "Quick Links"
         group_orders: "Orders"
         group_catalog: "Catalog"
         group_account: "Account"
         all_orders: "All Orders"
+        shopping_lists: "Shopping Lists"
+        shopping_lists_hint: "Saved products for quick ordering"
         orders_placed:
           zero: "No orders placed"
           one: "%{count} order placed"
@@ -175,6 +181,8 @@ en:
         price_request_email_subject: "Price Request — %{product}"
         price_request_email_body: "Hello,\n\nI would like to request pricing for the following product:\n\nProduct: %{product}\nSKU: %{sku}\n\nPlease send me a quote.\n\nBest regards,\n%{customer}"
         price_request_whatsapp_body: "Hello, I would like to request pricing for: *%{product}* (SKU: %{sku}). Could you send me a quote?"
+        add_to_list: "Save to List"
+        create_new_list: "Create New List"
 
     # Cart section
     cart:
@@ -283,9 +291,13 @@ en:
           total: "Total"
           actions: "Actions"
         reorder: "Reorder"
+        add_to_cart: "Add to Cart"
         view: "View"
         no_orders: "No orders yet"
         no_orders_hint: "Once you place an order, it will appear here."
+      add_to_cart:
+        success: "Items from order %{order_number} added to your cart."
+        skipped: "Some items were unavailable and skipped: %{items}"
       show:
         back_to_orders: "Back to Orders"
         order_number: "Order #%{number}"
@@ -347,6 +359,64 @@ en:
       flash:
         profile_updated: "Profile updated successfully."
         password_updated: "Password updated successfully."
+
+    # Shopping lists
+    shopping_lists:
+      index:
+        title: "Shopping Lists"
+        subtitle: "Save your favorite products for quick ordering"
+        new_list: "New List"
+        view: "View"
+        add_to_cart: "Add to Cart"
+        empty: "No shopping lists yet"
+        empty_hint: "Create your first list to save products you order regularly."
+        create_first: "Create First List"
+        lines:
+          one: "%{count} product"
+          other: "%{count} products"
+      new:
+        title: "New Shopping List"
+        back: "Back to Lists"
+        name_label: "List Name"
+        name_placeholder: "e.g. Weekly Order, Office Supplies..."
+        notes_label: "Notes"
+        notes_placeholder: "Notes or observations about this list..."
+        optional: "optional"
+        create: "Create List"
+      show:
+        back: "Back to Lists"
+        edit_details: "Edit Details"
+        add_all_to_cart: "Add All to Cart"
+        delete_list: "Delete List"
+        confirm_delete: "Are you sure you want to delete this list?"
+        rename: "Rename"
+        save: "Save"
+        notes_placeholder: "Add notes to this list..."
+        items_title: "List Items"
+        empty: "Empty list"
+        empty_hint: "Use the catalog below to add products to your list."
+        add_products: "Add Products"
+        table:
+          product: "Product"
+          variant: "Variant"
+          quantity: "Quantity"
+          update: "Update"
+      product_picker:
+        search_placeholder: "Search products..."
+        all_categories: "All Categories"
+        product: "Product"
+        price: "Price"
+        no_products: "No products found."
+      flash:
+        created: "Shopping list created successfully."
+        updated: "List updated successfully."
+        deleted: "List deleted successfully."
+        item_added: "Product added to list."
+        item_added_to_list: "'%{product}' added to '%{list}' successfully."
+        item_updated: "Quantity updated."
+        item_removed: "Product removed from list."
+        add_to_cart_success: "Items from list '%{name}' added to your cart."
+        add_to_cart_skipped: "Some items were unavailable and skipped: %{items}"
 
     # Flash messages
     flash:

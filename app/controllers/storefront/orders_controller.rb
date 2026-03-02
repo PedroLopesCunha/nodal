@@ -77,4 +77,47 @@ class Storefront::OrdersController < Storefront::BaseController
 
     redirect_to cart_path(org_slug: params[:org_slug])
   end
+
+  def add_to_cart
+    original_order = current_customer.orders.placed.find(params[:id])
+    authorize original_order
+
+    cart = current_cart
+    skipped_items = []
+
+    original_order.order_items.includes(:product, :product_variant).each do |item|
+      product = item.product
+
+      if product.nil? || !product.available?
+        skipped_items << item.product&.name || "Unknown product"
+        next
+      end
+
+      variant = item.product_variant
+      if variant.present? && !variant.purchasable?
+        skipped_items << "#{product.name} (#{variant.option_values_string})"
+        next
+      end
+
+      # Check if product+variant already exists in cart
+      existing = cart.order_items.find_by(product: product, product_variant: variant)
+      if existing
+        existing.update!(quantity: existing.quantity + item.quantity)
+      else
+        cart.order_items.create!(
+          product: product,
+          product_variant: variant,
+          quantity: item.quantity
+        )
+      end
+    end
+
+    if skipped_items.any?
+      flash[:warning] = I18n.t('storefront.orders.add_to_cart.skipped', items: skipped_items.join(', '))
+    else
+      flash[:notice] = I18n.t('storefront.orders.add_to_cart.success', order_number: original_order.order_number)
+    end
+
+    redirect_to cart_path(org_slug: params[:org_slug])
+  end
 end
