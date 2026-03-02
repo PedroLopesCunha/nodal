@@ -649,6 +649,7 @@ en:
         total: "Total"
         order_tier_discount: "Order Tier Discount"
         manual_discount: "Manual Discount"
+        promo_code_discount: "Promo Code"
         apply_discount: "Apply Discount"
         remove_discount: "Remove Discount"
         discount_type: "Discount Type"
@@ -704,6 +705,8 @@ en:
         custom_pricing_desc: "Set custom prices for specific customer-product pairs"
         order_tiers: "Order Tiers"
         order_tiers_desc: "Create order total threshold discounts"
+        promo_codes: "Promo Codes"
+        promo_codes_desc: "Create promotional codes for customers to apply at checkout"
       form:
         client: "Client"
         select_client: "Select a client..."
@@ -811,6 +814,48 @@ en:
           submit: "Update Discount"
         card_title: "Discount Details"
         validity_title: "Validity Period"
+      promo_codes:
+        title: "Promo Codes"
+        description: "Create promotional codes for customers to apply at checkout"
+        add: "Add Promo Code"
+        no_codes: "No promo codes found."
+        create_first: "Create your first promo code"
+        card_title: "Promo Code Details"
+        validity_title: "Validity Period"
+        table:
+          code: "Code"
+          eligibility: "Eligibility"
+          usage: "Usage"
+          all_customers: "All Customers"
+          specific_customers_count:
+            one: "%{count} Customer"
+            other: "%{count} Customers"
+        form:
+          code: "Code"
+          code_hint: "Unique code customers will enter at checkout (auto-uppercased)"
+          description: "Description"
+          description_placeholder: "Internal notes about this promo code..."
+          min_order_amount: "Minimum Order Amount"
+          min_order_hint: "Leave at 0 for no minimum"
+          usage_limit: "Usage Limit"
+          usage_limit_hint: "Leave blank for unlimited"
+          per_customer_limit: "Per Customer"
+          eligibility: "Eligibility"
+          all_customers: "All customers can use this code"
+          specific_customers: "Only specific customers"
+          select_customers: "Select eligible customers"
+          stackable_hint: "If enabled, this code can combine with other discounts"
+        new:
+          title: "New Promo Code"
+          subtitle: "Create a promotional code for customers"
+          submit: "Create Promo Code"
+        edit:
+          title: "Edit Promo Code"
+          submit: "Update Promo Code"
+        flash:
+          created: "Promo code created successfully."
+          updated: "Promo code updated successfully."
+          deleted: "Promo code deleted successfully."
       errors:
         title: "Please fix the following errors:"
 

@@ -69,6 +69,7 @@ en:
         off_orders_over: "off orders over %{amount}"
         free_label: "Free"
         free_shipping_over: "on orders over %{amount}"
+        promo_code: "Code: %{code}"
         auto_applied: "Your account pricing is applied automatically to every order."
       shopping_lists:
         title: "Your Lists"
@@ -418,6 +419,26 @@ en:
         item_removed: "Product removed from list."
         add_to_cart_success: "Items from list '%{name}' added to your cart."
         add_to_cart_skipped: "Some items were unavailable and skipped: %{items}"
+
+    # Promo codes
+    promo_codes:
+      label: "Promo Code"
+      have_code: "Have a promo code?"
+      placeholder: "Enter code"
+      apply: "Apply"
+      confirm_remove: "Remove this promo code?"
+      applied: "Promo code %{code} applied! You save %{discount}."
+      removed: "Promo code removed."
+      errors:
+        blank: "Please enter a promo code."
+        not_found: "This promo code is not valid."
+        inactive: "This promo code is not active."
+        expired: "This promo code has expired."
+        usage_limit: "This promo code has reached its usage limit."
+        customer_limit: "You have already used this promo code."
+        not_eligible: "This promo code is not available for your account."
+        min_amount: "Your order must be at least %{amount} to use this code."
+        invalid: "This promo code could not be applied."
 
     # Flash messages
     flash:

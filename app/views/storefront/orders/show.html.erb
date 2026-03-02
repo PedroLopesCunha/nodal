@@ -99,6 +99,18 @@
                 <span>-<%= humanized_money_with_symbol(@order.order_discount_amount) %></span>
               </div>
             <% end %>
+            <% if @order.promo_code_discount_amount_cents.present? && @order.promo_code_discount_amount_cents > 0 %>
+              <div class="d-flex justify-content-between mb-2 text-success">
+                <span>
+                  <i class="fa-solid fa-ticket me-1"></i>
+                  <%= t('storefront.promo_codes.label') %>
+                  <% if @order.promo_code.present? %>
+                    <span class="font-monospace">(<%= @order.promo_code.code %>)</span>
+                  <% end %>
+                </span>
+                <span>-<%= humanized_money_with_symbol(@order.promo_code_discount) %></span>
+              </div>
+            <% end %>
             <% if @order.tax_amount.present? %>
               <div class="d-flex justify-content-between mb-2">
                 <span class="text-muted"><%= t('storefront.orders.show.summary.tax') %></span>

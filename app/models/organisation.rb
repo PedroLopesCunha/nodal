@@ -29,6 +29,7 @@ class Organisation < ApplicationRecord
   has_many :product_discounts, dependent: :destroy
   has_many :customer_discounts, dependent: :destroy
   has_many :order_discounts, dependent: :destroy
+  has_many :promo_codes, dependent: :destroy
   has_one :erp_configuration, dependent: :destroy
   has_many :erp_sync_logs, dependent: :destroy
 
