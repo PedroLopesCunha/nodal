@@ -17,7 +17,7 @@
 </div>
 
 <%# Discount banner — shown when customer has any active discounts or free shipping %>
-<% if !browsing_as_member? && (@tier_discount || @special_prices_count > 0 || active_order_discounts.any? || current_organisation.free_shipping_enabled?) %>
+<% if !browsing_as_member? && (@tier_discount || @special_prices_count > 0 || active_order_discounts.any? || @active_promo_codes&.any? || current_organisation.free_shipping_enabled?) %>
   <div class="card border-0 shadow-sm mb-4 fade-in-up" style="border-radius: 12px; background: var(--org-secondary); color: #fff; animation-delay: 0.1s;">
     <div class="card-body py-3">
       <div class="d-flex align-items-center gap-2 mb-2">
@@ -65,6 +65,23 @@
                 <% end %>
               </div>
               <div class="small" style="opacity: 0.7;"><%= t('storefront.home.tier_discount.off_orders_over', amount: humanized_money_with_symbol(od.min_order_amount)) %></div>
+            </div>
+          </div>
+        <% end %>
+
+        <%# Promo codes %>
+        <% @active_promo_codes&.each do |pc| %>
+          <div class="col-6 col-md fade-in-up">
+            <div class="text-center rounded-2 py-2" style="background: rgba(255,255,255,0.1);">
+              <div class="fw-bold fs-5">
+                <i class="fa-solid fa-ticket me-1" style="opacity: 0.7;"></i>
+                <% if pc.percentage? %>
+                  <span><%= (pc.discount_value * 100).round(0) %>%</span>
+                <% else %>
+                  <%= humanized_money_with_symbol(Money.new((pc.discount_value * 100).to_i, current_organisation.currency)) %>
+                <% end %>
+              </div>
+              <div class="small" style="opacity: 0.7;"><%= t('storefront.home.tier_discount.promo_code', code: pc.code) %></div>
             </div>
           </div>
         <% end %>

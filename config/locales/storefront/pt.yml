@@ -69,6 +69,7 @@ pt:
         off_orders_over: "em encomendas acima de %{amount}"
         free_label: "Grátis"
         free_shipping_over: "em encomendas acima de %{amount}"
+        promo_code: "Código: %{code}"
         auto_applied: "Os seus preços são aplicados automaticamente em cada encomenda."
       shopping_lists:
         title: "As Suas Listas"
@@ -418,6 +419,26 @@ pt:
         item_removed: "Produto removido da lista."
         add_to_cart_success: "Itens da lista '%{name}' adicionados ao carrinho."
         add_to_cart_skipped: "Alguns itens não estavam disponíveis e foram ignorados: %{items}"
+
+    # Códigos promocionais
+    promo_codes:
+      label: "Código Promocional"
+      have_code: "Tem um código promocional?"
+      placeholder: "Introduza o código"
+      apply: "Aplicar"
+      confirm_remove: "Remover este código promocional?"
+      applied: "Código %{code} aplicado! Poupa %{discount}."
+      removed: "Código promocional removido."
+      errors:
+        blank: "Por favor introduza um código promocional."
+        not_found: "Este código promocional não é válido."
+        inactive: "Este código promocional não está ativo."
+        expired: "Este código promocional expirou."
+        usage_limit: "Este código promocional atingiu o limite de utilização."
+        customer_limit: "Já utilizou este código promocional."
+        not_eligible: "Este código promocional não está disponível para a sua conta."
+        min_amount: "A sua encomenda deve ser de pelo menos %{amount} para usar este código."
+        invalid: "Este código promocional não pôde ser aplicado."
 
     # Mensagens flash
     flash:

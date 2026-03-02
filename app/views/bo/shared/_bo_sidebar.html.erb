@@ -47,7 +47,7 @@
         <% end %>
       <% end %>
     </li>
-    <li class="bo-sidebar-item <%= 'active' if controller_name == 'pricing' || controller_name == 'customer_product_discounts' || controller_name == 'product_discounts' || controller_name == 'customer_discounts' %>">
+    <li class="bo-sidebar-item <%= 'active' if controller_name.in?(%w[pricing customer_product_discounts product_discounts customer_discounts order_discounts promo_codes]) %>">
       <%= link_to bo_pricing_path do %>
         <i class="fa-solid fa-tag"></i>
         <span><%= t('bo.sidebar.pricing') %></span>

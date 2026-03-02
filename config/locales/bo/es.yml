@@ -625,6 +625,7 @@ es:
         total: "Total"
         order_tier_discount: "Descuento por Tramo"
         manual_discount: "Descuento Manual"
+        promo_code_discount: "Código Promocional"
         apply_discount: "Aplicar Descuento"
         remove_discount: "Eliminar Descuento"
         discount_type: "Tipo de Descuento"
@@ -680,6 +681,8 @@ es:
         custom_pricing_desc: "Definir precios específicos para pares cliente-producto"
         order_tiers: "Tramos de Pedido"
         order_tiers_desc: "Crear descuentos por valor mínimo de pedido"
+        promo_codes: "Códigos Promocionales"
+        promo_codes_desc: "Crear códigos promocionales para que los clientes apliquen en el checkout"
       form:
         client: "Cliente"
         select_client: "Seleccione un cliente..."
@@ -787,6 +790,48 @@ es:
           submit: "Actualizar Descuento"
         card_title: "Detalles del Descuento"
         validity_title: "Período de Validez"
+      promo_codes:
+        title: "Códigos Promocionales"
+        description: "Crear códigos promocionales para que los clientes apliquen en el checkout"
+        add: "Añadir Código"
+        no_codes: "No se encontraron códigos promocionales."
+        create_first: "Crear el primer código promocional"
+        card_title: "Detalles del Código"
+        validity_title: "Período de Validez"
+        table:
+          code: "Código"
+          eligibility: "Elegibilidad"
+          usage: "Uso"
+          all_customers: "Todos los Clientes"
+          specific_customers_count:
+            one: "%{count} Cliente"
+            other: "%{count} Clientes"
+        form:
+          code: "Código"
+          code_hint: "Código único que los clientes introducen en el checkout (mayúsculas automáticas)"
+          description: "Descripción"
+          description_placeholder: "Notas internas sobre este código..."
+          min_order_amount: "Importe Mínimo del Pedido"
+          min_order_hint: "Dejar en 0 para sin mínimo"
+          usage_limit: "Límite de Uso"
+          usage_limit_hint: "Dejar vacío para ilimitado"
+          per_customer_limit: "Por Cliente"
+          eligibility: "Elegibilidad"
+          all_customers: "Todos los clientes pueden usar este código"
+          specific_customers: "Solo clientes específicos"
+          select_customers: "Seleccionar clientes elegibles"
+          stackable_hint: "Si está activado, este código puede combinarse con otros descuentos"
+        new:
+          title: "Nuevo Código Promocional"
+          subtitle: "Crear un código promocional para clientes"
+          submit: "Crear Código"
+        edit:
+          title: "Editar Código Promocional"
+          submit: "Actualizar Código"
+        flash:
+          created: "Código promocional creado con éxito."
+          updated: "Código promocional actualizado con éxito."
+          deleted: "Código promocional eliminado con éxito."
       errors:
         title: "Por favor corrija los siguientes errores:"
 

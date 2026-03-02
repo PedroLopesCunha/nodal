@@ -7,6 +7,7 @@ class Bo::PricingController < Bo::BaseController
     load_client_tiers
     load_custom_pricing
     load_order_tiers
+    load_promo_codes
 
     authorize :pricing, :index?
   end
@@ -53,5 +54,14 @@ class Bo::PricingController < Bo::BaseController
   def load_order_tiers
     @order_discounts = policy_scope(current_organisation.order_discounts)
       .order(min_order_amount_cents: :asc)
+  end
+
+  def load_promo_codes
+    @promo_codes = policy_scope(current_organisation.promo_codes)
+      .order(created_at: :desc)
+
+    if params[:search].present? && @tab == 'promo_codes'
+      @promo_codes = @promo_codes.where("code ILIKE ?", "%#{params[:search]}%")
+    end
   end
 end

@@ -44,6 +44,12 @@ Rails.application.routes.draw do
       # Checkout
       resource :checkout, only: [:show, :update]
 
+      # Promo codes (apply/remove at checkout)
+      resource :promo_code, only: [] do
+        post :apply
+        delete :remove
+      end
+
       # Order items (add/update/remove from cart)
       resources :order_items, only: [:create, :update, :destroy]
 
@@ -155,6 +161,12 @@ Rails.application.routes.draw do
       end
 
       resources :order_discounts, except: [:index, :show] do
+        member do
+          patch :toggle_active
+        end
+      end
+
+      resources :promo_codes, except: [:index, :show] do
         member do
           patch :toggle_active
         end

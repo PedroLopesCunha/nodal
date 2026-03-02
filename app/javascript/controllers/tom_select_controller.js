@@ -20,9 +20,18 @@ export default class extends Controller {
       }
     })
 
+    const isMultiple = this.element.multiple
+    let items
+    if (isMultiple) {
+      items = Array.from(this.element.selectedOptions).map(opt => opt.value)
+    } else {
+      items = selected ? [selected] : []
+    }
+
     this.select = new TomSelect(this.element, {
       options: options,
-      items: selected ? [selected] : [],
+      items: items,
+      plugins: isMultiple ? ['remove_button'] : [],
       valueField: "value",
       labelField: "text",
       searchField: ["text", "sku"],

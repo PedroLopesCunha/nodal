@@ -311,6 +311,8 @@
           </div>
         <% end %>
 
+        <%= render 'storefront/checkouts/promo_code' %>
+
         <div class="d-flex justify-content-between mb-2">
           <span class="text-muted"><%= t('storefront.checkouts.show.summary.tax') %> (<%= (@current_organisation.tax_rate * 100).round(1) %>%)</span>
           <span><%= humanized_money_with_symbol(@order.calculated_tax) %></span>
@@ -336,8 +338,8 @@
           <input type="checkbox" name="order[terms_accepted]" value="1" id="terms_accepted" class="form-check-input" required form="checkout-form">
           <label class="form-check-label small" for="terms_accepted">
             <%= t('storefront.checkouts.show.terms_checkbox_html',
-                  terms_link: link_to(t('storefront.checkouts.show.terms_link'), terms_path(org_slug: current_organisation.slug), target: "_blank"),
-                  privacy_link: link_to(t('storefront.checkouts.show.privacy_link'), privacy_path(org_slug: current_organisation.slug), target: "_blank")) %>
+                  terms_link: link_to(t('storefront.checkouts.show.terms_link'), terms_path(org_slug: current_organisation.slug), target: "_blank", class: "fw-medium text-primary"),
+                  privacy_link: link_to(t('storefront.checkouts.show.privacy_link'), privacy_path(org_slug: current_organisation.slug), target: "_blank", class: "fw-medium text-primary")) %>
           </label>
         </div>
       </div>

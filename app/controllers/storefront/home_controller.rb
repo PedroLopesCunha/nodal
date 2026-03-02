@@ -19,6 +19,13 @@ class Storefront::HomeController < Storefront::BaseController
       @tier_discount = current_customer.active_customer_discount
       @special_prices_count = current_customer.customer_product_discounts.active.count
       @total_orders_count = current_customer.orders.placed.count
+      @active_promo_codes = current_organisation.promo_codes.active
+        .left_joins(:promo_code_customers)
+        .where(eligibility: 'all_customers')
+        .or(current_organisation.promo_codes.active
+          .left_joins(:promo_code_customers)
+          .where(eligibility: 'specific_customers', promo_code_customers: { customer_id: current_customer.id }))
+        .distinct
     end
 
     @products_count = current_organisation.products.where(available: true).count

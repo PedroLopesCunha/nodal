@@ -8,6 +8,7 @@ class Order < ApplicationRecord
 
   monetize :tax_amount_cents, allow_nil: true
   monetize :shipping_amount_cents, allow_nil: true
+  monetize :promo_code_discount_amount_cents, allow_nil: true
 
   belongs_to :customer
   belongs_to :organisation
@@ -15,8 +16,10 @@ class Order < ApplicationRecord
   belongs_to :billing_address, class_name: "Address", optional: true
   belongs_to :applied_by, class_name: "Member", optional: true
   belongs_to :order_discount, optional: true
+  belongs_to :promo_code, optional: true
   has_many :order_items, dependent: :destroy
   has_many :products, through: :order_items
+  has_one :promo_code_redemption, dependent: :destroy
 
   accepts_nested_attributes_for :order_items, allow_destroy: true, reject_if: :all_blank
 
@@ -65,6 +68,7 @@ class Order < ApplicationRecord
     self.tax_amount = calculated_tax
     self.shipping_amount = calculated_shipping
     snapshot_auto_discount!
+    snapshot_promo_code!
 
     if terms_accepted_at.blank?
       errors.add(:base, "You must accept the terms and conditions")
@@ -163,9 +167,23 @@ class Order < ApplicationRecord
   end
 
   def subtotal_after_discount
-    # Apply both auto order tier discount and manual order discount
-    result = total_with_auto_discount - order_discount_amount
+    # Apply auto order tier discount, manual order discount, and promo code discount
+    result = total_with_auto_discount - order_discount_amount - promo_code_discount
     [result, Money.new(0, organisation.currency)].max
+  end
+
+  def promo_code_discount
+    if placed? && promo_code_discount_amount_cents.present? && promo_code_discount_amount_cents > 0
+      Money.new(promo_code_discount_amount_cents, organisation.currency)
+    elsif promo_code.present? && draft?
+      promo_code.calculate_discount(total_with_auto_discount)
+    else
+      Money.new(0, organisation.currency)
+    end
+  end
+
+  def has_promo_code?
+    promo_code.present?
   end
 
   def order_discount_display
@@ -217,5 +235,29 @@ class Order < ApplicationRecord
       self.auto_discount_value = discount.discount_value
       self.auto_discount_amount_cents = discount.calculate_discount(total_amount).cents
     end
+  end
+
+  def snapshot_promo_code!
+    return unless promo_code.present?
+
+    result = promo_code.redeemable_by?(customer, self)
+    if result != :ok
+      self.promo_code = nil
+      self.promo_code_discount_amount_cents = 0
+      return
+    end
+
+    discount_amount = promo_code.calculate_discount(total_with_auto_discount)
+    self.promo_code_discount_amount_cents = discount_amount.cents
+
+    PromoCodeRedemption.create!(
+      promo_code: promo_code,
+      customer: customer,
+      order: self,
+      discount_amount_cents: discount_amount.cents
+    )
+
+    promo_code.class.where(id: promo_code.id)
+      .update_all("usage_count = usage_count + 1")
   end
 end

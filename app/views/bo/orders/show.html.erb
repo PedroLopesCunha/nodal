@@ -137,6 +137,18 @@
               </div>
             <% end %>
 
+            <% if @order.promo_code_discount_amount_cents.present? && @order.promo_code_discount_amount_cents > 0 %>
+              <div class="d-flex justify-content-between mb-2 text-success">
+                <span>
+                  <i class="fa-solid fa-ticket me-1"></i> <%= t('bo.orders.show.promo_code_discount') %>
+                  <% if @order.promo_code.present? %>
+                    <span class="font-monospace">(<%= @order.promo_code.code %>)</span>
+                  <% end %>
+                </span>
+                <span>-<%= humanized_money_with_symbol(@order.promo_code_discount) %></span>
+              </div>
+            <% end %>
+
             <div class="d-flex justify-content-between mb-2">
               <span class="text-muted"><%= t('bo.common.tax') %> (<%= (@current_organisation.tax_rate * 100).round(1) %>%)</span>
               <span><%= humanized_money_with_symbol(@order.tax_amount || @order.calculated_tax) %></span>

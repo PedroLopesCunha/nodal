@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2026_03_02_160002) do
+ActiveRecord::Schema[7.1].define(version: 2026_03_02_174139) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -288,6 +288,8 @@ ActiveRecord::Schema[7.1].define(version: 2026_03_02_160002) do
     t.text "sync_error"
     t.datetime "viewed_at"
     t.datetime "terms_accepted_at"
+    t.bigint "promo_code_id"
+    t.integer "promo_code_discount_amount_cents", default: 0
     t.index ["applied_by_id"], name: "index_orders_on_applied_by_id"
     t.index ["billing_address_id"], name: "index_orders_on_billing_address_id"
     t.index ["customer_id"], name: "index_orders_on_customer_id"
@@ -297,6 +299,7 @@ ActiveRecord::Schema[7.1].define(version: 2026_03_02_160002) do
     t.index ["organisation_id", "external_id", "external_source"], name: "index_orders_on_org_external_id_source", unique: true, where: "(external_id IS NOT NULL)"
     t.index ["organisation_id", "placed_at"], name: "index_orders_on_organisation_id_and_placed_at"
     t.index ["organisation_id"], name: "index_orders_on_organisation_id"
+    t.index ["promo_code_id"], name: "index_orders_on_promo_code_id"
     t.index ["shipping_address_id"], name: "index_orders_on_shipping_address_id"
   end
 
@@ -486,6 +489,49 @@ ActiveRecord::Schema[7.1].define(version: 2026_03_02_160002) do
     t.index ["slug"], name: "index_products_on_slug", unique: true
   end
 
+  create_table "promo_code_customers", force: :cascade do |t|
+    t.bigint "promo_code_id", null: false
+    t.bigint "customer_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["customer_id"], name: "index_promo_code_customers_on_customer_id"
+    t.index ["promo_code_id", "customer_id"], name: "index_promo_code_customers_on_promo_code_id_and_customer_id", unique: true
+    t.index ["promo_code_id"], name: "index_promo_code_customers_on_promo_code_id"
+  end
+
+  create_table "promo_code_redemptions", force: :cascade do |t|
+    t.bigint "promo_code_id", null: false
+    t.bigint "customer_id", null: false
+    t.bigint "order_id", null: false
+    t.integer "discount_amount_cents", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["customer_id"], name: "index_promo_code_redemptions_on_customer_id"
+    t.index ["order_id"], name: "index_promo_code_redemptions_on_order_id", unique: true
+    t.index ["promo_code_id"], name: "index_promo_code_redemptions_on_promo_code_id"
+  end
+
+  create_table "promo_codes", force: :cascade do |t|
+    t.bigint "organisation_id", null: false
+    t.string "code", null: false
+    t.text "description"
+    t.string "discount_type", null: false
+    t.decimal "discount_value", precision: 10, scale: 4, null: false
+    t.integer "min_order_amount_cents", default: 0
+    t.integer "usage_limit"
+    t.integer "usage_count", default: 0, null: false
+    t.integer "per_customer_limit", default: 1, null: false
+    t.string "eligibility", default: "all_customers", null: false
+    t.date "valid_from"
+    t.date "valid_until"
+    t.boolean "stackable", default: false, null: false
+    t.boolean "active", default: true, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["organisation_id", "code"], name: "index_promo_codes_on_organisation_id_and_code", unique: true
+    t.index ["organisation_id"], name: "index_promo_codes_on_organisation_id"
+  end
+
   create_table "related_products", force: :cascade do |t|
     t.bigint "product_id", null: false
     t.bigint "related_product_id", null: false
@@ -556,6 +602,7 @@ ActiveRecord::Schema[7.1].define(version: 2026_03_02_160002) do
   add_foreign_key "orders", "members", column: "applied_by_id"
   add_foreign_key "orders", "order_discounts"
   add_foreign_key "orders", "organisations"
+  add_foreign_key "orders", "promo_codes"
   add_foreign_key "org_members", "members"
   add_foreign_key "org_members", "organisations"
   add_foreign_key "product_attribute_values", "product_attributes"
@@ -571,6 +618,12 @@ ActiveRecord::Schema[7.1].define(version: 2026_03_02_160002) do
   add_foreign_key "product_variants", "products"
   add_foreign_key "products", "categories"
   add_foreign_key "products", "organisations"
+  add_foreign_key "promo_code_customers", "customers"
+  add_foreign_key "promo_code_customers", "promo_codes"
+  add_foreign_key "promo_code_redemptions", "customers"
+  add_foreign_key "promo_code_redemptions", "orders"
+  add_foreign_key "promo_code_redemptions", "promo_codes"
+  add_foreign_key "promo_codes", "organisations"
   add_foreign_key "related_products", "products"
   add_foreign_key "related_products", "products", column: "related_product_id", name: "fk_rails_related_product_id"
   add_foreign_key "shopping_list_items", "product_variants"
