@@ -675,7 +675,7 @@ pt:
         subtitle: "Gerir descontos de produtos, escalões de clientes e regras de preços personalizados"
       add_discount: "Adicionar Desconto"
       tabs:
-        product_discounts: "Descontos de Produto"
+        product_discounts: "Descontos de Produto & Categorias"
         product_discounts_desc: "Definir descontos por quantidade ou tempo limitado"
         client_tiers: "Escalões de Cliente"
         client_tiers_desc: "Criar escalões de desconto por cliente"
@@ -715,10 +715,17 @@ pt:
         no_expiration: "Deixe vazio para sem expiração"
       product_discounts:
         title: "Descontos de Produto"
-        description: "Definir descontos por quantidade ou tempo limitado para produtos"
-        search_placeholder: "Pesquisar descontos de produto..."
+        description: "Definir descontos por quantidade ou tempo limitado para produtos e categorias"
+        search_placeholder: "Pesquisar descontos por produto ou categoria..."
         no_discounts: "Sem descontos de produto."
         create_first: "Criar o primeiro desconto de produto"
+        target_type: "Aplicar desconto a"
+        product_target: "Produto"
+        category_target: "Categoria"
+        select_category: "Selecione uma categoria..."
+        target_column: "Produto / Categoria"
+        product_badge: "Produto"
+        category_badge: "Categoria"
         new:
           title: "Novo Desconto de Produto"
           subtitle: "Configurar um desconto visível para todos os clientes"
@@ -728,6 +735,14 @@ pt:
           submit: "Atualizar Desconto"
         card_title: "Detalhes do Desconto"
         validity_title: "Período de Validade"
+        variant_overrides:
+          title: "Exceções por Variante"
+          description: "Configure exceções de desconto para variantes específicas"
+          variant: "Variante"
+          base_price: "Preço Base"
+          final_price: "Preço Final"
+          exclude: "Excluir"
+          custom_discount: "Desconto Personalizado"
       client_tiers:
         title: "Escalões de Cliente"
         description: "Criar escalões de desconto por cliente"

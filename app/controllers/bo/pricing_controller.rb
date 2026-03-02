@@ -15,12 +15,14 @@ class Bo::PricingController < Bo::BaseController
 
   def load_product_discounts
     @product_discounts = policy_scope(current_organisation.product_discounts)
-      .includes(:product)
+      .includes(:product, :category)
       .order(created_at: :desc)
 
     if params[:search].present? && @tab == 'product_discounts'
-      @product_discounts = @product_discounts.joins(:product)
-        .where("products.name ILIKE ?", "%#{params[:search]}%")
+      search_term = "%#{params[:search]}%"
+      @product_discounts = @product_discounts
+        .left_joins(:product, :category)
+        .where("products.name ILIKE :q OR categories.name ILIKE :q", q: search_term)
     end
   end
 
@@ -37,13 +39,14 @@ class Bo::PricingController < Bo::BaseController
 
   def load_custom_pricing
     @custom_pricing = policy_scope(current_organisation.customer_product_discounts)
-      .includes(:customer, :product)
+      .includes(:customer, :product, :category)
       .order(created_at: :desc)
 
     if params[:search].present? && @tab == 'custom_pricing'
-      @custom_pricing = @custom_pricing.joins(:customer, :product)
-        .where("customers.company_name ILIKE ? OR products.name ILIKE ?",
-               "%#{params[:search]}%", "%#{params[:search]}%")
+      search_term = "%#{params[:search]}%"
+      @custom_pricing = @custom_pricing
+        .left_joins(:customer, :product, :category)
+        .where("customers.company_name ILIKE :q OR products.name ILIKE :q OR categories.name ILIKE :q", q: search_term)
     end
   end
 

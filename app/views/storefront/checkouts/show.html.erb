@@ -305,7 +305,7 @@
         <h5 class="card-title mb-3"><%= t('storefront.carts.show.order_summary') %></h5>
 
         <div class="d-flex justify-content-between mb-2">
-          <span class="text-muted"><%= t('storefront.checkouts.show.summary.subtotal') %> (<%= @order.item_count %> <%= t('storefront.common.items', count: @order.item_count) %>)</span>
+          <span class="text-muted"><%= t('storefront.checkouts.show.summary.subtotal') %> (<%= t('storefront.common.items', count: @order.item_count) %>)</span>
           <span><%= humanized_money_with_symbol(@order.total_amount) %></span>
         </div>
 

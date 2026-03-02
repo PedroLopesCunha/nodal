@@ -1,7 +1,7 @@
 import { Controller } from "@hotwired/stimulus"
 
 export default class extends Controller {
-  static values = { target: String }
+  static values = { target: String, invert: { type: Boolean, default: false } }
 
   connect() {
     this.toggle()
@@ -10,7 +10,8 @@ export default class extends Controller {
   toggle() {
     const target = document.querySelector(this.targetValue)
     if (target) {
-      target.style.display = this.element.checked ? "" : "none"
+      const show = this.invertValue ? !this.element.checked : this.element.checked
+      target.style.display = show ? "" : "none"
     }
   }
 

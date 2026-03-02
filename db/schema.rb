@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2026_02_27_164355) do
+ActiveRecord::Schema[7.1].define(version: 2026_03_02_143136) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -117,7 +117,7 @@ ActiveRecord::Schema[7.1].define(version: 2026_02_27_164355) do
 
   create_table "customer_product_discounts", force: :cascade do |t|
     t.bigint "customer_id", null: false
-    t.bigint "product_id", null: false
+    t.bigint "product_id"
     t.bigint "organisation_id", null: false
     t.decimal "discount_percentage", precision: 5, scale: 4, default: "0.0"
     t.date "valid_from"
@@ -127,6 +127,8 @@ ActiveRecord::Schema[7.1].define(version: 2026_02_27_164355) do
     t.string "discount_type", default: "percentage", null: false
     t.boolean "stackable", default: false, null: false
     t.boolean "active", default: true, null: false
+    t.bigint "category_id"
+    t.index ["category_id"], name: "index_customer_product_discounts_on_category_id"
     t.index ["customer_id"], name: "index_customer_product_discounts_on_customer_id"
     t.index ["organisation_id"], name: "index_customer_product_discounts_on_organisation_id"
     t.index ["product_id"], name: "index_customer_product_discounts_on_product_id"
@@ -394,7 +396,7 @@ ActiveRecord::Schema[7.1].define(version: 2026_02_27_164355) do
   end
 
   create_table "product_discounts", force: :cascade do |t|
-    t.bigint "product_id", null: false
+    t.bigint "product_id"
     t.bigint "organisation_id", null: false
     t.string "discount_type", default: "percentage", null: false
     t.decimal "discount_value", precision: 10, scale: 4, null: false
@@ -405,6 +407,8 @@ ActiveRecord::Schema[7.1].define(version: 2026_02_27_164355) do
     t.boolean "active", default: true, null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.bigint "category_id"
+    t.index ["category_id"], name: "index_product_discounts_on_category_id"
     t.index ["organisation_id"], name: "index_product_discounts_on_organisation_id"
     t.index ["product_id", "organisation_id"], name: "index_product_discounts_on_product_id_and_organisation_id"
     t.index ["product_id"], name: "index_product_discounts_on_product_id"
@@ -440,6 +444,9 @@ ActiveRecord::Schema[7.1].define(version: 2026_02_27_164355) do
     t.datetime "last_synced_at"
     t.text "sync_error"
     t.boolean "hide_when_unavailable"
+    t.boolean "exclude_from_discounts"
+    t.string "custom_discount_type"
+    t.decimal "custom_discount_value"
     t.index ["organisation_id", "sku"], name: "index_product_variants_on_organisation_id_and_sku", unique: true, where: "((sku IS NOT NULL) AND ((sku)::text <> ''::text))"
     t.index ["organisation_id"], name: "index_product_variants_on_organisation_id"
     t.index ["product_id", "available"], name: "index_product_variants_on_product_id_and_available"
@@ -506,6 +513,7 @@ ActiveRecord::Schema[7.1].define(version: 2026_02_27_164355) do
   add_foreign_key "category_products", "products"
   add_foreign_key "customer_discounts", "customers"
   add_foreign_key "customer_discounts", "organisations"
+  add_foreign_key "customer_product_discounts", "categories"
   add_foreign_key "customer_product_discounts", "customers"
   add_foreign_key "customer_product_discounts", "organisations"
   add_foreign_key "customer_product_discounts", "products"
@@ -529,6 +537,7 @@ ActiveRecord::Schema[7.1].define(version: 2026_02_27_164355) do
   add_foreign_key "product_attributes", "organisations"
   add_foreign_key "product_available_values", "product_attribute_values"
   add_foreign_key "product_available_values", "products"
+  add_foreign_key "product_discounts", "categories"
   add_foreign_key "product_discounts", "organisations"
   add_foreign_key "product_discounts", "products"
   add_foreign_key "product_product_attributes", "product_attributes"
