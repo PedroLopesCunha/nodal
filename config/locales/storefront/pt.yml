@@ -19,6 +19,7 @@ pt:
 
     # Barra de navegação
     navbar:
+      home: "Início"
       products: "Produtos"
       orders: "Encomendas"
       contact: "Contacto"
@@ -27,6 +28,63 @@ pt:
       sign_out: "Terminar sessão"
       language: "Idioma"
       order_discounts_available: "Descontos de encomenda disponíveis!"
+
+    # Página inicial
+    home:
+      good_morning: "Bom dia, %{name}"
+      good_afternoon: "Boa tarde, %{name}"
+      good_evening: "Boa noite, %{name}"
+      browse_catalog: "Ver Catálogo"
+      frequent_products:
+        title: "Os Seus Produtos Preferidos"
+        subtitle:
+          one: "%{count} item mais encomendado"
+          other: "%{count} itens mais encomendados"
+        empty: "Ainda sem produtos frequentes"
+        empty_hint: "Os produtos que encomendar regularmente aparecerão aqui para repetir rapidamente."
+        start_shopping: "Começar a Comprar"
+      last_order:
+        title: "Última Encomenda"
+        view_order: "Ver Encomenda"
+        no_orders: "Ainda sem encomendas"
+        no_orders_hint: "Faça a sua primeira encomenda e ela aparecerá aqui."
+        items_label: "itens"
+        total_label: "total"
+        steps:
+          in_process: "Efetuada"
+          processed: "Em Processamento"
+          completed: "Concluída"
+      new_products:
+        title: "Novidades"
+        badge:
+          one: "%{count} NOVO"
+          other: "%{count} NOVOS"
+        subtitle: "Adicionados ao catálogo desde a sua última encomenda"
+      tier_discount:
+        member_label: "Cliente Preferencial"
+        active_badge: "ATIVO"
+        off_every_product: "em todos os produtos"
+        exclusive_prices: "preços exclusivos"
+        off_orders_over: "em encomendas acima de %{amount}"
+        free_label: "Grátis"
+        free_shipping_over: "em encomendas acima de %{amount}"
+        auto_applied: "Os seus preços são aplicados automaticamente em cada encomenda."
+      quick_links:
+        title: "Acesso Rápido"
+        group_orders: "Encomendas"
+        group_catalog: "Catálogo"
+        group_account: "Conta"
+        all_orders: "Todas as Encomendas"
+        orders_placed:
+          zero: "Nenhuma encomenda efetuada"
+          one: "%{count} encomenda efetuada"
+          other: "%{count} encomendas efetuadas"
+        products_available:
+          one: "%{count} produto disponível"
+          other: "%{count} produtos disponíveis"
+        my_account: "A Minha Conta"
+        manage_profile: "Gerir o seu perfil"
+        contact_support: "Contactar Suporte"
 
     # Envio grátis
     free_shipping:

@@ -214,6 +214,8 @@ class DiscountCalculator
       end
     end
 
+    return { percentage: 0, savings: Money.new(0, currency), source: :none, label: nil } if best.nil?
+
     effective_pct = (best_savings.to_f / base_price.to_f).round(4) rescue 0
 
     {

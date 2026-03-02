@@ -19,6 +19,7 @@ en:
 
     # Customer navbar
     navbar:
+      home: "Home"
       products: "Products"
       orders: "Orders"
       contact: "Contact"
@@ -27,6 +28,63 @@ en:
       sign_out: "Sign out"
       language: "Language"
       order_discounts_available: "Order discounts available!"
+
+    # Home page
+    home:
+      good_morning: "Good morning, %{name}"
+      good_afternoon: "Good afternoon, %{name}"
+      good_evening: "Good evening, %{name}"
+      browse_catalog: "Browse Catalog"
+      frequent_products:
+        title: "Your Preferred Products"
+        subtitle:
+          one: "%{count} most-ordered item"
+          other: "%{count} most-ordered items"
+        empty: "No frequent products yet"
+        empty_hint: "Products you order regularly will appear here for quick reordering."
+        start_shopping: "Start Shopping"
+      last_order:
+        title: "Last Order"
+        view_order: "View Order"
+        no_orders: "No orders yet"
+        no_orders_hint: "Place your first order and it will appear here."
+        items_label: "items"
+        total_label: "total"
+        steps:
+          in_process: "Placed"
+          processed: "Processing"
+          completed: "Completed"
+      new_products:
+        title: "New Arrivals"
+        badge:
+          one: "%{count} NEW"
+          other: "%{count} NEW"
+        subtitle: "Added to the catalog since your last order"
+      tier_discount:
+        member_label: "Tier Member"
+        active_badge: "ACTIVE"
+        off_every_product: "off every product"
+        exclusive_prices: "exclusive prices"
+        off_orders_over: "off orders over %{amount}"
+        free_label: "Free"
+        free_shipping_over: "on orders over %{amount}"
+        auto_applied: "Your account pricing is applied automatically to every order."
+      quick_links:
+        title: "Quick Links"
+        group_orders: "Orders"
+        group_catalog: "Catalog"
+        group_account: "Account"
+        all_orders: "All Orders"
+        orders_placed:
+          zero: "No orders placed"
+          one: "%{count} order placed"
+          other: "%{count} orders placed"
+        products_available:
+          one: "%{count} product available"
+          other: "%{count} products available"
+        my_account: "My Account"
+        manage_profile: "Manage your profile"
+        contact_support: "Contact Support"
 
     # Free shipping
     free_shipping:

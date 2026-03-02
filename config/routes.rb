@@ -32,6 +32,7 @@ Rails.application.routes.draw do
 
     # storefront (customer-facing)
     scope module: :storefront do
+      get 'home', to: 'home#show', as: :home
       resource :contact, only: [:show]
       resources :products, only: [:index, :show]
 
