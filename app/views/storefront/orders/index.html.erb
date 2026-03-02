@@ -35,7 +35,10 @@
                 <span class="badge <%= status_class %>"><%= order.status.titleize %></span>
               </td>
               <td class="text-end pe-4">
-                <div class="d-flex justify-content-end gap-3">
+                <div class="d-flex justify-content-end gap-2">
+                  <%= button_to add_to_cart_order_path(org_slug: params[:org_slug], id: order), method: :post, class: "btn btn-sm btn-outline-secondary" do %>
+                    <i class="fa-solid fa-cart-plus me-1"></i><%= t('storefront.orders.index.add_to_cart') %>
+                  <% end %>
                   <%= button_to reorder_order_path(org_slug: params[:org_slug], id: order), method: :post, class: "btn btn-sm btn-outline-secondary" do %>
                     <i class="fa-solid fa-rotate-right me-1"></i><%= t('storefront.orders.index.reorder') %>
                   <% end %>

@@ -181,6 +181,9 @@
 
     <!-- Reorder -->
     <div class="mt-4">
+      <%= button_to add_to_cart_order_path(org_slug: params[:org_slug], id: @order), method: :post, class: "btn btn-outline-secondary w-100 mb-2" do %>
+        <i class="fa-solid fa-cart-plus me-2"></i><%= t('storefront.orders.index.add_to_cart') %>
+      <% end %>
       <%= button_to reorder_order_path(org_slug: params[:org_slug], id: @order, confirm: params[:confirm_reorder]), method: :post, class: "btn btn-outline-secondary w-100 mb-2" do %>
         <i class="fa-solid fa-rotate-right me-2"></i><%= t('storefront.orders.index.reorder') %>
       <% end %>

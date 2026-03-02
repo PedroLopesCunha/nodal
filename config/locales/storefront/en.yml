@@ -283,9 +283,13 @@ en:
           total: "Total"
           actions: "Actions"
         reorder: "Reorder"
+        add_to_cart: "Add to Cart"
         view: "View"
         no_orders: "No orders yet"
         no_orders_hint: "Once you place an order, it will appear here."
+      add_to_cart:
+        success: "Items from order %{order_number} added to your cart."
+        skipped: "Some items were unavailable and skipped: %{items}"
       show:
         back_to_orders: "Back to Orders"
         order_number: "Order #%{number}"

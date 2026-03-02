@@ -283,9 +283,13 @@ pt:
           total: "Total"
           actions: "Ações"
         reorder: "Repetir"
+        add_to_cart: "Adicionar ao Carrinho"
         view: "Ver"
         no_orders: "Ainda não tem encomendas"
         no_orders_hint: "Quando efetuar uma encomenda, ela aparecerá aqui."
+      add_to_cart:
+        success: "Itens da encomenda %{order_number} adicionados ao carrinho."
+        skipped: "Alguns itens não estavam disponíveis e foram ignorados: %{items}"
       show:
         back_to_orders: "Voltar às Encomendas"
         order_number: "Encomenda #%{number}"
