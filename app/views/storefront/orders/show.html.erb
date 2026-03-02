@@ -1,34 +1,26 @@
-<%= link_to orders_path(org_slug: params[:org_slug]), class: "btn btn-outline-secondary mb-4 mt-5" do %>
-  <i class="fa-solid fa-arrow-left me-2"></i><%= t('storefront.orders.show.back_to_orders') %>
+<% status_class = case @order.status
+   when 'completed' then 'bg-success'
+   when 'processed' then 'bg-info'
+   when 'in_process' then 'bg-warning text-dark'
+   else 'bg-secondary'
+   end %>
+<% actions = capture do %>
+  <span class="badge <%= status_class %> fs-6"><%= @order.status.titleize %></span>
 <% end %>
+<% subtitle = if @order.placed?
+     t('storefront.orders.show.placed_on', date: l(@order.placed_at, format: :long))
+   else
+     t('storefront.orders.show.draft_order')
+   end %>
+<%= render "storefront/shared/page_header",
+  title: t('storefront.orders.show.order_number', number: @order.order_number),
+  subtitle: subtitle,
+  back_path: orders_path(org_slug: params[:org_slug]),
+  back_label: t('storefront.orders.show.back_to_orders'),
+  actions: actions %>
 
 <div class="row g-4">
   <div class="col-lg-8">
-    <!-- Order Header -->
-    <div class="card border-0 shadow-sm mb-4" style="border-radius: 12px;">
-      <div class="card-body">
-        <div class="d-flex justify-content-between align-items-start">
-          <div>
-            <h1 class="h3 mb-1"><%= t('storefront.orders.show.order_number', number: @order.order_number) %></h1>
-            <p class="text-muted mb-0">
-              <% if @order.placed? %>
-                <%= t('storefront.orders.show.placed_on', date: l(@order.placed_at, format: :long)) %>
-              <% else %>
-                <%= t('storefront.orders.show.draft_order') %>
-              <% end %>
-            </p>
-          </div>
-          <% status_class = case @order.status
-             when 'completed' then 'bg-success'
-             when 'processed' then 'bg-info'
-             when 'in_process' then 'bg-warning text-dark'
-             else 'bg-secondary'
-             end %>
-          <span class="badge <%= status_class %> fs-6"><%= @order.status.titleize %></span>
-        </div>
-      </div>
-    </div>
-
     <!-- Order Items -->
     <div class="card border-0 shadow-sm mb-4" style="border-radius: 12px;">
       <div class="card-body">

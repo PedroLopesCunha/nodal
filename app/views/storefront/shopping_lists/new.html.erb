@@ -1,13 +1,12 @@
-<%= link_to shopping_lists_path(org_slug: params[:org_slug]), class: "btn btn-outline-secondary mb-4 mt-3" do %>
-  <i class="fa-solid fa-arrow-left me-2"></i><%= t('storefront.shopping_lists.new.back') %>
-<% end %>
+<%= render "storefront/shared/page_header",
+  title: t('storefront.shopping_lists.new.title'),
+  back_path: shopping_lists_path(org_slug: params[:org_slug]),
+  back_label: t('storefront.shopping_lists.new.back') %>
 
 <div class="row justify-content-center">
   <div class="col-lg-6">
     <div class="card border-0 shadow-sm" style="border-radius: 12px;">
       <div class="card-body p-4">
-        <h3 class="mb-4"><%= t('storefront.shopping_lists.new.title') %></h3>
-
         <%= form_with model: @shopping_list, url: shopping_lists_path(org_slug: params[:org_slug]), method: :post do |f| %>
           <% if @shopping_list.errors.any? %>
             <div class="alert alert-danger">

@@ -1,9 +1,11 @@
-<div class="d-flex justify-content-between align-items-center mb-4 mt-3">
-  <h2 class="mb-0"><%= t('storefront.shopping_lists.index.title') %></h2>
-  <%= link_to new_shopping_list_path(org_slug: params[:org_slug]), class: "btn btn-primary" do %>
+<% actions = capture do %>
+  <%= link_to new_shopping_list_path(org_slug: params[:org_slug]), class: "btn btn-primary btn-sm" do %>
     <i class="fa-solid fa-plus me-1"></i> <%= t('storefront.shopping_lists.index.new_list') %>
   <% end %>
-</div>
+<% end %>
+<%= render "storefront/shared/page_header",
+  title: t('storefront.shopping_lists.index.title'),
+  actions: actions %>
 
 <% if @shopping_lists.any? %>
   <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">

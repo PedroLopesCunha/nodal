@@ -115,6 +115,7 @@ pt:
       email: "Email"
       phone: "Telefone"
       whatsapp: "WhatsApp"
+      location_and_hours: "Localização e Horário"
       address: "A Nossa Localização"
       business_hours: "Horário de Funcionamento"
       no_contact_info: "Informações de contacto não disponíveis de momento."

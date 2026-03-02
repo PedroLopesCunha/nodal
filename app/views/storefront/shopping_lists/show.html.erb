@@ -1,23 +1,21 @@
-<%= link_to shopping_lists_path(org_slug: params[:org_slug]), class: "btn btn-outline-secondary mb-4 mt-3" do %>
-  <i class="fa-solid fa-arrow-left me-2"></i><%= t('storefront.shopping_lists.show.back') %>
+<% actions = capture do %>
+  <button class="btn btn-outline-secondary btn-sm" type="button" data-bs-toggle="collapse" data-bs-target="#renameForm">
+    <i class="fa-solid fa-pen me-1"></i> <%= t('storefront.shopping_lists.show.edit_details') %>
+  </button>
+  <% if @items.any? %>
+    <%= button_to add_to_cart_shopping_list_path(org_slug: params[:org_slug], id: @shopping_list), method: :post, class: "btn btn-primary btn-sm" do %>
+      <i class="fa-solid fa-cart-plus me-1"></i> <%= t('storefront.shopping_lists.show.add_all_to_cart') %>
+    <% end %>
+  <% end %>
+  <%= button_to shopping_list_path(org_slug: params[:org_slug], id: @shopping_list), method: :delete, class: "btn btn-outline-danger btn-sm", data: { turbo_confirm: t('storefront.shopping_lists.show.confirm_delete') } do %>
+    <i class="fa-solid fa-trash-can me-1"></i> <%= t('storefront.shopping_lists.show.delete_list') %>
+  <% end %>
 <% end %>
-
-<div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2 mb-4">
-  <h2 class="mb-0"><%= @shopping_list.name %></h2>
-  <div class="d-flex gap-2 flex-wrap">
-    <button class="btn btn-outline-secondary btn-sm" type="button" data-bs-toggle="collapse" data-bs-target="#renameForm">
-      <i class="fa-solid fa-pen me-1"></i> <%= t('storefront.shopping_lists.show.edit_details') %>
-    </button>
-    <% if @items.any? %>
-      <%= button_to add_to_cart_shopping_list_path(org_slug: params[:org_slug], id: @shopping_list), method: :post, class: "btn btn-primary btn-sm" do %>
-        <i class="fa-solid fa-cart-plus me-1"></i> <%= t('storefront.shopping_lists.show.add_all_to_cart') %>
-      <% end %>
-    <% end %>
-    <%= button_to shopping_list_path(org_slug: params[:org_slug], id: @shopping_list), method: :delete, class: "btn btn-outline-danger btn-sm", data: { turbo_confirm: t('storefront.shopping_lists.show.confirm_delete') } do %>
-      <i class="fa-solid fa-trash-can me-1"></i> <%= t('storefront.shopping_lists.show.delete_list') %>
-    <% end %>
-  </div>
-</div>
+<%= render "storefront/shared/page_header",
+  title: @shopping_list.name,
+  back_path: shopping_lists_path(org_slug: params[:org_slug]),
+  back_label: t('storefront.shopping_lists.show.back'),
+  actions: actions %>
 
 <%# Notes display (when present and edit form is collapsed) %>
 <% if @shopping_list.notes.present? %>
