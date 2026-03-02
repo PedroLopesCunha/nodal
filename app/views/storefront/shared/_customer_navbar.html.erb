@@ -106,7 +106,7 @@
       </div>
     </div>
   </nav>
-  <% if current_organisation&.free_shipping_enabled? %>
+  <% if current_organisation&.free_shipping_enabled? && controller_name != 'home' %>
     <div class="py-2 text-center small fw-medium" style="background-color: #d1e7dd; color: #0f5132;">
       <i class="fa-solid fa-truck me-1"></i>
       <%= t('storefront.free_shipping.banner', amount: humanized_money_with_symbol(current_organisation.free_shipping_threshold)) %>

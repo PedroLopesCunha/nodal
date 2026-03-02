@@ -21,8 +21,8 @@
   <% end %>
 </div>
 
-<%# Discount banner — shown when customer has any active discounts %>
-<% if !browsing_as_member? && (@tier_discount || @special_prices_count > 0 || active_order_discounts.any?) %>
+<%# Discount banner — shown when customer has any active discounts or free shipping %>
+<% if !browsing_as_member? && (@tier_discount || @special_prices_count > 0 || active_order_discounts.any? || current_organisation.free_shipping_enabled?) %>
   <div class="card border-0 shadow-sm mb-4" style="border-radius: 12px; background: var(--org-secondary); color: #fff;">
     <div class="card-body py-3">
       <div class="d-flex align-items-center gap-4 flex-wrap">
@@ -66,10 +66,16 @@
           </div>
         <% end %>
 
-        <%# Explanatory text %>
-        <div class="small" style="opacity: 0.7; max-width: 260px;">
-          <%= t('storefront.home.tier_discount.auto_applied') %>
-        </div>
+        <%# Free shipping %>
+        <% if current_organisation.free_shipping_enabled? %>
+          <div class="text-center px-3" style="border-left: 1px solid rgba(255,255,255,0.15);">
+            <div class="fw-bold fs-5">
+              <i class="fa-solid fa-truck me-1" style="opacity: 0.7;"></i><%= t('storefront.home.tier_discount.free_label') %>
+            </div>
+            <div class="small" style="opacity: 0.7;"><%= t('storefront.home.tier_discount.free_shipping_over', amount: humanized_money_with_symbol(current_organisation.free_shipping_threshold)) %></div>
+          </div>
+        <% end %>
+
       </div>
     </div>
   </div>

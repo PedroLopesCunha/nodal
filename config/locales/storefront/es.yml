@@ -66,6 +66,8 @@ es:
         off_every_product: "en todos los productos"
         exclusive_prices: "precios exclusivos"
         off_orders_over: "en pedidos superiores a %{amount}"
+        free_label: "Gratis"
+        free_shipping_over: "en pedidos superiores a %{amount}"
         auto_applied: "Sus precios se aplican automáticamente en cada pedido."
       quick_links:
         title: "Acceso Rápido"

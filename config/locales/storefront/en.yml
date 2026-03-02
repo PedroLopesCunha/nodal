@@ -66,6 +66,8 @@ en:
         off_every_product: "off every product"
         exclusive_prices: "exclusive prices"
         off_orders_over: "off orders over %{amount}"
+        free_label: "Free"
+        free_shipping_over: "on orders over %{amount}"
         auto_applied: "Your account pricing is applied automatically to every order."
       quick_links:
         title: "Quick Links"
