@@ -1,5 +1,5 @@
 <%# Welcome header %>
-<div class="d-flex justify-content-between align-items-center mb-4 mt-3">
+<div class="d-flex justify-content-between align-items-center mb-4 mt-3 fade-in-up">
   <div>
     <h2 class="mb-0">
       <% name = browsing_as_member? ? current_member.first_name : current_customer.contact_name %>
@@ -10,11 +10,6 @@
          end %>
       <%= t("storefront.home.#{greeting_key}", name: name) %>
     </h2>
-    <div class="d-flex align-items-center gap-2 mt-1">
-      <% if !browsing_as_member? && current_customer.company_name.present? %>
-        <span class="text-muted small"><%= current_customer.company_name %></span>
-      <% end %>
-    </div>
   </div>
   <%= link_to products_path(org_slug: params[:org_slug]), class: "btn btn-outline-primary" do %>
     <%= t('storefront.home.browse_catalog') %> <i class="fa-solid fa-arrow-right ms-1"></i>
@@ -23,59 +18,68 @@
 
 <%# Discount banner — shown when customer has any active discounts or free shipping %>
 <% if !browsing_as_member? && (@tier_discount || @special_prices_count > 0 || active_order_discounts.any? || current_organisation.free_shipping_enabled?) %>
-  <div class="card border-0 shadow-sm mb-4" style="border-radius: 12px; background: var(--org-secondary); color: #fff;">
+  <div class="card border-0 shadow-sm mb-4 fade-in-up" style="border-radius: 12px; background: var(--org-secondary); color: #fff; animation-delay: 0.1s;">
     <div class="card-body py-3">
-      <div class="d-flex align-items-center gap-4 flex-wrap">
-        <%# Company name %>
-        <div class="d-flex align-items-center gap-2">
-          <div>
-            <span class="fw-semibold"><%= current_customer.company_name %></span>
-            <span class="badge bg-success ms-1" style="font-size: 0.65rem;"><%= t('storefront.home.tier_discount.active_badge') %></span>
-          </div>
-        </div>
-
+      <div class="d-flex align-items-center gap-2 mb-2">
+        <span class="fw-semibold"><%= current_customer.company_name %></span>
+        <span class="badge bg-success" style="font-size: 0.65rem;"><%= t('storefront.home.tier_discount.active_badge') %></span>
+      </div>
+      <div class="row g-2 stagger-children">
         <%# Tier discount value %>
         <% if @tier_discount %>
-          <div class="text-center px-3" style="border-left: 1px solid rgba(255,255,255,0.15);">
-            <div class="fw-bold fs-5">
-              <%= @tier_discount.discount_type == 'percentage' ?
-                    "#{(@tier_discount.discount_value * 100).round(0)}%" :
-                    humanized_money_with_symbol(Money.new((@tier_discount.discount_value * 100).to_i, current_organisation.currency)) %>
+          <div class="col-6 col-md fade-in-up">
+            <div class="text-center rounded-2 py-2" style="background: rgba(255,255,255,0.1);">
+              <div class="fw-bold fs-5">
+                <% if @tier_discount.discount_type == 'percentage' %>
+                  <span data-controller="count-up" data-count-up-value-value="<%= (@tier_discount.discount_value * 100).round(0) %>%"><%= (@tier_discount.discount_value * 100).round(0) %>%</span>
+                <% else %>
+                  <%= humanized_money_with_symbol(Money.new((@tier_discount.discount_value * 100).to_i, current_organisation.currency)) %>
+                <% end %>
+              </div>
+              <div class="small" style="opacity: 0.7;"><%= t('storefront.home.tier_discount.off_every_product') %></div>
             </div>
-            <div class="small" style="opacity: 0.7;"><%= t('storefront.home.tier_discount.off_every_product') %></div>
           </div>
         <% end %>
 
         <%# Exclusive prices %>
         <% if @special_prices_count > 0 %>
-          <div class="text-center px-3" style="border-left: 1px solid rgba(255,255,255,0.15);">
-            <div class="fw-bold fs-5">
-              <i class="fa-solid fa-tag me-1" style="opacity: 0.7;"></i><%= @special_prices_count %>
+          <div class="col-6 col-md fade-in-up">
+            <div class="text-center rounded-2 py-2" style="background: rgba(255,255,255,0.1);">
+              <div class="fw-bold fs-5">
+                <i class="fa-solid fa-tag me-1" style="opacity: 0.7;"></i><span data-controller="count-up"><%= @special_prices_count %></span>
+              </div>
+              <div class="small" style="opacity: 0.7;"><%= t('storefront.home.tier_discount.exclusive_prices') %></div>
             </div>
-            <div class="small" style="opacity: 0.7;"><%= t('storefront.home.tier_discount.exclusive_prices') %></div>
           </div>
         <% end %>
 
         <%# Order discounts %>
         <% active_order_discounts.each do |od| %>
-          <div class="text-center px-3" style="border-left: 1px solid rgba(255,255,255,0.15);">
-            <div class="fw-bold fs-5">
-              <%= od.percentage? ? "#{(od.discount_value * 100).round(0)}%" : humanized_money_with_symbol(Money.new((od.discount_value * 100).to_i, current_organisation.currency)) %>
+          <div class="col-6 col-md fade-in-up">
+            <div class="text-center rounded-2 py-2" style="background: rgba(255,255,255,0.1);">
+              <div class="fw-bold fs-5">
+                <% if od.percentage? %>
+                  <span data-controller="count-up" data-count-up-value-value="<%= (od.discount_value * 100).round(0) %>%"><%= (od.discount_value * 100).round(0) %>%</span>
+                <% else %>
+                  <%= humanized_money_with_symbol(Money.new((od.discount_value * 100).to_i, current_organisation.currency)) %>
+                <% end %>
+              </div>
+              <div class="small" style="opacity: 0.7;"><%= t('storefront.home.tier_discount.off_orders_over', amount: humanized_money_with_symbol(od.min_order_amount)) %></div>
             </div>
-            <div class="small" style="opacity: 0.7;"><%= t('storefront.home.tier_discount.off_orders_over', amount: humanized_money_with_symbol(od.min_order_amount)) %></div>
           </div>
         <% end %>
 
         <%# Free shipping %>
         <% if current_organisation.free_shipping_enabled? %>
-          <div class="text-center px-3" style="border-left: 1px solid rgba(255,255,255,0.15);">
-            <div class="fw-bold fs-5">
-              <i class="fa-solid fa-truck me-1" style="opacity: 0.7;"></i><%= t('storefront.home.tier_discount.free_label') %>
+          <div class="col-6 col-md fade-in-up">
+            <div class="text-center rounded-2 py-2" style="background: rgba(255,255,255,0.1);">
+              <div class="fw-bold fs-5">
+                <i class="fa-solid fa-truck me-1" style="opacity: 0.7;"></i><%= t('storefront.home.tier_discount.free_label') %>
+              </div>
+              <div class="small" style="opacity: 0.7;"><%= t('storefront.home.tier_discount.free_shipping_over', amount: humanized_money_with_symbol(current_organisation.free_shipping_threshold)) %></div>
             </div>
-            <div class="small" style="opacity: 0.7;"><%= t('storefront.home.tier_discount.free_shipping_over', amount: humanized_money_with_symbol(current_organisation.free_shipping_threshold)) %></div>
           </div>
         <% end %>
-
       </div>
     </div>
   </div>
@@ -86,7 +90,7 @@
   <div class="col-lg-8">
     <%# Preferred Products %>
     <% unless browsing_as_member? %>
-      <div class="card border-0 shadow-sm mb-4" style="border-radius: 12px;">
+      <div class="card border-0 shadow-sm mb-4 fade-in-up" style="border-radius: 12px; animation-delay: 0.2s;">
         <div class="card-body">
           <h5 class="card-title mb-0"><%= t('storefront.home.frequent_products.title') %></h5>
           <p class="text-muted small mb-3"><%= t('storefront.home.frequent_products.subtitle', count: @frequent_products.size) %></p>
@@ -116,7 +120,7 @@
 
     <%# New Arrivals %>
     <% if @new_products.any? %>
-      <div class="card border-0 shadow-sm mb-4" style="border-radius: 12px;">
+      <div class="card border-0 shadow-sm mb-4 fade-in-up" style="border-radius: 12px; animation-delay: 0.3s;">
         <div class="card-body">
           <div class="d-flex align-items-center gap-2 mb-0">
             <h5 class="card-title mb-0"><%= t('storefront.home.new_products.title') %></h5>
@@ -139,7 +143,7 @@
   <div class="col-lg-4">
     <%# Last Order with progress stepper %>
     <% unless browsing_as_member? %>
-      <div class="card border-0 shadow-sm mb-4" style="border-radius: 12px;">
+      <div class="card border-0 shadow-sm mb-4 fade-in-up" style="border-radius: 12px; animation-delay: 0.25s;">
         <div class="card-body">
           <h5 class="card-title mb-3">
             <i class="fa-solid fa-clock-rotate-left me-2" style="color: var(--org-secondary);"></i><%= t('storefront.home.last_order.title') %>
@@ -236,7 +240,7 @@
 
     <%# Shopping Lists %>
     <% if !browsing_as_member? && @shopping_lists.present? %>
-      <div class="card border-0 shadow-sm mb-4" style="border-radius: 12px;">
+      <div class="card border-0 shadow-sm mb-4 fade-in-up" style="border-radius: 12px; animation-delay: 0.35s;">
         <div class="card-body">
           <h5 class="card-title mb-3">
             <i class="fa-solid fa-clipboard-list me-2" style="color: var(--org-secondary);"></i><%= t('storefront.home.shopping_lists.title') %>
@@ -262,7 +266,7 @@
     <% end %>
 
     <%# Quick Links — grouped %>
-    <div class="card border-0 shadow-sm mb-4" style="border-radius: 12px;">
+    <div class="card border-0 shadow-sm mb-4 fade-in-up" style="border-radius: 12px; animation-delay: 0.4s;">
       <div class="card-body">
         <h5 class="card-title mb-3">
           <i class="fa-solid fa-link me-2" style="color: var(--org-secondary);"></i><%= t('storefront.home.quick_links.title') %>
