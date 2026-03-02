@@ -1,8 +1,14 @@
-<%= link_to products_path(org_slug: params[:org_slug]), class: "btn btn-outline-secondary mb-4 mt-5" do %>
-  <i class="fa-solid fa-arrow-left me-2"></i><%= t('storefront.products.show.back_to_products') %>
-<% end %>
-
-<h1 class="mb-4"><%= t('storefront.orders.index.title') %></h1>
+<div class="d-flex justify-content-between align-items-center mb-2 mt-5">
+  <h1 class="mb-0"><%= t('storefront.orders.index.title') %></h1>
+  <%= link_to shopping_lists_path(org_slug: params[:org_slug]), class: "btn btn-outline-primary btn-lg px-4 py-2" do %>
+    <i class="fa-solid fa-clipboard-list me-2"></i> <%= t('storefront.shopping_lists.index.title') %>
+  <% end %>
+</div>
+<div class="mb-4">
+  <%= link_to products_path(org_slug: params[:org_slug]), class: "btn btn-outline-secondary btn-sm" do %>
+    <i class="fa-solid fa-arrow-left me-2"></i><%= t('storefront.products.show.back_to_products') %>
+  <% end %>
+</div>
 
 <% if @orders.any? %>
   <div class="card border-0 shadow-sm" style="border-radius: 12px;">

@@ -55,6 +55,15 @@ Rails.application.routes.draw do
         end
       end
 
+      # Shopping lists
+      resources :shopping_lists, except: [:edit] do
+        member do
+          post :add_to_cart
+          get :product_picker
+        end
+        resources :shopping_list_items, only: [:create, :update, :destroy], as: :items
+      end
+
       # Customer account settings
       resource :account, only: [:show, :update]
     end

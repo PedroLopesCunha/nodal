@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2026_03_02_143136) do
+ActiveRecord::Schema[7.1].define(version: 2026_03_02_160002) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -496,6 +496,31 @@ ActiveRecord::Schema[7.1].define(version: 2026_03_02_143136) do
     t.index ["related_product_id"], name: "index_related_products_on_related_product_id"
   end
 
+  create_table "shopping_list_items", force: :cascade do |t|
+    t.bigint "shopping_list_id", null: false
+    t.bigint "product_id", null: false
+    t.bigint "product_variant_id"
+    t.integer "quantity", default: 1, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["product_id"], name: "index_shopping_list_items_on_product_id"
+    t.index ["product_variant_id"], name: "index_shopping_list_items_on_product_variant_id"
+    t.index ["shopping_list_id", "product_id", "product_variant_id"], name: "idx_shopping_list_items_uniqueness", unique: true
+    t.index ["shopping_list_id"], name: "index_shopping_list_items_on_shopping_list_id"
+  end
+
+  create_table "shopping_lists", force: :cascade do |t|
+    t.bigint "customer_id", null: false
+    t.bigint "organisation_id", null: false
+    t.string "name", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.text "notes"
+    t.index ["customer_id", "organisation_id"], name: "index_shopping_lists_on_customer_id_and_organisation_id"
+    t.index ["customer_id"], name: "index_shopping_lists_on_customer_id"
+    t.index ["organisation_id"], name: "index_shopping_lists_on_organisation_id"
+  end
+
   create_table "variant_attribute_values", force: :cascade do |t|
     t.bigint "product_variant_id", null: false
     t.bigint "product_attribute_value_id", null: false
@@ -548,6 +573,11 @@ ActiveRecord::Schema[7.1].define(version: 2026_03_02_143136) do
   add_foreign_key "products", "organisations"
   add_foreign_key "related_products", "products"
   add_foreign_key "related_products", "products", column: "related_product_id", name: "fk_rails_related_product_id"
+  add_foreign_key "shopping_list_items", "product_variants"
+  add_foreign_key "shopping_list_items", "products"
+  add_foreign_key "shopping_list_items", "shopping_lists"
+  add_foreign_key "shopping_lists", "customers"
+  add_foreign_key "shopping_lists", "organisations"
   add_foreign_key "variant_attribute_values", "product_attribute_values"
   add_foreign_key "variant_attribute_values", "product_variants"
 end

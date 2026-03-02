@@ -305,6 +305,9 @@
                 </div>
               <% end %>
             <% end %>
+            <% unless browsing_as_member? %>
+              <%= render 'storefront/products/add_to_list_dropdown', product: @product, default_variant: @default_variant, has_variants: true %>
+            <% end %>
           </div>
         <% else %>
           <!-- Add to Cart Section (simple product) -->
@@ -331,6 +334,9 @@
                 <% end %>
               </div>
             <% end %>
+          <% end %>
+          <% unless browsing_as_member? %>
+            <%= render 'storefront/products/add_to_list_dropdown', product: @product, default_variant: @default_variant, has_variants: false %>
           <% end %>
         <% end %>
 

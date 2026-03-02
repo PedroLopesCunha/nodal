@@ -22,6 +22,7 @@ pt:
       home: "Início"
       products: "Produtos"
       orders: "Encomendas"
+      shopping_lists: "Listas"
       contact: "Contacto"
       cart: "Carrinho"
       account: "Conta"
@@ -69,12 +70,17 @@ pt:
         free_label: "Grátis"
         free_shipping_over: "em encomendas acima de %{amount}"
         auto_applied: "Os seus preços são aplicados automaticamente em cada encomenda."
+      shopping_lists:
+        title: "As Suas Listas"
+        view_all: "Ver Todas as Listas"
       quick_links:
         title: "Acesso Rápido"
         group_orders: "Encomendas"
         group_catalog: "Catálogo"
         group_account: "Conta"
         all_orders: "Todas as Encomendas"
+        shopping_lists: "Listas de Compras"
+        shopping_lists_hint: "Produtos guardados para compra rápida"
         orders_placed:
           zero: "Nenhuma encomenda efetuada"
           one: "%{count} encomenda efetuada"
@@ -175,6 +181,8 @@ pt:
         price_request_email_subject: "Pedido de Preço — %{product}"
         price_request_email_body: "Olá,\n\nGostaria de solicitar o preço do seguinte produto:\n\nProduto: %{product}\nSKU: %{sku}\n\nPor favor envie-me um orçamento.\n\nCom os melhores cumprimentos,\n%{customer}"
         price_request_whatsapp_body: "Olá, gostaria de solicitar o preço de: *%{product}* (SKU: %{sku}). Poderiam enviar-me um orçamento?"
+        add_to_list: "Guardar em Lista"
+        create_new_list: "Criar Nova Lista"
 
     # Secção do carrinho
     cart:
@@ -351,6 +359,64 @@ pt:
       flash:
         profile_updated: "Perfil atualizado com sucesso."
         password_updated: "Palavra-passe atualizada com sucesso."
+
+    # Listas de compras
+    shopping_lists:
+      index:
+        title: "Listas de Compras"
+        subtitle: "Guarde os seus produtos favoritos para compra rápida"
+        new_list: "Nova Lista"
+        view: "Ver"
+        add_to_cart: "Adicionar ao Carrinho"
+        empty: "Ainda sem listas de compras"
+        empty_hint: "Crie a sua primeira lista para guardar os produtos que encomenda regularmente."
+        create_first: "Criar Primeira Lista"
+        lines:
+          one: "%{count} produto"
+          other: "%{count} produtos"
+      new:
+        title: "Nova Lista de Compras"
+        back: "Voltar às Listas"
+        name_label: "Nome da Lista"
+        name_placeholder: "Ex: Encomenda Semanal, Material de Escritório..."
+        notes_label: "Notas"
+        notes_placeholder: "Notas ou observações sobre esta lista..."
+        optional: "opcional"
+        create: "Criar Lista"
+      show:
+        back: "Voltar às Listas"
+        edit_details: "Editar Detalhes"
+        add_all_to_cart: "Adicionar Tudo ao Carrinho"
+        delete_list: "Eliminar Lista"
+        confirm_delete: "Tem a certeza que deseja eliminar esta lista?"
+        rename: "Renomear"
+        save: "Guardar"
+        notes_placeholder: "Adicionar notas à lista..."
+        items_title: "Itens da Lista"
+        empty: "Lista vazia"
+        empty_hint: "Use o catálogo abaixo para adicionar produtos à sua lista."
+        add_products: "Adicionar Produtos"
+        table:
+          product: "Produto"
+          variant: "Variante"
+          quantity: "Quantidade"
+          update: "Atualizar"
+      product_picker:
+        search_placeholder: "Pesquisar produtos..."
+        all_categories: "Todas as Categorias"
+        product: "Produto"
+        price: "Preço"
+        no_products: "Nenhum produto encontrado."
+      flash:
+        created: "Lista de compras criada com sucesso."
+        updated: "Lista atualizada com sucesso."
+        deleted: "Lista eliminada com sucesso."
+        item_added: "Produto adicionado à lista."
+        item_added_to_list: "'%{product}' adicionado à lista '%{list}' com sucesso."
+        item_updated: "Quantidade atualizada."
+        item_removed: "Produto removido da lista."
+        add_to_cart_success: "Itens da lista '%{name}' adicionados ao carrinho."
+        add_to_cart_skipped: "Alguns itens não estavam disponíveis e foram ignorados: %{items}"
 
     # Mensagens flash
     flash:

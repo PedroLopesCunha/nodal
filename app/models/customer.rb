@@ -19,6 +19,7 @@ class Customer < ApplicationRecord
   has_many :shipping_addresses, -> { shipping.active }, class_name: "Address", as: :addressable, dependent: :destroy
   has_one :billing_address_with_archived, -> { billing }, class_name: "Address", as: :addressable, dependent: :destroy
   has_many :shipping_addresses_with_archived, -> { shipping }, class_name: "Address", as: :addressable, dependent: :destroy
+  has_many :shopping_lists, dependent: :destroy
   has_many :customer_product_discounts, dependent: :destroy
   has_many :customer_discounts, dependent: :destroy
 
