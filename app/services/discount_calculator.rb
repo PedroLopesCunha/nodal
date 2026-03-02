@@ -155,6 +155,19 @@ class DiscountCalculator
       }
     end
 
+    # 2b. Customer-category specific discounts
+    find_customer_category_discounts.each do |ccpd|
+      discounts << {
+        type: :customer_product,
+        discount_type: ccpd.discount_type,
+        value: ccpd.discount_percentage,
+        stackable: ccpd.stackable,
+        label: "Your Special Price",
+        valid_until: ccpd.valid_until,
+        source: ccpd
+      }
+    end
+
     # 3. Customer global discount (client tier)
     cd = customer.active_customer_discount
     if cd
@@ -301,6 +314,17 @@ class DiscountCalculator
     ProductDiscount.active
       .for_category
       .where(organisation: product.organisation, category_id: category_ids)
+  end
+
+  def find_customer_category_discounts
+    return [] unless customer
+
+    category_ids = product.categories.flat_map { |cat| cat.path_ids }.uniq
+    return [] if category_ids.empty?
+
+    CustomerProductDiscount.active
+      .for_category
+      .where(customer: customer, organisation: product.organisation, category_id: category_ids)
   end
 
   def currency

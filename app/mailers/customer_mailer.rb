@@ -60,8 +60,10 @@ class CustomerMailer < ApplicationMailer
     I18n.with_locale(@organisation.default_locale) do
       if @discount.has_attribute?(:product_id) # CustomerProductDiscount
         @product = @discount.product
+        @category = @discount.category
+        subject_name = @product&.name || @category&.name
         subject = t('mailers.customer_mailer.customer_product_discount.subject',
-                    product_name: @product.name)
+                    product_name: subject_name)
         mail(to: @customer.email, subject: subject) do |format|
           format.html { render 'customer_product_discount' }
           format.text { render 'customer_product_discount' }

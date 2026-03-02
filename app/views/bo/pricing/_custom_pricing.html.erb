@@ -30,7 +30,7 @@
     <thead class="table-light">
       <tr>
         <th><%= t('bo.pricing.form.client') %></th>
-        <th><%= t('bo.common.product') %></th>
+        <th><%= t('bo.pricing.product_discounts.target_column') %></th>
         <th><%= t('bo.pricing.form.discount_type') %></th>
         <th><%= t('bo.pricing.form.value') %></th>
         <th><%= t('bo.pricing.form.valid_period') %></th>
@@ -47,8 +47,19 @@
               <small class="text-muted">C<%= discount.customer.id.to_s.rjust(3, '0') %></small>
             </td>
             <td>
-              <div class="fw-semibold"><%= discount.product.name %></div>
-              <small class="text-muted"><%= discount.product.sku %></small>
+              <div class="d-flex align-items-start gap-2">
+                <div>
+                  <div class="fw-semibold"><%= discount.target_name %></div>
+                  <% if discount.product? %>
+                    <small class="text-muted"><%= discount.product.sku %></small>
+                  <% end %>
+                </div>
+                <% if discount.category? %>
+                  <span class="badge bg-info-subtle text-info"><%= t('bo.pricing.product_discounts.category_badge') %></span>
+                <% else %>
+                  <span class="badge bg-secondary-subtle text-secondary"><%= t('bo.pricing.product_discounts.product_badge') %></span>
+                <% end %>
+              </div>
             </td>
             <td>
               <span class="badge bg-secondary-subtle text-secondary">
