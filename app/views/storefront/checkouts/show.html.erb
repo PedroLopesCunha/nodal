@@ -1,6 +1,8 @@
-<%= link_to cart_path(org_slug: params[:org_slug]), class: "btn btn-outline-secondary mb-4 mt-5" do %>
-  <i class="fa-solid fa-arrow-left me-2"></i><%= t('storefront.common.back') %> <%= t('storefront.navbar.cart') %>
-<% end %>
+<%= render "storefront/shared/page_header",
+  title: t('storefront.checkouts.show.title'),
+  subtitle: t('storefront.checkouts.show.subtitle'),
+  back_path: cart_path(org_slug: params[:org_slug]),
+  back_label: "#{t('storefront.common.back')} #{t('storefront.navbar.cart')}" %>
 
 <div class="row g-4"
      data-controller="checkout"
@@ -11,13 +13,6 @@
      data-checkout-free-shipping-threshold-value="<%= @current_organisation.free_shipping_threshold_cents || 0 %>"
      data-checkout-free-shipping-enabled-value="<%= @current_organisation.free_shipping_enabled? %>">
   <div class="col-lg-8">
-    <!-- Checkout Header -->
-    <div class="card border-0 shadow-sm mb-4" style="border-radius: 12px;">
-      <div class="card-body">
-        <h1 class="h3 mb-1"><%= t('storefront.checkouts.show.title') %></h1>
-        <p class="text-muted mb-0"><%= t('storefront.checkouts.show.subtitle') %></p>
-      </div>
-    </div>
 
     <%= form_with model: @order, url: checkout_path(org_slug: params[:org_slug]), method: :patch, id: "checkout-form" do |f| %>
 
