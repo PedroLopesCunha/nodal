@@ -5,7 +5,7 @@ class Storefront::OrderItemsController < Storefront::BaseController
     @product = current_organisation.products.where(available: true).find(params[:product_id])
 
     if @product.price_on_request?
-      redirect_to product_path(org_slug: params[:org_slug], id: @product), alert: t('storefront.products.show.price_on_request_not_purchasable')
+      redirect_to product_path(org_slug: params[:org_slug], id: @product, categories: params[:categories], queries: params[:queries], page: params[:page]), alert: t('storefront.products.show.price_on_request_not_purchasable')
       return
     end
 
@@ -34,10 +34,12 @@ class Storefront::OrderItemsController < Storefront::BaseController
 
     authorize @order_item
 
+    filter_params = { categories: params[:categories], queries: params[:queries], page: params[:page] }
+
     if @order_item.save
-      redirect_to product_path(org_slug: params[:org_slug], id: @product), notice: t('storefront.cart.item_added')
+      redirect_to product_path(org_slug: params[:org_slug], id: @product, **filter_params), notice: t('storefront.cart.item_added')
     else
-      redirect_to product_path(org_slug: params[:org_slug], id: @product.id),
+      redirect_to product_path(org_slug: params[:org_slug], id: @product.id, **filter_params),
                     alert: @order_item.errors.full_messages.join(", ")
     end
   end

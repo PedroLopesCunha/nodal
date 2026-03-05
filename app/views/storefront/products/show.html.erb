@@ -281,6 +281,9 @@
               <%= form_with url: order_items_path(org_slug: params[:org_slug]), method: :post, local: true, class: "d-flex align-items-center gap-3 flex-wrap" do |f| %>
                 <%= hidden_field_tag :product_id, @product.id %>
                 <%= hidden_field_tag :variant_id, @default_variant&.id, data: { variant_selector_target: "variantId" } %>
+                <%= hidden_field_tag :categories, params[:categories] if params[:categories].present? %>
+                <%= hidden_field_tag :queries, params[:queries] if params[:queries].present? %>
+                <%= hidden_field_tag :page, params[:page] if params[:page].present? %>
 
                 <div class="d-flex align-items-center">
                   <label class="text-muted small me-2"><%= t('storefront.products.show.quantity') %></label>
@@ -315,6 +318,9 @@
             <%= form_with url: order_items_path(org_slug: params[:org_slug]), method: :post, local: true, class: "d-flex align-items-center gap-3 flex-wrap" do |f| %>
               <%= hidden_field_tag :product_id, @product.id %>
               <%= hidden_field_tag :variant_id, @default_variant&.id %>
+              <%= hidden_field_tag :categories, params[:categories] if params[:categories].present? %>
+              <%= hidden_field_tag :queries, params[:queries] if params[:queries].present? %>
+              <%= hidden_field_tag :page, params[:page] if params[:page].present? %>
               <div class="d-flex align-items-center">
                 <label class="text-muted small me-2"><%= t('storefront.products.show.quantity') %></label>
                 <%= number_field_tag "order_item[quantity]", @product.min_quantity || 1, min: @product.min_quantity || 1, class: "form-control text-center", style: "width: 70px;" %>
