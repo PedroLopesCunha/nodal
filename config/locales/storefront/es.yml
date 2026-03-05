@@ -239,6 +239,7 @@ es:
           free: "Gratis"
         delivery_date:
           title: "Fecha de Entrega"
+          pickup_title: "Fecha de Recogida"
           hint: "Seleccione cuándo le gustaría recibir su pedido"
         shipping_address: "Dirección de Envío"
         billing_address: "Dirección de Facturación"

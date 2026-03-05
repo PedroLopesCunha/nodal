@@ -239,6 +239,7 @@ pt:
           free: "Grátis"
         delivery_date:
           title: "Data de Entrega"
+          pickup_title: "Data de Levantamento"
           hint: "Selecione quando gostaria de receber a sua encomenda"
         shipping_address: "Morada de Envio"
         billing_address: "Morada de Faturação"

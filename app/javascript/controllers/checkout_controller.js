@@ -13,7 +13,9 @@ export default class extends Controller {
         shippingCost: Number,
         currencySymbol: String,
         freeShippingThreshold: Number,
-        freeShippingEnabled: Boolean
+        freeShippingEnabled: Boolean,
+        deliveryLabel: String,
+        pickupLabel: String
     }
 
     connect() {
@@ -49,7 +51,7 @@ export default class extends Controller {
         }
 
         if (this.hasDateLabelTarget) {
-            this.dateLabelTarget.textContent = isPickup ? "Pickup Date" : "Delivery Date"
+            this.dateLabelTarget.textContent = isPickup ? this.pickupLabelValue : this.deliveryLabelValue
         }
     }
 

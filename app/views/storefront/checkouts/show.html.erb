@@ -11,7 +11,9 @@
      data-checkout-shipping-cost-value="<%= @current_organisation.shipping_cost.cents %>"
      data-checkout-currency-symbol-value="<%= @current_organisation.currency_symbol %>"
      data-checkout-free-shipping-threshold-value="<%= @current_organisation.free_shipping_threshold_cents || 0 %>"
-     data-checkout-free-shipping-enabled-value="<%= @current_organisation.free_shipping_enabled? %>">
+     data-checkout-free-shipping-enabled-value="<%= @current_organisation.free_shipping_enabled? %>"
+     data-checkout-delivery-label-value="<%= t('storefront.checkouts.show.delivery_date.title') %>"
+     data-checkout-pickup-label-value="<%= t('storefront.checkouts.show.delivery_date.pickup_title') %>">
   <div class="col-lg-8">
 
     <%= form_with model: @order, url: checkout_path(org_slug: params[:org_slug]), method: :patch, id: "checkout-form" do |f| %>

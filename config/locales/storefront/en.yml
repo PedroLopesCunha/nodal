@@ -239,6 +239,7 @@ en:
           free: "Free"
         delivery_date:
           title: "Delivery Date"
+          pickup_title: "Pickup Date"
           hint: "Select when you'd like to receive your order"
         shipping_address: "Shipping Address"
         billing_address: "Billing Address"
