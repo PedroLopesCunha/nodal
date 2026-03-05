@@ -275,12 +275,8 @@
                 <% end %>
                 <div>
                   <div class="<%= qualified ? 'fw-semibold' : '' %>">
-                    <% if discount.percentage? %>
-                      <%= discount.value_display %> off
-                    <% else %>
-                      <%= humanized_money_with_symbol(Money.new((discount.discount_value * 100).to_i, @current_organisation.currency)) %> off
-                    <% end %>
-                    orders over <%= discount.min_amount_display %>
+                    <% discount_value = discount.percentage? ? discount.value_display : humanized_money_with_symbol(Money.new((discount.discount_value * 100).to_i, @current_organisation.currency)) %>
+                    <%= t('storefront.carts.show.discount_off_orders_over', value: discount_value, amount: discount.min_amount_display) %>
                   </div>
                   <% if qualified %>
                     <small><%= t('storefront.carts.show.discount_applied') %></small>

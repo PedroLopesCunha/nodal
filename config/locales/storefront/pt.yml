@@ -216,6 +216,7 @@ pt:
         available_discounts: "Descontos de Encomenda Disponíveis"
         spend_more_to_unlock: "Gaste mais %{amount} para desbloquear"
         discount_applied: "Aplicado à sua encomenda!"
+        discount_off_orders_over: "%{value} em encomendas acima de %{amount}"
         proceed_to_checkout: "Avançar para Checkout"
         remove: "Remover"
         sku: "SKU"

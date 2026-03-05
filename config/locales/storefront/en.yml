@@ -216,6 +216,7 @@ en:
         available_discounts: "Available Order Discounts"
         spend_more_to_unlock: "Spend %{amount} more to unlock"
         discount_applied: "Applied to your order!"
+        discount_off_orders_over: "%{value} off orders over %{amount}"
         proceed_to_checkout: "Proceed to Checkout"
         remove: "Remove"
         sku: "SKU"
