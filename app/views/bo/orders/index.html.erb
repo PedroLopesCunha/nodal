@@ -61,7 +61,17 @@
           <tr>
             <th><%= t('bo.orders.index.table.order_id') %></th>
             <th><%= t('bo.orders.index.table.client') %></th>
-            <th><%= t('bo.orders.index.table.date') %></th>
+            <th>
+              <% next_dir = params[:sort_dir] == "asc" ? "desc" : "asc" %>
+              <%= link_to bo_orders_path(org_slug: @current_organisation.slug, search: params[:search], status: params[:status], payment_status: params[:payment_status], sort_dir: next_dir), class: "text-decoration-none text-dark" do %>
+                <%= t('bo.orders.index.table.date') %>
+                <% if params[:sort_dir] == "asc" %>
+                  <i class="fa-solid fa-arrow-up-short-wide fa-xs"></i>
+                <% else %>
+                  <i class="fa-solid fa-arrow-down-wide-short fa-xs"></i>
+                <% end %>
+              <% end %>
+            </th>
             <th><%= t('bo.orders.index.table.items') %></th>
             <th><%= t('bo.common.total') %></th>
             <th><%= t('bo.common.tables.status') %></th>

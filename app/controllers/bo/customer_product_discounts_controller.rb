@@ -18,7 +18,11 @@ class Bo::CustomerProductDiscountsController < Bo::BaseController
 
     if @discount.save
       update_variant_overrides
-      CustomerMailer.with(discount: @discount, organisation: current_organisation).notify_customer_about_discount.deliver_now
+      begin
+        CustomerMailer.with(discount: @discount, organisation: current_organisation).notify_customer_about_discount.deliver_now
+      rescue => e
+        Rails.logger.error("Failed to send customer product discount email: #{e.message}")
+      end
       redirect_to bo_pricing_path(params[:org_slug], tab: 'custom_pricing'),
                   notice: "Custom price created successfully."
     else

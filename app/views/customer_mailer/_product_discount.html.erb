@@ -69,11 +69,7 @@
               <tr>
                 <td style="background-color: #fef3c7; padding: 16px 24px; border-radius: 12px; text-align: center;">
                   <span style="font-size: 28px; font-weight: 700; color: #92400e;">
-                    <% if @discount.percentage? %>
-                      <%= @discount.value_display %> <%= t('mailers.common.off') %>
-                    <% else %>
-                      <%= @discount.discount_value.format %> <%= t('mailers.common.off') %>
-                    <% end %>
+                    <%= @discount.value_display %> <%= t('mailers.common.off') %>
                   </span>
                 </td>
               </tr>

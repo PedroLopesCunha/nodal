@@ -19,7 +19,8 @@ class Bo::OrdersController < Bo::BaseController
     # Filter by payment status
     @orders = @orders.where(payment_status: params[:payment_status]) if params[:payment_status].present?
 
-    @orders = @orders.order(created_at: :desc)
+    sort_direction = %w[asc desc].include?(params[:sort_dir]) ? params[:sort_dir] : "desc"
+    @orders = @orders.order(Arel.sql("COALESCE(placed_at, created_at) #{sort_direction}"))
     @pagy, @orders = pagy(@orders)
   end
 
