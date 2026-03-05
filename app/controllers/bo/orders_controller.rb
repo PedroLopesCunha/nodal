@@ -20,7 +20,7 @@ class Bo::OrdersController < Bo::BaseController
     @orders = @orders.where(payment_status: params[:payment_status]) if params[:payment_status].present?
 
     sort_direction = %w[asc desc].include?(params[:sort_dir]) ? params[:sort_dir] : "desc"
-    @orders = @orders.order(Arel.sql("COALESCE(placed_at, created_at) #{sort_direction}"))
+    @orders = @orders.order(Arel.sql("COALESCE(orders.placed_at, orders.created_at) #{sort_direction}"))
     @pagy, @orders = pagy(@orders)
   end
 
