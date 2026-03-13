@@ -29,7 +29,7 @@
 </div>
 
 <div class="bo-page-body">
-<%= form_with model: @customer, url: bo_customer_path(params[:org_slug], @customer), method: :patch, id: "customer-form" do |f| %>
+<%= form_with model: @customer, url: bo_customer_path(params[:org_slug], @customer, filter_params_hash), method: :patch, id: "customer-form" do |f| %>
   <div class="row g-3">
     <div class="col-md-8">
       <div class="card mb-3">

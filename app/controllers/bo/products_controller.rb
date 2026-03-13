@@ -175,15 +175,18 @@ class Bo::ProductsController < Bo::BaseController
 
     if @product.update(update_params)
       @product.photos.attach(new_photos) if new_photos
-      redirect_to bo_product_path(params[:org_slug], @product), notice: "Product was successfully updated."
+      redirect_to bo_product_path(params[:org_slug], @product, filter_params_hash), notice: "Product was successfully updated."
     else
       render :edit, status: :unprocessable_entity
     end
   end
 
   def destroy
-    @product.destroy
-    redirect_to bo_products_path(params[:org_slug]), notice: "Product was successfully deleted."
+    if @product.destroy
+      redirect_to bo_products_path(params[:org_slug], filter_params_hash), notice: "Product was successfully deleted."
+    else
+      redirect_to bo_product_path(params[:org_slug], @product, filter_params_hash), alert: @product.errors.full_messages.to_sentence
+    end
   end
 
   def delete_photo

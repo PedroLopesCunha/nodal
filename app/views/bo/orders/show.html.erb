@@ -3,7 +3,7 @@
 <div class="bo-page-header">
   <div class="d-flex justify-content-between align-items-start">
     <div class="d-flex align-items-center gap-3">
-      <%= link_to bo_orders_path(org_slug: @current_organisation.slug), class: "text-muted text-decoration-none" do %>
+      <%= link_to bo_orders_path(org_slug: @current_organisation.slug, **filter_params_hash), class: "text-muted text-decoration-none" do %>
         <i class="fa-solid fa-arrow-left fa-lg"></i>
       <% end %>
       <div>
@@ -32,7 +32,7 @@
       <span class="badge <%= payment_bg_class %> rounded-pill px-3 py-2">
         <%= t('bo.orders.show.payment') %>: <%= t("bo.common.payment_statuses.#{@order.payment_status}") %>
       </span>
-      <%= link_to edit_bo_order_path(org_slug: @current_organisation.slug, id: @order.id), class: "btn btn-outline-primary" do %>
+      <%= link_to edit_bo_order_path(org_slug: @current_organisation.slug, id: @order.id, **filter_params_hash), class: "btn btn-outline-primary" do %>
         <i class="fa-solid fa-pen-to-square me-1"></i> <%= t('bo.common.actions.edit') %>
       <% end %>
       <%= button_to bo_order_path(org_slug: @current_organisation.slug, id: @order.id), method: :delete, form: { class: "d-inline" }, class: "btn btn-outline-danger", data: { turbo_confirm: t('bo.common.confirm.delete_order', number: @order.order_number) } do %>

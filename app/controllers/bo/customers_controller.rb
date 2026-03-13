@@ -56,7 +56,7 @@ class Bo::CustomersController < Bo::BaseController
     if @customer.update(customer_params)
       #PEDRO ADDED THIS BELOW TO FIX THE UNARCHIVE
       @customer.reload
-      redirect_to bo_customer_path(params[:org_slug], @customer), notice: "Customer updated successfully."
+      redirect_to bo_customer_path(params[:org_slug], @customer, filter_params_hash), notice: "Customer updated successfully."
     else
       render :edit, status: :unprocessable_entity
     end
@@ -64,7 +64,7 @@ class Bo::CustomersController < Bo::BaseController
 
   def destroy
     @customer.destroy
-    redirect_to bo_customers_path(params[:org_slug]), status: :see_other, notice: "Customer deleted successfully."
+    redirect_to bo_customers_path(params[:org_slug], filter_params_hash), status: :see_other, notice: "Customer deleted successfully."
   end
 
   def invite

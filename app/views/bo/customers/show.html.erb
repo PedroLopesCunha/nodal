@@ -23,11 +23,11 @@
       <% else %>
         <span class="badge bg-secondary rounded-pill px-3 py-2"><%= t('bo.common.statuses.inactive') %></span>
       <% end %>
-      <%= link_to edit_bo_customer_path(params[:org_slug], @customer), class: "btn btn-outline-primary" do %>
+      <%= link_to edit_bo_customer_path(params[:org_slug], @customer, filter_params_hash), class: "btn btn-outline-primary" do %>
         <i class="fa-solid fa-pen-to-square me-1"></i> <%= t('bo.common.actions.edit') %>
       <% end %>
       <%= render "bo/customers/invite" %>
-      <%= link_to bo_customer_path(params[:org_slug], @customer), class: "btn btn-outline-danger", data: { turbo_method: :delete, turbo_confirm: t('bo.common.confirm.delete_customer') } do %>
+      <%= link_to bo_customer_path(params[:org_slug], @customer, filter_params_hash), class: "btn btn-outline-danger", data: { turbo_method: :delete, turbo_confirm: t('bo.common.confirm.delete_customer') } do %>
         <i class="fa-solid fa-trash me-1"></i> <%= t('bo.common.actions.delete') %>
       <% end %>
     </div>
