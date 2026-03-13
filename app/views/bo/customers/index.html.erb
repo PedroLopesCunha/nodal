@@ -172,7 +172,7 @@
             <%= link_to edit_bo_customer_path(params[:org_slug], customer, filter_params_hash), class: "btn btn-sm btn-link text-muted" do %>
               <i class="fa-solid fa-pen-to-square"></i>
             <% end %>
-            <%= button_to bo_customer_path(params[:org_slug], customer), method: :delete, form: { class: "d-inline" }, class: "btn btn-sm btn-link text-danger", data: { turbo_confirm: t('bo.common.confirm.delete_customer') } do %>
+            <%= button_to bo_customer_path(params[:org_slug], customer, filter_params_hash), method: :delete, form: { class: "d-inline" }, class: "btn btn-sm btn-link text-danger", data: { turbo_confirm: t('bo.common.confirm.delete_customer') } do %>
               <i class="fa-solid fa-trash"></i>
             <% end %>
           </td>

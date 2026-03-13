@@ -11,6 +11,7 @@ class ProductAttributeValue < ApplicationRecord
   validates :slug, presence: true, uniqueness: { scope: :product_attribute_id }
   validates :color_hex, format: { with: /\A#[0-9A-Fa-f]{6}\z/, message: "must be a valid hex color (e.g., #FF5733)" }, allow_blank: true
 
+  before_validation :normalize_value
   before_validation :generate_slug, if: -> { slug.blank? && value.present? }
 
   scope :by_position, -> { order(:position) }
@@ -27,6 +28,10 @@ class ProductAttributeValue < ApplicationRecord
   end
 
   private
+
+  def normalize_value
+    self.value = value.gsub(",", ".") if value.present?
+  end
 
   def generate_slug
     base_slug = value.parameterize

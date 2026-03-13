@@ -32,7 +32,7 @@ class Bo::ProductAttributesController < Bo::BaseController
 
   def update
     if @product_attribute.update(product_attribute_params)
-      redirect_to bo_product_attributes_path(params[:org_slug]), notice: t('bo.flash.product_attribute_updated')
+      redirect_to edit_bo_product_attribute_path(params[:org_slug], @product_attribute), notice: t('bo.flash.product_attribute_updated')
     else
       flash.now[:alert] = collect_nested_errors
       render :edit, status: :unprocessable_entity

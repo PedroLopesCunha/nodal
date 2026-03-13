@@ -131,6 +131,7 @@ Rails.application.routes.draw do
         collection do
           patch :reorder
         end
+        resources :product_attribute_values, only: [:create]
       end
 
       # Unified Pricing section

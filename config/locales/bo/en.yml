@@ -422,6 +422,7 @@ en:
         select_attributes_hint: "Choose which attributes apply to this product and select available values."
         select_values: "Select available values:"
         filter_values: "Search values..."
+        create_value: "Create"
         generate_variants: "Generate Variants"
         generate_hint: "After selecting attributes and values, generate variants automatically or create them manually."
         save_configuration: "Save Configuration"
