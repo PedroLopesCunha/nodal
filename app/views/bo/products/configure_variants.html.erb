@@ -78,12 +78,10 @@
 
                   <div class="values-section <%= 'd-none' unless @product.product_attributes.include?(attribute) %>" data-variant-configuration-target="valuesSection">
                     <p class="small text-muted mb-2"><%= t('bo.products.configure_variants.select_values') %></p>
-                    <% if attribute.product_attribute_values.active.size > 10 %>
-                      <input type="text"
-                             class="form-control form-control-sm mb-2"
-                             placeholder="<%= t('bo.products.configure_variants.filter_values') %>"
-                             data-action="input->variant-configuration#filterValues">
-                    <% end %>
+                    <input type="text"
+                           class="form-control form-control-sm mb-2"
+                           placeholder="<%= t('bo.products.configure_variants.filter_values') %>"
+                           data-action="input->variant-configuration#filterValues">
                     <div class="d-flex flex-wrap gap-2">
                       <% attribute.product_attribute_values.active.by_position.each do |value| %>
                         <div class="form-check">
@@ -105,6 +103,9 @@
                         </div>
                       <% end %>
                     </div>
+                    <button type="button" class="create-value-btn btn btn-sm btn-outline-success mt-2" style="display: none;" data-action="click->variant-configuration#createValue">
+                      <i class="fa-solid fa-plus me-1"></i> <%= t('bo.products.configure_variants.create_value', default: 'Criar') %> "<span class="create-value-name"></span>"
+                    </button>
                   </div>
                 </div>
               <% end %>
