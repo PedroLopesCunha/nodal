@@ -86,7 +86,10 @@ module Erp
         product.description = data[:description] if data.key?(:description)
         # Use write_attribute to bypass monetize wrapper and assign cents directly
         product.write_attribute(:unit_price, data[:unit_price_cents]) if data.key?(:unit_price_cents)
-        product.available = data[:available] if data.key?(:available)
+        # Skip available override when stock rules control availability
+        if data.key?(:available) && !organisation.deactivate_out_of_stock?
+          product.available = data[:available]
+        end
 
         generate_slug(product) if product.new_record?
       end
@@ -138,7 +141,10 @@ module Erp
         variant.name = data[:name] if data.key?(:name)
         variant.sku = data[:sku] if data.key?(:sku)
         variant.write_attribute(:unit_price_cents, data[:unit_price_cents]) if data.key?(:unit_price_cents)
-        variant.available = data[:available] if data.key?(:available)
+        # Skip available override when stock rules control availability
+        if data.key?(:available) && !organisation.deactivate_out_of_stock?
+          variant.available = data[:available]
+        end
       end
 
       def update_stock(variant, data)
