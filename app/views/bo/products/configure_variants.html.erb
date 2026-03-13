@@ -112,30 +112,31 @@
           </div>
         </div>
 
-        <div class="card">
-          <div class="card-body">
-            <h5 class="card-title mb-4"><%= t('bo.products.configure_variants.generate_variants') %></h5>
-            <p class="text-muted"><%= t('bo.products.configure_variants.generate_hint') %></p>
-
-            <% if @product.product_attributes.any? && @product.available_attribute_values.any? %>
-              <%= link_to generate_bo_product_variants_path(params[:org_slug], @product),
-                  class: "btn btn-success",
-                  data: { turbo_method: :post, turbo_confirm: t('bo.products.configure_variants.confirm_generate') } do %>
-                <i class="fa-solid fa-wand-magic-sparkles"></i> <%= t('bo.products.configure_variants.generate_button') %>
-              <% end %>
-            <% else %>
-              <button type="button" class="btn btn-outline-secondary" disabled>
-                <i class="fa-solid fa-wand-magic-sparkles"></i> <%= t('bo.products.configure_variants.generate_button') %>
-              </button>
-              <small class="text-muted d-block mt-2"><%= t('bo.products.configure_variants.save_first_hint', default: 'Save your attribute and value selection first, then generate variants.') %></small>
-            <% end %>
-          </div>
-        </div>
       </div>
 
     </div>
 
     <div class="col-md-4">
+      <div class="card mb-3">
+        <div class="card-body">
+          <h5 class="card-title mb-4"><%= t('bo.products.configure_variants.generate_variants') %></h5>
+          <p class="text-muted"><%= t('bo.products.configure_variants.generate_hint') %></p>
+
+          <% if @product.product_attributes.any? && @product.available_attribute_values.any? %>
+            <%= link_to generate_bo_product_variants_path(params[:org_slug], @product),
+                class: "btn btn-success w-100",
+                data: { turbo_method: :post, turbo_confirm: t('bo.products.configure_variants.confirm_generate') } do %>
+              <i class="fa-solid fa-wand-magic-sparkles"></i> <%= t('bo.products.configure_variants.generate_button') %>
+            <% end %>
+          <% else %>
+            <button type="button" class="btn btn-outline-secondary w-100" disabled>
+              <i class="fa-solid fa-wand-magic-sparkles"></i> <%= t('bo.products.configure_variants.generate_button') %>
+            </button>
+            <small class="text-muted d-block mt-2"><%= t('bo.products.configure_variants.save_first_hint', default: 'Save your attribute and value selection first, then generate variants.') %></small>
+          <% end %>
+        </div>
+      </div>
+
       <div class="card">
         <div class="card-body">
           <h5 class="card-title mb-3"><%= t('bo.products.configure_variants.current_status') %></h5>
