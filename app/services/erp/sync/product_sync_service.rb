@@ -25,10 +25,10 @@ module Erp
           return
         end
 
-        # 1. Try matching a product
+        # 1. Try matching a product by external_id
         product = organisation.products.find_by(external_id: external_id, external_source: external_source)
 
-        # 2. If no product match, try matching a variant
+        # 2. If no product match, try matching a variant by external_id
         if product.nil?
           variant = find_variant_by_external_id(external_id)
           if variant
@@ -37,7 +37,25 @@ module Erp
           end
         end
 
-        # 3. No match at all — handle per sync mode
+        # 3. Fallback: try matching by SKU (for manually created products/variants)
+        if product.nil?
+          sku = data[:sku] || external_id
+          variant = find_variant_by_sku(sku)
+          if variant
+            # Link to ERP for future syncs
+            variant.update_columns(external_id: external_id, external_source: external_source)
+            sync_variant(variant, data)
+            return
+          end
+
+          product = organisation.products.find_by(sku: sku)
+          if product
+            # Link to ERP for future syncs
+            product.update_columns(external_id: external_id, external_source: external_source)
+          end
+        end
+
+        # 4. No match at all — handle per sync mode
         if product.nil?
           if update_only_mode?
             sync_log.increment_processed!
@@ -110,6 +128,13 @@ module Erp
         ProductVariant.joins(:product)
                       .where(products: { organisation_id: organisation.id })
                       .find_by(external_id: external_id, external_source: external_source)
+      end
+
+      def find_variant_by_sku(sku)
+        ProductVariant.joins(:product)
+                      .where(products: { organisation_id: organisation.id })
+                      .where.not(sku: [nil, ''])
+                      .find_by(sku: sku)
       end
 
       def sync_variant(variant, data)
