@@ -182,8 +182,11 @@ class Bo::ProductsController < Bo::BaseController
   end
 
   def destroy
-    @product.destroy
-    redirect_to bo_products_path(params[:org_slug]), notice: "Product was successfully deleted."
+    if @product.destroy
+      redirect_to bo_products_path(params[:org_slug], filter_params_hash), notice: "Product was successfully deleted."
+    else
+      redirect_to bo_product_path(params[:org_slug], @product, filter_params_hash), alert: @product.errors.full_messages.to_sentence
+    end
   end
 
   def delete_photo

@@ -64,7 +64,7 @@ class Bo::CustomersController < Bo::BaseController
 
   def destroy
     @customer.destroy
-    redirect_to bo_customers_path(params[:org_slug]), status: :see_other, notice: "Customer deleted successfully."
+    redirect_to bo_customers_path(params[:org_slug], filter_params_hash), status: :see_other, notice: "Customer deleted successfully."
   end
 
   def invite

@@ -24,7 +24,7 @@
       <%= link_to edit_bo_product_path(params[:org_slug], @product, filter_params_hash), class: "btn btn-outline-primary" do %>
         <i class="fa-solid fa-pen-to-square me-1"></i> <%= t('bo.common.actions.edit') %>
       <% end %>
-      <%= link_to bo_product_path(params[:org_slug], @product),
+      <%= link_to bo_product_path(params[:org_slug], @product, filter_params_hash),
           class: "btn btn-outline-danger",
           data: { turbo_method: :delete, turbo_confirm: t('bo.common.confirm.delete_product_name', name: @product.name) } do %>
         <i class="fa-solid fa-trash me-1"></i> <%= t('bo.common.actions.delete') %>
