@@ -175,7 +175,7 @@ class Bo::ProductsController < Bo::BaseController
 
     if @product.update(update_params)
       @product.photos.attach(new_photos) if new_photos
-      redirect_to bo_product_path(params[:org_slug], @product), notice: "Product was successfully updated."
+      redirect_to bo_product_path(params[:org_slug], @product, filter_params_hash), notice: "Product was successfully updated."
     else
       render :edit, status: :unprocessable_entity
     end

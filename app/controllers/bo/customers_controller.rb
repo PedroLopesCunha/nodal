@@ -56,7 +56,7 @@ class Bo::CustomersController < Bo::BaseController
     if @customer.update(customer_params)
       #PEDRO ADDED THIS BELOW TO FIX THE UNARCHIVE
       @customer.reload
-      redirect_to bo_customer_path(params[:org_slug], @customer), notice: "Customer updated successfully."
+      redirect_to bo_customer_path(params[:org_slug], @customer, filter_params_hash), notice: "Customer updated successfully."
     else
       render :edit, status: :unprocessable_entity
     end

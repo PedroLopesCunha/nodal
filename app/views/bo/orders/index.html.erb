@@ -81,7 +81,7 @@
         </thead>
         <tbody>
           <% @orders.each do |order| %>
-            <tr class="order-row<%= ' table-active fw-semibold' if order.viewed_at.nil? %>" data-href="<%= bo_order_path(org_slug: @current_organisation.slug, id: order.id) %>" style="cursor: pointer;">
+            <tr class="order-row<%= ' table-active fw-semibold' if order.viewed_at.nil? %>" data-href="<%= bo_order_path(org_slug: @current_organisation.slug, id: order.id, **filter_params_hash) %>" style="cursor: pointer;">
               <td>
                 <div class="fw-semibold">
                   <%= order.order_number %>
@@ -120,10 +120,10 @@
                 </span>
               </td>
               <td class="text-end order-actions" onclick="event.stopPropagation();">
-                <%= link_to bo_order_path(org_slug: @current_organisation.slug, id: order.id), class: "btn btn-sm btn-link text-muted" do %>
+                <%= link_to bo_order_path(org_slug: @current_organisation.slug, id: order.id, **filter_params_hash), class: "btn btn-sm btn-link text-muted" do %>
                   <i class="fa-solid fa-eye"></i>
                 <% end %>
-                <%= link_to edit_bo_order_path(org_slug: @current_organisation.slug, id: order.id), class: "btn btn-sm btn-link text-muted" do %>
+                <%= link_to edit_bo_order_path(org_slug: @current_organisation.slug, id: order.id, **filter_params_hash), class: "btn btn-sm btn-link text-muted" do %>
                   <i class="fa-solid fa-pen-to-square"></i>
                 <% end %>
                 <%= button_to bo_order_path(org_slug: @current_organisation.slug, id: order.id), method: :delete, form: { class: "d-inline" }, class: "btn btn-sm btn-link text-danger", data: { turbo_confirm: t('bo.common.confirm.delete_order', number: order.order_number) } do %>

@@ -33,7 +33,7 @@
 </div>
 
 <div class="bo-page-body">
-<%= form_with model: @product, url: bo_product_path(params[:org_slug], @product), method: :patch, id: "product-form", multipart: true do |f| %>
+<%= form_with model: @product, url: bo_product_path(params[:org_slug], @product, filter_params_hash), method: :patch, id: "product-form", multipart: true do |f| %>
   <div class="row g-3">
     <div class="col-md-8">
       <div class="card mb-3">

@@ -21,7 +21,7 @@
       <%= link_to configure_variants_bo_product_path(params[:org_slug], @product), class: "btn btn-outline-secondary" do %>
         <i class="fa-solid fa-cubes me-1"></i> <%= t('bo.products.show.manage_variants') %>
       <% end %>
-      <%= link_to edit_bo_product_path(params[:org_slug], @product), class: "btn btn-outline-primary" do %>
+      <%= link_to edit_bo_product_path(params[:org_slug], @product, filter_params_hash), class: "btn btn-outline-primary" do %>
         <i class="fa-solid fa-pen-to-square me-1"></i> <%= t('bo.common.actions.edit') %>
       <% end %>
       <%= link_to bo_product_path(params[:org_slug], @product),
