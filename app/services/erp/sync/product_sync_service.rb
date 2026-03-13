@@ -51,12 +51,13 @@ module Erp
         update_product_attributes(product, data)
 
         if was_new || product.changed?
-          log_changes(external_id, product) unless was_new
+          record_changes(external_id, 'Product', was_new ? 'created' : 'updated', product) unless was_new
           if product.save
             update_variant_stock(product, data)
             product.mark_synced!(source: external_source)
 
             if was_new
+              record_changes(external_id, 'Product', 'created', product)
               sync_log.increment_created!
             else
               sync_log.increment_updated!
@@ -118,7 +119,7 @@ module Erp
         update_stock(variant, data) if data[:stock_quantity].present?
 
         if variant.changed?
-          log_changes(data[:external_id], variant) if attributes_changed
+          record_changes(data[:external_id], 'ProductVariant', 'updated', variant) if attributes_changed
           if variant.save
             apply_stock_rules(variant) if data[:stock_quantity].present?
             variant.mark_synced!(source: external_source)
@@ -178,13 +179,14 @@ module Erp
         erp_configuration.product_sync_mode != 'full_sync'
       end
 
-      def log_changes(external_id, record)
-        return unless record.changed?
+      def record_changes(external_id, record_type, action, record)
+        changes = if action == 'created'
+          { name: record.name, sku: record.sku }
+        else
+          record.changes.transform_values { |old_val, new_val| [old_val, new_val] }
+        end
 
-        changes = record.changes.map { |field, (old_val, new_val)|
-          "#{field}: #{old_val.inspect} (#{old_val.class}) → #{new_val.inspect} (#{new_val.class})"
-        }
-        Rails.logger.info("[ProductSync] #{record.class.name} external_id=#{external_id} changes: #{changes.join(', ')}")
+        sync_log.add_change(external_id, record_type, action, changes)
       end
 
       def generate_slug(product)

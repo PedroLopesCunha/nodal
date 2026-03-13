@@ -63,6 +63,21 @@ class ErpSyncLog < ApplicationRecord
     self.error_details << { record: record_identifier, error: error_message, at: Time.current.iso8601 }
   end
 
+  def add_change(external_id, record_type, action, changes = {})
+    self.change_details ||= []
+    self.change_details << {
+      external_id: external_id,
+      record_type: record_type,
+      action: action,
+      changes: changes,
+      at: Time.current.iso8601
+    }
+  end
+
+  def save_change_details!
+    save! if change_details_changed?
+  end
+
   def increment_processed!
     increment!(:records_processed)
   end

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2026_03_02_174139) do
+ActiveRecord::Schema[7.1].define(version: 2026_03_13_172427) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -205,6 +205,7 @@ ActiveRecord::Schema[7.1].define(version: 2026_03_02_174139) do
     t.text "summary"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.jsonb "change_details"
     t.index ["erp_configuration_id"], name: "index_erp_sync_logs_on_erp_configuration_id"
     t.index ["organisation_id", "created_at"], name: "index_erp_sync_logs_on_organisation_id_and_created_at"
     t.index ["organisation_id"], name: "index_erp_sync_logs_on_organisation_id"

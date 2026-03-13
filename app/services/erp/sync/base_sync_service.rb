@@ -21,6 +21,7 @@ module Erp
 
         begin
           perform_sync
+          sync_log.save_change_details!
           sync_log.mark_completed!
           success
         rescue Erp::ApiError, Erp::ConnectionError => e

@@ -73,7 +73,7 @@
             <tr>
               <td colspan="9" class="bg-light">
                 <details>
-                  <summary class="text-danger small">View <%= log.error_details.size %> error(s)</summary>
+                  <summary class="text-danger small"><i class="fa-solid fa-circle-exclamation me-1"></i>View <%= log.error_details.size %> error(s)</summary>
                   <ul class="list-unstyled mt-2 mb-0 small">
                     <% log.error_details.first(5).each do |error| %>
                       <li class="text-danger">
@@ -84,6 +84,61 @@
                       <li class="text-muted">... and <%= log.error_details.size - 5 %> more</li>
                     <% end %>
                   </ul>
+                </details>
+              </td>
+            </tr>
+            <% end %>
+            <% if log.change_details.present? && log.change_details.any? %>
+            <tr>
+              <td colspan="9" class="bg-light">
+                <details>
+                  <summary class="text-primary small"><i class="fa-solid fa-pen-to-square me-1"></i>View <%= log.change_details.size %> change(s)</summary>
+                  <div class="mt-2 small">
+                    <% created = log.change_details.select { |c| c['action'] == 'created' } %>
+                    <% updated = log.change_details.select { |c| c['action'] == 'updated' } %>
+
+                    <% if created.any? %>
+                      <p class="mb-1 fw-bold text-success"><i class="fa-solid fa-plus me-1"></i>Created (<%= created.size %>)</p>
+                      <ul class="list-unstyled mb-2 ms-3">
+                        <% created.first(10).each do |change| %>
+                          <li class="text-success">
+                            <strong><%= change['external_id'] %></strong>
+                            (<%= change['record_type'] %>)
+                            <% if change['changes'].present? %>
+                              — <%= change.dig('changes', 'name') || change.dig('changes', 'sku') %>
+                            <% end %>
+                          </li>
+                        <% end %>
+                        <% if created.size > 10 %>
+                          <li class="text-muted">... and <%= created.size - 10 %> more</li>
+                        <% end %>
+                      </ul>
+                    <% end %>
+
+                    <% if updated.any? %>
+                      <p class="mb-1 fw-bold text-primary"><i class="fa-solid fa-arrows-rotate me-1"></i>Updated (<%= updated.size %>)</p>
+                      <ul class="list-unstyled mb-0 ms-3">
+                        <% updated.first(10).each do |change| %>
+                          <li>
+                            <strong><%= change['external_id'] %></strong>
+                            (<%= change['record_type'] %>)
+                            <% if change['changes'].present? %>
+                              <ul class="list-unstyled ms-3">
+                                <% change['changes'].each do |field, values| %>
+                                  <li class="text-muted">
+                                    <%= field %>: <span class="text-danger"><%= values[0] %></span> &rarr; <span class="text-success"><%= values[1] %></span>
+                                  </li>
+                                <% end %>
+                              </ul>
+                            <% end %>
+                          </li>
+                        <% end %>
+                        <% if updated.size > 10 %>
+                          <li class="text-muted">... and <%= updated.size - 10 %> more</li>
+                        <% end %>
+                      </ul>
+                    <% end %>
+                  </div>
                 </details>
               </td>
             </tr>
