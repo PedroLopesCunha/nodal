@@ -51,6 +51,7 @@ module Erp
         update_product_attributes(product, data)
 
         if was_new || product.changed?
+          log_changes(external_id, product) unless was_new
           if product.save
             update_variant_stock(product, data)
             product.mark_synced!(source: external_source)
@@ -83,7 +84,8 @@ module Erp
         product.name = data[:name] if data.key?(:name)
         product.sku = data[:sku] if data.key?(:sku)
         product.description = data[:description] if data.key?(:description)
-        product.unit_price = data[:unit_price_cents] if data.key?(:unit_price_cents)
+        # Use write_attribute to bypass monetize wrapper and assign cents directly
+        product.write_attribute(:unit_price, data[:unit_price_cents]) if data.key?(:unit_price_cents)
         product.available = data[:available] if data.key?(:available)
 
         generate_slug(product) if product.new_record?
@@ -108,13 +110,22 @@ module Erp
 
       def sync_variant(variant, data)
         update_variant_attributes(variant, data)
+        attributes_changed = variant.changed?
+
         update_stock(variant, data) if data[:stock_quantity].present?
 
         if variant.changed?
+          log_changes(data[:external_id], variant) if attributes_changed
           if variant.save
             apply_stock_rules(variant) if data[:stock_quantity].present?
             variant.mark_synced!(source: external_source)
-            sync_log.increment_updated!
+
+            if attributes_changed
+              sync_log.increment_updated!
+            else
+              # Only stock changed, not product attributes
+              sync_log.increment_processed!
+            end
           else
             sync_log.increment_failed!(data[:external_id], variant.errors.full_messages.join(', '))
           end
@@ -126,7 +137,7 @@ module Erp
       def update_variant_attributes(variant, data)
         variant.name = data[:name] if data.key?(:name)
         variant.sku = data[:sku] if data.key?(:sku)
-        variant.unit_price_cents = data[:unit_price_cents] if data.key?(:unit_price_cents)
+        variant.write_attribute(:unit_price_cents, data[:unit_price_cents]) if data.key?(:unit_price_cents)
         variant.available = data[:available] if data.key?(:available)
       end
 
@@ -159,6 +170,15 @@ module Erp
 
       def update_only_mode?
         erp_configuration.product_sync_mode != 'full_sync'
+      end
+
+      def log_changes(external_id, record)
+        return unless record.changed?
+
+        changes = record.changes.map { |field, (old_val, new_val)|
+          "#{field}: #{old_val.inspect} (#{old_val.class}) → #{new_val.inspect} (#{new_val.class})"
+        }
+        Rails.logger.info("[ProductSync] #{record.class.name} external_id=#{external_id} changes: #{changes.join(', ')}")
       end
 
       def generate_slug(product)
