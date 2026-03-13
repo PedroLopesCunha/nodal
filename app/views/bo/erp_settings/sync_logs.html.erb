@@ -96,6 +96,7 @@
                   <div class="mt-2 small">
                     <% created = log.change_details.select { |c| c['action'] == 'created' } %>
                     <% updated = log.change_details.select { |c| c['action'] == 'updated' } %>
+                    <% stock_updated = log.change_details.select { |c| c['action'] == 'stock_updated' } %>
 
                     <% if created.any? %>
                       <p class="mb-1 fw-bold text-success"><i class="fa-solid fa-plus me-1"></i>Created (<%= created.size %>)</p>
@@ -117,7 +118,7 @@
 
                     <% if updated.any? %>
                       <p class="mb-1 fw-bold text-primary"><i class="fa-solid fa-arrows-rotate me-1"></i>Updated (<%= updated.size %>)</p>
-                      <ul class="list-unstyled mb-0 ms-3">
+                      <ul class="list-unstyled mb-2 ms-3">
                         <% updated.first(10).each do |change| %>
                           <li>
                             <strong><%= change['external_id'] %></strong>
@@ -135,6 +136,23 @@
                         <% end %>
                         <% if updated.size > 10 %>
                           <li class="text-muted">... and <%= updated.size - 10 %> more</li>
+                        <% end %>
+                      </ul>
+                    <% end %>
+
+                    <% if stock_updated.any? %>
+                      <p class="mb-1 fw-bold text-secondary"><i class="fa-solid fa-boxes-stacked me-1"></i>Stock Updated (<%= stock_updated.size %>)</p>
+                      <ul class="list-unstyled mb-0 ms-3">
+                        <% stock_updated.first(10).each do |change| %>
+                          <li class="text-muted">
+                            <strong><%= change['external_id'] %></strong>
+                            <% if change.dig('changes', 'stock_quantity') %>
+                              — <%= change['changes']['stock_quantity'][0] %> &rarr; <%= change['changes']['stock_quantity'][1] %>
+                            <% end %>
+                          </li>
+                        <% end %>
+                        <% if stock_updated.size > 10 %>
+                          <li class="text-muted">... and <%= stock_updated.size - 10 %> more</li>
                         <% end %>
                       </ul>
                     <% end %>

@@ -119,7 +119,11 @@ module Erp
         variant = product.default_variant
         return unless variant
 
+        old_stock = variant.stock_quantity
         update_stock(variant, data)
+        if variant.changed?
+          record_changes(product.external_id, 'ProductVariant', 'stock_updated', variant)
+        end
         variant.save!
         apply_stock_rules(variant)
       end
@@ -144,7 +148,8 @@ module Erp
         update_stock(variant, data) if data[:stock_quantity].present?
 
         if variant.changed?
-          record_changes(data[:external_id], 'ProductVariant', 'updated', variant) if attributes_changed
+          action = attributes_changed ? 'updated' : 'stock_updated'
+          record_changes(data[:external_id], 'ProductVariant', action, variant)
           if variant.save
             apply_stock_rules(variant) if data[:stock_quantity].present?
             variant.mark_synced!(source: external_source)
