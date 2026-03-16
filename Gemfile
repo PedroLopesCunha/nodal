@@ -101,8 +101,7 @@ group :firebird do
   gem 'fb', '~> 0.9', require: false
 end
 
-# sendgrid for mailing
-gem 'sendgrid-ruby'
+# Resend for mailing (via SMTP, no gem needed)
 
 group :development, :test do
   gem "dotenv-rails"

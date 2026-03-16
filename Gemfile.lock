@@ -372,7 +372,6 @@ GEM
     ruby-vips (2.2.5)
       ffi (~> 1.12)
       logger
-    ruby_http_client (3.5.5)
     ruby_llm (1.9.1)
       base64
       event_stream_parser (~> 1)
@@ -402,8 +401,6 @@ GEM
       rexml (~> 3.2, >= 3.2.5)
       rubyzip (>= 1.2.2, < 4.0)
       websocket (~> 1.0)
-    sendgrid-ruby (6.7.0)
-      ruby_http_client (~> 3.4)
     sidekiq (7.3.10)
       base64
       connection_pool (>= 2.3.0, < 3)
@@ -502,7 +499,6 @@ DEPENDENCIES
   ruby_llm
   sassc-rails
   selenium-webdriver
-  sendgrid-ruby
   sidekiq (~> 7.0)
   sidekiq-scheduler (~> 5.0)
   simple_form!
