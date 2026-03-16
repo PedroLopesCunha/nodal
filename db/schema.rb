@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2026_03_13_172427) do
+ActiveRecord::Schema[7.1].define(version: 2026_03_16_155231) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -161,6 +161,7 @@ ActiveRecord::Schema[7.1].define(version: 2026_03_13_172427) do
     t.datetime "last_synced_at"
     t.text "sync_error"
     t.string "taxpayer_id"
+    t.boolean "email_notifications_enabled", default: true, null: false
     t.index ["email", "organisation_id"], name: "index_customers_on_email_and_organisation_id", unique: true
     t.index ["invitation_token"], name: "index_customers_on_invitation_token", unique: true
     t.index ["invited_by_id"], name: "index_customers_on_invited_by_id"
@@ -169,6 +170,43 @@ ActiveRecord::Schema[7.1].define(version: 2026_03_13_172427) do
     t.index ["organisation_id", "external_id", "external_source"], name: "index_customers_on_org_external_id_source", unique: true, where: "(external_id IS NOT NULL)"
     t.index ["organisation_id"], name: "index_customers_on_organisation_id"
     t.index ["reset_password_token"], name: "index_customers_on_reset_password_token", unique: true
+  end
+
+  create_table "discount_email_notifications", force: :cascade do |t|
+    t.string "notifiable_type", null: false
+    t.bigint "notifiable_id", null: false
+    t.bigint "organisation_id", null: false
+    t.string "status", default: "pending", null: false
+    t.integer "recipient_count", default: 0
+    t.datetime "sent_at"
+    t.bigint "sent_by_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["notifiable_type", "notifiable_id"], name: "idx_den_on_notifiable", unique: true
+    t.index ["notifiable_type", "notifiable_id"], name: "index_discount_email_notifications_on_notifiable"
+    t.index ["organisation_id", "status"], name: "idx_on_organisation_id_status_7657d575d3"
+    t.index ["organisation_id"], name: "index_discount_email_notifications_on_organisation_id"
+    t.index ["sent_by_id"], name: "index_discount_email_notifications_on_sent_by_id"
+  end
+
+  create_table "email_logs", force: :cascade do |t|
+    t.bigint "organisation_id", null: false
+    t.bigint "customer_id"
+    t.bigint "member_id"
+    t.string "email_type", null: false
+    t.string "mailer_class", null: false
+    t.string "recipient_email", null: false
+    t.string "subject"
+    t.string "status", default: "sent", null: false
+    t.string "error_message"
+    t.datetime "sent_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["customer_id"], name: "index_email_logs_on_customer_id"
+    t.index ["member_id"], name: "index_email_logs_on_member_id"
+    t.index ["organisation_id", "sent_at"], name: "index_email_logs_on_organisation_id_and_sent_at"
+    t.index ["organisation_id"], name: "index_email_logs_on_organisation_id"
+    t.index ["status"], name: "index_email_logs_on_status"
   end
 
   create_table "erp_configurations", force: :cascade do |t|
@@ -317,6 +355,7 @@ ActiveRecord::Schema[7.1].define(version: 2026_03_13_172427) do
     t.bigint "invited_by_id"
     t.datetime "invitation_accepted_at"
     t.string "invited_email"
+    t.boolean "receive_order_notifications"
     t.index ["invitation_token"], name: "index_org_members_on_invitation_token", unique: true
     t.index ["member_id"], name: "index_org_members_on_member_id"
     t.index ["organisation_id"], name: "index_org_members_on_organisation_id"
@@ -356,6 +395,12 @@ ActiveRecord::Schema[7.1].define(version: 2026_03_13_172427) do
     t.string "linkedin_url"
     t.boolean "show_whatsapp_button"
     t.boolean "show_scroll_to_top"
+    t.string "email_sender_name"
+    t.string "email_reply_to"
+    t.boolean "email_order_confirmation_enabled", default: true, null: false
+    t.boolean "email_discount_notification_enabled", default: true, null: false
+    t.boolean "email_customer_invitation_enabled", default: true, null: false
+    t.boolean "email_member_order_notification_enabled", default: true, null: false
     t.index ["default_locale"], name: "index_organisations_on_default_locale"
     t.index ["slug"], name: "index_organisations_on_slug", unique: true
   end
@@ -590,6 +635,11 @@ ActiveRecord::Schema[7.1].define(version: 2026_03_13_172427) do
   add_foreign_key "customer_product_discounts", "organisations"
   add_foreign_key "customer_product_discounts", "products"
   add_foreign_key "customers", "organisations"
+  add_foreign_key "discount_email_notifications", "members", column: "sent_by_id"
+  add_foreign_key "discount_email_notifications", "organisations"
+  add_foreign_key "email_logs", "customers"
+  add_foreign_key "email_logs", "members"
+  add_foreign_key "email_logs", "organisations"
   add_foreign_key "erp_configurations", "organisations"
   add_foreign_key "erp_sync_logs", "erp_configurations"
   add_foreign_key "erp_sync_logs", "organisations"

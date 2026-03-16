@@ -19,7 +19,7 @@
 <p style="margin: 0 0 8px 0; font-size: 16px;"><%= t('mailers.customer_mailer.product_discount.greeting') %></p>
 
 <p style="margin: 0 0 24px 0; color: #4b5563;">
-  <%= t('mailers.customer_mailer.product_discount.intro') %>
+  <%= @product ? t('mailers.customer_mailer.product_discount.intro') : t('mailers.customer_mailer.product_discount.category_intro') %>
 </p>
 
 <!-- Shop button -->
@@ -31,8 +31,8 @@
           <%= t('mailers.common.view_product') %>
         </a>
       <% else %>
-        <a href="<%= root_url(org_slug: @organisation.slug) %>" style="display: inline-block; background: linear-gradient(135deg, #7c3aed 0%, #a855f7 100%); background-color: #7c3aed; color: #ffffff; text-decoration: none; font-size: 16px; font-weight: 600; padding: 14px 32px; border-radius: 8px;">
-          <%= t('mailers.common.view_product') %>
+        <a href="<%= products_url(org_slug: @organisation.slug) %>" style="display: inline-block; background: linear-gradient(135deg, #7c3aed 0%, #a855f7 100%); background-color: #7c3aed; color: #ffffff; text-decoration: none; font-size: 16px; font-weight: 600; padding: 14px 32px; border-radius: 8px;">
+          <%= t('mailers.common.view_category') %>
         </a>
       <% end %>
     </td>
@@ -44,7 +44,7 @@
   <!-- Card header -->
   <tr>
     <td style="padding: 16px 20px; background-color: #f9fafb; border-bottom: 1px solid #e5e5e5;">
-      <span style="font-size: 14px; font-weight: 600; color: #1a1a1a; text-transform: uppercase; letter-spacing: 0.5px;"><%= t('mailers.common.product_details') %></span>
+      <span style="font-size: 14px; font-weight: 600; color: #1a1a1a; text-transform: uppercase; letter-spacing: 0.5px;"><%= @product ? t('mailers.common.product_details') : t('mailers.common.category_details') %></span>
     </td>
   </tr>
   <!-- Info -->

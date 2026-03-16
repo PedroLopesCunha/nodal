@@ -222,6 +222,8 @@ es:
         active: "Activo"
         inactive: "Inactivo"
         inactive_hint: "Los clientes inactivos no pueden realizar pedidos"
+        email_notifications: "Notificaciones por Email"
+        email_notifications_hint: "Cuando está desactivado, este cliente no recibirá emails promocionales o transaccionales"
         taxpayer_id: "NIF/CIF"
         taxpayer_id_placeholder: "Introduzca el número de identificación fiscal"
         taxpayer_id_hint: "Número de identificación fiscal"
@@ -690,6 +692,7 @@ es:
         promo_codes_desc: "Crear códigos promocionales para que los clientes apliquen en el checkout"
       form:
         client: "Cliente"
+        clients: "Clientes"
         select_client: "Seleccione un cliente..."
         product: "Producto"
         select_product: "Seleccione un producto..."
@@ -746,6 +749,12 @@ es:
         search_placeholder: "Buscar tramos de cliente..."
         no_discounts: "No hay descuentos de tramo de cliente."
         create_first: "Crear el primer descuento de tramo de cliente"
+        select_clients_hint: "Seleccione uno o más clientes"
+        select_at_least_one: "Por favor seleccione al menos un cliente"
+        flash:
+          created_multiple:
+            one: "Descuento de tramo de cliente creado con éxito."
+            other: "%{count} descuentos de tramo de cliente creados con éxito."
         new:
           title: "Nuevo Descuento de Tramo de Cliente"
           subtitle: "Configurar un descuento global para un cliente"
@@ -762,6 +771,12 @@ es:
         no_discounts: "No hay precios personalizados."
         create_first: "Crear el primer precio personalizado"
         add_custom_price: "Añadir Precio Personalizado"
+        select_clients_hint: "Seleccione uno o más clientes"
+        select_at_least_one: "Por favor seleccione al menos un cliente"
+        flash:
+          created_multiple:
+            one: "Precio personalizado creado con éxito."
+            other: "%{count} precios personalizados creados con éxito."
         new:
           title: "Nuevo Precio Personalizado"
           subtitle: "Configurar un precio específico para un cliente en un producto"
@@ -837,6 +852,19 @@ es:
           created: "Código promocional creado con éxito."
           updated: "Código promocional actualizado con éxito."
           deleted: "Código promocional eliminado con éxito."
+      email_notifications:
+        pending: "Notificación de email pendiente"
+        sent: "Notificación de email enviada"
+        sent_success: "Notificación de email enviada con éxito."
+        sent_error: "Error al enviar la notificación de email."
+        modal:
+          title: "Enviar Notificación por Email"
+          send_question: "¿Enviar notificación a"
+          customers: "clientes?"
+          discount_type: "Tipo"
+          send_now: "Enviar Ahora"
+          send_later: "Enviar Después"
+          no_recipients: "No hay destinatarios con notificaciones de email activadas."
       errors:
         title: "Por favor corrija los siguientes errores:"
 
@@ -996,6 +1024,47 @@ es:
         status: "Estado"
         created: "Creado"
         last_updated: "Última Actualización"
+
+    # Sección Configuración de Email
+    email_settings:
+      edit:
+        title: "Configuración de Email"
+        subtitle: "Configurar los ajustes de email de su organización"
+        sender_settings: "Configuración del Remitente"
+        sender_name: "Nombre del Remitente"
+        sender_name_hint: "Se muestra como remitente en los emails enviados. Por defecto, usa el nombre de la organización."
+        reply_to: "Dirección de Respuesta"
+        reply_to_hint: "Cuando los clientes respondan a los emails, las respuestas se enviarán a esta dirección."
+        preview_from: "De:"
+        preview_reply_to: "Responder a:"
+        notification_preferences: "Notificaciones por Email"
+        notification_preferences_hint: "Controle qué emails se envían a clientes y miembros del equipo. Los emails de autenticación (recuperación de contraseña, invitaciones de equipo) no se pueden desactivar."
+        order_confirmation: "Confirmación de Pedido"
+        order_confirmation_hint: "Enviar email de confirmación cuando un cliente realiza un pedido"
+        discount_notification: "Notificaciones de Descuento"
+        discount_notification_hint: "Notificar a los clientes sobre nuevos descuentos y promociones"
+        customer_invitation: "Invitación de Cliente"
+        customer_invitation_hint: "Enviar email de invitación al añadir un nuevo cliente"
+        order_notification_recipients: "Destinatarios de Notificación de Pedido"
+        order_notification_recipients_hint: "Seleccione qué miembros del equipo reciben una notificación por email cuando un cliente realiza un pedido. Si no se selecciona ninguno, no se enviarán notificaciones."
+        no_team_members: "No se encontraron miembros del equipo activos."
+        auth_emails_note: "Los emails de invitación de cliente, recuperación de contraseña, invitación de equipo y adición a la organización siempre se envían y no se pueden desactivar."
+        email_logs: "Historial de Emails"
+        log_date: "Fecha"
+        log_type: "Tipo"
+        log_recipient: "Destinatario"
+        log_subject: "Asunto"
+        status_sent: "Enviado"
+        status_skipped: "Omitido"
+        status_failed: "Fallido"
+        no_logs: "Ningún email enviado todavía."
+        customer_opt_out: "Exclusión de Emails de Clientes"
+        customer_opt_out_hint: "Busque y seleccione clientes para excluir de emails de marketing (notificaciones de descuentos, códigos promocionales). Los emails de autenticación siempre se envían."
+        customer_opt_out_search: "Buscar y añadir clientes a la lista de exclusión"
+      flash:
+        updated: "Configuración de email actualizada con éxito."
+        recipients_updated: "Destinatarios de notificación de pedido actualizados con éxito."
+        customer_preferences_updated: "Preferencias de email de clientes actualizadas con éxito."
 
     # Sección Perfil
     profiles:

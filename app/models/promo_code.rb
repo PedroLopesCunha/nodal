@@ -1,4 +1,6 @@
 class PromoCode < ApplicationRecord
+  include HasEmailNotification
+
   DISCOUNT_TYPES = %w[percentage fixed].freeze
   ELIGIBILITIES = %w[all_customers specific_customers].freeze
 

@@ -13,7 +13,13 @@ class Bo::PromoCodesController < Bo::BaseController
     authorize @promo_code
 
     if @promo_code.save
-      redirect_to bo_pricing_path(params[:org_slug], tab: 'promo_codes'),
+      notification = DiscountEmailNotification.create!(
+        notifiable: @promo_code,
+        organisation: current_organisation,
+        status: 'pending',
+        recipient_count: DiscountEmailNotification.recipient_count_for(@promo_code, current_organisation)
+      )
+      redirect_to bo_pricing_path(params[:org_slug], tab: 'promo_codes', notification_id: notification.id),
                   notice: t('bo.pricing.promo_codes.flash.created')
     else
       @customers = current_organisation.customers.order(:company_name)

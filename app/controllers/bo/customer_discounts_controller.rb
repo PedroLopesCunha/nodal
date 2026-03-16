@@ -8,19 +8,55 @@ class Bo::CustomerDiscountsController < Bo::BaseController
   end
 
   def create
-    @discount = CustomerDiscount.new(customer_discount_params)
+    customer_ids = Array(params[:customer_ids]).reject(&:blank?)
+
+    if customer_ids.empty?
+      @discount = CustomerDiscount.new(customer_discount_params)
+      @discount.organisation = current_organisation
+      authorize @discount
+      @discount.errors.add(:base, t('bo.pricing.client_tiers.select_at_least_one'))
+      return render :new, status: :unprocessable_entity
+    end
+
+    @discount = CustomerDiscount.new(customer_discount_params.except(:customer_id))
     @discount.organisation = current_organisation
+    @discount.customer_id = customer_ids.first
     authorize @discount
 
-    if @discount.save
-      begin
-        CustomerMailer.with(discount: @discount, organisation: current_organisation).notify_customer_about_discount.deliver_now
-      rescue => e
-        Rails.logger.error("Failed to send customer discount email: #{e.message}")
+    created_discounts = []
+    errors = []
+
+    customer_ids.each do |cid|
+      discount = CustomerDiscount.new(customer_discount_params.except(:customer_id))
+      discount.organisation = current_organisation
+      discount.customer_id = cid
+      if discount.save
+        created_discounts << discount
+      else
+        errors << discount.errors.full_messages
       end
+    end
+
+    if created_discounts.any?
+      total_recipients = created_discounts.sum do |d|
+        DiscountEmailNotification.recipient_count_for(d, current_organisation)
+      end
+
+      # Create one notification per discount
+      last_notification = nil
+      created_discounts.each do |d|
+        last_notification = DiscountEmailNotification.create!(
+          notifiable: d,
+          organisation: current_organisation,
+          status: 'pending',
+          recipient_count: DiscountEmailNotification.recipient_count_for(d, current_organisation)
+        )
+      end
+
       redirect_to bo_pricing_path(params[:org_slug], tab: 'client_tiers'),
-                  notice: "Client tier discount created successfully."
+                  notice: t('bo.pricing.client_tiers.flash.created_multiple', count: created_discounts.size)
     else
+      @discount.errors.add(:base, errors.flatten.first)
       render :new, status: :unprocessable_entity
     end
   end

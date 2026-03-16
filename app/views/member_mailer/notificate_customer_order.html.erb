@@ -147,6 +147,20 @@
           </tr>
         <% end %>
 
+        <% if @order.has_promo_code? && @order.promo_code_discount.positive? %>
+          <!-- Promo Code Discount -->
+          <tr>
+            <td style="padding: 8px 20px;">
+              <span style="font-size: 14px; color: #166534;">
+                <%= t('mailers.common.promo_code') %> (<%= @order.promo_code.code %>)
+              </span>
+            </td>
+            <td align="right" style="padding: 8px 20px;">
+              <span style="font-size: 14px; color: #166534;">-<%= @order.promo_code_discount.format %></span>
+            </td>
+          </tr>
+        <% end %>
+
         <!-- Tax -->
         <tr>
           <td style="padding: 8px 20px;">

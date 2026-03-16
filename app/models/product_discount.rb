@@ -1,4 +1,6 @@
 class ProductDiscount < ApplicationRecord
+  include HasEmailNotification
+
   DISCOUNT_TYPES = %w[percentage fixed].freeze
 
   belongs_to :product, optional: true

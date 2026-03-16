@@ -153,6 +153,14 @@
             <label class="form-check-label" for="activeSwitch"><%= t('bo.customers.form.active_customer') %></label>
           </div>
           <small class="text-muted"><%= t('bo.customers.form.inactive_hint') %></small>
+
+          <hr class="my-3">
+
+          <div class="form-check form-switch">
+            <%= f.check_box :email_notifications_enabled, class: "form-check-input", role: "switch", id: "emailNotificationsSwitch" %>
+            <label class="form-check-label" for="emailNotificationsSwitch"><%= t('bo.customers.form.email_notifications') %></label>
+          </div>
+          <small class="text-muted"><%= t('bo.customers.form.email_notifications_hint') %></small>
         </div>
       </div>
 

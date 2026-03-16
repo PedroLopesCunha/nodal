@@ -41,7 +41,7 @@ class Storefront::AccountsController < Storefront::BaseController
 
   def profile_params
     params.require(:customer).permit(
-      :company_name, :contact_name, :contact_phone, :email, :taxpayer_id,
+      :company_name, :contact_name, :contact_phone, :email, :taxpayer_id, :email_notifications_enabled,
       billing_address_with_archived_attributes: [:id, :street_name, :street_nr, :postal_code, :city, :country, :address_type, :active],
       shipping_addresses_with_archived_attributes: [:id, :street_name, :street_nr, :postal_code, :city, :country, :address_type, :_destroy, :active]
     )
