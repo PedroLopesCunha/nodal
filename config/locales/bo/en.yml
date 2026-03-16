@@ -231,6 +231,8 @@ en:
         taxpayer_id: "Taxpayer ID"
         taxpayer_id_placeholder: "Enter taxpayer identification number"
         taxpayer_id_hint: "Tax identification number (VAT, EIN, etc.)"
+        password_placeholder: "Enter password"
+        confirm_password_placeholder: "Confirm password"
         billing_address: "Billing Address"
         shipping_address: "Shipping Address"
         add_shipping_address: "Add Shipping Address"

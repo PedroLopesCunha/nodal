@@ -225,6 +225,8 @@ es:
         taxpayer_id: "NIF/CIF"
         taxpayer_id_placeholder: "Introduzca el número de identificación fiscal"
         taxpayer_id_hint: "Número de identificación fiscal"
+        password_placeholder: "Introduzca la contraseña"
+        confirm_password_placeholder: "Confirme la contraseña"
         billing_address: "Dirección de Facturación"
         shipping_address: "Dirección de Envío"
         add_shipping_address: "Añadir Dirección de Envío"

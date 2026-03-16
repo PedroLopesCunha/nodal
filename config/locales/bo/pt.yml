@@ -225,6 +225,8 @@ pt:
         taxpayer_id: "NIF"
         taxpayer_id_placeholder: "Introduza o número de contribuinte"
         taxpayer_id_hint: "Número de identificação fiscal"
+        password_placeholder: "Introduza a palavra-passe"
+        confirm_password_placeholder: "Confirme a palavra-passe"
         billing_address: "Morada de Faturação"
         shipping_address: "Morada de Envio"
         add_shipping_address: "Adicionar Morada de Envio"
