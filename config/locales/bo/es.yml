@@ -176,14 +176,23 @@ es:
         title: "Clientes"
         subtitle: "Ver y gestionar sus clientes"
         search_placeholder: "Buscar clientes..."
+        tabs:
+          customers: "Clientes"
+          categories: "Categorías"
+        filters:
+          all_statuses: "Todos los Estados"
+          all_categories: "Todas las Categorías"
+          active_filters: "Filtros activos"
         table:
           customer: "Cliente"
           company: "Empresa"
           contact: "Contacto"
+          category: "Categoría"
           status: "Estado"
           actions: "Acciones"
       show:
         title: "Detalles del Cliente"
+        category: "Categoría"
         contact_info: "Información de Contacto"
         company_details: "Detalles de la Empresa"
         email: "Correo electrónico"
@@ -210,6 +219,7 @@ es:
         title: "Editar Cliente"
         subtitle: "Actualizar información del cliente"
       form:
+        contact_information: "Información de Contacto"
         contact_name: "Nombre de Contacto"
         contact_name_placeholder: "Introduzca el nombre de contacto"
         email: "Correo electrónico"
@@ -218,6 +228,8 @@ es:
         phone_placeholder: "Introduzca el número de teléfono"
         company_name: "Nombre de la Empresa"
         company_name_placeholder: "Introduzca el nombre de la empresa"
+        category: "Categoría"
+        no_category: "Sin categoría"
         status: "Estado"
         active: "Activo"
         inactive: "Inactivo"
@@ -244,6 +256,42 @@ es:
         title: "Invitar al Portal del Cliente"
         description: "Enviar un correo de invitación para permitir que este cliente acceda a la tienda."
         send_invitation: "Enviar Invitación"
+
+    # Sección Categorías de Clientes
+    customer_categories:
+      add: "Nueva Categoría"
+      empty: "Aún no hay categorías de clientes. Cree una para empezar a organizar sus clientes."
+      new:
+        title: "Nueva Categoría de Cliente"
+        subtitle: "Crear una nueva categoría de cliente"
+        create: "Crear Categoría"
+      edit:
+        title: "Editar Categoría de Cliente"
+      form:
+        name: "Nombre"
+        name_placeholder: "Introduzca el nombre de la categoría"
+        description: "Descripción"
+        description_placeholder: "Descripción opcional para esta categoría"
+      table:
+        name: "Nombre"
+        description: "Descripción"
+        customers_count: "Clientes"
+      customers:
+        title: "Clientes Asignados"
+        add: "Añadir Clientes"
+        empty: "Aún no hay clientes asignados a esta categoría."
+        confirm_remove: "¿Eliminar este cliente de la categoría?"
+        modal_title: "Añadir Clientes a la Categoría"
+        modal_hint: "Seleccione los clientes que desea añadir a esta categoría."
+        search_placeholder: "Buscar clientes..."
+        add_selected: "Añadir Seleccionados"
+        all_assigned: "Todos los clientes ya están asignados a una categoría."
+      flash:
+        created: "Categoría de cliente creada con éxito."
+        updated: "Categoría de cliente actualizada con éxito."
+        deleted: "Categoría de cliente eliminada con éxito."
+        customers_added: "Clientes añadidos a la categoría con éxito."
+        customer_removed: "Cliente eliminado de la categoría con éxito."
 
     # Sección Productos
     products:

@@ -157,6 +157,15 @@
         </div>
         <% end %>
 
+        <div class="border-bottom pb-3 mb-3">
+          <small class="text-muted d-block"><%= t('bo.customers.show.category') %></small>
+          <% if @customer.customer_category.present? %>
+            <span class="badge bg-light text-dark border"><%= @customer.customer_category.name %></span>
+          <% else %>
+            <span class="text-muted"><%= t('bo.customers.form.no_category') %></span>
+          <% end %>
+        </div>
+
         <div>
           <small class="text-muted d-block"><%= t('bo.customers.show.member_since') %></small>
           <span><%= @customer.created_at.strftime("%-m/%-d/%Y") %></span>

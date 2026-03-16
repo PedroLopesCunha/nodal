@@ -14,6 +14,7 @@ class Customer < ApplicationRecord
   end
 
   belongs_to :organisation
+  belongs_to :customer_category, optional: true
   has_many :orders, dependent: :destroy
   has_one :billing_address, -> { billing.active }, class_name: "Address", as: :addressable, dependent: :destroy
   has_many :shipping_addresses, -> { shipping.active }, class_name: "Address", as: :addressable, dependent: :destroy
