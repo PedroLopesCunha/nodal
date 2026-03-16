@@ -104,6 +104,8 @@ en:
       external_id: "External ID"
       last_synced: "Last synced"
       synced_ago: "%{time} ago"
+      via_variants: "via variants"
+      synced_variants: "Synced Variants"
 
     # Navigation
     navbar:

@@ -101,6 +101,8 @@ pt:
       external_id: "ID Externo"
       last_synced: "Última sincronização"
       synced_ago: "há %{time}"
+      via_variants: "via variantes"
+      synced_variants: "Variantes Sincronizadas"
 
     # Navegação
     navbar:
