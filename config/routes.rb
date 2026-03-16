@@ -173,9 +173,21 @@ Rails.application.routes.draw do
         end
       end
 
+      resources :discount_email_notifications, only: [] do
+        member do
+          post :send_email
+          get :recipients
+        end
+      end
+
       # Profile & Settings
       resource :profile, only: [:edit, :update]
       resource :settings, only: [:edit, :update]
+
+      # Email Settings
+      resource :email_settings, only: [:edit, :update] do
+        get :email_logs
+      end
 
       # ERP Integration
       resource :erp_settings, only: [:edit, :update] do

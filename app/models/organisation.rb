@@ -32,6 +32,8 @@ class Organisation < ApplicationRecord
   has_many :promo_codes, dependent: :destroy
   has_one :erp_configuration, dependent: :destroy
   has_many :erp_sync_logs, dependent: :destroy
+  has_many :email_logs, dependent: :destroy
+  has_many :discount_email_notifications, dependent: :destroy
 
   validates :name, presence: true
   validates :billing_email, format: { with: URI::MailTo::EMAIL_REGEXP }, allow_blank: true
@@ -41,6 +43,7 @@ class Organisation < ApplicationRecord
   validates :out_of_stock_strategy, inclusion: { in: OUT_OF_STOCK_STRATEGIES }
   validates :primary_color, format: { with: HEX_COLOR_REGEX }, allow_blank: true
   validates :secondary_color, format: { with: HEX_COLOR_REGEX }, allow_blank: true
+  validates :email_reply_to, format: { with: URI::MailTo::EMAIL_REGEXP }, allow_blank: true
 
   slugify :name
 
@@ -91,5 +94,17 @@ class Organisation < ApplicationRecord
 
   def effective_storefront_title
     storefront_title.presence || name
+  end
+
+  def effective_sender_name
+    email_sender_name.presence || name
+  end
+
+  def email_from_address
+    "#{effective_sender_name} <no-reply@nodal-seiri.dev>"
+  end
+
+  def email_reply_to_address
+    email_reply_to.presence
   end
 end

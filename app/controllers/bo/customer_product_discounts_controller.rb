@@ -12,20 +12,53 @@ class Bo::CustomerProductDiscountsController < Bo::BaseController
   end
 
   def create
-    @discount = CustomerProductDiscount.new(customer_product_discount_params)
+    customer_ids = Array(params[:customer_ids]).reject(&:blank?)
+
+    if customer_ids.empty?
+      @discount = CustomerProductDiscount.new(customer_product_discount_params.except(:customer_id))
+      @discount.organisation = current_organisation
+      @discount.customer_id = nil
+      authorize @discount
+      @discount.errors.add(:base, t('bo.pricing.custom_pricing.select_at_least_one'))
+      load_variants_for_form
+      return render :new, status: :unprocessable_entity
+    end
+
+    @discount = CustomerProductDiscount.new(customer_product_discount_params.except(:customer_id))
     @discount.organisation = current_organisation
+    @discount.customer_id = customer_ids.first
     authorize @discount
 
-    if @discount.save
-      update_variant_overrides
-      begin
-        CustomerMailer.with(discount: @discount, organisation: current_organisation).notify_customer_about_discount.deliver_now
-      rescue => e
-        Rails.logger.error("Failed to send customer product discount email: #{e.message}")
+    created_discounts = []
+    errors = []
+
+    customer_ids.each do |cid|
+      discount = CustomerProductDiscount.new(customer_product_discount_params.except(:customer_id))
+      discount.organisation = current_organisation
+      discount.customer_id = cid
+      if discount.save
+        created_discounts << discount
+      else
+        errors << discount.errors.full_messages
       end
+    end
+
+    if created_discounts.any?
+      update_variant_overrides
+
+      created_discounts.each do |d|
+        DiscountEmailNotification.create!(
+          notifiable: d,
+          organisation: current_organisation,
+          status: 'pending',
+          recipient_count: DiscountEmailNotification.recipient_count_for(d, current_organisation)
+        )
+      end
+
       redirect_to bo_pricing_path(params[:org_slug], tab: 'custom_pricing'),
-                  notice: "Custom price created successfully."
+                  notice: t('bo.pricing.custom_pricing.flash.created_multiple', count: created_discounts.size)
     else
+      @discount.errors.add(:base, errors.flatten.first)
       load_variants_for_form
       render :new, status: :unprocessable_entity
     end

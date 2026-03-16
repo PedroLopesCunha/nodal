@@ -228,6 +228,8 @@ en:
         active: "Active"
         inactive: "Inactive"
         inactive_hint: "Inactive customers cannot place orders"
+        email_notifications: "Email Notifications"
+        email_notifications_hint: "When disabled, this customer will not receive promotional or transactional emails"
         taxpayer_id: "Taxpayer ID"
         taxpayer_id_placeholder: "Enter taxpayer identification number"
         taxpayer_id_hint: "Tax identification number (VAT, EIN, etc.)"
@@ -714,6 +716,7 @@ en:
         promo_codes_desc: "Create promotional codes for customers to apply at checkout"
       form:
         client: "Client"
+        clients: "Clients"
         select_client: "Select a client..."
         product: "Product"
         select_product: "Select a product..."
@@ -770,6 +773,12 @@ en:
         search_placeholder: "Search client tiers..."
         no_discounts: "No client tier discounts found."
         create_first: "Create your first client tier discount"
+        select_clients_hint: "Select one or more clients"
+        select_at_least_one: "Please select at least one client"
+        flash:
+          created_multiple:
+            one: "Client tier discount created successfully."
+            other: "%{count} client tier discounts created successfully."
         new:
           title: "New Client Tier Discount"
           subtitle: "Set up a global discount for a client"
@@ -786,6 +795,12 @@ en:
         no_discounts: "No custom pricing found."
         create_first: "Create your first custom price"
         add_custom_price: "Add Custom Price"
+        select_clients_hint: "Select one or more clients"
+        select_at_least_one: "Please select at least one client"
+        flash:
+          created_multiple:
+            one: "Custom price created successfully."
+            other: "%{count} custom prices created successfully."
         new:
           title: "New Custom Pricing"
           subtitle: "Set up a specific price for a client on a product"
@@ -861,6 +876,19 @@ en:
           created: "Promo code created successfully."
           updated: "Promo code updated successfully."
           deleted: "Promo code deleted successfully."
+      email_notifications:
+        pending: "Email notification pending"
+        sent: "Email notification sent"
+        sent_success: "Email notification sent successfully."
+        sent_error: "Failed to send email notification."
+        modal:
+          title: "Send Email Notification"
+          send_question: "Send notification to"
+          customers: "customers?"
+          discount_type: "Type"
+          send_now: "Send Now"
+          send_later: "Send Later"
+          no_recipients: "No recipients with email notifications enabled."
       errors:
         title: "Please fix the following errors:"
 
@@ -1026,6 +1054,47 @@ en:
         status: "Status"
         created: "Created"
         last_updated: "Last Updated"
+
+    # Email Settings section
+    email_settings:
+      edit:
+        title: "Email Settings"
+        subtitle: "Configure outgoing email settings for your organisation"
+        sender_settings: "Sender Settings"
+        sender_name: "Sender Name"
+        sender_name_hint: "Displayed as the sender in outgoing emails. Defaults to organisation name."
+        reply_to: "Reply-To Address"
+        reply_to_hint: "When customers reply to emails, responses will go to this address."
+        preview_from: "From:"
+        preview_reply_to: "Reply-To:"
+        notification_preferences: "Email Notifications"
+        notification_preferences_hint: "Control which emails are sent to customers and team members. Authentication emails (password reset, team invitations) cannot be disabled."
+        order_confirmation: "Order Confirmation"
+        order_confirmation_hint: "Send confirmation email when a customer places an order"
+        discount_notification: "Discount Notifications"
+        discount_notification_hint: "Notify customers about new discounts and promotions"
+        customer_invitation: "Customer Invitation"
+        customer_invitation_hint: "Send invitation email when adding a new customer"
+        order_notification_recipients: "Order Notification Recipients"
+        order_notification_recipients_hint: "Select which team members receive an email notification when a customer places an order. If none are selected, no notifications will be sent."
+        no_team_members: "No active team members found."
+        auth_emails_note: "Customer invitation, password reset, team invitation, and added-to-organisation emails are always sent and cannot be disabled."
+        email_logs: "Email History"
+        log_date: "Date"
+        log_type: "Type"
+        log_recipient: "Recipient"
+        log_subject: "Subject"
+        status_sent: "Sent"
+        status_skipped: "Skipped"
+        status_failed: "Failed"
+        no_logs: "No emails sent yet."
+        customer_opt_out: "Customer Email Opt-Out"
+        customer_opt_out_hint: "Search and select customers to exclude from marketing emails (discount notifications, promo codes). Authentication emails are always sent."
+        customer_opt_out_search: "Search and add customers to the blocklist"
+      flash:
+        updated: "Email settings updated successfully."
+        recipients_updated: "Order notification recipients updated successfully."
+        customer_preferences_updated: "Customer email preferences updated successfully."
 
     # Profile section
     profiles:

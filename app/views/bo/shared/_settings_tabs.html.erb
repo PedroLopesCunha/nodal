@@ -8,6 +8,12 @@
         <% end %>
       </li>
       <li class="nav-item" role="presentation">
+        <%= link_to edit_bo_email_settings_path(params[:org_slug]),
+            class: "nav-link rounded-0 py-3 #{'active' if controller_name == 'email_settings'}" do %>
+          <i class="fa-solid fa-envelope me-2"></i><%= t('bo.settings.tabs.email', default: 'Email') %>
+        <% end %>
+      </li>
+      <li class="nav-item" role="presentation">
         <%= link_to edit_bo_erp_settings_path(params[:org_slug]),
             class: "nav-link rounded-0 py-3 #{'active' if controller_name == 'erp_settings'}" do %>
           <i class="fa-solid fa-plug me-2"></i><%= t('bo.settings.tabs.erp_integration', default: 'ERP Integration') %>

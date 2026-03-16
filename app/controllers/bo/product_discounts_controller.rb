@@ -14,12 +14,13 @@ class Bo::ProductDiscountsController < Bo::BaseController
 
     if @discount.save
       update_variant_overrides
-      begin
-        CustomerMailer.with(discount: @discount, organisation: current_organisation).notify_clients_about_discount.deliver_now
-      rescue => e
-        Rails.logger.error("Failed to send product discount email: #{e.message}")
-      end
-      redirect_to bo_pricing_path(params[:org_slug], tab: 'product_discounts'),
+      notification = DiscountEmailNotification.create!(
+        notifiable: @discount,
+        organisation: current_organisation,
+        status: 'pending',
+        recipient_count: DiscountEmailNotification.recipient_count_for(@discount, current_organisation)
+      )
+      redirect_to bo_pricing_path(params[:org_slug], tab: 'product_discounts', notification_id: notification.id),
                   notice: "Product discount created successfully."
     else
       load_variants_for_form

@@ -50,8 +50,13 @@
 
           <div class="row g-3">
             <div class="col-md-12">
-              <label class="form-label"><%= t('bo.pricing.form.client') %> <span class="text-danger">*</span></label>
-              <%= f.collection_select :customer_id, @customers, :id, :company_name, { prompt: t('bo.pricing.form.select_client') }, { class: "form-select", required: true } %>
+              <label class="form-label"><%= t('bo.pricing.form.clients') %> <span class="text-danger">*</span></label>
+              <select name="customer_ids[]" multiple class="form-select" data-controller="tom-select" required style="min-height: 100px;">
+                <% @customers.each do |c| %>
+                  <option value="<%= c.id %>"><%= "#{c.company_name} (#{c.email})" %></option>
+                <% end %>
+              </select>
+              <small class="text-muted"><%= t('bo.pricing.client_tiers.select_clients_hint') %></small>
             </div>
           </div>
 
