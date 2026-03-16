@@ -47,8 +47,8 @@ class Customer < ApplicationRecord
   #accepts_nested_attributes_for :billing_address, update_only: true
   #accepts_nested_attributes_for :shipping_addresses
   #new below
-  accepts_nested_attributes_for :billing_address_with_archived, update_only: true
-  accepts_nested_attributes_for :shipping_addresses_with_archived
+  accepts_nested_attributes_for :billing_address_with_archived, update_only: true, reject_if: :all_blank
+  accepts_nested_attributes_for :shipping_addresses_with_archived, reject_if: :all_blank
 
 
   def self.find_for_database_authentication(warden_conditions)
