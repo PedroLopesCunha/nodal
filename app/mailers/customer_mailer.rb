@@ -102,13 +102,18 @@ class CustomerMailer < ApplicationMailer
     @organisation = params[:organisation]
 
     if @discount.category_based?
+      unless EmailDeliveryGuard.should_send?(organisation: @organisation, email_type: "discount_notification")
+        log_skipped(@organisation, "discount_notification", "bulk")
+        return
+      end
+
       mailing_list = @discount.customer_category.customers
         .where(active: true, email_notifications_enabled: true)
         .pluck(:email)
       return if mailing_list.empty?
 
-      # Templates reference @customer.contact_name — use a generic stand-in for BCC emails
-      @customer = OpenStruct.new(contact_name: I18n.t('mailers.customer_mailer.generic_greeting', default: 'Customer'))
+      # Templates reference @customer.contact_name — use nil for BCC emails (templates handle it)
+      @customer = OpenStruct.new(contact_name: nil)
 
       I18n.with_locale(@organisation.default_locale) do
         if @discount.has_attribute?(:product_id) # CustomerProductDiscount
