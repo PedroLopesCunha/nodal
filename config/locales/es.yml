@@ -305,3 +305,12 @@ es:
       or: "o"
       remember_password: "¿Recuerdas tu contraseña?"
       sign_in: "Iniciar sesión"
+    accept_invitation:
+      title: "Define tu contraseña"
+      subtitle: "Elige una contraseña para acceder a tu cuenta"
+      password: "Contraseña"
+      password_placeholder: "Introduce tu contraseña"
+      password_hint: "Mínimo de %{count} caracteres"
+      confirm_password: "Confirmar contraseña"
+      confirm_password_placeholder: "Confirma tu contraseña"
+      submit: "Crear cuenta"

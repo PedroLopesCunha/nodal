@@ -305,3 +305,12 @@ pt:
       or: "ou"
       remember_password: "Lembras-te da tua palavra-passe?"
       sign_in: "Entrar"
+    accept_invitation:
+      title: "Define a tua palavra-passe"
+      subtitle: "Escolhe uma palavra-passe para aceder à tua conta"
+      password: "Palavra-passe"
+      password_placeholder: "Introduz a tua palavra-passe"
+      password_hint: "Mínimo de %{count} caracteres"
+      confirm_password: "Confirma a palavra-passe"
+      confirm_password_placeholder: "Confirma a tua palavra-passe"
+      submit: "Criar conta"
