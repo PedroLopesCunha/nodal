@@ -74,6 +74,10 @@ pt:
       shopping_lists:
         title: "As Suas Listas"
         view_all: "Ver Todas as Listas"
+      delivery_info:
+        title: "Info de Entrega"
+        cutoff: "Encomende até às %{time} para processamento no próprio dia"
+        next_delivery: "Próxima entrega: %{date}"
       quick_links:
         title: "Acesso Rápido"
         group_orders: "Encomendas"

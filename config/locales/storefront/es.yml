@@ -74,6 +74,10 @@ es:
       shopping_lists:
         title: "Sus Listas"
         view_all: "Ver Todas las Listas"
+      delivery_info:
+        title: "Info de Entrega"
+        cutoff: "Pida antes de las %{time} para procesamiento en el mismo día"
+        next_delivery: "Próxima entrega: %{date}"
       quick_links:
         title: "Acceso Rápido"
         group_orders: "Pedidos"

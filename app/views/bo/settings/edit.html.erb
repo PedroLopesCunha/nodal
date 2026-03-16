@@ -328,6 +328,60 @@
         </div>
       </div>
 
+      <div class="card mb-3">
+        <div class="card-body">
+          <h5 class="card-title mb-4"><%= t('bo.settings.edit.delivery_scheduling') %></h5>
+
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label class="form-label"><%= t('bo.settings.edit.timezone') %></label>
+              <%= f.select :timezone,
+                           options_for_select(
+                             ActiveSupport::TimeZone.all.map { |tz| ["#{tz.name} (#{tz.formatted_offset})", tz.tzinfo.name] },
+                             @organisation.timezone
+                           ),
+                           {},
+                           class: "form-control" %>
+            </div>
+          </div>
+
+          <div class="row g-3 mt-2">
+            <div class="col-md-12">
+              <label class="form-label"><%= t('bo.settings.edit.delivery_days') %></label>
+              <div class="d-flex flex-wrap gap-3">
+                <% Organisation::WEEKDAY_NAMES.each_with_index do |day, index| %>
+                  <div class="form-check">
+                    <input type="checkbox"
+                           name="organisation[delivery_day_flags][]"
+                           value="<%= index %>"
+                           id="delivery_day_<%= index %>"
+                           class="form-check-input"
+                           <%= 'checked' if @organisation.delivers_on?(index) %>>
+                    <label class="form-check-label" for="delivery_day_<%= index %>">
+                      <%= t("date.day_names")[index].capitalize %>
+                    </label>
+                  </div>
+                <% end %>
+              </div>
+              <small class="text-muted"><%= t('bo.settings.edit.delivery_days_hint') %></small>
+            </div>
+          </div>
+
+          <div class="row g-3 mt-2">
+            <div class="col-md-6">
+              <label class="form-label"><%= t('bo.settings.edit.lead_time_days') %></label>
+              <%= f.number_field :lead_time_days, class: "form-control", min: 0, step: 1 %>
+              <small class="text-muted"><%= t('bo.settings.edit.lead_time_days_hint') %></small>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label"><%= t('bo.settings.edit.order_cutoff_time') %></label>
+              <%= f.time_field :order_cutoff_time, class: "form-control", value: @organisation.order_cutoff_time %>
+              <small class="text-muted"><%= t('bo.settings.edit.order_cutoff_time_hint') %></small>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <div class="card" data-controller="branding-preview">
         <div class="card-body">
           <h5 class="card-title mb-4"><%= t('bo.settings.edit.branding') %></h5>

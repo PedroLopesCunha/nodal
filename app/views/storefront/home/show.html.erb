@@ -255,6 +255,33 @@
       </div>
     <% end %>
 
+    <%# Delivery Info %>
+    <div class="card border-0 shadow-sm mb-4 fade-in-up" style="border-radius: 12px; animation-delay: 0.3s;">
+      <div class="card-body">
+        <h5 class="card-title mb-3">
+          <i class="fa-solid fa-truck me-2" style="color: var(--org-secondary);"></i><%= t('storefront.home.delivery_info.title') %>
+        </h5>
+        <div class="d-flex flex-column gap-2">
+          <div class="d-flex align-items-center gap-2">
+            <i class="fa-solid fa-calendar-days text-muted" style="width: 18px; text-align: center;"></i>
+            <span class="small">
+              <%= current_organisation.delivery_wdays.map { |d| t("date.day_names")[d].capitalize }.join(", ") %>
+            </span>
+          </div>
+          <% if current_organisation.order_cutoff_time.present? %>
+            <div class="d-flex align-items-center gap-2">
+              <i class="fa-solid fa-clock text-muted" style="width: 18px; text-align: center;"></i>
+              <span class="small"><%= t('storefront.home.delivery_info.cutoff', time: current_organisation.order_cutoff_time) %></span>
+            </div>
+          <% end %>
+          <div class="d-flex align-items-center gap-2">
+            <i class="fa-solid fa-box text-muted" style="width: 18px; text-align: center;"></i>
+            <span class="small"><%= t('storefront.home.delivery_info.next_delivery', date: l(current_organisation.earliest_delivery_date, format: :long)) %></span>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <%# Shopping Lists %>
     <% if !browsing_as_member? && @shopping_lists.present? %>
       <div class="card border-0 shadow-sm mb-4 fade-in-up" style="border-radius: 12px; animation-delay: 0.35s;">

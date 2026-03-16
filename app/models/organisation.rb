@@ -4,6 +4,8 @@ class Organisation < ApplicationRecord
   SUPPORTED_CURRENCIES = %w[EUR CHF USD GBP].freeze
   OUT_OF_STOCK_STRATEGIES = %w[do_nothing deactivate hide].freeze
   HEX_COLOR_REGEX = /\A#[0-9A-Fa-f]{6}\z/
+  CUTOFF_TIME_REGEX = /\A([01]\d|2[0-3]):[0-5]\d\z/
+  WEEKDAY_NAMES = %w[sunday monday tuesday wednesday thursday friday saturday].freeze
 
   monetize :shipping_cost_cents
   monetize :free_shipping_threshold_cents, allow_nil: true
@@ -45,6 +47,15 @@ class Organisation < ApplicationRecord
   validates :primary_color, format: { with: HEX_COLOR_REGEX }, allow_blank: true
   validates :secondary_color, format: { with: HEX_COLOR_REGEX }, allow_blank: true
   validates :email_reply_to, format: { with: URI::MailTo::EMAIL_REGEXP }, allow_blank: true
+  validates :lead_time_days, numericality: { greater_than_or_equal_to: 0, only_integer: true }
+  validates :delivery_days, numericality: { greater_than: 0, only_integer: true }
+  validates :order_cutoff_time, format: { with: CUTOFF_TIME_REGEX }, allow_blank: true
+  validates :timezone, inclusion: { in: ActiveSupport::TimeZone::MAPPING.values.uniq }
+
+  before_validation :set_delivery_days_from_flags
+  before_validation :normalize_cutoff_time
+
+  attr_accessor :delivery_day_flags
 
   slugify :name
 
@@ -107,5 +118,61 @@ class Organisation < ApplicationRecord
 
   def email_reply_to_address
     email_reply_to.presence
+  end
+
+  # Delivery scheduling helpers
+
+  def delivery_day_flags
+    @delivery_day_flags || delivery_wdays.map(&:to_s)
+  end
+
+  def delivers_on?(wday)
+    delivery_days & (1 << wday) != 0
+  end
+
+  def delivery_wdays
+    (0..6).select { |d| delivers_on?(d) }
+  end
+
+  def valid_delivery_day?(date)
+    delivers_on?(date.wday)
+  end
+
+  def past_cutoff?(time = Time.current)
+    return false if order_cutoff_time.blank?
+
+    local_time = time.in_time_zone(timezone)
+    hours, minutes = order_cutoff_time.split(":").map(&:to_i)
+    cutoff = local_time.change(hour: hours, min: minutes)
+    local_time >= cutoff
+  end
+
+  def earliest_delivery_date(from: Time.current)
+    date = from.in_time_zone(timezone).to_date
+    date += 1.day if past_cutoff?(from)
+
+    remaining = lead_time_days
+    while remaining > 0
+      date += 1.day
+      remaining -= 1 if delivers_on?(date.wday)
+    end
+
+    date += 1.day until delivers_on?(date.wday)
+    date
+  end
+
+  private
+
+  def normalize_cutoff_time
+    return if order_cutoff_time.blank?
+
+    self.order_cutoff_time = order_cutoff_time.strip[0, 5]
+  end
+
+  def set_delivery_days_from_flags
+    return unless @delivery_day_flags.is_a?(Array)
+
+    flags = @delivery_day_flags.reject(&:blank?).map(&:to_i)
+    self.delivery_days = flags.sum { |d| 1 << d }
   end
 end
