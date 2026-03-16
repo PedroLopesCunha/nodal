@@ -13,7 +13,7 @@
 
       <div>
         <h1><%= t('bo.pricing.client_tiers.edit.title') %></h1>
-        <span class="text-muted"><%= @discount.customer.company_name %></span>
+        <span class="text-muted"><%= @discount.target_name %></span>
       </div>
     </div>
 
@@ -50,8 +50,13 @@
 
           <div class="row g-3">
             <div class="col-md-12">
-              <label class="form-label"><%= t('bo.pricing.form.client') %> <span class="text-danger">*</span></label>
-              <%= f.collection_select :customer_id, @customers, :id, :company_name, { prompt: t('bo.pricing.form.select_client') }, { class: "form-select", required: true } %>
+              <% if @discount.category_based? %>
+                <label class="form-label"><%= t('bo.pricing.form.customer_category') %> <span class="text-danger">*</span></label>
+                <%= f.collection_select :customer_category_id, @customer_categories, :id, :name, { prompt: t('bo.pricing.form.select_category') }, { class: "form-select", required: true } %>
+              <% else %>
+                <label class="form-label"><%= t('bo.pricing.form.client') %> <span class="text-danger">*</span></label>
+                <%= f.collection_select :customer_id, @customers, :id, :company_name, { prompt: t('bo.pricing.form.select_client') }, { class: "form-select", required: true } %>
+              <% end %>
             </div>
           </div>
 

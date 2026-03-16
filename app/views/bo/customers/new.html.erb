@@ -98,7 +98,7 @@
     </div>
 
     <div class="col-md-4">
-      <div class="card">
+      <div class="card mb-3">
         <div class="card-body">
           <h5 class="card-title mb-4"><%= t('bo.customers.form.account_status') %></h5>
 
@@ -107,6 +107,16 @@
             <label class="form-check-label" for="activeSwitch"><%= t('bo.customers.form.active_customer') %></label>
           </div>
           <small class="text-muted"><%= t('bo.customers.form.inactive_hint') %></small>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-body">
+          <h5 class="card-title mb-4"><%= t('bo.customers.form.category') %></h5>
+          <%= f.select :customer_category_id,
+              options_from_collection_for_select(@customer_categories, :id, :name),
+              { include_blank: t('bo.customers.form.no_category') },
+              class: "form-select" %>
         </div>
       </div>
     </div>

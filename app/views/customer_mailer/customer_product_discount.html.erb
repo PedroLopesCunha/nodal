@@ -16,7 +16,7 @@
   </tr>
 </table>
 
-<p style="margin: 0 0 8px 0; font-size: 16px;"><%= t('mailers.customer_mailer.customer_product_discount.greeting', name: @customer.contact_name) %></p>
+<p style="margin: 0 0 8px 0; font-size: 16px;"><%= @customer.contact_name.present? ? t('mailers.customer_mailer.customer_product_discount.greeting', name: @customer.contact_name) : t('mailers.customer_mailer.customer_product_discount.greeting_generic') %></p>
 
 <p style="margin: 0 0 24px 0; color: #4b5563;">
   <%= t('mailers.customer_mailer.customer_product_discount.intro') %>

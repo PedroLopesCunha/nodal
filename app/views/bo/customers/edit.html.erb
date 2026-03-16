@@ -164,6 +164,16 @@
         </div>
       </div>
 
+      <div class="card mb-3">
+        <div class="card-body">
+          <h5 class="card-title mb-4"><%= t('bo.customers.form.category') %></h5>
+          <%= f.select :customer_category_id,
+              options_from_collection_for_select(@customer_categories, :id, :name, @customer.customer_category_id),
+              { include_blank: t('bo.customers.form.no_category') },
+              class: "form-select" %>
+        </div>
+      </div>
+
       <div class="card">
         <div class="card-body">
           <h5 class="card-title mb-4"><%= t('bo.customers.form.account_info') %></h5>

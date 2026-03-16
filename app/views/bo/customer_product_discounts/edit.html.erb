@@ -13,7 +13,7 @@
 
       <div>
         <h1><%= t('bo.pricing.custom_pricing.edit.title') %></h1>
-        <span class="text-muted"><%= @discount.customer.company_name %> - <%= @discount.target_name %></span>
+        <span class="text-muted"><%= @discount.customer_target_name %> - <%= @discount.target_name %></span>
       </div>
     </div>
 
@@ -52,14 +52,24 @@
                data-variant-overrides-url-value="<%= variant_overrides_bo_customer_product_discounts_path(params[:org_slug]) %>"
                data-discount-target-url-value="<%= variant_overrides_bo_customer_product_discounts_path(params[:org_slug]) %>">
             <div class="col-md-12 mb-2">
-              <label class="form-label"><%= t('bo.pricing.form.client') %> <span class="text-danger">*</span></label>
-              <select name="customer_product_discount[customer_id]" id="customer_product_discount_customer_id" class="form-select" required
-                      data-controller="tom-select">
-                <option value=""><%= t('bo.pricing.form.select_client') %></option>
-                <% @customers.each do |customer| %>
-                  <option value="<%= customer.id %>" data-sku="<%= customer.email %>" <%= 'selected' if @discount.customer_id == customer.id %>><%= customer.company_name %></option>
-                <% end %>
-              </select>
+              <% if @discount.category_based? %>
+                <label class="form-label"><%= t('bo.pricing.form.customer_category') %> <span class="text-danger">*</span></label>
+                <select name="customer_product_discount[customer_category_id]" class="form-select" required data-controller="tom-select">
+                  <option value=""><%= t('bo.pricing.form.select_category') %></option>
+                  <% @customer_categories.each do |cc| %>
+                    <option value="<%= cc.id %>" <%= 'selected' if @discount.customer_category_id == cc.id %>><%= cc.name %></option>
+                  <% end %>
+                </select>
+              <% else %>
+                <label class="form-label"><%= t('bo.pricing.form.client') %> <span class="text-danger">*</span></label>
+                <select name="customer_product_discount[customer_id]" id="customer_product_discount_customer_id" class="form-select" required
+                        data-controller="tom-select">
+                  <option value=""><%= t('bo.pricing.form.select_client') %></option>
+                  <% @customers.each do |customer| %>
+                    <option value="<%= customer.id %>" data-sku="<%= customer.email %>" <%= 'selected' if @discount.customer_id == customer.id %>><%= customer.company_name %></option>
+                  <% end %>
+                </select>
+              <% end %>
             </div>
 
             <div class="col-md-12 mb-2">

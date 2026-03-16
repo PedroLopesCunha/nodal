@@ -90,6 +90,12 @@ Rails.application.routes.draw do
           post :invite
         end
       end
+      resources :customer_categories, except: [:index, :show] do
+        member do
+          post :add_customers
+          delete :remove_customer
+        end
+      end
       resources :products do
         collection do
           get :import

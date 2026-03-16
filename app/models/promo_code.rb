@@ -8,6 +8,8 @@ class PromoCode < ApplicationRecord
 
   has_many :promo_code_customers, dependent: :destroy
   has_many :eligible_customers, through: :promo_code_customers, source: :customer
+  has_many :promo_code_customer_categories, dependent: :destroy
+  has_many :eligible_customer_categories, through: :promo_code_customer_categories, source: :customer_category
   has_many :promo_code_redemptions, dependent: :destroy
   has_many :orders
 
@@ -77,7 +79,9 @@ class PromoCode < ApplicationRecord
 
   def eligible_for_customer?(customer)
     return true if eligibility == 'all_customers'
-    promo_code_customers.exists?(customer: customer)
+    return true if promo_code_customers.exists?(customer: customer)
+    customer.customer_category_id.present? &&
+      promo_code_customer_categories.exists?(customer_category_id: customer.customer_category_id)
   end
 
   def redeemable_by?(customer, order)

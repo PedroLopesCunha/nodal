@@ -57,7 +57,14 @@ class Product < ApplicationRecord
 
   def active_discount_for(customer)
     return nil unless customer
-    customer_product_discounts.active.find_by(customer: customer)
+    # Direct customer match takes precedence
+    direct = customer_product_discounts.active.find_by(customer: customer)
+    return direct if direct
+
+    # Fall back to customer category match
+    if customer.customer_category_id.present?
+      customer_product_discounts.active.find_by(customer_category_id: customer.customer_category_id)
+    end
   end
 
   def show_related_products?

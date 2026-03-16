@@ -5,6 +5,7 @@ class Bo::PromoCodesController < Bo::BaseController
     @promo_code = PromoCode.new
     authorize @promo_code
     @customers = current_organisation.customers.order(:company_name)
+    @customer_categories = current_organisation.customer_categories.ordered
   end
 
   def create
@@ -23,12 +24,14 @@ class Bo::PromoCodesController < Bo::BaseController
                   notice: t('bo.pricing.promo_codes.flash.created')
     else
       @customers = current_organisation.customers.order(:company_name)
+      @customer_categories = current_organisation.customer_categories.ordered
       render :new, status: :unprocessable_entity
     end
   end
 
   def edit
     @customers = current_organisation.customers.order(:company_name)
+    @customer_categories = current_organisation.customer_categories.ordered
   end
 
   def update
@@ -37,6 +40,7 @@ class Bo::PromoCodesController < Bo::BaseController
                   notice: t('bo.pricing.promo_codes.flash.updated')
     else
       @customers = current_organisation.customers.order(:company_name)
+      @customer_categories = current_organisation.customer_categories.ordered
       render :edit, status: :unprocessable_entity
     end
   end
@@ -65,7 +69,8 @@ class Bo::PromoCodesController < Bo::BaseController
       :code, :description, :discount_type, :discount_value,
       :min_order_amount, :usage_limit, :per_customer_limit,
       :eligibility, :valid_from, :valid_until, :stackable, :active,
-      eligible_customer_ids: []
+      eligible_customer_ids: [],
+      eligible_customer_category_ids: []
     )
   end
 end

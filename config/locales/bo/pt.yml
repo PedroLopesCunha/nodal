@@ -176,14 +176,23 @@ pt:
         title: "Clientes"
         subtitle: "Ver e gerir os seus clientes"
         search_placeholder: "Pesquisar clientes..."
+        tabs:
+          customers: "Clientes"
+          categories: "Categorias"
+        filters:
+          all_statuses: "Todos os Estados"
+          all_categories: "Todas as Categorias"
+          active_filters: "Filtros ativos"
         table:
           customer: "Cliente"
           company: "Empresa"
           contact: "Contacto"
+          category: "Categoria"
           status: "Estado"
           actions: "Ações"
       show:
         title: "Detalhes do Cliente"
+        category: "Categoria"
         contact_info: "Informação de Contacto"
         company_details: "Detalhes da Empresa"
         email: "E-mail"
@@ -210,6 +219,7 @@ pt:
         title: "Editar Cliente"
         subtitle: "Atualizar informação do cliente"
       form:
+        contact_information: "Informação de Contacto"
         contact_name: "Nome do Contacto"
         contact_name_placeholder: "Introduza o nome do contacto"
         email: "E-mail"
@@ -218,6 +228,8 @@ pt:
         phone_placeholder: "Introduza o número de telefone"
         company_name: "Nome da Empresa"
         company_name_placeholder: "Introduza o nome da empresa"
+        category: "Categoria"
+        no_category: "Sem categoria"
         status: "Estado"
         active: "Ativo"
         inactive: "Inativo"
@@ -244,6 +256,42 @@ pt:
         title: "Convidar para o Portal do Cliente"
         description: "Enviar um e-mail de convite para permitir que este cliente aceda à loja."
         send_invitation: "Enviar Convite"
+
+    # Secção Categorias de Clientes
+    customer_categories:
+      add: "Nova Categoria"
+      empty: "Ainda não existem categorias de clientes. Crie uma para começar a organizar os seus clientes."
+      new:
+        title: "Nova Categoria de Cliente"
+        subtitle: "Criar uma nova categoria de cliente"
+        create: "Criar Categoria"
+      edit:
+        title: "Editar Categoria de Cliente"
+      form:
+        name: "Nome"
+        name_placeholder: "Introduza o nome da categoria"
+        description: "Descrição"
+        description_placeholder: "Descrição opcional para esta categoria"
+      table:
+        name: "Nome"
+        description: "Descrição"
+        customers_count: "Clientes"
+      customers:
+        title: "Clientes Atribuídos"
+        add: "Adicionar Clientes"
+        empty: "Ainda não existem clientes atribuídos a esta categoria."
+        confirm_remove: "Remover este cliente da categoria?"
+        modal_title: "Adicionar Clientes à Categoria"
+        modal_hint: "Selecione os clientes que deseja adicionar a esta categoria."
+        search_placeholder: "Pesquisar clientes..."
+        add_selected: "Adicionar Selecionados"
+        all_assigned: "Todos os clientes já estão atribuídos a uma categoria."
+      flash:
+        created: "Categoria de cliente criada com sucesso."
+        updated: "Categoria de cliente atualizada com sucesso."
+        deleted: "Categoria de cliente eliminada com sucesso."
+        customers_added: "Clientes adicionados à categoria com sucesso."
+        customer_removed: "Cliente removido da categoria com sucesso."
 
     # Secção Produtos
     products:
@@ -697,6 +745,10 @@ pt:
         client: "Cliente"
         clients: "Clientes"
         select_client: "Selecione um cliente..."
+        customer_category: "Categoria de Cliente"
+        customer_categories: "Categorias de Clientes"
+        select_category: "Selecione uma categoria..."
+        select_categories_hint: "Selecione uma ou mais categorias de clientes"
         product: "Produto"
         select_product: "Selecione um produto..."
         discount_type: "Tipo de Desconto"
@@ -761,7 +813,8 @@ pt:
         no_discounts: "Sem descontos de escalão de cliente."
         create_first: "Criar o primeiro desconto de escalão de cliente"
         select_clients_hint: "Selecione um ou mais clientes"
-        select_at_least_one: "Por favor selecione pelo menos um cliente"
+        select_at_least_one: "Por favor selecione pelo menos um cliente ou categoria de cliente"
+        category_badge: "Categoria"
         flash:
           created_multiple:
             one: "Desconto de escalão de cliente criado com sucesso."
@@ -783,7 +836,7 @@ pt:
         create_first: "Criar o primeiro preço personalizado"
         add_custom_price: "Adicionar Preço Personalizado"
         select_clients_hint: "Selecione um ou mais clientes"
-        select_at_least_one: "Por favor selecione pelo menos um cliente"
+        select_at_least_one: "Por favor selecione pelo menos um cliente ou categoria de cliente"
         flash:
           created_multiple:
             one: "Preço personalizado criado com sucesso."
@@ -837,6 +890,9 @@ pt:
           specific_customers_count:
             one: "%{count} Cliente"
             other: "%{count} Clientes"
+          categories_count:
+            one: "%{count} Categoria"
+            other: "%{count} Categorias"
         form:
           code: "Código"
           code_hint: "Código único que os clientes introduzem no checkout (maiúsculas automáticas)"
@@ -851,6 +907,7 @@ pt:
           all_customers: "Todos os clientes podem usar este código"
           specific_customers: "Apenas clientes específicos"
           select_customers: "Selecionar clientes elegíveis"
+          select_customer_categories: "Selecionar categorias de clientes elegíveis"
           stackable_hint: "Se ativado, este código pode combinar com outros descontos"
         new:
           title: "Novo Código Promocional"

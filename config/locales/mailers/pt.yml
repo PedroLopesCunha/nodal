@@ -42,6 +42,7 @@ pt:
       dont_miss_out: "Não perca!"
 
     customer_mailer:
+      generic_greeting: "Cliente"
       confirm_order:
         subject: "Confirmação da encomenda %{order_number}"
         banner_title: "Encomenda Confirmada!"
@@ -74,6 +75,7 @@ pt:
         subject: "Novo Desconto pessoal para SI!"
         banner_title: "Desconto Exclusivo Só Para Si!"
         greeting: "Olá %{name},"
+        greeting_generic: "Olá,"
         intro: "Boas notícias! Criámos um desconto pessoal especial só para si como cliente valioso."
         your_personal_discount: "O Seu Desconto Pessoal"
         on_all_orders: "em todas as suas encomendas"
@@ -84,6 +86,7 @@ pt:
         subject: "Novo Desconto em %{product_name}"
         banner_title: "Desconto Especial em Produto Para Si!"
         greeting: "Olá %{name},"
+        greeting_generic: "Olá,"
         intro: "Boas notícias! Criámos um desconto especial num produto só para si."
         exclusive_to_you: "exclusivo para si"
         exclusive_awaits_title: "O seu desconto exclusivo espera-o!"

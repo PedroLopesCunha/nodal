@@ -179,17 +179,23 @@ en:
         title: "Customers"
         subtitle: "View and manage your customers"
         search_placeholder: "Search customers..."
+        tabs:
+          customers: "Customers"
+          categories: "Categories"
         filters:
           all_statuses: "All Statuses"
+          all_categories: "All Categories"
           active_filters: "Active filters"
         table:
           customer: "Customer"
           company: "Company"
           contact: "Contact"
+          category: "Category"
           status: "Status"
           actions: "Actions"
       show:
         title: "Customer Details"
+        category: "Category"
         contact_info: "Contact Information"
         company_details: "Company Details"
         email: "Email"
@@ -216,6 +222,7 @@ en:
         title: "Edit Customer"
         subtitle: "Update customer information"
       form:
+        contact_information: "Contact Information"
         contact_name: "Contact Name"
         contact_name_placeholder: "Enter contact name"
         email: "Email"
@@ -224,6 +231,8 @@ en:
         phone_placeholder: "Enter phone number"
         company_name: "Company Name"
         company_name_placeholder: "Enter company name"
+        category: "Category"
+        no_category: "No category"
         status: "Status"
         active: "Active"
         inactive: "Inactive"
@@ -250,6 +259,42 @@ en:
         title: "Invite to Customer Portal"
         description: "Send an invitation email to allow this customer to access the storefront."
         send_invitation: "Send Invitation"
+
+    # Customer Categories section
+    customer_categories:
+      add: "New Category"
+      empty: "No customer categories yet. Create one to start organising your customers."
+      new:
+        title: "New Customer Category"
+        subtitle: "Create a new customer category"
+        create: "Create Category"
+      edit:
+        title: "Edit Customer Category"
+      form:
+        name: "Name"
+        name_placeholder: "Enter category name"
+        description: "Description"
+        description_placeholder: "Optional description for this category"
+      table:
+        name: "Name"
+        description: "Description"
+        customers_count: "Customers"
+      customers:
+        title: "Assigned Customers"
+        add: "Add Customers"
+        empty: "No customers assigned to this category yet."
+        confirm_remove: "Remove this customer from the category?"
+        modal_title: "Add Customers to Category"
+        modal_hint: "Select the customers you want to add to this category."
+        search_placeholder: "Search customers..."
+        add_selected: "Add Selected"
+        all_assigned: "All customers are already assigned to a category."
+      flash:
+        created: "Customer category created successfully."
+        updated: "Customer category updated successfully."
+        deleted: "Customer category deleted successfully."
+        customers_added: "Customers added to category successfully."
+        customer_removed: "Customer removed from category successfully."
 
     # Products section
     products:
@@ -718,6 +763,10 @@ en:
         client: "Client"
         clients: "Clients"
         select_client: "Select a client..."
+        customer_category: "Customer Category"
+        customer_categories: "Customer Categories"
+        select_category: "Select a category..."
+        select_categories_hint: "Select one or more customer categories"
         product: "Product"
         select_product: "Select a product..."
         discount_type: "Discount Type"
@@ -774,7 +823,8 @@ en:
         no_discounts: "No client tier discounts found."
         create_first: "Create your first client tier discount"
         select_clients_hint: "Select one or more clients"
-        select_at_least_one: "Please select at least one client"
+        select_at_least_one: "Please select at least one client or customer category"
+        category_badge: "Category"
         flash:
           created_multiple:
             one: "Client tier discount created successfully."
@@ -796,7 +846,7 @@ en:
         create_first: "Create your first custom price"
         add_custom_price: "Add Custom Price"
         select_clients_hint: "Select one or more clients"
-        select_at_least_one: "Please select at least one client"
+        select_at_least_one: "Please select at least one client or customer category"
         flash:
           created_multiple:
             one: "Custom price created successfully."
@@ -850,6 +900,9 @@ en:
           specific_customers_count:
             one: "%{count} Customer"
             other: "%{count} Customers"
+          categories_count:
+            one: "%{count} Category"
+            other: "%{count} Categories"
         form:
           code: "Code"
           code_hint: "Unique code customers will enter at checkout (auto-uppercased)"
@@ -864,6 +917,7 @@ en:
           all_customers: "All customers can use this code"
           specific_customers: "Only specific customers"
           select_customers: "Select eligible customers"
+          select_customer_categories: "Select eligible customer categories"
           stackable_hint: "If enabled, this code can combine with other discounts"
         new:
           title: "New Promo Code"

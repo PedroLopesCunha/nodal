@@ -3,7 +3,8 @@ class CustomerProductDiscount < ApplicationRecord
 
   DISCOUNT_TYPES = %w[percentage fixed].freeze
 
-  belongs_to :customer
+  belongs_to :customer, optional: true
+  belongs_to :customer_category, optional: true
   belongs_to :product, optional: true
   belongs_to :category, optional: true
   belongs_to :organisation
@@ -15,6 +16,7 @@ class CustomerProductDiscount < ApplicationRecord
   validate :dates_not_in_past, on: :create
   validate :no_overlapping_discounts
   validate :must_have_product_or_category
+  validate :must_have_customer_or_customer_category
 
   scope :active, -> {
     where(active: true)
@@ -43,6 +45,18 @@ class CustomerProductDiscount < ApplicationRecord
 
   def category?
     category_id.present?
+  end
+
+  def category_based?
+    customer_category_id.present?
+  end
+
+  def customer_target_name
+    if category_based?
+      customer_category&.name
+    else
+      customer&.company_name
+    end
   end
 
   def target_name
@@ -95,12 +109,16 @@ class CustomerProductDiscount < ApplicationRecord
   end
 
   def no_overlapping_discounts
-    return if customer_id.blank?
+    return if customer_id.blank? && customer_category_id.blank?
     return if product_id.blank? && category_id.blank?
 
-    overlapping = CustomerProductDiscount
-      .where(customer_id: customer_id)
-      .where.not(id: id)
+    overlapping = CustomerProductDiscount.where.not(id: id)
+
+    if customer_id.present?
+      overlapping = overlapping.where(customer_id: customer_id)
+    else
+      overlapping = overlapping.where(customer_category_id: customer_category_id)
+    end
 
     if product?
       overlapping = overlapping.where(product_id: product_id)
@@ -120,6 +138,14 @@ class CustomerProductDiscount < ApplicationRecord
     if overlapping.exists?
       target = product? ? "product" : "category"
       errors.add(:base, "overlaps with an existing discount for this customer and #{target}")
+    end
+  end
+
+  def must_have_customer_or_customer_category
+    if customer_id.blank? && customer_category_id.blank?
+      errors.add(:base, "must target either a customer or a customer category")
+    elsif customer_id.present? && customer_category_id.present?
+      errors.add(:base, "cannot target both a customer and a customer category")
     end
   end
 

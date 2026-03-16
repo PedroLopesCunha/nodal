@@ -43,8 +43,13 @@
         <% @custom_pricing.each do |discount| %>
           <tr>
             <td>
-              <div class="fw-semibold"><%= discount.customer.company_name %></div>
-              <small class="text-muted">C<%= discount.customer.id.to_s.rjust(3, '0') %></small>
+              <% if discount.category_based? %>
+                <div class="fw-semibold"><%= discount.customer_category.name %></div>
+                <span class="badge bg-info-subtle text-info"><%= t('bo.pricing.client_tiers.category_badge') %></span>
+              <% else %>
+                <div class="fw-semibold"><%= discount.customer.company_name %></div>
+                <small class="text-muted">C<%= discount.customer.id.to_s.rjust(3, '0') %></small>
+              <% end %>
             </td>
             <td>
               <div class="d-flex align-items-start gap-2">

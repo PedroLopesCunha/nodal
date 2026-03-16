@@ -322,9 +322,26 @@ class DiscountCalculator
     category_ids = product.categories.flat_map { |cat| cat.path_ids }.uniq
     return [] if category_ids.empty?
 
-    CustomerProductDiscount.active
+    # Direct customer match
+    direct = CustomerProductDiscount.active
       .for_category
       .where(customer: customer, organisation: product.organisation, category_id: category_ids)
+
+    # Also include customer_category-based matches
+    if customer.customer_category_id.present?
+      category_based = CustomerProductDiscount.active
+        .for_category
+        .where(customer_category_id: customer.customer_category_id, organisation: product.organisation, category_id: category_ids)
+        .where(customer_id: nil)
+
+      # Direct customer discounts take precedence — only include category-based for categories not already covered
+      covered_category_ids = direct.pluck(:category_id)
+      category_based = category_based.where.not(category_id: covered_category_ids) if covered_category_ids.any?
+
+      return direct.to_a + category_based.to_a
+    end
+
+    direct.to_a
   end
 
   def currency
