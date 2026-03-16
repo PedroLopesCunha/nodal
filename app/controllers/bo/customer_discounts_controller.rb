@@ -9,8 +9,9 @@ class Bo::CustomerDiscountsController < Bo::BaseController
 
   def create
     customer_ids = Array(params[:customer_ids]).reject(&:blank?)
+    customer_category_ids = Array(params[:customer_category_ids]).reject(&:blank?)
 
-    if customer_ids.empty?
+    if customer_ids.empty? && customer_category_ids.empty?
       @discount = CustomerDiscount.new(customer_discount_params)
       @discount.organisation = current_organisation
       authorize @discount
@@ -18,18 +19,30 @@ class Bo::CustomerDiscountsController < Bo::BaseController
       return render :new, status: :unprocessable_entity
     end
 
-    @discount = CustomerDiscount.new(customer_discount_params.except(:customer_id))
+    @discount = CustomerDiscount.new(customer_discount_params.except(:customer_id, :customer_category_id))
     @discount.organisation = current_organisation
-    @discount.customer_id = customer_ids.first
+    @discount.customer_id = customer_ids.first if customer_ids.any?
+    @discount.customer_category_id = customer_category_ids.first if customer_ids.empty? && customer_category_ids.any?
     authorize @discount
 
     created_discounts = []
     errors = []
 
     customer_ids.each do |cid|
-      discount = CustomerDiscount.new(customer_discount_params.except(:customer_id))
+      discount = CustomerDiscount.new(customer_discount_params.except(:customer_id, :customer_category_id))
       discount.organisation = current_organisation
       discount.customer_id = cid
+      if discount.save
+        created_discounts << discount
+      else
+        errors << discount.errors.full_messages
+      end
+    end
+
+    customer_category_ids.each do |ccid|
+      discount = CustomerDiscount.new(customer_discount_params.except(:customer_id, :customer_category_id))
+      discount.organisation = current_organisation
+      discount.customer_category_id = ccid
       if discount.save
         created_discounts << discount
       else
@@ -94,6 +107,7 @@ class Bo::CustomerDiscountsController < Bo::BaseController
 
   def load_form_collections
     @customers = current_organisation.customers.order(:company_name)
+    @customer_categories = current_organisation.customer_categories.ordered
   end
 
   def customer_discount_params

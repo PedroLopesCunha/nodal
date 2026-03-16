@@ -63,14 +63,37 @@ class Customer < ApplicationRecord
   end
 
   def active_discounts_for_products(product_ids)
-    customer_product_discounts
+    # Direct customer discounts take precedence
+    direct = customer_product_discounts
       .active
       .where(product_id: product_ids)
       .index_by(&:product_id)
+
+    # Fill in category-based discounts for products not covered by direct
+    if customer_category_id.present?
+      missing_ids = product_ids - direct.keys
+      if missing_ids.any?
+        category_based = CustomerProductDiscount
+          .where(customer_category_id: customer_category_id)
+          .active
+          .where(product_id: missing_ids)
+          .index_by(&:product_id)
+        direct.merge!(category_based)
+      end
+    end
+
+    direct
   end
 
   def active_customer_discount
-    customer_discounts.active.first
+    # Direct customer discount takes precedence
+    direct = customer_discounts.active.first
+    return direct if direct
+
+    # Fall back to category-based
+    if customer_category_id.present?
+      CustomerDiscount.where(customer_category_id: customer_category_id).active.first
+    end
   end
 
   def has_active_global_discount?

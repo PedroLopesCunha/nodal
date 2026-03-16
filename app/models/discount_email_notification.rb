@@ -25,13 +25,26 @@ class DiscountEmailNotification < ApplicationRecord
     when ProductDiscount, OrderDiscount
       organisation.customers.where(active_with_email).count
     when CustomerDiscount, CustomerProductDiscount
-      c = notifiable.customer
-      c.active? && c.email_notifications_enabled? ? 1 : 0
+      if notifiable.category_based?
+        notifiable.customer_category.customers.where(active_with_email).count
+      else
+        c = notifiable.customer
+        c.active? && c.email_notifications_enabled? ? 1 : 0
+      end
     when PromoCode
       if notifiable.eligibility == 'all_customers'
         organisation.customers.where(active_with_email).count
       else
-        notifiable.eligible_customers.where(active_with_email).count
+        customer_count = notifiable.eligible_customers.where(active_with_email).count
+        if notifiable.eligible_customer_categories.any?
+          category_count = Customer.where(
+            customer_category_id: notifiable.eligible_customer_category_ids,
+            **active_with_email
+          ).where.not(id: notifiable.eligible_customer_ids).count
+          customer_count + category_count
+        else
+          customer_count
+        end
       end
     else
       0

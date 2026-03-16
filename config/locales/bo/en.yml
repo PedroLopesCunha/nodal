@@ -763,6 +763,10 @@ en:
         client: "Client"
         clients: "Clients"
         select_client: "Select a client..."
+        customer_category: "Customer Category"
+        customer_categories: "Customer Categories"
+        select_category: "Select a category..."
+        select_categories_hint: "Select one or more customer categories"
         product: "Product"
         select_product: "Select a product..."
         discount_type: "Discount Type"
@@ -819,7 +823,8 @@ en:
         no_discounts: "No client tier discounts found."
         create_first: "Create your first client tier discount"
         select_clients_hint: "Select one or more clients"
-        select_at_least_one: "Please select at least one client"
+        select_at_least_one: "Please select at least one client or customer category"
+        category_badge: "Category"
         flash:
           created_multiple:
             one: "Client tier discount created successfully."
@@ -841,7 +846,7 @@ en:
         create_first: "Create your first custom price"
         add_custom_price: "Add Custom Price"
         select_clients_hint: "Select one or more clients"
-        select_at_least_one: "Please select at least one client"
+        select_at_least_one: "Please select at least one client or customer category"
         flash:
           created_multiple:
             one: "Custom price created successfully."
@@ -895,6 +900,9 @@ en:
           specific_customers_count:
             one: "%{count} Customer"
             other: "%{count} Customers"
+          categories_count:
+            one: "%{count} Category"
+            other: "%{count} Categories"
         form:
           code: "Code"
           code_hint: "Unique code customers will enter at checkout (auto-uppercased)"
@@ -909,6 +917,7 @@ en:
           all_customers: "All customers can use this code"
           specific_customers: "Only specific customers"
           select_customers: "Select eligible customers"
+          select_customer_categories: "Select eligible customer categories"
           stackable_hint: "If enabled, this code can combine with other discounts"
         new:
           title: "New Promo Code"

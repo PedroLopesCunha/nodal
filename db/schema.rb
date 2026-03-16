@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2026_03_16_172925) do
+ActiveRecord::Schema[7.1].define(version: 2026_03_16_183835) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -109,7 +109,7 @@ ActiveRecord::Schema[7.1].define(version: 2026_03_16_172925) do
   end
 
   create_table "customer_discounts", force: :cascade do |t|
-    t.bigint "customer_id", null: false
+    t.bigint "customer_id"
     t.bigint "organisation_id", null: false
     t.string "discount_type", default: "percentage", null: false
     t.decimal "discount_value", precision: 10, scale: 4, null: false
@@ -120,13 +120,15 @@ ActiveRecord::Schema[7.1].define(version: 2026_03_16_172925) do
     t.text "notes"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.bigint "customer_category_id"
+    t.index ["customer_category_id"], name: "index_customer_discounts_on_customer_category_id"
     t.index ["customer_id", "organisation_id"], name: "index_customer_discounts_on_customer_id_and_organisation_id"
     t.index ["customer_id"], name: "index_customer_discounts_on_customer_id"
     t.index ["organisation_id"], name: "index_customer_discounts_on_organisation_id"
   end
 
   create_table "customer_product_discounts", force: :cascade do |t|
-    t.bigint "customer_id", null: false
+    t.bigint "customer_id"
     t.bigint "product_id"
     t.bigint "organisation_id", null: false
     t.decimal "discount_percentage", precision: 5, scale: 4, default: "0.0"
@@ -138,7 +140,9 @@ ActiveRecord::Schema[7.1].define(version: 2026_03_16_172925) do
     t.boolean "stackable", default: false, null: false
     t.boolean "active", default: true, null: false
     t.bigint "category_id"
+    t.bigint "customer_category_id"
     t.index ["category_id"], name: "index_customer_product_discounts_on_category_id"
+    t.index ["customer_category_id"], name: "index_customer_product_discounts_on_customer_category_id"
     t.index ["customer_id"], name: "index_customer_product_discounts_on_customer_id"
     t.index ["organisation_id"], name: "index_customer_product_discounts_on_organisation_id"
     t.index ["product_id"], name: "index_customer_product_discounts_on_product_id"
@@ -547,6 +551,16 @@ ActiveRecord::Schema[7.1].define(version: 2026_03_16_172925) do
     t.index ["slug"], name: "index_products_on_slug", unique: true
   end
 
+  create_table "promo_code_customer_categories", force: :cascade do |t|
+    t.bigint "promo_code_id", null: false
+    t.bigint "customer_category_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["customer_category_id"], name: "index_promo_code_customer_categories_on_customer_category_id"
+    t.index ["promo_code_id", "customer_category_id"], name: "idx_promo_code_customer_categories_unique", unique: true
+    t.index ["promo_code_id"], name: "index_promo_code_customer_categories_on_promo_code_id"
+  end
+
   create_table "promo_code_customers", force: :cascade do |t|
     t.bigint "promo_code_id", null: false
     t.bigint "customer_id", null: false
@@ -641,9 +655,11 @@ ActiveRecord::Schema[7.1].define(version: 2026_03_16_172925) do
   add_foreign_key "category_products", "categories"
   add_foreign_key "category_products", "products"
   add_foreign_key "customer_categories", "organisations"
+  add_foreign_key "customer_discounts", "customer_categories"
   add_foreign_key "customer_discounts", "customers"
   add_foreign_key "customer_discounts", "organisations"
   add_foreign_key "customer_product_discounts", "categories"
+  add_foreign_key "customer_product_discounts", "customer_categories"
   add_foreign_key "customer_product_discounts", "customers"
   add_foreign_key "customer_product_discounts", "organisations"
   add_foreign_key "customer_product_discounts", "products"
@@ -683,6 +699,8 @@ ActiveRecord::Schema[7.1].define(version: 2026_03_16_172925) do
   add_foreign_key "product_variants", "products"
   add_foreign_key "products", "categories"
   add_foreign_key "products", "organisations"
+  add_foreign_key "promo_code_customer_categories", "customer_categories"
+  add_foreign_key "promo_code_customer_categories", "promo_codes"
   add_foreign_key "promo_code_customers", "customers"
   add_foreign_key "promo_code_customers", "promo_codes"
   add_foreign_key "promo_code_redemptions", "customers"

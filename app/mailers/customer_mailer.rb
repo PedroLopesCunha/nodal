@@ -77,7 +77,16 @@ class CustomerMailer < ApplicationMailer
     mailing_list = if @promo_code.eligibility == "all_customers"
       @organisation.customers.where(email_notifications_enabled: true).pluck(:email)
     else
-      @promo_code.eligible_customers.where(email_notifications_enabled: true).pluck(:email)
+      emails = @promo_code.eligible_customers.where(email_notifications_enabled: true).pluck(:email)
+      # Also include customers from eligible categories
+      if @promo_code.eligible_customer_categories.any?
+        category_emails = Customer.where(
+          customer_category_id: @promo_code.eligible_customer_category_ids,
+          email_notifications_enabled: true
+        ).pluck(:email)
+        emails = (emails + category_emails).uniq
+      end
+      emails
     end
 
     return if mailing_list.empty?
@@ -91,29 +100,57 @@ class CustomerMailer < ApplicationMailer
   def notify_customer_about_discount
     @discount = params[:discount]
     @organisation = params[:organisation]
-    @customer = @discount.customer
 
-    unless EmailDeliveryGuard.should_send?(organisation: @organisation, email_type: "discount_notification", customer: @customer)
-      log_skipped(@organisation, "discount_notification", @customer.email)
-      return
-    end
+    if @discount.category_based?
+      mailing_list = @discount.customer_category.customers
+        .where(active: true, email_notifications_enabled: true)
+        .pluck(:email)
+      return if mailing_list.empty?
 
-    I18n.with_locale(@organisation.default_locale) do
-      if @discount.has_attribute?(:product_id) # CustomerProductDiscount
-        @product = @discount.product
-        @category = @discount.category
-        subject_name = @product&.name || @category&.name
-        subject = t('mailers.customer_mailer.customer_product_discount.subject',
-                    product_name: subject_name)
-        mail_with_org_defaults(@organisation, to: @customer.email, subject: subject) do |format|
-          format.html { render 'customer_product_discount' }
-          format.text { render 'customer_product_discount' }
+      I18n.with_locale(@organisation.default_locale) do
+        if @discount.has_attribute?(:product_id) # CustomerProductDiscount
+          @product = @discount.product
+          @category = @discount.category
+          subject_name = @product&.name || @category&.name
+          subject = t('mailers.customer_mailer.customer_product_discount.subject',
+                      product_name: subject_name)
+          mail_with_org_defaults(@organisation, bcc: mailing_list, subject: subject) do |format|
+            format.html { render 'customer_product_discount' }
+            format.text { render 'customer_product_discount' }
+          end
+        else # CustomerDiscount
+          subject = t('mailers.customer_mailer.customer_discount.subject')
+          mail_with_org_defaults(@organisation, bcc: mailing_list, subject: subject) do |format|
+            format.html { render 'customer_discount' }
+            format.text { render 'customer_discount' }
+          end
         end
-      else # CustomerDiscount
-        subject = t('mailers.customer_mailer.customer_discount.subject')
-        mail_with_org_defaults(@organisation, to: @customer.email, subject: subject) do |format|
-          format.html { render 'customer_discount' }
-          format.text { render 'customer_discount' }
+      end
+    else
+      @customer = @discount.customer
+
+      unless EmailDeliveryGuard.should_send?(organisation: @organisation, email_type: "discount_notification", customer: @customer)
+        log_skipped(@organisation, "discount_notification", @customer.email)
+        return
+      end
+
+      I18n.with_locale(@organisation.default_locale) do
+        if @discount.has_attribute?(:product_id) # CustomerProductDiscount
+          @product = @discount.product
+          @category = @discount.category
+          subject_name = @product&.name || @category&.name
+          subject = t('mailers.customer_mailer.customer_product_discount.subject',
+                      product_name: subject_name)
+          mail_with_org_defaults(@organisation, to: @customer.email, subject: subject) do |format|
+            format.html { render 'customer_product_discount' }
+            format.text { render 'customer_product_discount' }
+          end
+        else # CustomerDiscount
+          subject = t('mailers.customer_mailer.customer_discount.subject')
+          mail_with_org_defaults(@organisation, to: @customer.email, subject: subject) do |format|
+            format.html { render 'customer_discount' }
+            format.text { render 'customer_discount' }
+          end
         end
       end
     end

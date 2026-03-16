@@ -65,11 +65,22 @@
           </div>
 
           <div data-promo-eligibility-target="customerPicker" class="<%= 'd-none' unless @promo_code.eligibility == 'specific_customers' %>">
-            <label class="form-label"><%= t('bo.pricing.promo_codes.form.select_customers') %></label>
-            <%= f.select :eligible_customer_ids,
-                options_for_select(@customers.map { |c| ["#{c.company_name} (#{c.email})", c.id] }, @promo_code.eligible_customer_ids),
-                {},
-                { multiple: true, class: "form-select", data: { controller: "tom-select" }, style: "min-height: 100px;" } %>
+            <div class="mb-3">
+              <label class="form-label"><%= t('bo.pricing.promo_codes.form.select_customers') %></label>
+              <%= f.select :eligible_customer_ids,
+                  options_for_select(@customers.map { |c| ["#{c.company_name} (#{c.email})", c.id] }, @promo_code.eligible_customer_ids),
+                  {},
+                  { multiple: true, class: "form-select", data: { controller: "tom-select" }, style: "min-height: 100px;" } %>
+            </div>
+            <% if @customer_categories&.any? %>
+              <div>
+                <label class="form-label"><%= t('bo.pricing.promo_codes.form.select_customer_categories') %></label>
+                <%= f.select :eligible_customer_category_ids,
+                    options_for_select(@customer_categories.map { |cc| [cc.name, cc.id] }, @promo_code.eligible_customer_category_ids),
+                    {},
+                    { multiple: true, class: "form-select", data: { controller: "tom-select" }, style: "min-height: 100px;" } %>
+              </div>
+            <% end %>
           </div>
         </div>
 

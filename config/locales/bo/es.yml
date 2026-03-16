@@ -742,6 +742,10 @@ es:
         client: "Cliente"
         clients: "Clientes"
         select_client: "Seleccione un cliente..."
+        customer_category: "Categoría de Cliente"
+        customer_categories: "Categorías de Clientes"
+        select_category: "Seleccione una categoría..."
+        select_categories_hint: "Seleccione una o más categorías de clientes"
         product: "Producto"
         select_product: "Seleccione un producto..."
         discount_type: "Tipo de Descuento"
@@ -798,7 +802,8 @@ es:
         no_discounts: "No hay descuentos de tramo de cliente."
         create_first: "Crear el primer descuento de tramo de cliente"
         select_clients_hint: "Seleccione uno o más clientes"
-        select_at_least_one: "Por favor seleccione al menos un cliente"
+        select_at_least_one: "Por favor seleccione al menos un cliente o categoría de cliente"
+        category_badge: "Categoría"
         flash:
           created_multiple:
             one: "Descuento de tramo de cliente creado con éxito."
@@ -820,7 +825,7 @@ es:
         create_first: "Crear el primer precio personalizado"
         add_custom_price: "Añadir Precio Personalizado"
         select_clients_hint: "Seleccione uno o más clientes"
-        select_at_least_one: "Por favor seleccione al menos un cliente"
+        select_at_least_one: "Por favor seleccione al menos un cliente o categoría de cliente"
         flash:
           created_multiple:
             one: "Precio personalizado creado con éxito."
@@ -874,6 +879,9 @@ es:
           specific_customers_count:
             one: "%{count} Cliente"
             other: "%{count} Clientes"
+          categories_count:
+            one: "%{count} Categoría"
+            other: "%{count} Categorías"
         form:
           code: "Código"
           code_hint: "Código único que los clientes introducen en el checkout (mayúsculas automáticas)"
@@ -888,6 +896,7 @@ es:
           all_customers: "Todos los clientes pueden usar este código"
           specific_customers: "Solo clientes específicos"
           select_customers: "Seleccionar clientes elegibles"
+          select_customer_categories: "Seleccionar categorías de clientes elegibles"
           stackable_hint: "Si está activado, este código puede combinarse con otros descuentos"
         new:
           title: "Nuevo Código Promocional"
