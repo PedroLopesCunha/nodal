@@ -305,3 +305,12 @@ en:
       or: "or"
       remember_password: "Remember your password?"
       sign_in: "Sign in"
+    accept_invitation:
+      title: "Set your password"
+      subtitle: "Choose a password to access your account"
+      password: "Password"
+      password_placeholder: "Enter your password"
+      password_hint: "Minimum %{count} characters"
+      confirm_password: "Confirm password"
+      confirm_password_placeholder: "Confirm your password"
+      submit: "Create account"
