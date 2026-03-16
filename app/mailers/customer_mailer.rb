@@ -107,6 +107,9 @@ class CustomerMailer < ApplicationMailer
         .pluck(:email)
       return if mailing_list.empty?
 
+      # Templates reference @customer.contact_name — use a generic stand-in for BCC emails
+      @customer = OpenStruct.new(contact_name: I18n.t('mailers.customer_mailer.generic_greeting', default: 'Customer'))
+
       I18n.with_locale(@organisation.default_locale) do
         if @discount.has_attribute?(:product_id) # CustomerProductDiscount
           @product = @discount.product

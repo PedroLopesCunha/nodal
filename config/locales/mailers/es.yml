@@ -42,6 +42,7 @@ es:
       dont_miss_out: "¡No te lo pierdas!"
 
     customer_mailer:
+      generic_greeting: "Cliente"
       confirm_order:
         subject: "Confirmación del pedido %{order_number}"
         banner_title: "¡Pedido Confirmado!"
