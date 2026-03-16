@@ -75,6 +75,7 @@ class Order < ApplicationRecord
       raise ActiveRecord::RecordInvalid, self
     end
 
+    validate_receive_on!
     place!
   end
 
@@ -204,6 +205,20 @@ class Order < ApplicationRecord
   # Calculate tax based on subtotal after discount
   def calculated_tax
     subtotal_after_discount * organisation.tax_rate
+  end
+
+  def validate_receive_on!
+    return if receive_on.blank?
+
+    unless organisation.valid_delivery_day?(receive_on)
+      errors.add(:receive_on, :invalid_delivery_day)
+      raise ActiveRecord::RecordInvalid, self
+    end
+
+    if receive_on < organisation.earliest_delivery_date
+      errors.add(:receive_on, :too_early)
+      raise ActiveRecord::RecordInvalid, self
+    end
   end
 
   private

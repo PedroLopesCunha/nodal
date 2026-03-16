@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2026_03_16_183835) do
+ActiveRecord::Schema[7.1].define(version: 2026_03_16_203714) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -417,6 +417,10 @@ ActiveRecord::Schema[7.1].define(version: 2026_03_16_183835) do
     t.boolean "email_discount_notification_enabled", default: true, null: false
     t.boolean "email_customer_invitation_enabled", default: true, null: false
     t.boolean "email_member_order_notification_enabled", default: true, null: false
+    t.integer "delivery_days", default: 62, null: false
+    t.string "order_cutoff_time"
+    t.integer "lead_time_days", default: 1, null: false
+    t.string "timezone", default: "Europe/Lisbon", null: false
     t.index ["default_locale"], name: "index_organisations_on_default_locale"
     t.index ["slug"], name: "index_organisations_on_slug", unique: true
   end

@@ -5,7 +5,7 @@ export default class extends Controller {
     static targets = [
         "shippingAmount", "totalAmount", "shippingAddressSection",
         "sameAsShippingOption", "dateLabel", "newShippingAddressForm",
-        "billingAddressFields", "deliveryShippingCost"
+        "billingAddressFields", "deliveryShippingCost", "dateField"
     ]
     static values = {
         subtotal: Number,
@@ -15,7 +15,9 @@ export default class extends Controller {
         freeShippingThreshold: Number,
         freeShippingEnabled: Boolean,
         deliveryLabel: String,
-        pickupLabel: String
+        pickupLabel: String,
+        deliveryDays: Array,
+        earliestDate: String
     }
 
     connect() {
@@ -66,6 +68,20 @@ export default class extends Controller {
         const sameAsShipping = document.getElementById("same_as_shipping")
         if (sameAsShipping && this.hasBillingAddressFieldsTarget) {
             this.billingAddressFieldsTarget.style.display = sameAsShipping.checked ? "none" : "block"
+        }
+    }
+
+    validateDate() {
+        if (!this.hasDateFieldTarget || !this.hasDeliveryDaysValue) return
+
+        const selected = this.dateFieldTarget.value
+        if (!selected) return
+
+        const date = new Date(selected + "T00:00:00")
+        const dayOfWeek = date.getDay()
+
+        if (!this.deliveryDaysValue.includes(dayOfWeek)) {
+            this.dateFieldTarget.value = this.earliestDateValue
         }
     }
 

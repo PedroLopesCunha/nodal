@@ -2,6 +2,11 @@ en:
   activerecord:
     errors:
       models:
+        order:
+          attributes:
+            receive_on:
+              invalid_delivery_day: "is not a valid delivery day"
+              too_early: "is too early, please select a later date"
         product_attribute_value:
           attributes:
             value:

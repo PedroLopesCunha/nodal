@@ -11,6 +11,7 @@ class Storefront::CheckoutsController < Storefront::BaseController
     @order_items = @order.order_items.includes(product: :category)
     @shipping_addresses = current_customer.shipping_addresses
     @billing_address = current_customer.billing_address
+    @earliest_delivery_date = current_organisation.earliest_delivery_date
   end
 
   def update
@@ -40,6 +41,7 @@ class Storefront::CheckoutsController < Storefront::BaseController
       @order_items = @order.order_items.includes(product: :category)
       @shipping_addresses = current_customer.shipping_addresses
       @billing_address = current_customer.billing_address
+      @earliest_delivery_date = current_organisation.earliest_delivery_date
       flash.now[:alert] = e.record.errors.full_messages.to_sentence
       render :show, status: :unprocessable_entity
     end

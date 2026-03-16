@@ -1,7 +1,19 @@
 es:
+  date:
+    day_names: [Domingo, Lunes, Martes, Miércoles, Jueves, Viernes, Sábado]
+    abbr_day_names: [Dom, Lun, Mar, Mié, Jue, Vie, Sáb]
+    month_names: [~, Enero, Febrero, Marzo, Abril, Mayo, Junio, Julio, Agosto, Septiembre, Octubre, Noviembre, Diciembre]
+    abbr_month_names: [~, Ene, Feb, Mar, Abr, May, Jun, Jul, Ago, Sep, Oct, Nov, Dic]
+    formats:
+      long: "%d de %B de %Y"
   activerecord:
     errors:
       models:
+        order:
+          attributes:
+            receive_on:
+              invalid_delivery_day: "no es un día de entrega válido"
+              too_early: "es demasiado pronto, por favor seleccione una fecha posterior"
         product_attribute_value:
           attributes:
             value:

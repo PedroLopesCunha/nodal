@@ -13,7 +13,9 @@
      data-checkout-free-shipping-threshold-value="<%= @current_organisation.free_shipping_threshold_cents || 0 %>"
      data-checkout-free-shipping-enabled-value="<%= @current_organisation.free_shipping_enabled? %>"
      data-checkout-delivery-label-value="<%= t('storefront.checkouts.show.delivery_date.title') %>"
-     data-checkout-pickup-label-value="<%= t('storefront.checkouts.show.delivery_date.pickup_title') %>">
+     data-checkout-pickup-label-value="<%= t('storefront.checkouts.show.delivery_date.pickup_title') %>"
+     data-checkout-delivery-days-value="<%= current_organisation.delivery_wdays.to_json %>"
+     data-checkout-earliest-date-value="<%= @earliest_delivery_date.iso8601 %>">
   <div class="col-lg-8">
 
     <%= form_with model: @order, url: checkout_path(org_slug: params[:org_slug]), method: :patch, id: "checkout-form" do |f| %>
@@ -175,8 +177,9 @@
           <div class="mb-3">
             <%= f.date_field :receive_on,
                 class: "form-control",
-                min: Date.tomorrow,
-                value: @order.receive_on || Date.tomorrow %>
+                min: @earliest_delivery_date,
+                value: (@order.receive_on.present? && @order.receive_on >= @earliest_delivery_date) ? @order.receive_on : @earliest_delivery_date,
+                data: { checkout_target: "dateField", action: "change->checkout#validateDate" } %>
             <div class="form-text"><%= t('storefront.checkouts.show.delivery_date.hint') %></div>
           </div>
         </div>

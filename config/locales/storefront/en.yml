@@ -74,6 +74,10 @@ en:
       shopping_lists:
         title: "Your Lists"
         view_all: "View All Lists"
+      delivery_info:
+        title: "Delivery Info"
+        cutoff: "Order by %{time} for same-day processing"
+        next_delivery: "Next delivery: %{date}"
       quick_links:
         title: "Quick Links"
         group_orders: "Orders"
