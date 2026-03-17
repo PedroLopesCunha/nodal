@@ -2,7 +2,8 @@
   current_category_id = params[:category].present? ? params[:category].to_i : nil
   is_selected = category.id == current_category_id
   is_ancestor = local_assigns[:current_categories]&.any? { |c| c.ancestor_ids.include?(category.id) }
-  has_children = category.children.kept.any?
+  children_list = @category_children[category.id] || []
+  has_children = children_list.any?
   is_expanded = is_selected || is_ancestor || local_assigns[:expanded]
 
   # Single-select: click selects, click again deselects
@@ -28,14 +29,14 @@
     <%= link_to products_path(**link_params),
         class: "category-link flex-grow-1 py-1 #{'active fw-bold text-primary' if is_selected}" do %>
       <%= category.name %>
-      <span class="category-count">(<%= category.all_products_count %>)</span>
+      <span class="category-count">(<%= @category_counts[category.id] || 0 %>)</span>
     <% end %>
   </div>
 
   <% if has_children %>
     <ul class="list-unstyled ms-3 category-children <%= 'collapsed' unless is_expanded %>"
         data-storefront-category-tree-target="children">
-      <% category.children.kept.by_position.each do |child| %>
+      <% children_list.each do |child| %>
         <%= render 'storefront/shared/category_tree_item', category: child, current_categories: local_assigns[:current_categories] %>
       <% end %>
     </ul>
