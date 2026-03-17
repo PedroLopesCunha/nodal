@@ -81,16 +81,17 @@ class Storefront::ProductsController < Storefront::BaseController
 
     # Sort
     @current_sort = params[:sort].presence || "name_asc"
-    sort_order = case @current_sort
-                 when "name_desc" then { name: :desc }
-                 when "price_asc" then { unit_price: :asc, name: :asc }
-                 when "price_desc" then { unit_price: :desc, name: :asc }
-                 when "newest" then { created_at: :desc }
-                 else { name: :asc }
-                 end
+    min_variant_price = "(SELECT MIN(pv.unit_price_cents) FROM product_variants pv WHERE pv.product_id = products.id AND pv.available = true)"
+    sorted_products = case @current_sort
+                      when "name_desc" then products.order(name: :desc)
+                      when "price_asc" then products.order(Arel.sql("#{min_variant_price} ASC NULLS LAST, products.name ASC"))
+                      when "price_desc" then products.order(Arel.sql("#{min_variant_price} DESC NULLS LAST, products.name ASC"))
+                      when "newest" then products.order(created_at: :desc)
+                      else products.order(name: :asc)
+                      end
 
     # Paginate results
-    @pagy, @products = pagy(products.order(sort_order))
+    @pagy, @products = pagy(sorted_products)
 
     # Build discount info for all products using DiscountCalculator
     # for_display: true shows all available discounts (ignoring min_quantity) for display purposes
