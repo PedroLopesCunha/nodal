@@ -13,26 +13,22 @@ class Storefront::ProductsController < Storefront::BaseController
     # Load categories tree for sidebar
     @categories = current_organisation.categories.kept.roots.by_position
 
-    # Parse category IDs
-    if params[:categories].present?
-      category_ids = Array(params[:categories]).map(&:to_i).reject(&:zero?)
-      @current_categories = current_organisation.categories.kept.where(id: category_ids)
-    else
-      @current_categories = []
+    # Parse single selected category
+    if params[:category].present?
+      @current_category = current_organisation.categories.kept.find_by(id: params[:category].to_i)
     end
+    # Keep as array for backward compatibility with shared views
+    @current_categories = @current_category ? [ @current_category ] : []
 
-    # Build product IDs from categories (OR logic)
+    # Build product IDs from selected category (includes subcategories)
     category_product_ids = []
-    if @current_categories.any?
-      all_category_ids = @current_categories.flat_map(&:subtree_ids).uniq
+    if @current_category
+      all_category_ids = @current_category.subtree_ids
       category_product_ids = base_products.joins(:category_products)
                                           .where(category_products: { category_id: all_category_ids })
                                           .pluck(:id).uniq
 
-      # Show breadcrumbs for single category selection only
-      if @current_categories.size == 1
-        @breadcrumbs = @current_categories.first.ancestors.to_a << @current_categories.first
-      end
+      @breadcrumbs = @current_category.ancestors.to_a << @current_category
     end
 
     # Parse search queries (multiple terms with OR logic)
@@ -53,16 +49,30 @@ class Storefront::ProductsController < Storefront::BaseController
     end
     search_product_ids = search_product_ids.uniq
 
-    # Combine with OR logic: categories OR search
-    if @current_categories.any? || @current_queries.any?
-      combined_ids = (category_product_ids + search_product_ids).uniq
+    # Combine with AND logic: category AND search (intersection)
+    if @current_category && @current_queries.any?
+      combined_ids = (category_product_ids & search_product_ids)
       products = combined_ids.any? ? base_products.where(id: combined_ids) : base_products.none
+    elsif @current_category
+      products = category_product_ids.any? ? base_products.where(id: category_product_ids) : base_products.none
+    elsif @current_queries.any?
+      products = search_product_ids.any? ? base_products.where(id: search_product_ids) : base_products.none
     else
       products = base_products
     end
 
+    # Sort
+    @current_sort = params[:sort].presence || "name_asc"
+    sort_order = case @current_sort
+                 when "name_desc" then { name: :desc }
+                 when "price_asc" then { unit_price: :asc, name: :asc }
+                 when "price_desc" then { unit_price: :desc, name: :asc }
+                 when "newest" then { created_at: :desc }
+                 else { name: :asc }
+                 end
+
     # Paginate results
-    @pagy, @products = pagy(products.order(:name))
+    @pagy, @products = pagy(products.order(sort_order))
 
     # Build discount info for all products using DiscountCalculator
     # for_display: true shows all available discounts (ignoring min_quantity) for display purposes
@@ -132,21 +142,9 @@ class Storefront::ProductsController < Storefront::BaseController
   def build_active_filters
     filters = []
 
-    @current_categories.each do |category|
-      remaining_ids = @current_categories.map(&:id) - [ category.id ]
-      remove_params = request.query_parameters.except("categories")
-      remove_params["categories"] = remaining_ids if remaining_ids.any?
-
-      filters << {
-        type: :category,
-        label: category.name,
-        remove_params: remove_params
-      }
-    end
-
     @current_queries.each do |term|
       remaining_queries = @current_queries - [ term ]
-      remove_params = request.query_parameters.except("queries")
+      remove_params = request.query_parameters.except("queries", "page")
       remove_params["queries"] = remaining_queries if remaining_queries.any?
 
       filters << {
