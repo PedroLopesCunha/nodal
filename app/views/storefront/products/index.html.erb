@@ -85,10 +85,30 @@
   </div>
 </div>
 
-<%# Product count and sort (aligned with product grid) %>
-<% if @products.any? %>
-  <div class="row mb-2">
-    <div class="col-lg-9 offset-lg-3">
+<%# Search bar / clear filters + product count / sort %>
+<% has_filters = params[:category].present? || Array(params[:queries]).any? %>
+<div class="row mb-2 align-items-center">
+  <%# Left: search bar + clear filters (aligned with sidebar) %>
+  <div class="col-lg-3 d-none d-lg-flex align-items-center gap-2">
+    <%= form_with url: products_path(org_slug: params[:org_slug]), method: :get, local: true, class: "flex-grow-1" do %>
+      <%= hidden_field_tag 'category', params[:category] if params[:category].present? %>
+      <% Array(params[:queries]).each do |q| %>
+        <%= hidden_field_tag 'queries[]', q %>
+      <% end %>
+      <%= hidden_field_tag 'sort', params[:sort] if params[:sort].present? %>
+      <div class="search-minimal">
+        <%= text_field_tag 'queries[]', nil, class: "form-control", placeholder: t('storefront.products.index.search_placeholder') %>
+        <i class="fa-solid fa-magnifying-glass search-minimal-icon"></i>
+        <button type="submit" class="search-minimal-btn" aria-label="Search">
+          <i class="fa-solid fa-arrow-right"></i>
+        </button>
+      </div>
+    <% end %>
+  </div>
+
+  <%# Right: product count + sort (aligned with grid) %>
+  <div class="col-lg-9">
+    <% if @products.any? %>
       <div class="d-flex justify-content-between align-items-center">
         <small class="text-muted">
           <%= t('storefront.products.index.showing_products',
@@ -115,9 +135,9 @@
           </div>
         </div>
       </div>
-    </div>
+    <% end %>
   </div>
-<% end %>
+</div>
 
 <div class="row">
   <%# Desktop sidebar with filters (hidden on mobile) %>

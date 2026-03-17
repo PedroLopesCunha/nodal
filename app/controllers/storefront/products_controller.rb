@@ -10,8 +10,26 @@ class Storefront::ProductsController < Storefront::BaseController
                                    .or(base_products.where(id: keep_visible_ids))
     end
 
-    # Load categories tree for sidebar
-    @categories = current_organisation.categories.kept.roots.by_position
+    # Load categories tree for sidebar (eager load full tree to avoid N+1)
+    @all_kept_categories = current_organisation.categories.kept.by_position.to_a
+    @categories = @all_kept_categories.select { |c| c.ancestry.nil? }
+
+    # Precompute product counts and children lookup (2 queries instead of N+1)
+    direct_counts = CategoryProduct
+      .where(category_id: @all_kept_categories.map(&:id))
+      .group(:category_id)
+      .distinct
+      .count(:product_id)
+    # Sum descendant counts in memory using ancestry strings
+    @category_counts = {}
+    @all_kept_categories.each do |cat|
+      descendant_ids = @all_kept_categories
+        .select { |c| c.id == cat.id || c.ancestry.to_s.split('/').map(&:to_i).include?(cat.id) }
+        .map(&:id)
+      @category_counts[cat.id] = direct_counts.values_at(*descendant_ids).compact.sum
+    end
+    # Children lookup to avoid N+1 in tree rendering
+    @category_children = @all_kept_categories.group_by(&:parent_id)
 
     # Parse single selected category
     if params[:category].present?
