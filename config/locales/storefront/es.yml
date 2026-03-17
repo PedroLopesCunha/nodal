@@ -146,6 +146,13 @@ es:
         min_order: "Pedido mín."
         price_on_request: "Precio bajo consulta"
         showing_products: "Mostrando %{from}-%{to} de %{count} productos"
+        sort:
+          label: "Ordenar por"
+          name_asc: "Nombre A-Z"
+          name_desc: "Nombre Z-A"
+          price_asc: "Precio: menor a mayor"
+          price_desc: "Precio: mayor a menor"
+          newest: "Más recientes"
       not_available: "Este producto ya no está disponible."
       show:
         back_to_products: "Volver a productos"

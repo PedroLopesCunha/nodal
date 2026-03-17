@@ -6,12 +6,11 @@
     <%# Desktop search bar (hidden on mobile) %>
     <div class="d-none d-lg-block">
       <%= form_with url: products_path(org_slug: params[:org_slug]), method: :get, local: true do %>
-        <% Array(params[:categories]).each do |cat_id| %>
-          <%= hidden_field_tag 'categories[]', cat_id %>
-        <% end %>
+        <%= hidden_field_tag 'category', params[:category] if params[:category].present? %>
         <% Array(params[:queries]).each do |q| %>
           <%= hidden_field_tag 'queries[]', q %>
         <% end %>
+        <%= hidden_field_tag 'sort', params[:sort] if params[:sort].present? %>
         <div class="search-minimal">
           <%= text_field_tag 'queries[]', nil, class: "form-control", placeholder: t('storefront.products.index.search_placeholder') %>
           <button type="submit" class="search-minimal-btn" aria-label="Search">
@@ -28,7 +27,7 @@
             data-bs-target="#categoryFilterOffcanvas"
             aria-controls="categoryFilterOffcanvas">
       <i class="fa-solid fa-filter me-2"></i><%= t('storefront.products.index.filters_button') %>
-      <% active_filter_count = Array(params[:categories]).length + Array(params[:queries]).length %>
+      <% active_filter_count = (params[:category].present? ? 1 : 0) + Array(params[:queries]).length %>
       <% if active_filter_count > 0 %>
         <span class="badge bg-primary ms-1"><%= active_filter_count %></span>
       <% end %>
@@ -58,12 +57,11 @@
     <div class="mb-4">
       <h6 class="card-title mb-3"><%= t('storefront.products.index.search') %></h6>
       <%= form_with url: products_path(org_slug: params[:org_slug]), method: :get, local: true do %>
-        <% Array(params[:categories]).each do |cat_id| %>
-          <%= hidden_field_tag 'categories[]', cat_id %>
-        <% end %>
+        <%= hidden_field_tag 'category', params[:category] if params[:category].present? %>
         <% Array(params[:queries]).each do |q| %>
           <%= hidden_field_tag 'queries[]', q %>
         <% end %>
+        <%= hidden_field_tag 'sort', params[:sort] if params[:sort].present? %>
         <div class="sidebar-search">
           <%= text_field_tag 'queries[]', nil, class: "form-control", placeholder: t('storefront.products.index.search_placeholder') %>
           <button type="submit" class="sidebar-search-btn" aria-label="Search">
@@ -77,7 +75,7 @@
     <%= render 'storefront/shared/category_sidebar_content', categories: @categories, current_categories: @current_categories %>
 
     <%# Clear filters button %>
-    <% if Array(params[:categories]).any? || Array(params[:queries]).any? %>
+    <% if params[:category].present? || Array(params[:queries]).any? %>
       <div class="mt-4 pt-3 border-top">
         <%= link_to products_path(org_slug: params[:org_slug]), class: "btn btn-outline-secondary w-100" do %>
           <i class="fa-solid fa-times me-2"></i><%= t('storefront.products.index.clear_filters') %>
@@ -87,16 +85,36 @@
   </div>
 </div>
 
-<%# Product count (aligned with product grid) %>
+<%# Product count and sort (aligned with product grid) %>
 <% if @products.any? %>
   <div class="row mb-2">
     <div class="col-lg-9 offset-lg-3">
-      <small class="text-muted">
-        <%= t('storefront.products.index.showing_products',
-              from: @pagy.from,
-              to: @pagy.to,
-              count: @pagy.count) %>
-      </small>
+      <div class="d-flex justify-content-between align-items-center">
+        <small class="text-muted">
+          <%= t('storefront.products.index.showing_products',
+                from: @pagy.from,
+                to: @pagy.to,
+                count: @pagy.count) %>
+        </small>
+        <div class="d-flex align-items-center gap-2">
+          <small class="text-muted d-none d-sm-inline"><%= t('storefront.products.index.sort.label') %></small>
+          <% sort_base_params = { org_slug: params[:org_slug], category: params[:category], queries: params[:queries] } %>
+          <div class="dropdown">
+            <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+              <%= t("storefront.products.index.sort.#{@current_sort}") %>
+            </button>
+            <ul class="dropdown-menu dropdown-menu-end">
+              <% %w[name_asc name_desc price_asc price_desc newest].each do |sort_key| %>
+                <li>
+                  <%= link_to t("storefront.products.index.sort.#{sort_key}"),
+                      products_path(**sort_base_params, sort: sort_key),
+                      class: "dropdown-item #{'active' if @current_sort == sort_key}" %>
+                </li>
+              <% end %>
+            </ul>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 <% end %>
@@ -113,7 +131,7 @@
       <div class="row row-cols-2 row-cols-md-2 row-cols-xl-3 product-grid">
         <% @products.each do |product| %>
           <div class="col">
-            <%= link_to product_path(org_slug: params[:org_slug], id: product, categories: params[:categories], queries: params[:queries], page: params[:page]), class: "text-decoration-none" do %>
+            <%= link_to product_path(org_slug: params[:org_slug], id: product, category: params[:category], queries: params[:queries], page: params[:page]), class: "text-decoration-none" do %>
               <div class="card h-100 product-card">
                 <% discount_info = @product_discounts[product.id] %>
                 <div class="product-card-image">
@@ -173,7 +191,7 @@
         <i class="fa-solid fa-box-open fa-4x text-muted mb-3"></i>
         <h4><%= t('storefront.products.index.no_products') %></h4>
         <p class="text-muted">
-          <% if Array(params[:queries]).any? || Array(params[:categories]).any? %>
+          <% if Array(params[:queries]).any? || params[:category].present? %>
             <%= t('storefront.products.index.no_products_hint') %>
           <% else %>
             <%= t('storefront.products.index.empty_catalog') %>

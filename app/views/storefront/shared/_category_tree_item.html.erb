@@ -1,18 +1,15 @@
 <%
-  current_category_ids = Array(params[:categories]).map(&:to_i)
-  is_selected = current_category_ids.include?(category.id)
+  current_category_id = params[:category].present? ? params[:category].to_i : nil
+  is_selected = category.id == current_category_id
   is_ancestor = local_assigns[:current_categories]&.any? { |c| c.ancestor_ids.include?(category.id) }
+  is_descendant = current_category_id && category.ancestor_ids.include?(current_category_id)
   has_children = category.children.kept.any?
-  is_expanded = is_selected || is_ancestor || local_assigns[:expanded]
+  is_expanded = is_selected || is_ancestor || is_descendant || local_assigns[:expanded]
 
-  # Toggle logic: add if not selected, remove if selected
-  if is_selected
-    new_categories = current_category_ids - [category.id]
-  else
-    new_categories = current_category_ids + [category.id]
-  end
+  # Single-select: click selects, click again deselects
   link_params = { org_slug: params[:org_slug], queries: params[:queries] }
-  link_params[:categories] = new_categories if new_categories.any?
+  link_params[:category] = category.id unless is_selected
+  link_params[:sort] = params[:sort] if params[:sort].present?
 %>
 
 <li class="category-tree-item" data-storefront-category-tree-target="item" data-category-id="<%= category.id %>">
