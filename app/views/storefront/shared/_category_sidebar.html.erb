@@ -1,5 +1,23 @@
 <div class="card sidebar-card sidebar-sticky">
   <div class="card-body">
+    <%# Search bar %>
+    <div class="mb-3">
+      <%= form_with url: products_path(org_slug: params[:org_slug]), method: :get, local: true do %>
+        <%= hidden_field_tag 'category', params[:category] if params[:category].present? %>
+        <% Array(params[:queries]).each do |q| %>
+          <%= hidden_field_tag 'queries[]', q %>
+        <% end %>
+        <%= hidden_field_tag 'sort', params[:sort] if params[:sort].present? %>
+        <div class="search-minimal">
+          <%= text_field_tag 'queries[]', nil, class: "form-control", placeholder: t('storefront.products.index.search_placeholder') %>
+          <i class="fa-solid fa-magnifying-glass search-minimal-icon"></i>
+          <button type="submit" class="search-minimal-btn" aria-label="Search">
+            <i class="fa-solid fa-arrow-right"></i>
+          </button>
+        </div>
+      <% end %>
+    </div>
+
     <h6 class="card-title mb-3"><%= t('storefront.products.index.categories') %></h6>
     <div class="category-sidebar" data-controller="storefront-category-tree">
       <ul class="list-unstyled mb-0">
