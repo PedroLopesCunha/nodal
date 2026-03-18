@@ -122,7 +122,15 @@ class Storefront::ProductsController < Storefront::BaseController
 
     # Load variants data for variable products
     if @product.has_variants?
-      @variants = @product.product_variants.available.by_position.includes(:attribute_values)
+      # Include unavailable variants that opted out of hiding (show with "Sem Stock" badge)
+      if current_organisation.hide_out_of_stock?
+        @variants = @product.product_variants
+                            .where(available: true)
+                            .or(@product.product_variants.where(available: false, hide_when_unavailable: false))
+                            .by_position.includes(:attribute_values)
+      else
+        @variants = @product.product_variants.available.by_position.includes(:attribute_values)
+      end
       @attributes_with_values = @product.available_values_by_attribute
       @default_variant = @product.default_variant
 

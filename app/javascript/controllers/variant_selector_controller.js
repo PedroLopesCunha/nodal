@@ -10,7 +10,9 @@ export default class extends Controller {
     defaultHasDiscount: Boolean,
     defaultDiscountPercentage: Number,
     minQuantity: Number,
-    defaultSku: String
+    defaultSku: String,
+    inStockText: { type: String, default: "In Stock" },
+    outOfStockText: { type: String, default: "Out of Stock" }
   }
 
   connect() {
@@ -135,12 +137,12 @@ export default class extends Controller {
     if (this.hasStockTarget) {
       if (variant.track_stock) {
         if (variant.in_stock) {
-          this.stockTarget.innerHTML = `<i class="fa-solid fa-circle-check me-1 text-success"></i> In Stock (${variant.stock_quantity})`
+          this.stockTarget.innerHTML = `<i class="fa-solid fa-circle-check me-1 text-success"></i> ${this.inStockTextValue}`
         } else {
-          this.stockTarget.innerHTML = `<i class="fa-solid fa-circle-xmark me-1 text-danger"></i> Out of Stock`
+          this.stockTarget.innerHTML = `<i class="fa-solid fa-circle-xmark me-1 text-danger"></i> ${this.outOfStockTextValue}`
         }
       } else {
-        this.stockTarget.innerHTML = `<i class="fa-solid fa-circle-check me-1 text-success"></i> In Stock`
+        this.stockTarget.innerHTML = `<i class="fa-solid fa-circle-check me-1 text-success"></i> ${this.inStockTextValue}`
       }
     }
 
