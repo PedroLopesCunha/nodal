@@ -29,7 +29,9 @@
       "variant-selector-default-has-discount-value" => @discount_calculator.discount_breakdown[:has_discount].to_s,
       "variant-selector-default-discount-percentage-value" => (@discount_calculator.discount_breakdown[:has_discount] ? (@discount_calculator.discount_breakdown[:effective_discount][:percentage] * 100).round(0) : 0).to_s,
       "variant-selector-min-quantity-value" => @product.min_quantity || 1,
-      "variant-selector-default-sku-value" => @product.sku
+      "variant-selector-default-sku-value" => @product.sku,
+      "variant-selector-in-stock-text-value" => t('storefront.products.show.in_stock'),
+      "variant-selector-out-of-stock-text-value" => t('storefront.products.show.out_of_stock')
     )
   end
 %>
@@ -239,7 +241,7 @@
             <% if show_availability %>
               <div class="col-4">
                 <div class="text-muted small fw-semibold mb-1"><%= t('storefront.products.show.availability') %></div>
-                <div>
+                <div data-variant-selector-target="stock">
                   <% if @product.available? %>
                     <i class="fa-solid fa-circle-check me-1 text-success"></i>
                     <%= t('storefront.products.show.in_stock') %>
