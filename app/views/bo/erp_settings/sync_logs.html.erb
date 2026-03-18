@@ -81,7 +81,14 @@
                       </li>
                     <% end %>
                     <% if log.error_details.size > 5 %>
-                      <li class="text-muted">... and <%= log.error_details.size - 5 %> more</li>
+                      <details>
+                        <summary class="text-muted" style="cursor: pointer;">... and <%= log.error_details.size - 5 %> more</summary>
+                        <% log.error_details.drop(5).each do |error| %>
+                          <li class="text-danger">
+                            <strong><%= error['record'] %>:</strong> <%= error['error'] %>
+                          </li>
+                        <% end %>
+                      </details>
                     <% end %>
                   </ul>
                 </details>
@@ -111,7 +118,18 @@
                           </li>
                         <% end %>
                         <% if created.size > 10 %>
-                          <li class="text-muted">... and <%= created.size - 10 %> more</li>
+                          <details>
+                            <summary class="text-muted" style="cursor: pointer;">... and <%= created.size - 10 %> more</summary>
+                            <% created.drop(10).each do |change| %>
+                              <li class="text-success">
+                                <strong><%= change['external_id'] %></strong>
+                                (<%= change['record_type'] %>)
+                                <% if change['changes'].present? %>
+                                  — <%= change.dig('changes', 'name') || change.dig('changes', 'sku') %>
+                                <% end %>
+                              </li>
+                            <% end %>
+                          </details>
                         <% end %>
                       </ul>
                     <% end %>
@@ -135,7 +153,24 @@
                           </li>
                         <% end %>
                         <% if updated.size > 10 %>
-                          <li class="text-muted">... and <%= updated.size - 10 %> more</li>
+                          <details>
+                            <summary class="text-muted" style="cursor: pointer;">... and <%= updated.size - 10 %> more</summary>
+                            <% updated.drop(10).each do |change| %>
+                              <li>
+                                <strong><%= change['external_id'] %></strong>
+                                (<%= change['record_type'] %>)
+                                <% if change['changes'].present? %>
+                                  <ul class="list-unstyled ms-3">
+                                    <% change['changes'].each do |field, values| %>
+                                      <li class="text-muted">
+                                        <%= field %>: <span class="text-danger"><%= values[0] %></span> &rarr; <span class="text-success"><%= values[1] %></span>
+                                      </li>
+                                    <% end %>
+                                  </ul>
+                                <% end %>
+                              </li>
+                            <% end %>
+                          </details>
                         <% end %>
                       </ul>
                     <% end %>
@@ -152,7 +187,17 @@
                           </li>
                         <% end %>
                         <% if stock_updated.size > 10 %>
-                          <li class="text-muted">... and <%= stock_updated.size - 10 %> more</li>
+                          <details>
+                            <summary class="text-muted" style="cursor: pointer;">... and <%= stock_updated.size - 10 %> more</summary>
+                            <% stock_updated.drop(10).each do |change| %>
+                              <li class="text-muted">
+                                <strong><%= change['external_id'] %></strong>
+                                <% if change.dig('changes', 'stock_quantity') %>
+                                  — <%= change['changes']['stock_quantity'][0] %> &rarr; <%= change['changes']['stock_quantity'][1] %>
+                                <% end %>
+                              </li>
+                            <% end %>
+                          </details>
                         <% end %>
                       </ul>
                     <% end %>
