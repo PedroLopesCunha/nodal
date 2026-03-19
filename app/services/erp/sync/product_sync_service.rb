@@ -180,7 +180,8 @@ module Erp
 
       def update_stock(variant, data)
         variant.stock_quantity = data[:stock_quantity]
-        variant.track_stock = true
+        # Only enable track_stock for new variants that haven't been explicitly configured
+        variant.track_stock = true if variant.new_record? || !variant.persisted?
       end
 
       def apply_stock_rules(variant)
