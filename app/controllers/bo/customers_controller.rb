@@ -10,6 +10,20 @@ class Bo::CustomersController < Bo::BaseController
   end
 
   def show
+    placed_orders = @customer.orders.placed.order(placed_at: :desc).includes(:order_items, :organisation)
+    @total_orders = placed_orders.count
+    currency = current_organisation.currency
+    if @total_orders > 0
+      total_cents = placed_orders.sum { |o| o.grand_total.cents }
+      @total_spent = Money.new(total_cents, currency)
+      @average_order_value = Money.new(total_cents / @total_orders, currency)
+    else
+      @total_spent = Money.new(0, currency)
+      @average_order_value = Money.new(0, currency)
+    end
+    @last_order = placed_orders.first
+    @recent_orders = placed_orders.limit(5)
+    @open_cart = @customer.orders.draft.includes(:order_items).first
   end
 
   def new
@@ -87,8 +101,10 @@ class Bo::CustomersController < Bo::BaseController
     end
 
     case params[:status]
-    when "active" then @customers = @customers.where(active: true)
+    when "active" then @customers = @customers.where(active: true).where.not(invitation_accepted_at: nil)
     when "inactive" then @customers = @customers.where(active: false)
+    when "not_invited" then @customers = @customers.where(active: true, invitation_sent_at: nil)
+    when "pending" then @customers = @customers.where(active: true, invitation_accepted_at: nil).where.not(invitation_sent_at: nil)
     end
 
     if params[:category].present?

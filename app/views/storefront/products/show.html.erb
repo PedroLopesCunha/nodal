@@ -230,7 +230,7 @@
                   <% if @product.categories.any? %>
                     <%= @product.categories.first.name %>
                     <% if @product.categories.size > 1 %>
-                      <span class="text-muted small" title="<%= @product.categories.drop(1).map(&:name).join(', ') %>" data-bs-toggle="tooltip">+<%= @product.categories.size - 1 %> more</span>
+                      <span class="text-muted small" role="button" title="<%= @product.categories.drop(1).map(&:name).join(', ') %>" data-bs-toggle="tooltip">+<%= t('storefront.products.show.n_more_categories', count: @product.categories.size - 1) %></span>
                     <% end %>
                   <% else %>
                     -

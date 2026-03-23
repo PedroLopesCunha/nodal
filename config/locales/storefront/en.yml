@@ -168,6 +168,9 @@ en:
         valid_until: "Valid until %{date}"
         min_order: "Min. order"
         category: "Category"
+        n_more_categories:
+          one: "1 more category"
+          other: "%{count} more categories"
         availability: "Availability"
         in_stock: "In Stock"
         out_of_stock: "Out of Stock"

@@ -29,6 +29,7 @@ en:
         active: "Active"
         inactive: "Inactive"
         pending: "Pending"
+        not_invited: "Not Invited"
         completed: "Completed"
         draft: "Draft"
         in_process: "In Process"
@@ -220,6 +221,20 @@ en:
         invitation_sent: "Invitation Sent"
         resend_invitation: "Resend Invitation"
         last_invited: "Last invited %{time} ago"
+        invitation_status: "Invitation Status"
+        invitation_accepted: "Invitation Accepted"
+        invited_on: "Invited"
+        accepted_on: "Accepted"
+        account_details: "Account Details"
+        member_since: "Member Since"
+        active_shipping_addresses: "Shipping Addresses"
+        activity_overview: "Activity Overview"
+        total_orders: "Total Orders"
+        total_spent: "Total Spent"
+        avg_order_value: "Avg Order Value"
+        last_login: "Last Login"
+        never: "Never"
+        open_cart: "Open Cart"
       new:
         title: "New Customer"
         subtitle: "Add a new customer to your organisation"
@@ -264,6 +279,9 @@ en:
         title: "Invite to Customer Portal"
         description: "Send an invitation email to allow this customer to access the storefront."
         send_invitation: "Send Invitation"
+        accepted: "Accepted"
+        resend: "Resend Invitation"
+        invite: "Invite to Portal"
 
     # Customer Categories section
     customer_categories:

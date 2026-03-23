@@ -6,7 +6,7 @@ class Customer < ApplicationRecord
   # Note: :registerable is excluded - Members create customer accounts
   # Note: :validatable is excluded - email uniqueness is scoped to organisation
   devise :database_authenticatable,
-         :recoverable, :rememberable, :invitable,
+         :recoverable, :rememberable, :invitable, :trackable,
          authentication_keys: [:email, :organisation_id]
 
   def devise_mailer
@@ -98,6 +98,18 @@ class Customer < ApplicationRecord
 
   def has_active_global_discount?
     active_customer_discount.present?
+  end
+
+  def invitation_status
+    if !active?
+      :inactive
+    elsif invitation_accepted_at.present?
+      :active
+    elsif invitation_sent_at.present?
+      :pending
+    else
+      :not_invited
+    end
   end
 
   private

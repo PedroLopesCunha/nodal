@@ -29,6 +29,7 @@ es:
         active: "Activo"
         inactive: "Inactivo"
         pending: "Pendiente"
+        not_invited: "No Invitado"
         completed: "Completado"
         draft: "Borrador"
         in_process: "En Proceso"
@@ -212,6 +213,20 @@ es:
         invitation_sent: "Invitación Enviada"
         resend_invitation: "Reenviar Invitación"
         last_invited: "Última invitación hace %{time}"
+        invitation_status: "Estado de la Invitación"
+        invitation_accepted: "Invitación Aceptada"
+        invited_on: "Invitado"
+        accepted_on: "Aceptado"
+        account_details: "Detalles de la Cuenta"
+        member_since: "Cliente desde"
+        active_shipping_addresses: "Direcciones de Envío"
+        activity_overview: "Resumen de Actividad"
+        total_orders: "Total de Pedidos"
+        total_spent: "Total Gastado"
+        avg_order_value: "Valor Medio por Pedido"
+        last_login: "Último Inicio de Sesión"
+        never: "Nunca"
+        open_cart: "Carrito Abierto"
       new:
         title: "Nuevo Cliente"
         subtitle: "Añadir un nuevo cliente a su organización"
@@ -256,6 +271,9 @@ es:
         title: "Invitar al Portal del Cliente"
         description: "Enviar un correo de invitación para permitir que este cliente acceda a la tienda."
         send_invitation: "Enviar Invitación"
+        accepted: "Aceptada"
+        resend: "Reenviar Invitación"
+        invite: "Invitar al Portal"
 
     # Sección Categorías de Clientes
     customer_categories:
