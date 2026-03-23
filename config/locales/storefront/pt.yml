@@ -168,6 +168,9 @@ pt:
         valid_until: "Válido até %{date}"
         min_order: "Encomenda mín."
         category: "Categoria"
+        n_more_categories:
+          one: "1 categoria"
+          other: "%{count} categorias"
         availability: "Disponibilidade"
         in_stock: "Em Stock"
         out_of_stock: "Sem Stock"
@@ -228,7 +231,7 @@ pt:
         spend_more_to_unlock: "Gaste mais %{amount} para desbloquear"
         discount_applied: "Aplicado à sua encomenda!"
         discount_off_orders_over: "%{value} em encomendas acima de %{amount}"
-        proceed_to_checkout: "Avançar para Checkout"
+        proceed_to_checkout: "Finalizar Pedido"
         remove: "Remover"
         sku: "SKU"
         min_order: "Mín"
