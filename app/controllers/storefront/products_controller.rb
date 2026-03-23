@@ -58,10 +58,10 @@ class Storefront::ProductsController < Storefront::BaseController
       query = "%#{term}%"
       # Search in product name, description, and category names
       ids_by_category_name = base_products.joins(:categories)
-                                          .where("categories.name ILIKE ?", query)
+                                          .where("unaccent(categories.name) ILIKE unaccent(?)", query)
                                           .pluck(:id)
-      ids_by_product = base_products.where(
-        "products.name ILIKE ? OR products.description ILIKE ? OR products.sku ILIKE ?", query, query, query
+      ids_by_product = base_products.left_joins(:product_variants).where(
+        "unaccent(products.name) ILIKE unaccent(?) OR unaccent(products.description) ILIKE unaccent(?) OR unaccent(products.sku) ILIKE unaccent(?) OR unaccent(product_variants.sku) ILIKE unaccent(?)", query, query, query, query
       ).pluck(:id)
       search_product_ids += ids_by_product + ids_by_category_name
     end

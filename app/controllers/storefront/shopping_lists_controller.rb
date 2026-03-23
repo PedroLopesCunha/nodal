@@ -107,7 +107,7 @@ class Storefront::ShoppingListsController < Storefront::BaseController
     if params[:search].present?
       query = "%#{params[:search]}%"
       base_products = base_products.where(
-        "products.name ILIKE ? OR products.sku ILIKE ?", query, query
+        "unaccent(products.name) ILIKE unaccent(?) OR unaccent(products.sku) ILIKE unaccent(?)", query, query
       )
     end
 

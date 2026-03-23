@@ -8,7 +8,7 @@ class Bo::OrdersController < Bo::BaseController
     if params[:search].present?
       search_term = "%#{params[:search]}%"
       @orders = @orders.joins(:customer).where(
-        "orders.order_number ILIKE :search OR customers.company_name ILIKE :search OR customers.contact_name ILIKE :search",
+        "unaccent(orders.order_number) ILIKE unaccent(:search) OR unaccent(customers.company_name) ILIKE unaccent(:search) OR unaccent(customers.contact_name) ILIKE unaccent(:search)",
         search: search_term
       )
     end
