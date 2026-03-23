@@ -215,6 +215,8 @@ es:
         last_invited: "Última invitación hace %{time}"
         invitation_status: "Estado de la Invitación"
         invitation_accepted: "Invitación Aceptada"
+        invited_on: "Invitado"
+        accepted_on: "Aceptado"
       new:
         title: "Nuevo Cliente"
         subtitle: "Añadir un nuevo cliente a su organización"

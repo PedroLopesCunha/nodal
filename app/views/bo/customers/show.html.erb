@@ -179,12 +179,15 @@
           <% when :pending %>
             <span class="badge bg-info-subtle text-info"><i class="fa-solid fa-clock me-1"></i><%= t('bo.common.statuses.pending') %></span>
             <% if @customer.invitation_sent_at %>
-              <br><small class="text-muted"><%= t('bo.customers.show.last_invited', time: time_ago_in_words(@customer.invitation_sent_at)) %></small>
+              <br><small class="text-muted"><%= t('bo.customers.show.invited_on') %>: <%= l(@customer.invitation_sent_at, format: :short) %></small>
             <% end %>
           <% when :active %>
             <span class="badge bg-success-subtle text-success"><%= t('bo.customers.show.invitation_accepted') %></span>
+            <% if @customer.invitation_sent_at %>
+              <br><small class="text-muted"><%= t('bo.customers.show.invited_on') %>: <%= l(@customer.invitation_sent_at, format: :short) %></small>
+            <% end %>
             <% if @customer.invitation_accepted_at %>
-              <br><small class="text-muted"><%= l(@customer.invitation_accepted_at, format: :short) %></small>
+              <br><small class="text-muted"><%= t('bo.customers.show.accepted_on') %>: <%= l(@customer.invitation_accepted_at, format: :short) %></small>
             <% end %>
           <% when :inactive %>
             <span class="badge bg-secondary-subtle text-secondary"><%= t('bo.common.statuses.inactive') %></span>

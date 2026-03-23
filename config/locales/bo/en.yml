@@ -223,6 +223,8 @@ en:
         last_invited: "Last invited %{time} ago"
         invitation_status: "Invitation Status"
         invitation_accepted: "Invitation Accepted"
+        invited_on: "Invited"
+        accepted_on: "Accepted"
       new:
         title: "New Customer"
         subtitle: "Add a new customer to your organisation"
