@@ -100,6 +100,18 @@ class Customer < ApplicationRecord
     active_customer_discount.present?
   end
 
+  def invitation_status
+    if !active?
+      :inactive
+    elsif invitation_accepted_at.present?
+      :active
+    elsif invitation_sent_at.present?
+      :pending
+    else
+      :not_invited
+    end
+  end
+
   private
 
   def address_blank?(attributes)

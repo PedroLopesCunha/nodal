@@ -113,6 +113,8 @@
                 <option value=""><%= t('bo.customers.index.filters.all_statuses') %></option>
                 <option value="active" <%= 'selected' if params[:status] == 'active' %>><%= t('bo.common.statuses.active') %></option>
                 <option value="inactive" <%= 'selected' if params[:status] == 'inactive' %>><%= t('bo.common.statuses.inactive') %></option>
+                <option value="not_invited" <%= 'selected' if params[:status] == 'not_invited' %>><%= t('bo.common.statuses.not_invited') %></option>
+                <option value="pending" <%= 'selected' if params[:status] == 'pending' %>><%= t('bo.common.statuses.pending') %></option>
               </select>
             </div>
             <% if @customer_categories.any? %>
@@ -140,7 +142,7 @@
         <% end %>
         <% if params[:status].present? %>
           <%= link_to bo_customers_path(params[:org_slug], filter_params_hash.except(:status)), class: "badge bg-secondary text-decoration-none" do %>
-            <%= params[:status] == 'active' ? t('bo.common.statuses.active') : t('bo.common.statuses.inactive') %> <i class="fa-solid fa-xmark ms-1"></i>
+            <%= t("bo.common.statuses.#{params[:status]}") %> <i class="fa-solid fa-xmark ms-1"></i>
           <% end %>
         <% end %>
         <% if params[:category].present? %>
@@ -212,10 +214,19 @@
                 <% end %>
               </td>
               <td>
-                <% if customer.active? %>
-                  <span class="badge rounded-pill bg-success-subtle text-success"><%= t('bo.common.statuses.active') %></span>
-                <% else %>
+                <% case customer.invitation_status %>
+                <% when :inactive %>
                   <span class="badge rounded-pill bg-secondary-subtle text-secondary"><%= t('bo.common.statuses.inactive') %></span>
+                <% when :not_invited %>
+                  <span class="badge rounded-pill bg-warning-subtle text-warning">
+                    <i class="fa-solid fa-envelope"></i> <%= t('bo.common.statuses.not_invited') %>
+                  </span>
+                <% when :pending %>
+                  <span class="badge rounded-pill bg-info-subtle text-info">
+                    <i class="fa-solid fa-clock"></i> <%= t('bo.common.statuses.pending') %>
+                  </span>
+                <% when :active %>
+                  <span class="badge rounded-pill bg-success-subtle text-success"><%= t('bo.common.statuses.active') %></span>
                 <% end %>
               </td>
               <td class="text-end customer-actions" style="white-space: nowrap;" onclick="event.stopPropagation();">

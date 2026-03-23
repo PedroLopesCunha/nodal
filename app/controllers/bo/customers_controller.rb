@@ -87,8 +87,10 @@ class Bo::CustomersController < Bo::BaseController
     end
 
     case params[:status]
-    when "active" then @customers = @customers.where(active: true)
+    when "active" then @customers = @customers.where(active: true).where.not(invitation_accepted_at: nil)
     when "inactive" then @customers = @customers.where(active: false)
+    when "not_invited" then @customers = @customers.where(active: true, invitation_sent_at: nil)
+    when "pending" then @customers = @customers.where(active: true, invitation_accepted_at: nil).where.not(invitation_sent_at: nil)
     end
 
     if params[:category].present?

@@ -18,10 +18,15 @@
     </div>
 
     <div class="bo-page-actions">
-      <% if @customer.active? %>
-        <span class="badge bg-primary rounded-pill px-3 py-2"><%= t('bo.common.statuses.active') %></span>
-      <% else %>
+      <% case @customer.invitation_status %>
+      <% when :inactive %>
         <span class="badge bg-secondary rounded-pill px-3 py-2"><%= t('bo.common.statuses.inactive') %></span>
+      <% when :not_invited %>
+        <span class="badge bg-warning rounded-pill px-3 py-2"><i class="fa-solid fa-envelope me-1"></i><%= t('bo.common.statuses.not_invited') %></span>
+      <% when :pending %>
+        <span class="badge bg-info rounded-pill px-3 py-2"><i class="fa-solid fa-clock me-1"></i><%= t('bo.common.statuses.pending') %></span>
+      <% when :active %>
+        <span class="badge bg-primary rounded-pill px-3 py-2"><%= t('bo.common.statuses.active') %></span>
       <% end %>
       <%= link_to edit_bo_customer_path(params[:org_slug], @customer, filter_params_hash), class: "btn btn-outline-primary" do %>
         <i class="fa-solid fa-pen-to-square me-1"></i> <%= t('bo.common.actions.edit') %>
@@ -163,6 +168,26 @@
             <span class="badge bg-light text-dark border"><%= @customer.customer_category.name %></span>
           <% else %>
             <span class="text-muted"><%= t('bo.customers.form.no_category') %></span>
+          <% end %>
+        </div>
+
+        <div class="border-bottom pb-3 mb-3">
+          <small class="text-muted d-block"><%= t('bo.customers.show.invitation_status') %></small>
+          <% case @customer.invitation_status %>
+          <% when :not_invited %>
+            <span class="badge bg-warning-subtle text-warning"><i class="fa-solid fa-envelope me-1"></i><%= t('bo.common.statuses.not_invited') %></span>
+          <% when :pending %>
+            <span class="badge bg-info-subtle text-info"><i class="fa-solid fa-clock me-1"></i><%= t('bo.common.statuses.pending') %></span>
+            <% if @customer.invitation_sent_at %>
+              <br><small class="text-muted"><%= t('bo.customers.show.last_invited', time: time_ago_in_words(@customer.invitation_sent_at)) %></small>
+            <% end %>
+          <% when :active %>
+            <span class="badge bg-success-subtle text-success"><%= t('bo.customers.show.invitation_accepted') %></span>
+            <% if @customer.invitation_accepted_at %>
+              <br><small class="text-muted"><%= l(@customer.invitation_accepted_at, format: :short) %></small>
+            <% end %>
+          <% when :inactive %>
+            <span class="badge bg-secondary-subtle text-secondary"><%= t('bo.common.statuses.inactive') %></span>
           <% end %>
         </div>
 

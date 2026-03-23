@@ -29,6 +29,7 @@ pt:
         active: "Ativo"
         inactive: "Inativo"
         pending: "Pendente"
+        not_invited: "Não Convidado"
         completed: "Concluído"
         draft: "Rascunho"
         in_process: "Em Processo"
@@ -217,6 +218,8 @@ pt:
         invitation_sent: "Convite Enviado"
         resend_invitation: "Reenviar Convite"
         last_invited: "Último convite há %{time}"
+        invitation_status: "Estado do Convite"
+        invitation_accepted: "Convite Aceite"
       new:
         title: "Novo Cliente"
         subtitle: "Adicionar um novo cliente à sua organização"
@@ -261,6 +264,9 @@ pt:
         title: "Convidar para o Portal do Cliente"
         description: "Enviar um e-mail de convite para permitir que este cliente aceda à loja."
         send_invitation: "Enviar Convite"
+        accepted: "Aceite"
+        resend: "Reenviar Convite"
+        invite: "Convidar para o Portal"
 
     # Secção Categorias de Clientes
     customer_categories:
