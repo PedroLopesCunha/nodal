@@ -78,7 +78,7 @@ class Bo::ProductsController < Bo::BaseController
 
     if params[:query].present?
       matching_ids = @products.left_joins(:categories, :product_variants).where(
-        "products.name ILIKE :q OR products.sku ILIKE :q OR products.description ILIKE :q OR categories.name ILIKE :q OR product_variants.sku ILIKE :q",
+        "unaccent(products.name) ILIKE unaccent(:q) OR unaccent(products.sku) ILIKE unaccent(:q) OR unaccent(products.description) ILIKE unaccent(:q) OR unaccent(categories.name) ILIKE unaccent(:q) OR unaccent(product_variants.sku) ILIKE unaccent(:q)",
         q: "%#{params[:query]}%"
       ).select("products.id").distinct
       @products = @products.where(id: matching_ids)

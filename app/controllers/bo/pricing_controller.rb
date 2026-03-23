@@ -27,7 +27,7 @@ class Bo::PricingController < Bo::BaseController
       search_term = "%#{params[:search]}%"
       @product_discounts = @product_discounts
         .left_joins(:product, :category)
-        .where("products.name ILIKE :q OR categories.name ILIKE :q", q: search_term)
+        .where("unaccent(products.name) ILIKE unaccent(:q) OR unaccent(categories.name) ILIKE unaccent(:q)", q: search_term)
     end
   end
 
@@ -39,7 +39,7 @@ class Bo::PricingController < Bo::BaseController
     if params[:search].present? && @tab == 'client_tiers'
       @customer_discounts = @customer_discounts
         .left_joins(:customer, :customer_category)
-        .where("customers.company_name ILIKE :q OR customer_categories.name ILIKE :q", q: "%#{params[:search]}%")
+        .where("unaccent(customers.company_name) ILIKE unaccent(:q) OR unaccent(customer_categories.name) ILIKE unaccent(:q)", q: "%#{params[:search]}%")
     end
   end
 
@@ -52,7 +52,7 @@ class Bo::PricingController < Bo::BaseController
       search_term = "%#{params[:search]}%"
       @custom_pricing = @custom_pricing
         .left_joins(:customer, :customer_category, :product, :category)
-        .where("customers.company_name ILIKE :q OR customer_categories.name ILIKE :q OR products.name ILIKE :q OR categories.name ILIKE :q", q: search_term)
+        .where("unaccent(customers.company_name) ILIKE unaccent(:q) OR unaccent(customer_categories.name) ILIKE unaccent(:q) OR unaccent(products.name) ILIKE unaccent(:q) OR unaccent(categories.name) ILIKE unaccent(:q)", q: search_term)
     end
   end
 
@@ -68,7 +68,7 @@ class Bo::PricingController < Bo::BaseController
       .order(created_at: :desc)
 
     if params[:search].present? && @tab == 'promo_codes'
-      @promo_codes = @promo_codes.where("code ILIKE ?", "%#{params[:search]}%")
+      @promo_codes = @promo_codes.where("unaccent(code) ILIKE unaccent(?)", "%#{params[:search]}%")
     end
   end
 end
