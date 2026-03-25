@@ -9,7 +9,8 @@
           data-bs-target="#categoryFilterOffcanvas"
           aria-controls="categoryFilterOffcanvas">
     <i class="fa-solid fa-filter me-2"></i><%= t('storefront.products.index.filters_button') %>
-    <% active_filter_count = (params[:category].present? ? 1 : 0) + Array(params[:queries]).length %>
+    <% attr_filter_count = params[:attrs].present? ? params[:attrs].values.sum { |v| Array(v).length } : 0 %>
+    <% active_filter_count = (params[:category].present? ? 1 : 0) + Array(params[:queries]).length + attr_filter_count %>
     <% if active_filter_count > 0 %>
       <span class="badge bg-primary ms-1"><%= active_filter_count %></span>
     <% end %>
@@ -62,6 +63,7 @@
           <%= hidden_field_tag 'queries[]', q %>
         <% end %>
         <%= hidden_field_tag 'sort', params[:sort] if params[:sort].present? %>
+        <%= render 'storefront/products/attrs_hidden_fields' %>
         <div class="sidebar-search">
           <%= text_field_tag 'queries[]', nil, class: "form-control", placeholder: t('storefront.products.index.search_placeholder') %>
           <button type="submit" class="sidebar-search-btn" aria-label="Search">
@@ -74,8 +76,66 @@
     <%# Categories %>
     <%= render 'storefront/shared/category_sidebar_content', categories: @categories, current_categories: @current_categories %>
 
+    <%# Attribute filters (mobile) %>
+    <% if @available_attributes.present? %>
+      <div class="mt-4 pt-3 border-top">
+        <h6 class="mb-3"><%= t('storefront.products.index.filters.filter_by') %></h6>
+        <div class="accordion accordion-flush" id="mobileAttributeFilters">
+          <% @available_attributes.each_with_index do |attribute, idx| %>
+            <div class="accordion-item border-0">
+              <h2 class="accordion-header">
+                <button class="accordion-button collapsed px-0 py-2" type="button"
+                        data-bs-toggle="collapse"
+                        data-bs-target="#mobileAttr<%= idx %>"
+                        aria-expanded="false">
+                  <%= attribute[:name] %>
+                  <% selected_count = attribute[:values].count { |v| v[:selected] } %>
+                  <% if selected_count > 0 %>
+                    <span class="badge bg-primary ms-2"><%= selected_count %></span>
+                  <% end %>
+                </button>
+              </h2>
+              <div id="mobileAttr<%= idx %>" class="accordion-collapse collapse">
+                <div class="accordion-body px-0 pt-1 pb-2">
+                  <% attribute[:values].each do |value| %>
+                    <%
+                      if value[:selected]
+                        new_slugs = (@current_attrs[attribute[:slug]] || []) - [value[:slug]]
+                        toggle_attrs = @current_attrs.except(attribute[:slug])
+                        toggle_attrs[attribute[:slug]] = new_slugs if new_slugs.any?
+                      else
+                        new_slugs = (@current_attrs[attribute[:slug]] || []) + [value[:slug]]
+                        toggle_attrs = @current_attrs.merge(attribute[:slug] => new_slugs)
+                      end
+                      filter_params = {
+                        org_slug: params[:org_slug],
+                        category: params[:category],
+                        queries: params[:queries],
+                        sort: params[:sort],
+                        attrs: toggle_attrs.presence
+                      }.compact
+                    %>
+                    <%= link_to products_path(**filter_params), class: "d-flex align-items-center gap-2 py-1 text-decoration-none text-body" do %>
+                      <% if value[:color_hex].present? %>
+                        <span class="attribute-color-swatch <%= 'selected' if value[:selected] %>"
+                              style="background-color: <%= value[:color_hex] %>;"></span>
+                      <% else %>
+                        <i class="fa-<%= value[:selected] ? 'solid' : 'regular' %> fa-square<%= '-check' if value[:selected] %> text-primary"></i>
+                      <% end %>
+                      <span class="flex-grow-1"><%= value[:label] %></span>
+                      <small class="text-muted">(<%= value[:count] %>)</small>
+                    <% end %>
+                  <% end %>
+                </div>
+              </div>
+            </div>
+          <% end %>
+        </div>
+      </div>
+    <% end %>
+
     <%# Clear filters button %>
-    <% if params[:category].present? || Array(params[:queries]).any? %>
+    <% if params[:category].present? || Array(params[:queries]).any? || params[:attrs].present? %>
       <div class="mt-4 pt-3 border-top">
         <%= link_to products_path(org_slug: params[:org_slug]), class: "btn btn-outline-secondary w-100" do %>
           <i class="fa-solid fa-times me-2"></i><%= t('storefront.products.index.clear_filters') %>
@@ -96,6 +156,7 @@
         <%= hidden_field_tag 'queries[]', q %>
       <% end %>
       <%= hidden_field_tag 'sort', params[:sort] if params[:sort].present? %>
+      <%= render 'storefront/products/attrs_hidden_fields' %>
       <div class="search-minimal">
         <%= text_field_tag 'queries[]', nil, class: "form-control", placeholder: t('storefront.products.index.search_placeholder') %>
         <i class="fa-solid fa-magnifying-glass search-minimal-icon"></i>
@@ -106,22 +167,21 @@
     <% end %>
   </div>
 
-  <%# Right: product count + sort (aligned with grid) %>
+  <%# Right: attribute filters + product count + sort (all in one row) %>
   <div class="col-lg-9">
-    <% if @products.any? %>
-      <div class="d-flex justify-content-between align-items-center">
-        <small class="text-muted">
-          <%= t('storefront.products.index.showing_products',
-                from: @pagy.from,
-                to: @pagy.to,
-                count: @pagy.count) %>
-        </small>
-        <div class="d-flex align-items-center gap-2">
-          <small class="text-muted d-none d-sm-inline"><%= t('storefront.products.index.sort.label') %></small>
-          <% sort_base_params = { org_slug: params[:org_slug], category: params[:category], queries: params[:queries] } %>
+    <% if @products.any? || @current_attrs.present? %>
+      <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+        <%# Left: attribute filters %>
+        <div class="d-none d-lg-flex align-items-center flex-wrap gap-2">
+          <%= render 'storefront/products/attribute_filters' %>
+        </div>
+
+        <%# Right: sort %>
+        <div class="d-flex align-items-center">
+          <% sort_base_params = { org_slug: params[:org_slug], category: params[:category], queries: params[:queries], attrs: @current_attrs.presence } %>
           <div class="dropdown">
-            <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-              <%= t("storefront.products.index.sort.#{@current_sort}") %>
+            <button class="btn btn-sm btn-outline-secondary border-0 text-muted text-uppercase dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" style="font-size: 0.8rem; letter-spacing: 0.03em;">
+              <%= t('storefront.products.index.sort.label') %>
             </button>
             <ul class="dropdown-menu dropdown-menu-end">
               <% %w[name_asc name_desc price_asc price_desc newest].each do |sort_key| %>
@@ -151,7 +211,7 @@
       <div class="row row-cols-2 row-cols-md-2 row-cols-xl-3 product-grid">
         <% @products.each do |product| %>
           <div class="col">
-            <%= link_to product_path(org_slug: params[:org_slug], id: product, category: params[:category], queries: params[:queries], page: params[:page]), class: "text-decoration-none" do %>
+            <%= link_to product_path(org_slug: params[:org_slug], id: product, category: params[:category], queries: params[:queries], attrs: @current_attrs.presence, page: params[:page]), class: "text-decoration-none" do %>
               <div class="card h-100 product-card">
                 <% discount_info = @product_discounts[product.id] %>
                 <div class="product-card-image">
@@ -180,7 +240,8 @@
                           <%= humanized_money_with_symbol(discount_info[:final_price]) %>
                         </span>
                         <span class="badge bg-success product-card-discount-badge">
-                          -<%= (discount_info[:effective_discount][:percentage] * 100).round(0) %>%
+                          <% pct = discount_info[:effective_discount][:percentage].to_f %>
+                          -<%= pct.finite? ? (pct * 100).round(0) : 0 %>%
                         </span>
                         <% if discount_info[:all_discounts].any? { |d| d[:type] == :product || d[:type] == :category } %>
                           <span class="badge bg-danger product-card-sale-badge ms-1"><%= t('storefront.products.index.sale_badge') %></span>
@@ -201,11 +262,17 @@
       </div>
 
       <%# Pagination controls %>
-      <% if @pagy.pages > 1 %>
-        <div class="d-flex justify-content-center mt-4">
+      <div class="mt-4 d-flex flex-column align-items-center">
+        <small class="text-muted mb-2">
+          <%= t('storefront.products.index.showing_products',
+                from: @pagy.from,
+                to: @pagy.to,
+                count: @pagy.count) %>
+        </small>
+        <% if @pagy.pages > 1 %>
           <%== pagy_bootstrap_nav(@pagy) %>
-        </div>
-      <% end %>
+        <% end %>
+      </div>
     <% else %>
       <div class="text-center py-5">
         <i class="fa-solid fa-box-open fa-4x text-muted mb-3"></i>

@@ -40,11 +40,28 @@
     }
   }
 
-  // Override Bootstrap dropdown active state
+  // Consistent dropdown styling across storefront
+  .dropdown-item:hover,
+  .dropdown-item:focus {
+    background-color: rgba(var(--org-primary-rgb, 0, 128, 96), 0.08);
+    color: inherit;
+  }
+
   .dropdown-item.active,
   .dropdown-item:active {
-    background-color: var(--org-primary, $teal);
-    color: var(--org-primary-contrast, #ffffff);
+    background-color: rgba(var(--org-primary-rgb, 0, 128, 96), 0.12);
+    color: var(--org-primary, $teal);
+    font-weight: 600;
+  }
+
+  // Consistent outline-secondary buttons (sort, filters)
+  .btn-outline-secondary {
+    &:hover,
+    &:focus {
+      background-color: rgba(0, 0, 0, 0.05);
+      color: $dark;
+      border-color: rgba(0, 0, 0, 0.2);
+    }
   }
 
   // Links with primary color

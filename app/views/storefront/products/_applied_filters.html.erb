@@ -8,6 +8,8 @@
           <i class="fa-solid fa-folder me-1"></i>
         <% elsif filter[:type] == :query %>
           <i class="fa-solid fa-magnifying-glass me-1"></i>
+        <% elsif filter[:type] == :attribute %>
+          <i class="fa-solid fa-filter me-1"></i>
         <% end %>
         <%= filter[:label] %>
         <i class="fa-solid fa-xmark ms-1"></i>

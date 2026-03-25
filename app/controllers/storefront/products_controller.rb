@@ -79,6 +79,34 @@ class Storefront::ProductsController < Storefront::BaseController
       products = base_products
     end
 
+    # Parse attribute filters: params[:attrs] = { "cor" => ["vermelho", "azul"], "espessura" => ["10"] }
+    @current_attrs = {}
+    if params[:attrs].present? && params[:attrs].is_a?(ActionController::Parameters)
+      params[:attrs].each do |attr_slug, value_slugs|
+        slugs = Array(value_slugs).map(&:strip).reject(&:blank?)
+        @current_attrs[attr_slug] = slugs if slugs.any?
+      end
+    end
+
+    # Filter products by attribute values (AND across attributes, OR within each attribute)
+    if @current_attrs.any?
+      attr_filtered_ids = nil
+      @current_attrs.each do |attr_slug, value_slugs|
+        ids = products
+          .joins(product_variants: :variant_attribute_values)
+          .joins("INNER JOIN product_attribute_values pav ON pav.id = variant_attribute_values.product_attribute_value_id")
+          .joins("INNER JOIN product_attributes pa ON pa.id = pav.product_attribute_id")
+          .where(product_variants: { available: true })
+          .where("pa.slug = ? AND pav.slug IN (?)", attr_slug, value_slugs)
+          .distinct.pluck(:id)
+        attr_filtered_ids = attr_filtered_ids ? (attr_filtered_ids & ids) : ids
+      end
+      products = products.where(id: attr_filtered_ids || [])
+    end
+
+    # Collect available attribute filters from the current filtered product set
+    @available_attributes = build_available_attributes(products, @current_attrs)
+
     # Sort
     @current_sort = params[:sort].presence || "name_asc"
     min_variant_price = "(SELECT MIN(pv.unit_price_cents) FROM product_variants pv WHERE pv.product_id = products.id AND pv.available = true)"
@@ -185,7 +213,66 @@ class Storefront::ProductsController < Storefront::BaseController
       }
     end
 
+    @current_attrs.each do |attr_slug, value_slugs|
+      attr = @available_attributes&.find { |a| a[:slug] == attr_slug }
+      attr_name = attr ? attr[:name] : attr_slug
+
+      value_slugs.each do |value_slug|
+        value_label = attr&.dig(:values)&.find { |v| v[:slug] == value_slug }&.dig(:label) || value_slug
+        remaining = value_slugs - [value_slug]
+        remove_params = request.query_parameters.except("page").deep_dup
+        if remaining.any?
+          remove_params["attrs"][attr_slug] = remaining
+        else
+          remove_params["attrs"]&.delete(attr_slug)
+          remove_params.delete("attrs") if remove_params["attrs"]&.empty?
+        end
+
+        filters << {
+          type: :attribute,
+          label: "#{attr_name}: #{value_label}",
+          remove_params: remove_params
+        }
+      end
+    end
+
     filters
+  end
+
+  def build_available_attributes(products, current_attrs)
+    product_ids = products.pluck(:id)
+    return [] if product_ids.empty?
+
+    # Query attribute values present in available variants of these products
+    rows = ProductAttributeValue
+      .joins(:product_attribute, variant_attribute_values: { product_variant: :product })
+      .where(products: { id: product_ids })
+      .where(product_variants: { available: true })
+      .group("product_attributes.id", "product_attributes.name", "product_attributes.slug", "product_attributes.position",
+             "product_attribute_values.id", "product_attribute_values.value", "product_attribute_values.slug",
+             "product_attribute_values.color_hex", "product_attribute_values.position")
+      .order("product_attributes.position", "product_attribute_values.position")
+      .pluck(
+        Arel.sql("product_attributes.id"), Arel.sql("product_attributes.name"), Arel.sql("product_attributes.slug"),
+        Arel.sql("product_attribute_values.id"), Arel.sql("product_attribute_values.value"), Arel.sql("product_attribute_values.slug"),
+        Arel.sql("product_attribute_values.color_hex"),
+        Arel.sql("COUNT(DISTINCT products.id)")
+      )
+
+    # Group into structured data
+    attrs_hash = {}
+    rows.each do |attr_id, attr_name, attr_slug, _val_id, val_label, val_slug, color_hex, count|
+      attrs_hash[attr_id] ||= { name: attr_name, slug: attr_slug, values: [] }
+      attrs_hash[attr_id][:values] << {
+        label: val_label,
+        slug: val_slug,
+        color_hex: color_hex,
+        count: count,
+        selected: current_attrs[attr_slug]&.include?(val_slug) || false
+      }
+    end
+
+    attrs_hash.values
   end
 
   def build_discounts_for(products)
