@@ -94,6 +94,12 @@ gem 'redis', '~> 5.0'
 # HTTP client for ERP integrations
 gem 'faraday', '~> 2.0'
 
+# ZIP file handling for product image import
+gem 'rubyzip', '~> 2.3'
+
+# Excel file parsing for product import
+gem 'roo', '~> 2.10'
+
 # Firebird database client for direct ERP connections
 # Requires libfbclient native library (installed on Heroku via Aptfile)
 # Install with: bundle config set --local with firebird && bundle install

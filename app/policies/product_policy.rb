@@ -20,6 +20,12 @@ class ProductPolicy < ApplicationPolicy
     belongs_to_organisation?
   end
 
+  def import?
+    return false unless user.is_a?(Member) && organisation.present?
+
+    user.org_members.find_by(organisation: organisation)&.role&.in?(%w[admin owner])
+  end
+
   def edit?
     belongs_to_organisation?
   end
