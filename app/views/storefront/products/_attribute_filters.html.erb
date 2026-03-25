@@ -1,0 +1,50 @@
+<% if @available_attributes.present? %>
+  <div class="attribute-filters d-flex flex-wrap align-items-center gap-2">
+    <% @available_attributes.each do |attribute| %>
+      <% has_selected = attribute[:values].any? { |v| v[:selected] } %>
+      <div class="dropdown">
+        <button class="btn btn-sm <%= has_selected ? 'btn-primary' : 'btn-outline-secondary' %> dropdown-toggle"
+                type="button"
+                data-bs-toggle="dropdown"
+                data-bs-auto-close="outside"
+                aria-expanded="false">
+          <%= attribute[:name] %>
+        </button>
+        <div class="dropdown-menu p-3 attribute-filter-dropdown">
+          <% attribute[:values].each do |value| %>
+            <%
+              if value[:selected]
+                # Remove this value
+                new_slugs = (@current_attrs[attribute[:slug]] || []) - [value[:slug]]
+                toggle_attrs = @current_attrs.except(attribute[:slug])
+                toggle_attrs[attribute[:slug]] = new_slugs if new_slugs.any?
+              else
+                # Add this value
+                new_slugs = (@current_attrs[attribute[:slug]] || []) + [value[:slug]]
+                toggle_attrs = @current_attrs.merge(attribute[:slug] => new_slugs)
+              end
+              filter_params = {
+                org_slug: params[:org_slug],
+                category: params[:category],
+                queries: params[:queries],
+                sort: params[:sort],
+                attrs: toggle_attrs.presence
+              }.compact
+            %>
+            <%= link_to products_path(**filter_params), class: "dropdown-item d-flex align-items-center gap-2 px-1 py-1 rounded" do %>
+              <% if value[:color_hex].present? %>
+                <span class="attribute-color-swatch <%= 'selected' if value[:selected] %>"
+                      style="background-color: <%= value[:color_hex] %>;"
+                      title="<%= value[:label] %>"></span>
+              <% else %>
+                <i class="fa-<%= value[:selected] ? 'solid' : 'regular' %> fa-square<%= '-check' if value[:selected] %> text-primary"></i>
+              <% end %>
+              <span class="flex-grow-1"><%= value[:label] %></span>
+              <small class="text-muted">(<%= value[:count] %>)</small>
+            <% end %>
+          <% end %>
+        </div>
+      </div>
+    <% end %>
+  </div>
+<% end %>

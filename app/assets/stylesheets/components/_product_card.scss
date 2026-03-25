@@ -12,9 +12,9 @@
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
   }
 
-  // Image container
+  // Image container — square ratio for consistent scaling
   .product-card-image {
-    height: 200px;
+    aspect-ratio: 1;
     background-color: #f8f9fa;
     display: flex;
     align-items: center;
@@ -30,10 +30,6 @@
     .placeholder-icon {
       font-size: 3rem;
       color: #adb5bd;
-    }
-
-    @media (max-width: 575.98px) {
-      height: 160px;
     }
   }
 
@@ -54,7 +50,7 @@
 
   // Product title
   .product-card-title {
-    font-size: 1rem;
+    font-size: 1.05rem;
     font-weight: 600;
     color: #212529;
     margin: 0.5rem 0 0 0;
@@ -72,13 +68,13 @@
   // Card footer with price
   .card-footer {
     background-color: #fff;
-    border-top: 1px solid rgba(0, 0, 0, 0.04);
-    padding: 0.875rem 1rem;
+    border-top: none;
+    padding: 0.75rem 1rem;
   }
 
   // Price styling
   .product-card-price {
-    font-size: 1.25rem;
+    font-size: 1rem;
     font-weight: 700;
     color: var(--org-primary, #0d6efd);
     margin: 0;
@@ -86,7 +82,7 @@
 
   // Discounted price
   .product-card-price-discounted {
-    font-size: 1.25rem;
+    font-size: 1rem;
     font-weight: 700;
     color: #198754;
     margin: 0;

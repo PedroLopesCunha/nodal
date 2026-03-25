@@ -139,6 +139,7 @@ pt:
         clear_filters: "Limpar filtros"
         filters:
           active: "Filtros ativos"
+          filter_by: "Filtrar por"
         no_products: "Nenhum produto encontrado"
         no_products_hint: "Tente ajustar a sua pesquisa ou filtros."
         empty_catalog: "Não existem produtos disponíveis de momento."

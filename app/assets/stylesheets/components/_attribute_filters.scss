@@ -1,0 +1,32 @@
+// Attribute filter dropdowns (horizontal, above product grid)
+.attribute-filters {
+  .dropdown-toggle {
+    font-size: 0.85rem;
+  }
+}
+
+.attribute-filter-dropdown {
+  min-width: 200px;
+  max-height: 280px;
+  overflow-y: auto;
+
+  .dropdown-item {
+    font-size: 0.875rem;
+    white-space: nowrap;
+  }
+}
+
+// Color swatch circles
+.attribute-color-swatch {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 2px solid #dee2e6;
+  flex-shrink: 0;
+
+  &.selected {
+    border-color: var(--bs-primary);
+    box-shadow: 0 0 0 2px var(--bs-primary);
+  }
+}

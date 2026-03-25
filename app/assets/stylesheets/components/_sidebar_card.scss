@@ -27,7 +27,7 @@
 
   .form-control {
     border: 1px solid rgba(0, 0, 0, 0.12);
-    border-radius: 50px;
+    border-radius: 0.375rem;
     padding: 0.5rem 2.5rem 0.5rem 2.5rem;
     background-color: #f5f6f8;
     font-size: 0.875rem;
@@ -70,7 +70,7 @@
     color: #6c757d;
     padding: 0.25rem 0.5rem;
     cursor: pointer;
-    border-radius: 50px;
+    border-radius: 0.375rem;
     transition: color 0.15s ease, background-color 0.15s ease;
 
     &:hover {
