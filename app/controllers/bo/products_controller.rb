@@ -1,15 +1,17 @@
 require "csv"
+require "roo"
 
 class Bo::ProductsController < Bo::BaseController
   before_action :set_product, only: [:show, :edit, :update, :destroy, :configure_variants, :update_variant_configuration, :delete_photo, :set_main_photo, :related_products, :update_related_products, :reorder_related_products]
 
   # Import actions
   def import
-    authorize Product, :create?
+    authorize Product, :import?
+    @categories = current_organisation.categories.kept.order(:name)
   end
 
   def import_mapping
-    authorize Product, :create?
+    authorize Product, :import?
 
     unless params[:file].present?
       redirect_to import_bo_products_path(params[:org_slug]), alert: t("bo.products.import.no_file")
@@ -17,8 +19,8 @@ class Bo::ProductsController < Bo::BaseController
     end
 
     begin
-      csv_content = params[:file].read.force_encoding("UTF-8")
-      csv_content = csv_content.encode("UTF-8", invalid: :replace, undef: :replace, replace: "")
+      uploaded_file = params[:file]
+      csv_content = parse_uploaded_file(uploaded_file)
 
       # Auto-detect delimiter (semicolon common in European Excel exports)
       col_sep = detect_csv_delimiter(csv_content)
@@ -35,6 +37,27 @@ class Bo::ProductsController < Bo::BaseController
       File.write(temp_path, csv_content)
       session["import_#{@import_key}_col_sep"] = col_sep
 
+      # Store ZIP file if provided
+      if params[:zip_file].present?
+        zip_path = Rails.root.join("tmp", "imports", "#{@import_key}.zip")
+        File.open(zip_path, "wb") { |f| f.write(params[:zip_file].read) }
+        session["import_#{@import_key}_zip"] = zip_path.to_s
+      end
+
+      # Store individual image files if provided
+      if params[:image_files].present?
+        images_dir = Rails.root.join("tmp", "imports", "images_#{@import_key}")
+        FileUtils.mkdir_p(images_dir)
+        params[:image_files].each do |image|
+          File.open(images_dir.join(image.original_filename), "wb") { |f| f.write(image.read) }
+        end
+        session["import_#{@import_key}_images_dir"] = images_dir.to_s
+      end
+
+      # Pass through category and photo mode selections
+      session["import_#{@import_key}_category_id"] = params[:category_id] if params[:category_id].present?
+      session["import_#{@import_key}_photo_mode"] = params[:photo_mode] || "append"
+
       @importable_fields = ProductImportService.importable_fields
     rescue CSV::MalformedCSVError => e
       redirect_to import_bo_products_path(params[:org_slug]), alert: t("bo.products.import.invalid_csv", error: e.message)
@@ -42,7 +65,7 @@ class Bo::ProductsController < Bo::BaseController
   end
 
   def import_process
-    authorize Product, :create?
+    authorize Product, :import?
 
     import_key = params[:import_key]
     mapping = params[:mapping]&.to_unsafe_h || {}
@@ -56,19 +79,33 @@ class Bo::ProductsController < Bo::BaseController
 
     csv_content = File.read(temp_path)
     col_sep = session["import_#{import_key}_col_sep"] || ","
+    zip_path = session["import_#{import_key}_zip"]
+    images_dir = session["import_#{import_key}_images_dir"]
+    category_id = session["import_#{import_key}_category_id"]
+    photo_mode = session["import_#{import_key}_photo_mode"] || "append"
 
     service = ProductImportService.new(
       organisation: current_organisation,
       csv_content: csv_content,
       column_mapping: mapping,
-      col_sep: col_sep
+      col_sep: col_sep,
+      zip_path: zip_path,
+      images_dir: images_dir,
+      photo_mode: photo_mode,
+      form_category_id: category_id
     )
 
     @result = service.call
 
-    # Clean up temp file and session
+    # Clean up temp files and session
     File.delete(temp_path) if File.exist?(temp_path)
+    File.delete(zip_path) if zip_path && File.exist?(zip_path)
+    FileUtils.rm_rf(images_dir) if images_dir && File.exist?(images_dir)
     session.delete("import_#{import_key}_col_sep")
+    session.delete("import_#{import_key}_zip")
+    session.delete("import_#{import_key}_images_dir")
+    session.delete("import_#{import_key}_category_id")
+    session.delete("import_#{import_key}_photo_mode")
 
     render :import_results
   end
@@ -308,10 +345,30 @@ class Bo::ProductsController < Bo::BaseController
     params.require(:product).permit(:name, :slug, :sku, :description, :price, :unit_description, :min_quantity, :min_quantity_type, :available, :price_on_request, :category_id, category_ids: [], photos: [])
   end
 
+  def parse_uploaded_file(uploaded_file)
+    filename = uploaded_file.original_filename.downcase
+
+    if filename.end_with?(".xlsx", ".xls")
+      convert_excel_to_csv(uploaded_file)
+    else
+      content = uploaded_file.read.force_encoding("UTF-8")
+      content.encode("UTF-8", invalid: :replace, undef: :replace, replace: "")
+    end
+  end
+
+  def convert_excel_to_csv(uploaded_file)
+    spreadsheet = Roo::Spreadsheet.open(uploaded_file.path || uploaded_file.tempfile.path)
+    sheet = spreadsheet.sheet(0)
+
+    CSV.generate do |csv|
+      sheet.each_row_streaming(pad_cells: true) do |row|
+        csv << row.map { |cell| cell&.value.to_s }
+      end
+    end
+  end
+
   def detect_csv_delimiter(content)
-    # Sample first 1024 bytes to detect delimiter
     sample = content[0, 1024] || content
-    # Count occurrences of common delimiters in first line
     first_line = sample.lines.first || ""
     semicolons = first_line.count(";")
     commas = first_line.count(",")

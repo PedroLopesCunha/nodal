@@ -18,8 +18,10 @@
       <p><%= t('bo.products.index.subtitle') %></p>
     </div>
     <div class="bo-page-actions">
-      <%= link_to import_bo_products_path(params[:org_slug]), class: "btn btn-outline-secondary" do %>
-        <i class="fa-solid fa-upload"></i> <%= t('bo.common.actions.import') %>
+      <% if admin_or_owner? %>
+        <%= link_to import_bo_products_path(params[:org_slug]), class: "btn btn-outline-secondary" do %>
+          <i class="fa-solid fa-upload"></i> <%= t('bo.common.actions.import') %>
+        <% end %>
       <% end %>
       <a href="#" class="btn btn-outline-secondary">
         <i class="fa-solid fa-download"></i> <%= t('bo.common.actions.export') %>
