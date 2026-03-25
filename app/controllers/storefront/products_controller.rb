@@ -131,7 +131,11 @@ class Storefront::ProductsController < Storefront::BaseController
       else
         @variants = @product.product_variants.available.by_position.includes(:attribute_values)
       end
-      @attributes_with_values = @product.available_values_by_attribute
+      # Only show attribute values that lead to at least one available variant
+      variant_value_ids = @variants.flat_map { |v| v.attribute_values.map(&:id) }.to_set
+      @attributes_with_values = @product.available_values_by_attribute.transform_values { |values|
+        values.select { |v| variant_value_ids.include?(v.id) }
+      }
       @default_variant = @product.default_variant
 
       # Compute per-variant discount data for JS
