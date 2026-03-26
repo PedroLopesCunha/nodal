@@ -729,6 +729,9 @@ en:
         default_hint: "The default variant is selected initially in the storefront"
         options: "Variant Options"
         select_option: "Select %{attribute}..."
+        create_new_value: "Create new value..."
+        create_value: "Create"
+        add_attribute: "Add Attribute"
         placeholders:
           name: "e.g., T-Shirt - Red / Large"
           sku: "e.g., TSHIRT-RED-L"

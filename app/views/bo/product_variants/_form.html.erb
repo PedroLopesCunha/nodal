@@ -101,41 +101,26 @@
         </div>
       </div>
 
-      <% if !variant.persisted? && @available_values_by_attribute.present? %>
-        <div class="card">
+      <% current_value_ids = variant.persisted? ? variant.attribute_values.pluck(:id) : [] %>
+
+      <% if @product_values_by_attribute.present? %>
+        <div class="card mb-3">
           <div class="card-body">
             <h5 class="card-title mb-3"><%= t('bo.product_variants.form.options') %></h5>
-            <% @available_values_by_attribute.each do |attribute, values| %>
-              <div class="mb-3">
-                <label class="form-label"><%= attribute.name %></label>
-                <select name="product_variant[attribute_value_ids][]" class="form-select">
-                  <option value=""><%= t('bo.product_variants.form.select_option', attribute: attribute.name) %></option>
-                  <% values.each do |value| %>
-                    <option value="<%= value.id %>"><%= value.value %></option>
-                  <% end %>
-                </select>
-              </div>
+            <% @product_values_by_attribute.each do |attribute, values| %>
+              <%= render 'bo/product_variants/attribute_select', attribute: attribute, values: values, current_value_ids: current_value_ids, used_value_ids: @used_value_ids %>
             <% end %>
           </div>
         </div>
-      <% elsif variant.persisted? && variant.attribute_values.any? %>
+      <% end %>
+
+      <% if @extra_values_by_attribute.present? %>
         <div class="card">
           <div class="card-body">
-            <h5 class="card-title mb-3"><%= t('bo.product_variants.form.options') %></h5>
-            <dl class="row mb-0">
-              <% variant.attribute_values.includes(:product_attribute).each do |value| %>
-                <dt class="col-6"><%= value.product_attribute.name %></dt>
-                <dd class="col-6">
-                  <% if value.color_hex.present? %>
-                    <span class="badge" style="background-color: <%= value.color_hex %>; color: <%= contrast_color(value.color_hex) %>;">
-                      <%= value.value %>
-                    </span>
-                  <% else %>
-                    <span class="badge bg-secondary"><%= value.value %></span>
-                  <% end %>
-                </dd>
-              <% end %>
-            </dl>
+            <h5 class="card-title mb-3"><%= t('bo.product_variants.form.add_attribute') %></h5>
+            <% @extra_values_by_attribute.each do |attribute, values| %>
+              <%= render 'bo/product_variants/attribute_select', attribute: attribute, values: values, current_value_ids: current_value_ids, used_value_ids: @used_value_ids %>
+            <% end %>
           </div>
         </div>
       <% end %>

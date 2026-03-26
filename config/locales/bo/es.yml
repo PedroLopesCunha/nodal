@@ -665,6 +665,9 @@ es:
         default_hint: "La variante predeterminada se selecciona inicialmente en la tienda"
         options: "Opciones de la Variante"
         select_option: "Seleccionar %{attribute}..."
+        create_new_value: "Crear nuevo valor..."
+        create_value: "Crear"
+        add_attribute: "Añadir Atributo"
         placeholders:
           name: "ej: Camiseta - Rojo / Grande"
           sku: "ej: CAMISETA-ROJO-G"
