@@ -1,0 +1,29 @@
+<div class="mb-3" data-controller="variant-attribute-select" data-variant-attribute-select-attribute-id-value="<%= attribute.id %>">
+  <label class="form-label"><%= attribute.name %></label>
+  <select name="product_variant[attribute_value_ids][]" class="form-select"
+          data-variant-attribute-select-target="select"
+          data-action="change->variant-attribute-select#toggleInput">
+    <option value=""><%= t('bo.product_variants.form.select_option', attribute: attribute.name) %></option>
+    <% values.each do |value| %>
+      <% next if used_value_ids.include?(value.id) && !current_value_ids.include?(value.id) %>
+      <option value="<%= value.id %>" <%= 'selected' if current_value_ids.include?(value.id) %>><%= value.value %></option>
+    <% end %>
+    <option value="__new__">+ <%= t('bo.product_variants.form.create_new_value') %></option>
+  </select>
+  <div class="mt-2" style="display: none;" data-variant-attribute-select-target="inputWrapper">
+    <div class="input-group">
+      <input type="text" class="form-control form-control-sm"
+             placeholder="<%= t('bo.product_variants.form.create_new_value') %>"
+             data-variant-attribute-select-target="input"
+             data-action="input->variant-attribute-select#onInput">
+      <button type="button" class="btn btn-sm btn-outline-success"
+              style="display: none;"
+              data-variant-attribute-select-target="createBtn"
+              data-action="click->variant-attribute-select#create">
+        <i class="fa-solid fa-plus me-1"></i>
+        <%= t('bo.product_variants.form.create_value') %>
+        "<span data-variant-attribute-select-target="createName"></span>"
+      </button>
+    </div>
+  </div>
+</div>
