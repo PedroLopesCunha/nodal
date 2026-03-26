@@ -133,9 +133,10 @@ class Bo::ProductVariantsController < Bo::BaseController
       end
     end
 
-    # Value IDs used by other variants of this product (exclude current variant)
-    other_variants = @product.product_variants.where.not(id: @variant&.id)
-    @used_value_ids = VariantAttributeValue.where(product_variant: other_variants).pluck(:product_attribute_value_id)
+    # Collect full value combinations used by other variants to prevent exact duplicates
+    other_variants = @product.product_variants.where.not(id: @variant&.id).includes(:attribute_values)
+    @used_combinations = other_variants.map { |v| v.attribute_values.pluck(:id).sort }
+    @used_value_ids = [] # No longer restrict individual values
   end
 
   def ensure_product_attribute_associations(value_ids)
