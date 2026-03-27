@@ -262,19 +262,28 @@
 
             <% @attributes_with_values.each do |attribute, values| %>
               <div class="mb-3">
-                <label class="form-label fw-semibold"><%= attribute.name %></label>
-                <select class="form-select" data-variant-selector-target="select" data-action="change->variant-selector#change">
-                  <option value=""><%= t('storefront.products.show.select_option', attribute: attribute.name) %></option>
-                  <% values.each do |value| %>
-                    <option value="<%= value.id %>"
-                            <%= 'selected' if @default_variant&.attribute_values&.include?(value) %>
-                            <% if value.color_hex.present? %>
-                              data-color="<%= value.color_hex %>"
-                            <% end %>>
-                      <%= value.value %>
-                    </option>
-                  <% end %>
-                </select>
+                <% if values.size == 1 %>
+                  <%# Single value: display as static info, no dropdown needed %>
+                  <span class="fw-semibold"><%= attribute.name %>:</span>
+                  <span class="text-muted"><%= values.first.value %></span>
+                  <select class="form-select d-none" data-variant-selector-target="select">
+                    <option value="<%= values.first.id %>" selected><%= values.first.value %></option>
+                  </select>
+                <% else %>
+                  <label class="form-label fw-semibold"><%= attribute.name %></label>
+                  <select class="form-select" data-variant-selector-target="select" data-action="change->variant-selector#change">
+                    <option value=""><%= t('storefront.products.show.select_option', attribute: attribute.name) %></option>
+                    <% values.each do |value| %>
+                      <option value="<%= value.id %>"
+                              <%= 'selected' if @default_variant&.attribute_values&.include?(value) %>
+                              <% if value.color_hex.present? %>
+                                data-color="<%= value.color_hex %>"
+                              <% end %>>
+                        <%= value.value %>
+                      </option>
+                    <% end %>
+                  </select>
+                <% end %>
               </div>
             <% end %>
 
