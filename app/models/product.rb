@@ -104,7 +104,10 @@ class Product < ApplicationRecord
   end
 
   def price_range
-    prices = product_variants.available.pluck(:unit_price_cents).compact
+    variants = product_variants.available
+    # Exclude default base variant from range calculation for variable products
+    variants = variants.where(is_default: false) if has_variants? && product_variants.where(is_default: false).exists?
+    prices = variants.pluck(:unit_price_cents).compact
     return nil if prices.empty?
 
     min_price = Money.new(prices.min, organisation.currency)
