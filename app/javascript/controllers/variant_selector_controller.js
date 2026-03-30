@@ -18,13 +18,80 @@ export default class extends Controller {
   connect() {
     this.selectedVariant = null
     this.originalImageUrl = this.hasImageTarget ? this.imageTarget.src : null
+    // Store all original options per select for filtering
+    this.originalOptions = this.selectTargets.map(select => {
+      return Array.from(select.options).map(opt => ({
+        value: opt.value,
+        text: opt.textContent,
+        selected: opt.selected,
+        color: opt.dataset.color
+      }))
+    })
+    this.filterAvailableOptions()
     this.updateSelection()
     this.updateTotal()
   }
 
   change() {
+    this.filterAvailableOptions()
     this.updateSelection()
     this.updateTotal()
+  }
+
+  filterAvailableOptions() {
+    const selects = this.selectTargets.filter(s => !s.classList.contains("d-none"))
+
+    selects.forEach((currentSelect, currentIndex) => {
+      // Get selected values from ALL OTHER selects (not this one)
+      const otherSelections = []
+      selects.forEach((otherSelect, otherIndex) => {
+        if (otherIndex !== currentIndex && otherSelect.value) {
+          otherSelections.push(parseInt(otherSelect.value))
+        }
+      })
+
+      // Find which values for THIS select's attribute are compatible
+      // with the other selections
+      const compatibleValueIds = new Set()
+
+      this.variantsValue.forEach(variant => {
+        // Check if this variant matches all other selections
+        const matchesOthers = otherSelections.every(selectedId =>
+          variant.attribute_value_ids.includes(selectedId)
+        )
+
+        if (matchesOthers) {
+          // This variant is compatible — its attribute values for this select are valid
+          const originalValueIds = this.originalOptions[this.selectTargets.indexOf(currentSelect)]
+            .filter(opt => opt.value)
+            .map(opt => parseInt(opt.value))
+
+          variant.attribute_value_ids.forEach(valueId => {
+            if (originalValueIds.includes(valueId)) {
+              compatibleValueIds.add(valueId)
+            }
+          })
+        }
+      })
+
+      // Update the options: disable incompatible ones
+      const currentValue = currentSelect.value
+      Array.from(currentSelect.options).forEach(option => {
+        if (!option.value) return // Skip placeholder
+        const valueId = parseInt(option.value)
+        const isCompatible = compatibleValueIds.has(valueId)
+        option.disabled = !isCompatible
+        option.style.display = isCompatible ? "" : "none"
+      })
+
+      // If current selection is no longer compatible, reset to first compatible
+      if (currentValue && !compatibleValueIds.has(parseInt(currentValue))) {
+        const firstCompatible = Array.from(currentSelect.options).find(
+          opt => opt.value && !opt.disabled
+        )
+        currentSelect.value = firstCompatible ? firstCompatible.value : ""
+      }
+    })
   }
 
   updateTotal() {
@@ -62,29 +129,24 @@ export default class extends Controller {
     if (!this.hasMainPriceTarget || !variant) return
 
     if (variant.has_discount) {
-      // Show discounted price in green
       this.mainPriceTarget.textContent = this.formatPrice(variant.final_price_cents)
       this.mainPriceTarget.classList.remove("text-primary")
       this.mainPriceTarget.classList.add("text-success")
 
-      // Show original price with strikethrough
       if (this.hasOriginalPriceTarget) {
         this.originalPriceTarget.textContent = this.formatPrice(variant.price_cents)
         this.originalPriceTarget.classList.remove("d-none")
       }
 
-      // Show discount badge
       if (this.hasDiscountBadgeTarget) {
         this.discountBadgeTarget.textContent = `-${variant.discount_percentage}% OFF`
         this.discountBadgeTarget.classList.remove("d-none")
       }
     } else {
-      // Show regular price
       this.mainPriceTarget.textContent = this.formatPrice(variant.price_cents)
       this.mainPriceTarget.classList.remove("text-success")
       this.mainPriceTarget.classList.add("text-primary")
 
-      // Hide original price and badge
       if (this.hasOriginalPriceTarget) {
         this.originalPriceTarget.classList.add("d-none")
       }
@@ -114,14 +176,10 @@ export default class extends Controller {
   }
 
   updateDisplay(variant) {
-    // Update variant ID hidden field
     if (this.hasVariantIdTarget) {
       this.variantIdTarget.value = variant.id
     }
 
-    // Note: Price and discount display is handled by updateMainPrice()
-
-    // Update SKU (fall back to parent product SKU if variant has none)
     if (this.hasSkuTarget) {
       const effectiveSku = variant.sku || this.defaultSkuValue
       if (effectiveSku) {
@@ -133,7 +191,6 @@ export default class extends Controller {
       }
     }
 
-    // Update stock status
     if (this.hasStockTarget) {
       if (variant.track_stock) {
         if (variant.in_stock) {
@@ -146,7 +203,6 @@ export default class extends Controller {
       }
     }
 
-    // Update image if variant has specific photo, otherwise revert to original
     if (this.hasImageTarget) {
       this.imageTarget.src = variant.photo_url || this.originalImageUrl
     }
