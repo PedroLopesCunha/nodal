@@ -33,9 +33,21 @@
   }
 }
 
-// --- Scroll Shadows for horizontal scroll tables ---
+// --- Make ALL tables in BO horizontally scrollable on mobile ---
 @media (max-width: 991.98px) {
-  .table-responsive {
+  // Force any card/container with a table to be scrollable
+  .bo-main-content .card > table,
+  .bo-main-content .card > .card-body > table,
+  .bo-main-content .card-body > table {
+    display: block;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .table-responsive,
+  .bo-main-content .card > table,
+  .bo-main-content .card > .card-body > table,
+  .bo-main-content .card-body > table {
     // CSS-only scroll shadow using background-attachment
     background:
       linear-gradient(to right, #fff 30%, transparent),
