@@ -9,7 +9,7 @@
       <li><%= link_to bo_customers_path, class: "dropdown-item" do %><i class="fa-solid fa-users me-2"></i><%= t('bo.sidebar.customers') %><% end %></li>
       <li><%= link_to bo_products_path, class: "dropdown-item" do %><i class="fa-solid fa-box me-2"></i><%= t('bo.sidebar.products') %><% end %></li>
       <li><%= link_to bo_orders_path, class: "dropdown-item" do %><i class="fa-solid fa-clipboard-list me-2"></i><%= t('bo.sidebar.orders') %><% end %></li>
-      <li><%= link_to bo_customer_product_discounts_path, class: "dropdown-item" do %><i class="fa-solid fa-percent me-2"></i><%= t('bo.sidebar.pricing') %><% end %></li>
+      <li><%= link_to bo_pricing_path, class: "dropdown-item" do %><i class="fa-solid fa-percent me-2"></i><%= t('bo.sidebar.pricing') %><% end %></li>
       <li><hr class="dropdown-divider"></li>
       <li><%= link_to bo_team_members_path, class: "dropdown-item" do %><i class="fa-solid fa-users-gear me-2"></i><%= t('bo.sidebar.team') %><% end %></li>
       <% if admin_or_owner? %>
