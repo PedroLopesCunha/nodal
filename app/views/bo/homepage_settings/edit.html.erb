@@ -93,6 +93,7 @@
                 <div class="d-flex justify-content-between align-items-center">
                   <%= button_to toggle_banner_bo_homepage_settings_path(params[:org_slug], banner_id: banner.id),
                       method: :patch,
+                      data: { turbo: false },
                       class: "btn btn-sm #{banner.active? ? 'btn-success' : 'btn-outline-secondary'}" do %>
                     <i class="fa-solid fa-<%= banner.active? ? 'eye' : 'eye-slash' %> me-1"></i>
                     <%= banner.active? ? t('bo.common.statuses.active') : t('bo.common.statuses.inactive') %>
