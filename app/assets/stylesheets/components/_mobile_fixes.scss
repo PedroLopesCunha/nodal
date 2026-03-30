@@ -74,28 +74,26 @@
   }
 }
 
-// --- Sticky Save Button on Mobile ---
+// --- BO Page Actions: wrap on mobile ---
 @media (max-width: 767.98px) {
-  .bo-page-header .bo-page-actions {
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    background: #fff;
-    padding: 0.75rem 1rem;
-    box-shadow: 0 -2px 8px rgba(0,0,0,0.1);
-    z-index: 1030;
-    display: flex;
-    gap: 0.5rem;
-
-    .btn {
-      flex: 1;
+  .bo-page-header {
+    .d-flex {
+      flex-wrap: wrap;
+      gap: 0.5rem;
     }
   }
 
-  // Add padding to prevent content hiding behind sticky footer
-  .bo-page-body {
-    padding-bottom: 80px;
+  .bo-page-actions {
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    width: 100%;
+
+    .btn {
+      flex: 1 1 auto;
+      min-width: 0;
+      font-size: 0.8rem;
+      white-space: nowrap;
+    }
   }
 }
 
