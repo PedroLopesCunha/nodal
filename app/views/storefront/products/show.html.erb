@@ -31,7 +31,8 @@
       "variant-selector-min-quantity-value" => @product.min_quantity || 1,
       "variant-selector-default-sku-value" => @product.sku,
       "variant-selector-in-stock-text-value" => t('storefront.products.show.in_stock'),
-      "variant-selector-out-of-stock-text-value" => t('storefront.products.show.out_of_stock')
+      "variant-selector-out-of-stock-text-value" => t('storefront.products.show.out_of_stock'),
+      "variant-selector-display-price-value" => @product.display_price
     )
   end
 %>
@@ -99,7 +100,7 @@
                 <% if discount_breakdown[:has_discount] %>
                   <%= humanized_money_with_symbol(discount_breakdown[:final_price]) %>
                 <% else %>
-                  <%= @default_variant&.price ? humanized_money_with_symbol(@default_variant.price) : @product.display_price %>
+                  <%= @product.display_price %>
                 <% end %>
               </span>
               <span class="badge bg-success fs-6 <%= 'd-none' unless discount_breakdown[:has_discount] %>" data-variant-selector-target="discountBadge">
@@ -275,7 +276,7 @@
                     <option value=""><%= t('storefront.products.show.select_option', attribute: attribute.name) %></option>
                     <% values.each do |value| %>
                       <option value="<%= value.id %>"
-                              <%= 'selected' if @default_variant&.attribute_values&.include?(value) %>
+                              <%= 'selected' if @default_variant&.purchasable? && @default_variant&.attribute_values&.include?(value) %>
                               <% if value.color_hex.present? %>
                                 data-color="<%= value.color_hex %>"
                               <% end %>>

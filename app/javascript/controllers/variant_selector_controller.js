@@ -12,7 +12,8 @@ export default class extends Controller {
     minQuantity: Number,
     defaultSku: String,
     inStockText: { type: String, default: "In Stock" },
-    outOfStockText: { type: String, default: "Out of Stock" }
+    outOfStockText: { type: String, default: "Out of Stock" },
+    displayPrice: { type: String, default: "" }
   }
 
   connect() {
@@ -121,6 +122,7 @@ export default class extends Controller {
       this.enableAddToCart(variant)
     } else {
       this.selectedVariant = null
+      this.showPriceRange()
       this.disableAddToCart()
     }
   }
@@ -153,6 +155,23 @@ export default class extends Controller {
       if (this.hasDiscountBadgeTarget) {
         this.discountBadgeTarget.classList.add("d-none")
       }
+    }
+  }
+
+  showPriceRange() {
+    if (this.hasMainPriceTarget && this.displayPriceValue) {
+      this.mainPriceTarget.textContent = this.displayPriceValue
+      this.mainPriceTarget.classList.remove("text-success")
+      this.mainPriceTarget.classList.add("text-primary")
+    }
+    if (this.hasOriginalPriceTarget) {
+      this.originalPriceTarget.classList.add("d-none")
+    }
+    if (this.hasDiscountBadgeTarget) {
+      this.discountBadgeTarget.classList.add("d-none")
+    }
+    if (this.hasPriceTarget) {
+      this.priceTarget.textContent = ""
     }
   }
 
