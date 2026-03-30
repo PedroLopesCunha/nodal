@@ -32,6 +32,16 @@ en:
 
     # Home page
     home:
+      hero:
+        see_more: "See More"
+      buttons:
+        customer_portal: "Customer Portal"
+      portal:
+        title: "Your Account"
+      categories:
+        title: "Featured Categories"
+      featured_products:
+        title: "Featured Products"
       good_morning: "Good morning, %{name}"
       good_afternoon: "Good afternoon, %{name}"
       good_evening: "Good evening, %{name}"

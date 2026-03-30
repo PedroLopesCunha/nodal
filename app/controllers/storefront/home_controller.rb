@@ -2,6 +2,12 @@ class Storefront::HomeController < Storefront::BaseController
   skip_after_action :verify_authorized
 
   def show
+    @banners = current_organisation.homepage_banners.active.by_position.includes(image_attachment: :blob)
+    @featured_categories = current_organisation.homepage_featured_categories
+                             .order(:position)
+                             .includes(category: { photo_attachment: :blob })
+                             .map(&:category)
+    @featured_products = load_featured_products
     @frequent_products = load_frequent_products
     @new_products = load_new_products
 
@@ -31,7 +37,7 @@ class Storefront::HomeController < Storefront::BaseController
     @products_count = current_organisation.products.where(available: true).count
 
     # Build discount info for all displayed products
-    all_products = @frequent_products + @new_products
+    all_products = @featured_products + @frequent_products + @new_products
     @product_discounts = all_products.each_with_object({}) do |product, hash|
       calculator = DiscountCalculator.new(product: product, customer: current_customer, for_display: true)
       hash[product.id] = calculator.discount_breakdown
@@ -39,6 +45,29 @@ class Storefront::HomeController < Storefront::BaseController
   end
 
   private
+
+  def load_featured_products
+    featured_product_ids = current_organisation.homepage_featured_products
+                             .order(:position)
+                             .pluck(:product_id)
+    return [] if featured_product_ids.empty?
+
+    products = current_organisation.products
+                 .where(id: featured_product_ids, available: true)
+                 .includes(:categories, :product_discounts)
+
+    if current_organisation.hide_out_of_stock?
+      keep_visible_ids = current_organisation.product_variants
+                           .where(hide_when_unavailable: false)
+                           .select(:product_id)
+      products = products.where(available: true)
+                   .or(products.where(id: keep_visible_ids))
+    end
+
+    # Preserve position order
+    products_by_id = products.index_by(&:id)
+    featured_product_ids.filter_map { |id| products_by_id[id] }
+  end
 
   def load_frequent_products
     return [] if browsing_as_member?
@@ -50,7 +79,7 @@ class Storefront::HomeController < Storefront::BaseController
       .where.not(orders: { placed_at: nil })
       .group(:product_id)
       .order(Arel.sql("COUNT(*) DESC"))
-      .limit(8)
+      .limit(12)
       .pluck(:product_id)
 
     return [] if frequent_product_ids.empty?
@@ -75,7 +104,7 @@ class Storefront::HomeController < Storefront::BaseController
              .where(available: true)
              .includes(:categories, :product_discounts)
              .order(created_at: :desc)
-             .limit(6)
+             .limit(12)
 
     if current_organisation.hide_out_of_stock?
       keep_visible_ids = current_organisation.product_variants

@@ -32,6 +32,16 @@ pt:
 
     # Página inicial
     home:
+      hero:
+        see_more: "Ver Mais"
+      buttons:
+        customer_portal: "Portal de Cliente"
+      portal:
+        title: "A Sua Conta"
+      categories:
+        title: "Categorias em Destaque"
+      featured_products:
+        title: "Produtos em Destaque"
       good_morning: "Bom dia, %{name}"
       good_afternoon: "Boa tarde, %{name}"
       good_evening: "Boa noite, %{name}"

@@ -189,6 +189,16 @@ Rails.application.routes.draw do
       # Profile & Settings
       resource :profile, only: [:edit, :update]
       resource :settings, only: [:edit, :update]
+      resource :homepage_settings, only: [:edit, :update] do
+        post :create_banner
+        patch :update_banner
+        patch :toggle_banner
+        delete :destroy_banner
+        post :add_featured_products
+        delete :remove_featured_product
+        post :add_featured_categories
+        delete :remove_featured_category
+      end
 
       # Email Settings
       resource :email_settings, only: [:edit, :update] do

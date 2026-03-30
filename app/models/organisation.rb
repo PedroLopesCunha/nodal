@@ -37,6 +37,9 @@ class Organisation < ApplicationRecord
   has_many :erp_sync_logs, dependent: :destroy
   has_many :email_logs, dependent: :destroy
   has_many :discount_email_notifications, dependent: :destroy
+  has_many :homepage_banners, dependent: :destroy
+  has_many :homepage_featured_products, dependent: :destroy
+  has_many :homepage_featured_categories, dependent: :destroy
 
   validates :name, presence: true
   validates :billing_email, format: { with: URI::MailTo::EMAIL_REGEXP }, allow_blank: true
