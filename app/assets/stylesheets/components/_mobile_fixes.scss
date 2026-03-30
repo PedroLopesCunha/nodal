@@ -49,6 +49,13 @@
   }
 }
 
+// --- BO Page Header: not sticky on mobile ---
+@media (max-width: 767.98px) {
+  .bo-page-header {
+    position: static !important;
+  }
+}
+
 // --- Product Detail Image Mobile ---
 @media (max-width: 767.98px) {
   .product-detail-image-container {

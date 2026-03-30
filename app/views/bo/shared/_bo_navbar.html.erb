@@ -1,10 +1,10 @@
 <nav class="bo-navbar">
-  <!-- Hamburger menu - only visible when sidebar is collapsed -->
+  <!-- Hamburger menu - visible when sidebar is collapsed / on mobile -->
   <div class="bo-collapsed-menu dropdown">
     <button class="bo-collapsed-menu-btn" type="button" data-bs-toggle="dropdown" aria-expanded="false">
       <i class="fa-solid fa-bars"></i>
     </button>
-    <ul class="dropdown-menu dropdown-menu-dark">
+    <ul class="dropdown-menu dropdown-menu-dark" style="max-height: 80vh; overflow-y: auto;">
       <li><%= link_to bo_path, class: "dropdown-item" do %><i class="fa-solid fa-chart-line me-2"></i><%= t('bo.sidebar.dashboard') %><% end %></li>
       <li><%= link_to bo_customers_path, class: "dropdown-item" do %><i class="fa-solid fa-users me-2"></i><%= t('bo.sidebar.customers') %><% end %></li>
       <li><%= link_to bo_products_path, class: "dropdown-item" do %><i class="fa-solid fa-box me-2"></i><%= t('bo.sidebar.products') %><% end %></li>
@@ -15,12 +15,31 @@
       <% if admin_or_owner? %>
         <li><%= link_to edit_bo_settings_path, class: "dropdown-item" do %><i class="fa-solid fa-gear me-2"></i><%= t('bo.sidebar.settings') %><% end %></li>
       <% end %>
+      <%# Mobile-only: language & profile links %>
+      <li class="d-md-none"><hr class="dropdown-divider"></li>
+      <li class="d-md-none dropdown-header text-muted"><i class="fa-regular fa-building me-1"></i><%= @current_organisation.name %></li>
+      <li class="d-md-none">
+        <%= link_to update_locale_path(org_slug: params[:org_slug], locale: 'en'), data: { turbo_method: :patch }, class: "dropdown-item #{'active' if I18n.locale == :en}" do %>
+          🇬🇧 English
+        <% end %>
+      </li>
+      <li class="d-md-none">
+        <%= link_to update_locale_path(org_slug: params[:org_slug], locale: 'pt'), data: { turbo_method: :patch }, class: "dropdown-item #{'active' if I18n.locale == :pt}" do %>
+          🇵🇹 Português
+        <% end %>
+      </li>
+      <li class="d-md-none">
+        <%= link_to update_locale_path(org_slug: params[:org_slug], locale: 'es'), data: { turbo_method: :patch }, class: "dropdown-item #{'active' if I18n.locale == :es}" do %>
+          🇪🇸 Español
+        <% end %>
+      </li>
+      <li><hr class="dropdown-divider"></li>
       <li><%= link_to destroy_member_session_path, data: { turbo_method: :delete }, class: "dropdown-item" do %><i class="fa-solid fa-right-from-bracket me-2"></i><%= t('bo.sidebar.log_out') %><% end %></li>
     </ul>
   </div>
 
   <div class="bo-navbar-content justify-content-end">
-    <div class="d-flex align-items-center gap-3">
+    <div class="d-none d-md-flex align-items-center gap-3">
       <span class="text-muted">
         <i class="fa-regular fa-building"></i>
         <%= @current_organisation.name %>
