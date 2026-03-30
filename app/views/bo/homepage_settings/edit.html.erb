@@ -45,9 +45,16 @@
               <label class="form-label"><%= t('bo.homepage_settings.banners.link_url') %></label>
               <input type="text" name="homepage_banner[link_url]" class="form-control" placeholder="<%= t('bo.homepage_settings.banners.link_url_placeholder') %>">
             </div>
-            <div class="col-md-4">
+            <div class="col-md-2">
               <label class="form-label"><%= t('bo.homepage_settings.banners.link_text') %></label>
               <input type="text" name="homepage_banner[link_text]" class="form-control" placeholder="<%= t('bo.homepage_settings.banners.link_text_placeholder') %>">
+            </div>
+            <div class="col-md-2">
+              <label class="form-label"><%= t('bo.homepage_settings.banners.text_theme') %></label>
+              <select name="homepage_banner[text_theme]" class="form-select">
+                <option value="light"><%= t('bo.homepage_settings.banners.theme_light') %></option>
+                <option value="dark"><%= t('bo.homepage_settings.banners.theme_dark') %></option>
+              </select>
             </div>
           </div>
           <div class="mt-3">
@@ -127,6 +134,13 @@
                       <div class="col-4">
                         <label class="form-label small"><%= t('bo.homepage_settings.banners.link_text') %></label>
                         <input type="text" name="homepage_banner[link_text]" class="form-control form-control-sm" value="<%= banner.link_text %>">
+                      </div>
+                      <div class="col-4">
+                        <label class="form-label small"><%= t('bo.homepage_settings.banners.text_theme') %></label>
+                        <select name="homepage_banner[text_theme]" class="form-select form-select-sm">
+                          <option value="light" <%= 'selected' if banner.text_theme == 'light' %>><%= t('bo.homepage_settings.banners.theme_light') %></option>
+                          <option value="dark" <%= 'selected' if banner.text_theme == 'dark' %>><%= t('bo.homepage_settings.banners.theme_dark') %></option>
+                        </select>
                       </div>
                     </div>
                     <div class="mt-2">

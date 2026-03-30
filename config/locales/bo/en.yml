@@ -1245,6 +1245,9 @@ en:
         link_url_placeholder: "E.g., /org-slug/products?category=new"
         link_text: "Button Text"
         link_text_placeholder: "E.g., View Collection"
+        text_theme: "Text Theme"
+        theme_light: "Light (white text)"
+        theme_dark: "Dark (black text)"
         save: "Save Banner"
         empty: "No banners configured. Add banners for the storefront homepage."
       featured_categories:

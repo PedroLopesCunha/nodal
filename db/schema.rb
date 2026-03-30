@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2026_03_30_091339) do
+ActiveRecord::Schema[7.1].define(version: 2026_03_30_132804) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
   enable_extension "unaccent"
@@ -281,6 +281,7 @@ ActiveRecord::Schema[7.1].define(version: 2026_03_30_091339) do
     t.boolean "active"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "text_theme"
     t.index ["organisation_id"], name: "index_homepage_banners_on_organisation_id"
   end
 

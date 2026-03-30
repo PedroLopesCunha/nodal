@@ -23,18 +23,19 @@
             <%= image_tag banner.image, alt: banner.title || "" %>
           <% end %>
           <% if banner.title.present? || banner.subtitle.present? %>
-            <div class="home-banner__overlay">
+            <% dark_text = banner.text_theme == 'dark' %>
+            <div class="home-banner__overlay" style="<%= 'background: linear-gradient(transparent 0%, rgba(255,255,255,0.85) 100%);' if dark_text %>">
               <% if banner.title.present? %>
-                <h2 class="home-banner__title"><%= banner.title %></h2>
+                <h2 class="home-banner__title" style="<%= 'color: #1e293b; text-shadow: none;' if dark_text %>"><%= banner.title %></h2>
               <% end %>
               <% if banner.subtitle.present? %>
-                <p class="home-banner__subtitle"><%= banner.subtitle %></p>
+                <p class="home-banner__subtitle" style="<%= 'color: #475569;' if dark_text %>"><%= banner.subtitle %></p>
               <% end %>
               <% if banner.link_url.present? %>
                 <div>
                   <%= link_to banner.link_text.presence || t('storefront.home.hero.see_more'),
                               banner.link_url,
-                              class: "btn btn-light btn-sm fw-semibold" %>
+                              class: "btn btn-sm fw-semibold #{dark_text ? 'btn-dark' : 'btn-light'}" %>
                 </div>
               <% end %>
             </div>

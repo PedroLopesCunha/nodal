@@ -1235,6 +1235,9 @@ pt:
         link_url_placeholder: "Ex: /org-slug/products?category=novidades"
         link_text: "Texto do Botão"
         link_text_placeholder: "Ex: Ver Coleção"
+        text_theme: "Tema do Texto"
+        theme_light: "Claro (texto branco)"
+        theme_dark: "Escuro (texto preto)"
         save: "Guardar Banner"
         empty: "Nenhum banner configurado. Adicione banners para a homepage da loja."
       featured_categories:

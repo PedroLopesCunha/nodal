@@ -92,6 +92,6 @@ class Bo::HomepageSettingsController < Bo::BaseController
   end
 
   def banner_params
-    params.require(:homepage_banner).permit(:image, :title, :subtitle, :link_url, :link_text, :active)
+    params.require(:homepage_banner).permit(:image, :title, :subtitle, :link_url, :link_text, :active, :text_theme)
   end
 end
