@@ -18,7 +18,7 @@
     <%= render "bo/shared/bo_sidebar" %>
     <%= render "bo/shared/bo_navbar" %>
 
-    <main class="bo-main-content">
+    <main class="bo-main-content" data-controller="bo-form-guard">
       <%= yield :bo_main_content %>
     </main>
 

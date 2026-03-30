@@ -32,7 +32,7 @@ export default class extends Controller {
 
   handleTurboBeforeVisit(event) {
     if (this.changed) {
-      if (!confirm("You have unsaved changes. Are you sure you want to leave?")) {
+      if (!confirm(this.element.dataset.unsavedChangesMessage || "You have unsaved changes. Are you sure you want to leave?")) {
         event.preventDefault()
       }
     }
