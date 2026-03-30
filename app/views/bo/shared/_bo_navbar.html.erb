@@ -1,10 +1,10 @@
 <nav class="bo-navbar">
   <!-- Hamburger menu - visible when sidebar is collapsed / on mobile -->
-  <div class="bo-collapsed-menu dropdown">
+  <div class="bo-collapsed-menu dropdown d-flex align-items-center">
     <button class="bo-collapsed-menu-btn" type="button" data-bs-toggle="dropdown" aria-expanded="false">
       <i class="fa-solid fa-bars"></i>
     </button>
-    <span class="d-md-none ms-2 fw-semibold small"><%= @current_organisation.name %></span>
+    <span class="d-md-none ms-2 fw-semibold small" style="white-space: nowrap;"><%= @current_organisation.name %></span>
     <ul class="dropdown-menu dropdown-menu-dark" style="max-height: 80vh; overflow-y: auto;">
       <li><%= link_to bo_path, class: "dropdown-item" do %><i class="fa-solid fa-chart-line me-2"></i><%= t('bo.sidebar.dashboard') %><% end %></li>
       <li><%= link_to bo_customers_path, class: "dropdown-item" do %><i class="fa-solid fa-users me-2"></i><%= t('bo.sidebar.customers') %><% end %></li>
