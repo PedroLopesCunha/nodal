@@ -33,22 +33,9 @@
   }
 }
 
-// --- Make ALL tables in BO horizontally scrollable on mobile ---
+// --- Scroll shadows on table-responsive containers ---
 @media (max-width: 991.98px) {
-  // Force any card/container with a table to be scrollable
-  .bo-main-content .card > table,
-  .bo-main-content .card > .card-body > table,
-  .bo-main-content .card-body > table {
-    display: block;
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-  }
-
-  .table-responsive,
-  .bo-main-content .card > table,
-  .bo-main-content .card > .card-body > table,
-  .bo-main-content .card-body > table {
-    // CSS-only scroll shadow using background-attachment
+  .table-responsive {
     background:
       linear-gradient(to right, #fff 30%, transparent),
       linear-gradient(to left, #fff 30%, transparent),
@@ -121,11 +108,6 @@
     max-height: 60vh;
     overflow-y: auto;
   }
-}
-
-// --- TomSelect dropdowns: prevent clipping ---
-.ts-dropdown {
-  z-index: 9999 !important;
 }
 
 // --- Hide text on action buttons mobile, show only icons ---
