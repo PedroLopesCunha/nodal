@@ -1,0 +1,116 @@
+// ========================================
+// GLOBAL MOBILE UX FIXES
+// ========================================
+
+// --- Touch Targets: Minimum 44px on mobile ---
+@media (max-width: 767.98px) {
+  // BO action buttons in tables
+  .product-actions,
+  .order-actions,
+  .customer-actions {
+    .btn-sm {
+      min-width: 40px;
+      min-height: 40px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0.5rem;
+    }
+  }
+
+  // All small buttons on mobile should be at least tappable
+  .btn-sm {
+    min-height: 38px;
+    padding-left: 0.75rem;
+    padding-right: 0.75rem;
+  }
+
+  // Form controls larger on mobile
+  .form-control-sm,
+  .form-select-sm {
+    min-height: 38px;
+    font-size: 0.9rem;
+  }
+}
+
+// --- Scroll Shadows for horizontal scroll tables ---
+@media (max-width: 991.98px) {
+  .table-responsive {
+    // CSS-only scroll shadow using background-attachment
+    background:
+      linear-gradient(to right, #fff 30%, transparent),
+      linear-gradient(to left, #fff 30%, transparent),
+      linear-gradient(to right, rgba(0,0,0,0.08), transparent),
+      linear-gradient(to left, rgba(0,0,0,0.08), transparent);
+    background-position: left center, right center, left center, right center;
+    background-repeat: no-repeat;
+    background-size: 20px 100%, 20px 100%, 10px 100%, 10px 100%;
+    background-attachment: local, local, scroll, scroll;
+  }
+}
+
+// --- Product Detail Image Mobile ---
+@media (max-width: 767.98px) {
+  .product-detail-image-container {
+    min-height: 250px !important;
+    padding: 20px !important;
+  }
+}
+
+// --- Storefront Orders Mobile Cards ---
+.order-card-mobile {
+  border-bottom: 1px solid #eee;
+  padding: 1rem 0;
+
+  &:last-child {
+    border-bottom: none;
+  }
+}
+
+// --- Sticky Save Button on Mobile ---
+@media (max-width: 767.98px) {
+  .bo-page-header .bo-page-actions {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: #fff;
+    padding: 0.75rem 1rem;
+    box-shadow: 0 -2px 8px rgba(0,0,0,0.1);
+    z-index: 1030;
+    display: flex;
+    gap: 0.5rem;
+
+    .btn {
+      flex: 1;
+    }
+  }
+
+  // Add padding to prevent content hiding behind sticky footer
+  .bo-page-body {
+    padding-bottom: 80px;
+  }
+}
+
+// --- Modal Mobile Sizing ---
+@media (max-width: 575.98px) {
+  .modal-lg,
+  .modal-xl {
+    max-width: calc(100% - 1rem);
+    margin: 0.5rem;
+  }
+
+  .modal-body {
+    max-height: 60vh;
+    overflow-y: auto;
+  }
+}
+
+// --- Hide text on action buttons mobile, show only icons ---
+@media (max-width: 575.98px) {
+  .order-actions .btn span,
+  .product-actions .btn span,
+  .customer-actions .btn span {
+    display: none;
+  }
+}

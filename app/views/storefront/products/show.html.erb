@@ -43,7 +43,7 @@
       <% discount_breakdown = @discount_calculator.discount_breakdown %>
 
       <!-- Main Image -->
-      <div class="d-flex align-items-center justify-content-center" style="min-height: 400px; padding: 40px;">
+      <div class="d-flex align-items-center justify-content-center product-detail-image-container" style="min-height: 400px; padding: 40px;">
         <% if @product.photo_attached? %>
           <%= image_tag @product.photo, class: "img-fluid", style: "max-height: 350px; object-fit: contain;", data: { image_gallery_target: "mainImage", variant_selector_target: "image" } %>
         <% else %>
@@ -216,7 +216,7 @@
         <% if show_min_qty || show_category || show_availability %>
           <div class="row g-3 mb-4 py-3 border-top border-bottom">
             <% if show_min_qty %>
-              <div class="col-4">
+              <div class="col-6 col-md-4">
                 <div class="text-muted small fw-semibold mb-1"><%= t('storefront.products.show.min_order') %></div>
                 <div>
                   <i class="fa-solid fa-layer-group me-1 text-muted"></i>
@@ -225,7 +225,7 @@
               </div>
             <% end %>
             <% if show_category %>
-              <div class="col-4">
+              <div class="col-6 col-md-4">
                 <div class="text-muted small fw-semibold mb-1"><%= t('storefront.products.show.category') %></div>
                 <div>
                   <% if @product.categories.any? %>
@@ -240,7 +240,7 @@
               </div>
             <% end %>
             <% if show_availability %>
-              <div class="col-4">
+              <div class="col-6 col-md-4">
                 <div class="text-muted small fw-semibold mb-1"><%= t('storefront.products.show.availability') %></div>
                 <div data-variant-selector-target="stock">
                   <% if @product.available? %>
