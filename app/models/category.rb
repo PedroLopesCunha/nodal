@@ -5,6 +5,8 @@ class Category < ApplicationRecord
 
   acts_as_list scope: [:organisation_id, :ancestry]
 
+  has_one_attached :photo
+
   belongs_to :organisation
   has_many :category_products, dependent: :destroy
   has_many :products, through: :category_products

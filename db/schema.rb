@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2026_03_23_175354) do
+ActiveRecord::Schema[7.1].define(version: 2026_03_30_091339) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
   enable_extension "unaccent"
@@ -271,6 +271,39 @@ ActiveRecord::Schema[7.1].define(version: 2026_03_23_175354) do
     t.index ["organisation_id"], name: "index_erp_sync_logs_on_organisation_id"
   end
 
+  create_table "homepage_banners", force: :cascade do |t|
+    t.bigint "organisation_id", null: false
+    t.string "title"
+    t.string "subtitle"
+    t.string "link_url"
+    t.string "link_text"
+    t.integer "position"
+    t.boolean "active"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["organisation_id"], name: "index_homepage_banners_on_organisation_id"
+  end
+
+  create_table "homepage_featured_categories", force: :cascade do |t|
+    t.bigint "organisation_id", null: false
+    t.bigint "category_id", null: false
+    t.integer "position"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["category_id"], name: "index_homepage_featured_categories_on_category_id"
+    t.index ["organisation_id"], name: "index_homepage_featured_categories_on_organisation_id"
+  end
+
+  create_table "homepage_featured_products", force: :cascade do |t|
+    t.bigint "organisation_id", null: false
+    t.bigint "product_id", null: false
+    t.integer "position"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["organisation_id"], name: "index_homepage_featured_products_on_organisation_id"
+    t.index ["product_id"], name: "index_homepage_featured_products_on_product_id"
+  end
+
   create_table "members", force: :cascade do |t|
     t.string "email", default: "", null: false
     t.string "encrypted_password", default: "", null: false
@@ -427,6 +460,10 @@ ActiveRecord::Schema[7.1].define(version: 2026_03_23_175354) do
     t.string "order_cutoff_time"
     t.integer "lead_time_days", default: 1, null: false
     t.string "timezone", default: "Europe/Lisbon", null: false
+    t.string "hero_title"
+    t.string "hero_subtitle"
+    t.string "hero_link_url"
+    t.string "hero_link_text"
     t.index ["default_locale"], name: "index_organisations_on_default_locale"
     t.index ["slug"], name: "index_organisations_on_slug", unique: true
   end
@@ -555,6 +592,7 @@ ActiveRecord::Schema[7.1].define(version: 2026_03_23_175354) do
     t.boolean "hide_related_products", default: false, null: false
     t.bigint "cover_photo_blob_id"
     t.boolean "price_on_request"
+    t.boolean "featured"
     t.index ["category_id"], name: "index_products_on_category_id"
     t.index ["organisation_id", "external_id", "external_source"], name: "index_products_on_org_external_id_source", unique: true, where: "(external_id IS NOT NULL)"
     t.index ["organisation_id"], name: "index_products_on_organisation_id"
@@ -683,6 +721,11 @@ ActiveRecord::Schema[7.1].define(version: 2026_03_23_175354) do
   add_foreign_key "erp_configurations", "organisations"
   add_foreign_key "erp_sync_logs", "erp_configurations"
   add_foreign_key "erp_sync_logs", "organisations"
+  add_foreign_key "homepage_banners", "organisations"
+  add_foreign_key "homepage_featured_categories", "categories"
+  add_foreign_key "homepage_featured_categories", "organisations"
+  add_foreign_key "homepage_featured_products", "organisations"
+  add_foreign_key "homepage_featured_products", "products"
   add_foreign_key "order_discounts", "organisations"
   add_foreign_key "order_items", "orders"
   add_foreign_key "order_items", "product_variants"

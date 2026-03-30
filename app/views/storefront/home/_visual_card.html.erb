@@ -1,0 +1,22 @@
+<%= link_to link_path, class: "text-decoration-none" do %>
+  <div class="home-visual-card">
+    <% if defined?(badge) && badge.present? %>
+      <span class="home-visual-card__badge"><%= badge %></span>
+    <% end %>
+    <% if defined?(image) && image %>
+      <div class="home-visual-card__image-wrapper">
+        <%= image_tag image, class: "home-visual-card__image", alt: name %>
+      </div>
+    <% elsif defined?(fallback_color) && fallback_color %>
+      <div class="home-visual-card__image-wrapper" style="background: <%= fallback_color %>;">
+      </div>
+    <% else %>
+      <div class="home-visual-card__placeholder">
+        <i class="fa-solid fa-image"></i>
+      </div>
+    <% end %>
+    <div class="home-visual-card__body">
+      <span class="home-visual-card__name"><%= name %></span>
+    </div>
+  </div>
+<% end %>

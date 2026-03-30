@@ -18,7 +18,7 @@
       <div class="d-flex justify-content-between align-items-center">
         <% if product.price_on_request? %>
           <span class="product-card-price"><%= t('storefront.products.index.price_on_request') %></span>
-        <% elsif discount_info && discount_info[:has_discount] %>
+        <% elsif discount_info && discount_info[:has_discount] && discount_info[:effective_discount][:percentage]&.finite? %>
           <div>
             <span class="product-card-price-original">
               <%= humanized_money_with_symbol(discount_info[:base_price]) %>

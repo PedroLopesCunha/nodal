@@ -55,6 +55,7 @@ class Product < ApplicationRecord
   scope :simple, -> { where(has_variants: false) }
   scope :variable, -> { where(has_variants: true) }
 
+
   def active_discount_for(customer)
     return nil unless customer
     # Direct customer match takes precedence
