@@ -59,10 +59,18 @@
       <% end %>
     </div>
 
-    <!-- Thumbnails (if photos exist) -->
-    <% if @product.photo_attached? %>
+    <!-- Thumbnails (product photos + variant photos) -->
+    <%
+      all_photos = @product.photos.to_a
+      if @product.has_variants? && defined?(@variants)
+        @variants.each do |v|
+          all_photos << v.photo if v.photo.attached?
+        end
+      end
+    %>
+    <% if all_photos.any? %>
       <div class="d-flex justify-content-center gap-2 mt-3 flex-wrap">
-        <% @product.photos.each do |photo| %>
+        <% all_photos.each do |photo| %>
           <div class="border rounded p-1"
                style="width: 60px; height: 60px; cursor: pointer;"
                data-image-gallery-target="thumbnail"
