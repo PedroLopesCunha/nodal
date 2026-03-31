@@ -45,10 +45,10 @@ class ProductGridImportService
                    attributes_created: 0, attribute_values_created: 0, photos_attached: 0 }
         raise ActiveRecord::Rollback
       end
-
-      # Attach photos after all products/variants are created
-      attach_all_photos
     end
+
+    # Attach photos outside the transaction (same pattern as ProductImportService)
+    attach_all_photos if @errors.empty?
 
     Result.new(
       **@stats,
@@ -154,17 +154,33 @@ class ProductGridImportService
           next
         end
 
-        variant = parent.product_variants.new(
-          name: row["nome"],
-          sku: row["sku"].presence,
-          unit_price_cents: parse_price(row["preco"]),
-          unit_price_currency: @organisation.currency,
-          available: true,
-          is_default: false,
-          organisation: @organisation
-        )
+        # Upsert variant by SKU
+        variant_sku = row["sku"].presence
+        if variant_sku
+          variant = @organisation.product_variants.find_by(sku: variant_sku)
+        end
+
+        if variant
+          variant.assign_attributes(
+            name: row["nome"],
+            unit_price_cents: parse_price(row["preco"]) || variant.unit_price_cents,
+            product: parent
+          )
+        else
+          variant = parent.product_variants.new(
+            name: row["nome"],
+            sku: variant_sku,
+            unit_price_cents: parse_price(row["preco"]),
+            unit_price_currency: @organisation.currency,
+            available: true,
+            is_default: false,
+            organisation: @organisation
+          )
+        end
         variant.save!
 
+        # Re-link attribute values (clear and re-create)
+        variant.variant_attribute_values.destroy_all
         link_variant_attributes(variant, row, line)
 
         # Inherit category from parent
@@ -390,6 +406,7 @@ class ProductGridImportService
 
     if @photo_mode == "replace" && product.photos.attached?
       product.photos.purge
+      product.reload
     end
 
     count = 0
@@ -408,7 +425,7 @@ class ProductGridImportService
     end
 
     if count > 0 && product.photos.any?
-      first_attachment = product.photos.order(:id).first
+      first_attachment = product.photos_attachments.order(:id).first
       unless product.photos.any? { |p| p.blob.metadata["main"] }
         first_attachment.blob.update(metadata: first_attachment.blob.metadata.merge("main" => true))
       end

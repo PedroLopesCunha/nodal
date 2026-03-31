@@ -751,16 +751,12 @@ export default class extends Controller {
       })
     })
 
-    // Include photo files if selected
+    // Move original file inputs into the form (cloneNode doesn't transfer files)
     if (this.hasZipInputTarget && this.zipInputTarget.files.length > 0) {
-      const clone = this.zipInputTarget.cloneNode(true)
-      clone.name = "zip_file"
-      form.appendChild(clone)
+      form.appendChild(this.zipInputTarget)
     }
     if (this.hasImageInputTarget && this.imageInputTarget.files.length > 0) {
-      const clone = this.imageInputTarget.cloneNode(true)
-      clone.name = "image_files[]"
-      form.appendChild(clone)
+      form.appendChild(this.imageInputTarget)
     }
 
     // Include photo mode

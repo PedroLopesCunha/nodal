@@ -104,6 +104,7 @@ Rails.application.routes.draw do
           get :add_products
           get :bulk_create
           post :bulk_create_process
+          get :bulk_create_process, to: redirect { |params| "/#{params[:org_slug]}/bo/products/bulk_create" }
         end
         member do
           get :configure_variants
