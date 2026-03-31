@@ -228,6 +228,23 @@ class Bo::ProductsController < Bo::BaseController
     @last_product_sync = current_organisation.erp_sync_logs.for_entity('products').completed.recent.first if current_organisation.erp_configuration&.enabled?
   end
 
+  def export_variants
+    authorize Product, :export?
+
+    columns = ProductVariant.exportable_columns_for(params[:columns])
+    format = params[:format_type] || "csv"
+    extension = format == "xlsx" ? "xlsx" : "csv"
+
+    product_ids = apply_product_filters(policy_scope(current_organisation.products)).select(:id)
+    records = ProductVariant.where(product_id: product_ids)
+                            .includes(:product, :attribute_values, product: :categories)
+                            .order(:product_id, :position)
+
+    result = ExportService.new(records: records, columns: columns, format: format).call
+    filename = "product_variants_#{Date.today.iso8601}.#{extension}"
+    send_data result[:data], filename: filename, type: result[:content_type], disposition: "attachment"
+  end
+
   def show
   end
 

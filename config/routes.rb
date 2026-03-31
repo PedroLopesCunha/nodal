@@ -82,6 +82,7 @@ Rails.application.routes.draw do
       resources :orders do
         collection do
           get :export
+          get :export_items
         end
         member do
           patch :apply_discount
@@ -105,6 +106,7 @@ Rails.application.routes.draw do
       resources :products do
         collection do
           get :export
+          get :export_variants
           get :import
           post :import_mapping
           post :import_process

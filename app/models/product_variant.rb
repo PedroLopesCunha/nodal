@@ -1,5 +1,6 @@
 class ProductVariant < ApplicationRecord
   include ErpSyncable
+  include HasExportableColumns
 
   belongs_to :organisation
   belongs_to :product
@@ -28,6 +29,33 @@ class ProductVariant < ApplicationRecord
   scope :by_position, -> { order(:position) }
   scope :available, -> { where(available: true) }
   scope :default, -> { where(is_default: true) }
+
+  def self.exportable_columns
+    [
+      { key: :product_name, label: I18n.t("bo.export.columns.variant.product_name"), default: true,
+        value: ->(r) { r.product&.name } },
+      { key: :variant_name, label: I18n.t("bo.export.columns.variant.variant_name"), default: true,
+        value: ->(r) { r.name } },
+      { key: :options, label: I18n.t("bo.export.columns.variant.options"), default: true,
+        value: ->(r) { r.option_values_string.presence } },
+      { key: :sku, label: I18n.t("bo.export.columns.variant.sku"), default: true,
+        value: ->(r) { r.sku } },
+      { key: :unit_price, label: I18n.t("bo.export.columns.variant.unit_price"), default: true,
+        value: ->(r) { r.price&.format } },
+      { key: :available, label: I18n.t("bo.export.columns.variant.available"), default: true,
+        value: ->(r) { r.available? ? I18n.t("bo.common.yes") : I18n.t("bo.common.no") } },
+      { key: :stock_quantity, label: I18n.t("bo.export.columns.variant.stock_quantity"), default: true,
+        value: ->(r) { r.track_stock? ? r.stock_quantity : I18n.t("bo.export.columns.variant.unlimited") } },
+      { key: :track_stock, label: I18n.t("bo.export.columns.variant.track_stock"), default: false,
+        value: ->(r) { r.track_stock? ? I18n.t("bo.common.yes") : I18n.t("bo.common.no") } },
+      { key: :is_default, label: I18n.t("bo.export.columns.variant.is_default"), default: false,
+        value: ->(r) { r.is_default? ? I18n.t("bo.common.yes") : I18n.t("bo.common.no") } },
+      { key: :categories, label: I18n.t("bo.export.columns.variant.categories"), default: false,
+        value: ->(r) { r.product&.categories&.map(&:name)&.join(", ") } },
+      { key: :product_type, label: I18n.t("bo.export.columns.variant.product_type"), default: false,
+        value: ->(r) { r.product&.has_variants? ? I18n.t("bo.products.index.table.variable") : I18n.t("bo.products.index.table.simple") } }
+    ]
+  end
 
   def in_stock?
     return true unless track_stock?

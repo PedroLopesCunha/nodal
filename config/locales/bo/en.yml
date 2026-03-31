@@ -104,6 +104,10 @@ en:
       deselect_all: "Deselect all"
       format: "Format"
       download: "Download"
+      export_orders: "Export Orders"
+      export_order_items: "Export Order Items"
+      export_products: "Export Products"
+      export_variants: "Export Variants"
       columns:
         product:
           name: "Name"
@@ -142,6 +146,32 @@ en:
           invitation_status: "Invitation Status"
           last_sign_in_at: "Last Sign In"
           created_at: "Created"
+        order_item:
+          order_number: "Order Number"
+          placed_at: "Date"
+          customer_company: "Company"
+          product_name: "Product"
+          variant_name: "Variant"
+          sku: "SKU"
+          quantity: "Quantity"
+          unit_price: "Unit Price"
+          discount: "Discount"
+          total: "Total"
+          order_status: "Order Status"
+          payment_status: "Payment Status"
+        variant:
+          product_name: "Product"
+          variant_name: "Variant Name"
+          options: "Options"
+          sku: "SKU"
+          unit_price: "Unit Price"
+          available: "Available"
+          stock_quantity: "Stock"
+          unlimited: "Unlimited"
+          track_stock: "Track Stock"
+          is_default: "Default"
+          categories: "Categories"
+          product_type: "Type"
 
     # ERP Sync (shared across products & customers)
     erp_sync:
@@ -867,6 +897,12 @@ en:
         subtitle: "Track and manage all customer orders"
         search_placeholder: "Search orders..."
         no_orders: "No orders found"
+        new_badge: "New"
+        filters:
+          all_statuses: "All Statuses"
+          all_payments: "All Payments"
+          all_customers: "All Customers"
+          active_filters: "Active filters"
         table:
           order_id: "Order ID"
           client: "Client"

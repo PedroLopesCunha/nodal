@@ -96,6 +96,10 @@ es:
       deselect_all: "Deseleccionar todo"
       format: "Formato"
       download: "Descargar"
+      export_orders: "Exportar Pedidos"
+      export_order_items: "Exportar Líneas de Pedido"
+      export_products: "Exportar Productos"
+      export_variants: "Exportar Variantes"
       columns:
         product:
           name: "Nombre"
@@ -134,6 +138,32 @@ es:
           invitation_status: "Estado de Invitación"
           last_sign_in_at: "Último Acceso"
           created_at: "Creado"
+        order_item:
+          order_number: "Nº Pedido"
+          placed_at: "Fecha"
+          customer_company: "Empresa"
+          product_name: "Producto"
+          variant_name: "Variante"
+          sku: "SKU"
+          quantity: "Cantidad"
+          unit_price: "Precio Unitario"
+          discount: "Descuento"
+          total: "Total"
+          order_status: "Estado del Pedido"
+          payment_status: "Estado de Pago"
+        variant:
+          product_name: "Producto"
+          variant_name: "Nombre de Variante"
+          options: "Opciones"
+          sku: "SKU"
+          unit_price: "Precio Unitario"
+          available: "Disponible"
+          stock_quantity: "Stock"
+          unlimited: "Ilimitado"
+          track_stock: "Gestionar Stock"
+          is_default: "Predeterminada"
+          categories: "Categorías"
+          product_type: "Tipo"
 
     # Sincronización ERP (compartido entre productos y clientes)
     erp_sync:
@@ -799,6 +829,12 @@ es:
         subtitle: "Seguir y gestionar todos los pedidos"
         search_placeholder: "Buscar pedidos..."
         no_orders: "Sin pedidos"
+        new_badge: "Nuevo"
+        filters:
+          all_statuses: "Todos los Estados"
+          all_payments: "Todos los Pagos"
+          all_customers: "Todos los Clientes"
+          active_filters: "Filtros activos"
         table:
           order_id: "Nº Pedido"
           client: "Cliente"
