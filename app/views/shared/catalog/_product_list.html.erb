@@ -28,14 +28,14 @@
             <% variants.each do |variant| %>
               <tr>
                 <% if show_variant_photo %>
-                  <td>
+                  <td style="width: 24px;">
                     <% if variant.photo.attached? %>
-                      <%= image_tag url_for(variant.photo.variant(resize_to_fill: [28, 28])), class: "variant-thumb" %>
+                      <%= image_tag url_for(variant.photo.variant(resize_to_fill: [20, 20])), class: "variant-thumb" %>
                     <% end %>
                   </td>
                 <% end %>
                 <td><%= variant.option_values_string.presence || variant.name %></td>
-                <% if show_variant_sku %><td class="text-muted"><%= variant.sku %></td><% end %>
+                <% if show_variant_sku %><td class="sku-code"><%= variant.sku %></td><% end %>
                 <% if show_variant_price %><td class="text-end fw-bold"><%= variant.price&.format %></td><% end %>
               </tr>
             <% end %>
