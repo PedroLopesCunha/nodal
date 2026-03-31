@@ -4,6 +4,61 @@ require "roo"
 class Bo::ProductsController < Bo::BaseController
   before_action :set_product, only: [:show, :edit, :update, :destroy, :configure_variants, :update_variant_configuration, :delete_photo, :set_main_photo, :related_products, :update_related_products, :reorder_related_products]
 
+  # Add products choice page
+  def add_products
+    authorize Product, :add_products?
+  end
+
+  # Bulk create with spreadsheet grid
+  def bulk_create
+    authorize Product, :bulk_create?
+    @categories = current_organisation.categories.kept.order(:name)
+    @product_attributes = current_organisation.product_attributes.kept.active.by_position
+                            .includes(:product_attribute_values)
+    @all_skus = current_organisation.products.pluck(:sku).compact
+    @variable_skus = current_organisation.products.where(has_variants: true).pluck(:sku).compact
+  end
+
+  def bulk_create_process
+    authorize Product, :bulk_create_process?
+    raw_rows = params.require(:rows)
+    rows = raw_rows.to_unsafe_h.values.map(&:to_h)
+
+    # Handle photo uploads
+    zip_path = nil
+    images_dir = nil
+    import_key = SecureRandom.uuid
+
+    if params[:zip_file].present?
+      zip_path = Rails.root.join("tmp", "imports", "#{import_key}.zip").to_s
+      FileUtils.mkdir_p(File.dirname(zip_path))
+      File.open(zip_path, "wb") { |f| f.write(params[:zip_file].read) }
+    end
+
+    if params[:image_files].present?
+      images_dir = Rails.root.join("tmp", "imports", "images_#{import_key}").to_s
+      FileUtils.mkdir_p(images_dir)
+      params[:image_files].each do |image|
+        File.open(File.join(images_dir, image.original_filename), "wb") { |f| f.write(image.read) }
+      end
+    end
+
+    service = ProductGridImportService.new(
+      organisation: current_organisation,
+      rows: rows,
+      zip_path: zip_path,
+      images_dir: images_dir,
+      photo_mode: params[:photo_mode] || "append"
+    )
+    @result = service.call
+
+    # Cleanup temp files
+    File.delete(zip_path) if zip_path && File.exist?(zip_path)
+    FileUtils.rm_rf(images_dir) if images_dir && File.exist?(images_dir)
+
+    render :bulk_create_results
+  end
+
   # Import actions
   def import
     authorize Product, :import?

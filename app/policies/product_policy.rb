@@ -26,6 +26,18 @@ class ProductPolicy < ApplicationPolicy
     user.org_members.find_by(organisation: organisation)&.role&.in?(%w[admin owner])
   end
 
+  def add_products?
+    import?
+  end
+
+  def bulk_create?
+    import?
+  end
+
+  def bulk_create_process?
+    import?
+  end
+
   def edit?
     belongs_to_organisation?
   end

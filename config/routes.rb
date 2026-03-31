@@ -101,6 +101,9 @@ Rails.application.routes.draw do
           get :import
           post :import_mapping
           post :import_process
+          get :add_products
+          get :bulk_create
+          post :bulk_create_process
         end
         member do
           get :configure_variants

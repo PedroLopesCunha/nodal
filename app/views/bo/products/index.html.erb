@@ -19,8 +19,8 @@
     </div>
     <div class="bo-page-actions">
       <% if admin_or_owner? %>
-        <%= link_to import_bo_products_path(params[:org_slug]), class: "btn btn-outline-secondary" do %>
-          <i class="fa-solid fa-upload"></i> <%= t('bo.common.actions.import') %>
+        <%= link_to add_products_bo_products_path(params[:org_slug]), class: "btn btn-outline-secondary" do %>
+          <i class="fa-solid fa-upload"></i> <%= t('bo.products.add_products.title') %>
         <% end %>
       <% end %>
       <a href="#" class="btn btn-outline-secondary">
