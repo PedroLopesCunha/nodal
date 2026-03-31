@@ -1,4 +1,13 @@
 <% actions = capture do %>
+  <div class="btn-group me-2">
+    <button type="button" class="btn btn-outline-secondary btn-sm dropdown-toggle" data-bs-toggle="dropdown">
+      <i class="fa-solid fa-download me-1"></i> <%= t('storefront.orders.export.title') %>
+    </button>
+    <ul class="dropdown-menu">
+      <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#exportOrdersModal"><%= t('storefront.orders.export.orders') %></a></li>
+      <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#exportItemsModal"><%= t('storefront.orders.export.order_items') %></a></li>
+    </ul>
+  </div>
   <%= link_to shopping_lists_path(org_slug: params[:org_slug]), class: "btn btn-outline-primary btn-sm" do %>
     <i class="fa-solid fa-clipboard-list me-1"></i> <%= t('storefront.shopping_lists.index.title') %>
   <% end %>
@@ -103,3 +112,17 @@
     </div>
   </div>
 <% end %>
+
+<%= render "bo/shared/export_modal",
+    columns: Order.exportable_columns,
+    export_path: export_orders_path(org_slug: params[:org_slug]),
+    filter_params: {},
+    modal_id: "exportOrdersModal",
+    title: t('storefront.orders.export.orders') %>
+
+<%= render "bo/shared/export_modal",
+    columns: OrderItem.exportable_columns,
+    export_path: export_items_orders_path(org_slug: params[:org_slug]),
+    filter_params: {},
+    modal_id: "exportItemsModal",
+    title: t('storefront.orders.export.order_items') %>

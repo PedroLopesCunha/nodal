@@ -12,6 +12,45 @@ class Storefront::OrdersController < Storefront::BaseController
     authorize @order
   end
 
+  def download_pdf
+    @order = current_customer.orders.placed.find(params[:id])
+    authorize @order
+
+    html = render_to_string(template: "shared/orders/pdf", layout: false)
+    pdf = Grover.new(html).to_pdf
+
+    send_data pdf,
+      filename: "#{@order.order_number}.pdf",
+      type: "application/pdf",
+      disposition: "attachment"
+  end
+
+  def export
+    authorize Order, :index?
+    orders = current_customer.orders.placed.includes(:order_items, :organisation)
+    columns = Order.exportable_columns_for(params[:columns])
+    format = params[:format_type] || "csv"
+    extension = format == "xlsx" ? "xlsx" : "csv"
+
+    result = ExportService.new(records: orders.order(placed_at: :desc), columns: columns, format: format).call
+    filename = "#{t('storefront.orders.export.filename_orders')}_#{Date.today.iso8601}.#{extension}"
+    send_data result[:data], filename: filename, type: result[:content_type], disposition: "attachment"
+  end
+
+  def export_items
+    authorize Order, :index?
+    order_ids = current_customer.orders.placed.select(:id)
+    records = OrderItem.where(order_id: order_ids).includes(:order, :product, :product_variant, order: :customer)
+
+    columns = OrderItem.exportable_columns_for(params[:columns])
+    format = params[:format_type] || "csv"
+    extension = format == "xlsx" ? "xlsx" : "csv"
+
+    result = ExportService.new(records: records, columns: columns, format: format).call
+    filename = "#{t('storefront.orders.export.filename_items')}_#{Date.today.iso8601}.#{extension}"
+    send_data result[:data], filename: filename, type: result[:content_type], disposition: "attachment"
+  end
+
   def reorder
     original_order = current_customer.orders.placed.find(params[:id])
     authorize original_order

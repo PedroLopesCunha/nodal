@@ -21,9 +21,15 @@
       <button class="btn btn-outline-secondary">
         <i class="fa-solid fa-upload"></i> <%= t('bo.common.actions.import') %>
       </button>
-      <button class="btn btn-outline-secondary">
-        <i class="fa-solid fa-download"></i> <%= t('bo.common.actions.export') %>
-      </button>
+      <div class="btn-group">
+        <button type="button" class="btn btn-outline-secondary dropdown-toggle" data-bs-toggle="dropdown">
+          <i class="fa-solid fa-download"></i> <%= t('bo.common.actions.export') %>
+        </button>
+        <ul class="dropdown-menu">
+          <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#exportModal"><%= t('bo.export.export_orders') %></a></li>
+          <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#exportItemsModal"><%= t('bo.export.export_order_items') %></a></li>
+        </ul>
+      </div>
       <%= link_to new_bo_order_path(org_slug: @current_organisation.slug), class: "btn btn-primary" do %>
         <i class="fa-solid fa-plus"></i> <%= t('bo.common.actions.add_new') %>
       <% end %>
@@ -33,25 +39,99 @@
 
 <!-- Page Body -->
 <div class="bo-page-body">
-  <!-- Search -->
+  <!-- Search & Filters -->
   <div class="card mb-4">
     <div class="card-body">
-      <%= form_with url: bo_orders_path(org_slug: @current_organisation.slug), method: :get, class: "d-flex align-items-center" do %>
-        <div class="input-group flex-grow-1 me-3">
-          <span class="input-group-text bg-white border-end-0">
-            <i class="fa-solid fa-magnifying-glass text-muted"></i>
-          </span>
-          <%= text_field_tag :search, params[:search], class: "form-control border-start-0", placeholder: t('bo.orders.index.search_placeholder') %>
+      <%= form_with url: bo_orders_path(org_slug: @current_organisation.slug), method: :get do %>
+        <%= hidden_field_tag :sort_dir, params[:sort_dir] if params[:sort_dir].present? %>
+        <div class="d-flex align-items-center mb-0">
+          <div class="input-group flex-grow-1 me-3">
+            <span class="input-group-text bg-white border-end-0">
+              <i class="fa-solid fa-magnifying-glass text-muted"></i>
+            </span>
+            <%= text_field_tag :search, params[:search], class: "form-control border-start-0", placeholder: t('bo.orders.index.search_placeholder') %>
+          </div>
+          <button type="submit" class="btn btn-outline-secondary me-2">
+            <i class="fa-solid fa-magnifying-glass"></i> <%= t('bo.common.actions.search') %>
+          </button>
+          <% if filter_params_hash.except(:sort_dir).any? %>
+            <%= link_to bo_orders_path(org_slug: @current_organisation.slug), class: "btn btn-outline-danger" do %>
+              <i class="fa-solid fa-xmark"></i> <%= t('bo.common.actions.clear') %>
+            <% end %>
+          <% end %>
         </div>
-        <button type="submit" class="btn btn-outline-secondary me-2">
-          <i class="fa-solid fa-magnifying-glass"></i> <%= t('bo.common.actions.search') %>
-        </button>
-        <% if params[:search].present? %>
-          <%= link_to t('bo.common.actions.clear'), bo_orders_path(org_slug: @current_organisation.slug), class: "btn btn-outline-secondary" %>
-        <% end %>
+        <div class="row mt-3">
+          <div class="col-md-3">
+            <select name="status" class="form-select form-select-sm" onchange="this.form.submit()">
+              <option value=""><%= t('bo.orders.index.filters.all_statuses') %></option>
+              <% Order::STATUSES.each do |s| %>
+                <option value="<%= s %>" <%= 'selected' if params[:status] == s %>><%= t("bo.common.statuses.#{s}") %></option>
+              <% end %>
+            </select>
+          </div>
+          <div class="col-md-3">
+            <select name="payment_status" class="form-select form-select-sm" onchange="this.form.submit()">
+              <option value=""><%= t('bo.orders.index.filters.all_payments') %></option>
+              <% Order::PAYMENT_STATUSES.each do |s| %>
+                <option value="<%= s %>" <%= 'selected' if params[:payment_status] == s %>><%= t("bo.common.statuses.#{s}") %></option>
+              <% end %>
+            </select>
+          </div>
+          <div class="col-md-3">
+            <select name="customer_id" class="form-select form-select-sm" onchange="this.form.submit()">
+              <option value=""><%= t('bo.orders.index.filters.all_customers') %></option>
+              <% @customers.each do |customer| %>
+                <option value="<%= customer.id %>" <%= 'selected' if params[:customer_id].to_s == customer.id.to_s %>><%= customer.company_name %></option>
+              <% end %>
+            </select>
+          </div>
+          <div class="col-md-3 d-flex gap-2 align-items-center">
+            <small class="text-muted text-nowrap"><%= t('bo.common.time.from') %></small>
+            <%= date_field_tag :date_from, params[:date_from], class: "form-control form-control-sm", onchange: "this.form.submit()" %>
+            <small class="text-muted text-nowrap"><%= t('bo.common.time.to') %></small>
+            <%= date_field_tag :date_to, params[:date_to], class: "form-control form-control-sm", onchange: "this.form.submit()" %>
+          </div>
+        </div>
       <% end %>
     </div>
   </div>
+
+  <% if filter_params_hash.except(:sort_dir).any? %>
+    <div class="mb-3 d-flex align-items-center gap-2 flex-wrap">
+      <small class="text-muted"><%= t('bo.orders.index.filters.active_filters') %>:</small>
+      <% if params[:search].present? %>
+        <%= link_to bo_orders_path(org_slug: @current_organisation.slug, **filter_params_hash.except(:search)), class: "badge bg-secondary text-decoration-none" do %>
+          "<%= params[:search] %>" <i class="fa-solid fa-xmark ms-1"></i>
+        <% end %>
+      <% end %>
+      <% if params[:status].present? %>
+        <%= link_to bo_orders_path(org_slug: @current_organisation.slug, **filter_params_hash.except(:status)), class: "badge bg-secondary text-decoration-none" do %>
+          <%= t("bo.common.statuses.#{params[:status]}") %> <i class="fa-solid fa-xmark ms-1"></i>
+        <% end %>
+      <% end %>
+      <% if params[:payment_status].present? %>
+        <%= link_to bo_orders_path(org_slug: @current_organisation.slug, **filter_params_hash.except(:payment_status)), class: "badge bg-secondary text-decoration-none" do %>
+          <%= t("bo.common.statuses.#{params[:payment_status]}") %> <i class="fa-solid fa-xmark ms-1"></i>
+        <% end %>
+      <% end %>
+      <% if params[:customer_id].present? %>
+        <% selected_customer = @customers.find { |c| c.id.to_s == params[:customer_id] } %>
+        <%= link_to bo_orders_path(org_slug: @current_organisation.slug, **filter_params_hash.except(:customer_id)), class: "badge bg-secondary text-decoration-none" do %>
+          <%= selected_customer&.company_name %> <i class="fa-solid fa-xmark ms-1"></i>
+        <% end %>
+      <% end %>
+      <% if params[:date_from].present? %>
+        <%= link_to bo_orders_path(org_slug: @current_organisation.slug, **filter_params_hash.except(:date_from)), class: "badge bg-secondary text-decoration-none" do %>
+          <%= t('bo.common.time.from') %>: <%= params[:date_from] %> <i class="fa-solid fa-xmark ms-1"></i>
+        <% end %>
+      <% end %>
+      <% if params[:date_to].present? %>
+        <%= link_to bo_orders_path(org_slug: @current_organisation.slug, **filter_params_hash.except(:date_to)), class: "badge bg-secondary text-decoration-none" do %>
+          <%= t('bo.common.time.to') %>: <%= params[:date_to] %> <i class="fa-solid fa-xmark ms-1"></i>
+        <% end %>
+      <% end %>
+    </div>
+  <% end %>
 
   <!-- Orders Table -->
   <div class="card">
@@ -151,5 +231,16 @@
   </div>
 </div>
 
+<%= render "bo/shared/export_modal",
+    columns: Order.exportable_columns,
+    export_path: export_bo_orders_path(org_slug: @current_organisation.slug),
+    filter_params: filter_params_hash %>
+
+<%= render "bo/shared/export_modal",
+    columns: OrderItem.exportable_columns,
+    export_path: export_items_bo_orders_path(org_slug: @current_organisation.slug),
+    filter_params: filter_params_hash,
+    modal_id: "exportItemsModal",
+    title: t('bo.export.export_order_items') %>
 
 <% end %>

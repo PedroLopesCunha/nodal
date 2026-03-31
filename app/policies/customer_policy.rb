@@ -1,4 +1,8 @@
 class CustomerPolicy < ApplicationPolicy
+  def export?
+    member_working_for_organisation?
+  end
+
   def show?
     member_working_for_organisation? && record_belongs_to_user_organisation?
   end

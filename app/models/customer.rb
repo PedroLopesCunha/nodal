@@ -1,5 +1,6 @@
 class Customer < ApplicationRecord
   include ErpSyncable
+  include HasExportableColumns
 
   # Include default devise modules. Others available are:
   # :confirmable, :lockable, :timeoutable, :trackable and :omniauthable
@@ -31,6 +32,31 @@ class Customer < ApplicationRecord
   validates :contact_name, presence: true
   validates :active, inclusion: { in: [true, false] }
   validates :locale, inclusion: { in: I18n.available_locales.map(&:to_s) }, allow_nil: true
+
+  def self.exportable_columns
+    [
+      { key: :company_name, label: I18n.t("bo.export.columns.customer.company_name"), default: true,
+        value: ->(r) { r.company_name } },
+      { key: :contact_name, label: I18n.t("bo.export.columns.customer.contact_name"), default: true,
+        value: ->(r) { r.contact_name } },
+      { key: :email, label: I18n.t("bo.export.columns.customer.email"), default: true,
+        value: ->(r) { r.email } },
+      { key: :contact_phone, label: I18n.t("bo.export.columns.customer.contact_phone"), default: true,
+        value: ->(r) { r.contact_phone } },
+      { key: :category, label: I18n.t("bo.export.columns.customer.category"), default: true,
+        value: ->(r) { r.customer_category&.name } },
+      { key: :taxpayer_id, label: I18n.t("bo.export.columns.customer.taxpayer_id"), default: false,
+        value: ->(r) { r.taxpayer_id } },
+      { key: :active, label: I18n.t("bo.export.columns.customer.active"), default: true,
+        value: ->(r) { r.active? ? I18n.t("bo.common.yes") : I18n.t("bo.common.no") } },
+      { key: :invitation_status, label: I18n.t("bo.export.columns.customer.invitation_status"), default: false,
+        value: ->(r) { I18n.t("bo.common.statuses.#{r.invitation_status}") } },
+      { key: :last_sign_in_at, label: I18n.t("bo.export.columns.customer.last_sign_in_at"), default: false,
+        value: ->(r) { r.last_sign_in_at&.strftime("%Y-%m-%d %H:%M") } },
+      { key: :created_at, label: I18n.t("bo.export.columns.customer.created_at"), default: false,
+        value: ->(r) { I18n.l(r.created_at, format: :short) } }
+    ]
+  end
 
   # Email validations (from Devise::Models::Validatable, with scoped uniqueness)
   validates :email, presence: true, if: :email_required?

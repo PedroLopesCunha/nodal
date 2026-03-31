@@ -26,7 +26,7 @@
         <a href="#" class="btn btn-outline-secondary">
           <i class="fa-solid fa-upload"></i> <%= t('bo.common.actions.import') %>
         </a>
-        <a href="#" class="btn btn-outline-secondary">
+        <a href="#" class="btn btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#exportModal">
           <i class="fa-solid fa-download"></i> <%= t('bo.common.actions.export') %>
         </a>
         <%= link_to new_bo_customer_path(params[:org_slug]), class: "btn btn-primary" do %>
@@ -256,5 +256,10 @@
     <%= render 'customer_categories' %>
   <% end %>
 </div>
+
+<%= render "bo/shared/export_modal",
+    columns: Customer.exportable_columns,
+    export_path: export_bo_customers_path(params[:org_slug]),
+    filter_params: filter_params_hash %>
 
 <% end %>

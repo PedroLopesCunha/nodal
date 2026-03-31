@@ -23,9 +23,15 @@
           <i class="fa-solid fa-upload"></i> <%= t('bo.products.add_products.title') %>
         <% end %>
       <% end %>
-      <a href="#" class="btn btn-outline-secondary">
-        <i class="fa-solid fa-download"></i> <%= t('bo.common.actions.export') %>
-      </a>
+      <div class="btn-group">
+        <button type="button" class="btn btn-outline-secondary dropdown-toggle" data-bs-toggle="dropdown">
+          <i class="fa-solid fa-download"></i> <%= t('bo.common.actions.export') %>
+        </button>
+        <ul class="dropdown-menu">
+          <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#exportModal"><%= t('bo.export.export_products') %></a></li>
+          <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#exportVariantsModal"><%= t('bo.export.export_variants') %></a></li>
+        </ul>
+      </div>
       <%= link_to new_bo_product_path(params[:org_slug]), class: "btn btn-primary" do %>
         <i class="fa-solid fa-plus"></i> <%= t('bo.common.actions.add_new') %>
       <% end %>
@@ -273,5 +279,17 @@
     </div>
   <% end %>
 </div>
+
+<%= render "bo/shared/export_modal",
+    columns: Product.exportable_columns,
+    export_path: export_bo_products_path(params[:org_slug]),
+    filter_params: filter_params_hash %>
+
+<%= render "bo/shared/export_modal",
+    columns: ProductVariant.exportable_columns,
+    export_path: export_variants_bo_products_path(params[:org_slug]),
+    filter_params: filter_params_hash,
+    modal_id: "exportVariantsModal",
+    title: t('bo.export.export_variants') %>
 
 <% end %>

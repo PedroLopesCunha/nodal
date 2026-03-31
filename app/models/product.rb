@@ -1,6 +1,7 @@
 class Product < ApplicationRecord
   include Slugable
   include ErpSyncable
+  include HasExportableColumns
 
   slugify :name, secondary: :sku
 
@@ -54,6 +55,33 @@ class Product < ApplicationRecord
 
   scope :simple, -> { where(has_variants: false) }
   scope :variable, -> { where(has_variants: true) }
+
+  def self.exportable_columns
+    [
+      { key: :name, label: I18n.t("bo.export.columns.product.name"), default: true,
+        value: ->(r) { r.name } },
+      { key: :sku, label: I18n.t("bo.export.columns.product.sku"), default: true,
+        value: ->(r) { r.sku } },
+      { key: :description, label: I18n.t("bo.export.columns.product.description"), default: false,
+        value: ->(r) { r.description } },
+      { key: :unit_price, label: I18n.t("bo.export.columns.product.unit_price"), default: true,
+        value: ->(r) { r.price&.format } },
+      { key: :price_on_request, label: I18n.t("bo.export.columns.product.price_on_request"), default: false,
+        value: ->(r) { r.price_on_request? ? I18n.t("bo.common.yes") : I18n.t("bo.common.no") } },
+      { key: :available, label: I18n.t("bo.export.columns.product.available"), default: true,
+        value: ->(r) { r.available? ? I18n.t("bo.common.yes") : I18n.t("bo.common.no") } },
+      { key: :product_type, label: I18n.t("bo.export.columns.product.product_type"), default: true,
+        value: ->(r) { r.has_variants? ? I18n.t("bo.products.index.table.variable") : I18n.t("bo.products.index.table.simple") } },
+      { key: :categories, label: I18n.t("bo.export.columns.product.categories"), default: true,
+        value: ->(r) { r.categories.map(&:name).join(", ") } },
+      { key: :min_quantity, label: I18n.t("bo.export.columns.product.min_quantity"), default: false,
+        value: ->(r) { r.min_quantity } },
+      { key: :unit_description, label: I18n.t("bo.export.columns.product.unit_description"), default: false,
+        value: ->(r) { r.unit_description } },
+      { key: :created_at, label: I18n.t("bo.export.columns.product.created_at"), default: false,
+        value: ->(r) { I18n.l(r.created_at, format: :short) } }
+    ]
+  end
 
 
   def active_discount_for(customer)

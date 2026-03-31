@@ -1,9 +1,40 @@
 class OrderItem < ApplicationRecord
+  include HasExportableColumns
+
   belongs_to :order
   belongs_to :product
   belongs_to :product_variant, optional: true
 
   monetize :unit_price, as: :price
+
+  def self.exportable_columns
+    [
+      { key: :order_number, label: I18n.t("bo.export.columns.order_item.order_number"), default: true,
+        value: ->(r) { r.order.order_number } },
+      { key: :placed_at, label: I18n.t("bo.export.columns.order_item.placed_at"), default: true,
+        value: ->(r) { r.order.placed_at&.strftime("%Y-%m-%d") } },
+      { key: :customer_company, label: I18n.t("bo.export.columns.order_item.customer_company"), default: true,
+        value: ->(r) { r.order.customer&.company_name } },
+      { key: :product_name, label: I18n.t("bo.export.columns.order_item.product_name"), default: true,
+        value: ->(r) { r.product&.name } },
+      { key: :variant_name, label: I18n.t("bo.export.columns.order_item.variant_name"), default: true,
+        value: ->(r) { r.product_variant&.option_values_string.presence } },
+      { key: :sku, label: I18n.t("bo.export.columns.order_item.sku"), default: true,
+        value: ->(r) { r.product_variant&.sku || r.product&.sku } },
+      { key: :quantity, label: I18n.t("bo.export.columns.order_item.quantity"), default: true,
+        value: ->(r) { r.quantity } },
+      { key: :unit_price, label: I18n.t("bo.export.columns.order_item.unit_price"), default: true,
+        value: ->(r) { r.price&.format } },
+      { key: :discount, label: I18n.t("bo.export.columns.order_item.discount"), default: true,
+        value: ->(r) { r.discount_percentage.to_f > 0 ? "#{(r.discount_percentage * 100).round(1)}%" : nil } },
+      { key: :total, label: I18n.t("bo.export.columns.order_item.total"), default: true,
+        value: ->(r) { r.total_price.format } },
+      { key: :order_status, label: I18n.t("bo.export.columns.order_item.order_status"), default: false,
+        value: ->(r) { r.order.status&.titleize } },
+      { key: :payment_status, label: I18n.t("bo.export.columns.order_item.payment_status"), default: false,
+        value: ->(r) { r.order.payment_status&.titleize } }
+    ]
+  end
 
   validates :quantity, presence: true, numericality: { greater_than: 0 }
   validates :unit_price, presence: true, numericality: { greater_than_or_equal_to: 0 }
