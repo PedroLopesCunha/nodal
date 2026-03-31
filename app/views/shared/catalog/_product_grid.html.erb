@@ -1,0 +1,44 @@
+<div class="product-card">
+  <% if product.photo_attached? %>
+    <%= image_tag url_for(product.photo.variant(resize_to_fill: [300, 240])), class: "product-card-img" %>
+  <% else %>
+    <div class="product-card-placeholder">&#128247;</div>
+  <% end %>
+  <div class="product-card-body">
+    <div class="product-card-name"><%= product.name %></div>
+    <% if show_sku && product.sku.present? %>
+      <div class="product-card-sku">SKU: <%= product.sku %></div>
+    <% end %>
+    <% if show_description && product.description.present? %>
+      <div class="product-card-description"><%= product.description %></div>
+    <% end %>
+    <% if show_prices && !product.has_variants? %>
+      <% if product.price_on_request? %>
+        <div class="product-card-price-request"><%= t('bo.catalog.pdf.price_on_request') %></div>
+      <% else %>
+        <div class="product-card-price"><%= product.display_price %></div>
+      <% end %>
+    <% end %>
+    <% if show_variants && product.has_variants? %>
+      <% variants = product.product_variants.reject(&:is_default?).select(&:available?) %>
+      <% if variants.any? %>
+        <div class="product-card-variants-detail">
+          <% variants.each do |variant| %>
+            <div class="variant-row">
+              <% if show_variant_photo && variant.photo.attached? %>
+                <%= image_tag url_for(variant.photo.variant(resize_to_fill: [24, 24])), class: "variant-thumb" %>
+              <% end %>
+              <span class="variant-options"><%= variant.option_values_string.presence || variant.name %></span>
+              <% if show_variant_sku && variant.sku.present? %>
+                <span class="variant-sku"><%= variant.sku %></span>
+              <% end %>
+              <% if show_variant_price %>
+                <span class="variant-price"><%= variant.price&.format %></span>
+              <% end %>
+            </div>
+          <% end %>
+        </div>
+      <% end %>
+    <% end %>
+  </div>
+</div>

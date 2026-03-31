@@ -88,6 +88,42 @@ es:
       "yes": "Sí"
       "no": "No"
 
+    # Catálogo PDF
+    catalog:
+      title: "Catálogo"
+      catalog_title: "Título del Catálogo"
+      catalog_title_placeholder: "ej: Catálogo Primavera 2026"
+      layout: "Disposición"
+      grid: "Cuadrícula"
+      list: "Lista"
+      sort_by: "Ordenar por"
+      sort_name: "Nombre"
+      sort_price: "Precio"
+      sort_category: "Categoría"
+      options: "Opciones"
+      show_prices: "Mostrar precios"
+      show_sku: "Mostrar SKU"
+      show_description: "Mostrar descripción"
+      show_variants: "Mostrar opciones de variante"
+      group_by_category: "Agrupar por categoría"
+      only_available: "Solo productos disponibles"
+      variant_details: "Detalles de Variantes"
+      show_variant_sku: "Mostrar SKU de variante"
+      show_variant_price: "Mostrar precio de variante"
+      show_variant_photo: "Mostrar foto de variante"
+      select_categories: "Categorías"
+      no_selection_hint: "Sin selección = todos los productos"
+      filters_applied: "Los filtros activos se aplicarán al catálogo"
+      generate: "Generar Catálogo"
+      pdf:
+        product_count:
+          one: "%{count} producto"
+          other: "%{count} productos"
+        price_on_request: "Precio bajo consulta"
+        uncategorized: "Otros"
+        variant: "Variante"
+        price_label: "Precio"
+
     # Exportación
     export:
       title: "Exportar"
