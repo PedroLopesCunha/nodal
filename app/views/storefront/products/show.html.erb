@@ -415,34 +415,71 @@
 <%= render 'related_products' if @related_products&.any? %>
 
 <!-- Image Zoom Modal -->
-<% if @product.photo_attached? %>
-  <div class="modal fade" id="imageModal" tabindex="-1" aria-labelledby="imageModalLabel" aria-hidden="true">
+<% if all_photos.any? %>
+  <div class="modal fade" id="imageModal" tabindex="-1" aria-labelledby="imageModalLabel" aria-hidden="true"
+       data-controller="modal-gallery"
+       data-modal-gallery-photos-value="<%= all_photos.map { |p| url_for(p) }.to_json %>"
+       data-action="keydown@document->modal-gallery#keydown">
     <div class="modal-dialog modal-fullscreen">
-      <div class="modal-content bg-dark">
-        <div class="modal-header border-0 bg-dark position-relative" style="z-index: 10;">
-          <h5 class="modal-title text-white" id="imageModalLabel"><%= @product.name %></h5>
-          <div class="d-flex align-items-center gap-2">
-            <div class="btn-group" role="group">
-              <button type="button" class="btn btn-outline-light btn-sm" data-action="image-zoom#zoomOut" title="Zoom out">
-                <i class="fa-solid fa-minus"></i>
+      <div class="modal-content bg-white">
+        <div class="d-flex h-100">
+
+          <!-- Left: Main Image -->
+          <div class="flex-grow-1 d-flex align-items-center justify-content-center position-relative"
+               style="background: #f8f9fa; min-height: 100vh;"
+               data-controller="image-zoom"
+               data-action="wheel->image-zoom#wheel mousedown->image-zoom#mousedown mousemove->image-zoom#mousemove mouseup->image-zoom#mouseup mouseleave->image-zoom#mouseleave dblclick->image-zoom#dblclick touchstart->image-zoom#touchstart touchmove->image-zoom#touchmove touchend->image-zoom#touchend">
+            <%= image_tag @product.photo, id: "zoomModalImage",
+                style: "max-height: 90vh; max-width: 100%; object-fit: contain; cursor: zoom-in; transition: opacity 0.15s;",
+                data: { image_zoom_target: "image", variant_selector_target: "zoomImage", modal_gallery_target: "image" } %>
+
+            <% if all_photos.size > 1 %>
+              <button type="button" class="btn position-absolute d-flex align-items-center justify-content-center"
+                      style="left: 16px; top: 50%; transform: translateY(-50%); width: 40px; height: 40px; background: white; border: 1px solid #dee2e6; border-radius: 50%; box-shadow: 0 1px 4px rgba(0,0,0,0.1); z-index: 5;"
+                      data-action="click->modal-gallery#prev">
+                <i class="fa-solid fa-chevron-left text-muted"></i>
               </button>
-              <button type="button" class="btn btn-outline-light btn-sm" data-action="image-zoom#reset" title="Reset">
-                <i class="fa-solid fa-expand"></i>
+              <button type="button" class="btn position-absolute d-flex align-items-center justify-content-center"
+                      style="right: 16px; top: 50%; transform: translateY(-50%); width: 40px; height: 40px; background: white; border: 1px solid #dee2e6; border-radius: 50%; box-shadow: 0 1px 4px rgba(0,0,0,0.1); z-index: 5;"
+                      data-action="click->modal-gallery#next">
+                <i class="fa-solid fa-chevron-right text-muted"></i>
               </button>
-              <button type="button" class="btn btn-outline-light btn-sm" data-action="image-zoom#zoomIn" title="Zoom in">
-                <i class="fa-solid fa-plus"></i>
+            <% end %>
+          </div>
+
+          <!-- Right: Info + Thumbnails -->
+          <div class="d-none d-md-flex flex-column" style="width: 320px; border-left: 1px solid #e5e5e5;">
+            <!-- Close button -->
+            <div class="d-flex justify-content-end p-3">
+              <button type="button" class="btn btn-link text-muted p-0" data-bs-dismiss="modal" aria-label="Close">
+                <i class="fa-solid fa-xmark fa-lg"></i>
               </button>
             </div>
-            <button type="button" class="btn-close btn-close-white ms-2" data-bs-dismiss="modal" aria-label="Close"></button>
+
+            <!-- Product name -->
+            <div class="px-4 pb-3">
+              <h6 class="fw-semibold mb-1"><%= @product.name %></h6>
+              <% if all_photos.size > 1 %>
+                <small class="text-muted" data-modal-gallery-target="counter"></small>
+              <% end %>
+            </div>
+
+            <!-- Thumbnails grid -->
+            <div class="px-4 pb-4">
+              <div class="d-flex flex-wrap gap-2">
+                <% all_photos.each_with_index do |photo, i| %>
+                  <div class="rounded overflow-hidden"
+                       style="width: 64px; height: 64px; cursor: pointer; border: 2px solid <%= i == 0 ? '#0d6efd' : '#dee2e6' %>; transition: border-color 0.2s;"
+                       data-modal-gallery-target="thumbnail"
+                       data-action="click->modal-gallery#goTo"
+                       data-index="<%= i %>">
+                    <%= image_tag photo, style: "width: 100%; height: 100%; object-fit: cover;" %>
+                  </div>
+                <% end %>
+              </div>
+            </div>
           </div>
-        </div>
-        <div class="modal-body overflow-hidden d-flex align-items-center justify-content-center p-0"
-             data-controller="image-zoom"
-             data-action="wheel->image-zoom#wheel mousedown->image-zoom#mousedown mousemove->image-zoom#mousemove mouseup->image-zoom#mouseup mouseleave->image-zoom#mouseleave dblclick->image-zoom#dblclick touchstart->image-zoom#touchstart touchmove->image-zoom#touchmove touchend->image-zoom#touchend">
-          <%= image_tag @product.photo, id: "zoomModalImage", style: "max-height: 90vh; cursor: zoom-in;", data: { image_zoom_target: "image" } %>
-        </div>
-        <div class="modal-footer border-0 bg-dark justify-content-center py-2">
-          <small class="text-white-50">Scroll to zoom • Double-click to toggle • Drag to pan</small>
+
         </div>
       </div>
     </div>

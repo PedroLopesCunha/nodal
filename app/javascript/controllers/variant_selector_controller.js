@@ -1,7 +1,7 @@
 import { Controller } from "@hotwired/stimulus"
 
 export default class extends Controller {
-  static targets = ["select", "variantId", "price", "originalPrice", "sku", "stock", "addToCart", "image", "mainPrice", "discountBadge", "quantity"]
+  static targets = ["select", "variantId", "price", "originalPrice", "sku", "stock", "addToCart", "image", "zoomImage", "mainPrice", "discountBadge", "quantity"]
   static values = {
     variants: Array,
     currencySymbol: String,
@@ -223,7 +223,11 @@ export default class extends Controller {
     }
 
     if (this.hasImageTarget) {
-      this.imageTarget.src = variant.photo_url || this.originalImageUrl
+      const imageUrl = variant.photo_url || this.originalImageUrl
+      this.imageTarget.src = imageUrl
+      if (this.hasZoomImageTarget) {
+        this.zoomImageTarget.src = imageUrl
+      }
     }
   }
 
