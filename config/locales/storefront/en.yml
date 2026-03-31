@@ -324,6 +324,12 @@ en:
         view: "View"
         no_orders: "No orders yet"
         no_orders_hint: "Once you place an order, it will appear here."
+      export:
+        title: "Export"
+        orders: "Export Orders"
+        order_items: "Export Order Items"
+        filename_orders: "orders"
+        filename_items: "order_items"
       add_to_cart:
         success: "Items from order %{order_number} added to your cart."
         skipped: "Some items were unavailable and skipped: %{items}"

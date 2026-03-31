@@ -55,6 +55,10 @@ Rails.application.routes.draw do
 
       # Order history (placed orders only)
       resources :orders, only: [:index, :show] do
+        collection do
+          get :export
+          get :export_items
+        end
         member do
           post :reorder
           post :add_to_cart

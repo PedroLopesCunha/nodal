@@ -324,6 +324,12 @@ pt:
         view: "Ver"
         no_orders: "Ainda não tem encomendas"
         no_orders_hint: "Quando efetuar uma encomenda, ela aparecerá aqui."
+      export:
+        title: "Exportar"
+        orders: "Exportar Encomendas"
+        order_items: "Exportar Linhas de Encomenda"
+        filename_orders: "encomendas"
+        filename_items: "linhas_encomenda"
       add_to_cart:
         success: "Itens da encomenda %{order_number} adicionados ao carrinho."
         skipped: "Alguns itens não estavam disponíveis e foram ignorados: %{items}"
