@@ -1,23 +1,10 @@
 class Bo::OrdersController < Bo::BaseController
+  include Exportable
+
   before_action :set_order, only: [:show, :edit, :update, :destroy, :apply_discount, :remove_discount]
 
   def index
-    @orders = policy_scope(current_organisation.orders.placed).includes(:customer, :order_items)
-
-    # Search by order number or customer name
-    if params[:search].present?
-      search_term = "%#{params[:search]}%"
-      @orders = @orders.joins(:customer).where(
-        "unaccent(orders.order_number) ILIKE unaccent(:search) OR unaccent(customers.company_name) ILIKE unaccent(:search) OR unaccent(customers.contact_name) ILIKE unaccent(:search)",
-        search: search_term
-      )
-    end
-
-    # Filter by status
-    @orders = @orders.where(status: params[:status]) if params[:status].present?
-
-    # Filter by payment status
-    @orders = @orders.where(payment_status: params[:payment_status]) if params[:payment_status].present?
+    @orders = apply_order_filters(policy_scope(current_organisation.orders.placed).includes(:customer, :order_items))
 
     sort_direction = %w[asc desc].include?(params[:sort_dir]) ? params[:sort_dir] : "desc"
     @orders = @orders.order(Arel.sql("COALESCE(orders.placed_at, orders.created_at) #{sort_direction}"))
@@ -87,9 +74,36 @@ class Bo::OrdersController < Bo::BaseController
 
   private
 
+  def exportable_class
+    Order
+  end
+
+  def exportable_base_scope
+    policy_scope(current_organisation.orders.placed).includes(:customer, :order_items)
+  end
+
+  def apply_export_filters(scope)
+    apply_order_filters(scope)
+  end
+
   def filter_params_hash
     { search: params[:search], status: params[:status],
       payment_status: params[:payment_status], sort_dir: params[:sort_dir] }.compact_blank
+  end
+
+  def apply_order_filters(scope)
+    if params[:search].present?
+      search_term = "%#{params[:search]}%"
+      scope = scope.joins(:customer).where(
+        "unaccent(orders.order_number) ILIKE unaccent(:search) OR unaccent(customers.company_name) ILIKE unaccent(:search) OR unaccent(customers.contact_name) ILIKE unaccent(:search)",
+        search: search_term
+      )
+    end
+
+    scope = scope.where(status: params[:status]) if params[:status].present?
+    scope = scope.where(payment_status: params[:payment_status]) if params[:payment_status].present?
+
+    scope
   end
 
   def set_order

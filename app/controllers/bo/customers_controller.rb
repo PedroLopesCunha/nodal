@@ -1,4 +1,6 @@
 class Bo::CustomersController < Bo::BaseController
+  include Exportable
+
   before_action :set_and_authorize_customer, only: [:show, :edit, :update, :destroy, :invite]
 
   def index
@@ -76,6 +78,18 @@ class Bo::CustomersController < Bo::BaseController
 
   private
 
+  def exportable_class
+    Customer
+  end
+
+  def exportable_base_scope
+    policy_scope(current_organisation.customers).includes(:customer_category)
+  end
+
+  def apply_export_filters(scope)
+    apply_customer_filters(scope)
+  end
+
   def filter_params_hash
     { query: params[:query], status: params[:status], category: params[:category],
       sort: params[:sort], direction: params[:direction] }.compact_blank
@@ -91,25 +105,7 @@ class Bo::CustomersController < Bo::BaseController
   end
 
   def load_customers
-    @customers = policy_scope(current_organisation.customers).includes(:customer_category)
-
-    if params[:query].present?
-      @customers = @customers.where(
-        "unaccent(company_name) ILIKE unaccent(:q) OR unaccent(contact_name) ILIKE unaccent(:q) OR unaccent(email) ILIKE unaccent(:q) OR unaccent(external_id) ILIKE unaccent(:q)",
-        q: "%#{params[:query]}%"
-      )
-    end
-
-    case params[:status]
-    when "active" then @customers = @customers.where(active: true).where.not(invitation_accepted_at: nil)
-    when "inactive" then @customers = @customers.where(active: false)
-    when "not_invited" then @customers = @customers.where(active: true, invitation_sent_at: nil)
-    when "pending" then @customers = @customers.where(active: true, invitation_accepted_at: nil).where.not(invitation_sent_at: nil)
-    end
-
-    if params[:category].present?
-      @customers = @customers.where(customer_category_id: params[:category])
-    end
+    @customers = apply_customer_filters(policy_scope(current_organisation.customers).includes(:customer_category))
 
     @sort_column = %w[company_name contact_name email active].include?(params[:sort]) ? params[:sort] : "company_name"
     @sort_direction = %w[asc desc].include?(params[:direction]) ? params[:direction] : "asc"
@@ -117,6 +113,26 @@ class Bo::CustomersController < Bo::BaseController
     @pagy, @customers = pagy(@customers)
 
     @last_customer_sync = current_organisation.erp_sync_logs.for_entity('customers').completed.recent.first if current_organisation.erp_configuration&.enabled?
+  end
+
+  def apply_customer_filters(scope)
+    if params[:query].present?
+      scope = scope.where(
+        "unaccent(company_name) ILIKE unaccent(:q) OR unaccent(contact_name) ILIKE unaccent(:q) OR unaccent(email) ILIKE unaccent(:q) OR unaccent(external_id) ILIKE unaccent(:q)",
+        q: "%#{params[:query]}%"
+      )
+    end
+
+    case params[:status]
+    when "active" then scope = scope.where(active: true).where.not(invitation_accepted_at: nil)
+    when "inactive" then scope = scope.where(active: false)
+    when "not_invited" then scope = scope.where(active: true, invitation_sent_at: nil)
+    when "pending" then scope = scope.where(active: true, invitation_accepted_at: nil).where.not(invitation_sent_at: nil)
+    end
+
+    scope = scope.where(customer_category_id: params[:category]) if params[:category].present?
+
+    scope
   end
 
   def set_and_authorize_customer

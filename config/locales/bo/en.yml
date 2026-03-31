@@ -93,6 +93,55 @@ en:
       created: "Created"
       last_updated: "Last Updated"
       danger_zone: "Danger Zone"
+      "yes": "Yes"
+      "no": "No"
+
+    # Export
+    export:
+      title: "Export"
+      select_columns: "Select columns to export"
+      select_all: "Select all"
+      deselect_all: "Deselect all"
+      format: "Format"
+      download: "Download"
+      columns:
+        product:
+          name: "Name"
+          sku: "SKU"
+          description: "Description"
+          unit_price: "Unit Price"
+          price_on_request: "Price on Request"
+          available: "Available"
+          product_type: "Type"
+          categories: "Categories"
+          min_quantity: "Min. Quantity"
+          unit_description: "Unit"
+          created_at: "Created"
+        order:
+          order_number: "Order Number"
+          customer_company: "Company"
+          customer_contact: "Contact"
+          customer_email: "Email"
+          status: "Status"
+          payment_status: "Payment Status"
+          placed_at: "Date"
+          receive_on: "Delivery Date"
+          delivery_method: "Delivery Method"
+          item_count: "Items"
+          total_amount: "Subtotal"
+          grand_total: "Grand Total"
+          notes: "Notes"
+        customer:
+          company_name: "Company"
+          contact_name: "Contact"
+          email: "Email"
+          contact_phone: "Phone"
+          category: "Category"
+          taxpayer_id: "Tax ID"
+          active: "Active"
+          invitation_status: "Invitation Status"
+          last_sign_in_at: "Last Sign In"
+          created_at: "Created"
 
     # ERP Sync (shared across products & customers)
     erp_sync:

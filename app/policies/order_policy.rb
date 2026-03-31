@@ -3,6 +3,10 @@ class OrderPolicy < ApplicationPolicy
     true
   end
 
+  def export?
+    true
+  end
+
   def show?
     customer_owner? || member_of_organisation?
   end

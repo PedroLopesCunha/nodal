@@ -21,9 +21,9 @@
       <button class="btn btn-outline-secondary">
         <i class="fa-solid fa-upload"></i> <%= t('bo.common.actions.import') %>
       </button>
-      <button class="btn btn-outline-secondary">
+      <a href="#" class="btn btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#exportModal">
         <i class="fa-solid fa-download"></i> <%= t('bo.common.actions.export') %>
-      </button>
+      </a>
       <%= link_to new_bo_order_path(org_slug: @current_organisation.slug), class: "btn btn-primary" do %>
         <i class="fa-solid fa-plus"></i> <%= t('bo.common.actions.add_new') %>
       <% end %>
@@ -151,5 +151,9 @@
   </div>
 </div>
 
+<%= render "bo/shared/export_modal",
+    columns: Order.exportable_columns,
+    export_path: export_bo_orders_path(org_slug: @current_organisation.slug),
+    filter_params: filter_params_hash %>
 
 <% end %>

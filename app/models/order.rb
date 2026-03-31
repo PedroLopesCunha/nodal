@@ -1,5 +1,6 @@
 class Order < ApplicationRecord
   include ErpSyncable
+  include HasExportableColumns
 
   STATUSES = %w[in_process processed completed].freeze
   PAYMENT_STATUSES = %w[pending paid failed refunded].freeze
@@ -38,6 +39,37 @@ class Order < ApplicationRecord
   scope :draft, -> { where(placed_at: nil) }
   scope :placed, -> { where.not(placed_at: nil) }
   scope :unreviewed, -> { placed.where(viewed_at: nil) }
+
+  def self.exportable_columns
+    [
+      { key: :order_number, label: I18n.t("bo.export.columns.order.order_number"), default: true,
+        value: ->(r) { r.order_number } },
+      { key: :customer_company, label: I18n.t("bo.export.columns.order.customer_company"), default: true,
+        value: ->(r) { r.customer&.company_name } },
+      { key: :customer_contact, label: I18n.t("bo.export.columns.order.customer_contact"), default: true,
+        value: ->(r) { r.customer&.contact_name } },
+      { key: :customer_email, label: I18n.t("bo.export.columns.order.customer_email"), default: false,
+        value: ->(r) { r.customer&.email } },
+      { key: :status, label: I18n.t("bo.export.columns.order.status"), default: true,
+        value: ->(r) { r.status&.titleize } },
+      { key: :payment_status, label: I18n.t("bo.export.columns.order.payment_status"), default: true,
+        value: ->(r) { r.payment_status&.titleize } },
+      { key: :placed_at, label: I18n.t("bo.export.columns.order.placed_at"), default: true,
+        value: ->(r) { r.placed_at&.strftime("%Y-%m-%d %H:%M") } },
+      { key: :receive_on, label: I18n.t("bo.export.columns.order.receive_on"), default: false,
+        value: ->(r) { r.receive_on&.strftime("%Y-%m-%d") } },
+      { key: :delivery_method, label: I18n.t("bo.export.columns.order.delivery_method"), default: false,
+        value: ->(r) { r.delivery_method&.titleize } },
+      { key: :item_count, label: I18n.t("bo.export.columns.order.item_count"), default: true,
+        value: ->(r) { r.order_items.sum(:quantity) } },
+      { key: :total_amount, label: I18n.t("bo.export.columns.order.total_amount"), default: true,
+        value: ->(r) { r.total_amount.format } },
+      { key: :grand_total, label: I18n.t("bo.export.columns.order.grand_total"), default: true,
+        value: ->(r) { r.grand_total.format } },
+      { key: :notes, label: I18n.t("bo.export.columns.order.notes"), default: false,
+        value: ->(r) { r.notes } }
+    ]
+  end
 
   def draft?
     placed_at.nil?

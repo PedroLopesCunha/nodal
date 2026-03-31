@@ -85,6 +85,55 @@ es:
         "false": "No"
       vs_prev_period: "vs período anterior"
       not_provided: "No proporcionado"
+      "yes": "Sí"
+      "no": "No"
+
+    # Exportación
+    export:
+      title: "Exportar"
+      select_columns: "Seleccionar columnas para exportar"
+      select_all: "Seleccionar todo"
+      deselect_all: "Deseleccionar todo"
+      format: "Formato"
+      download: "Descargar"
+      columns:
+        product:
+          name: "Nombre"
+          sku: "SKU"
+          description: "Descripción"
+          unit_price: "Precio Unitario"
+          price_on_request: "Precio bajo Consulta"
+          available: "Disponible"
+          product_type: "Tipo"
+          categories: "Categorías"
+          min_quantity: "Cant. Mínima"
+          unit_description: "Unidad"
+          created_at: "Creado"
+        order:
+          order_number: "Nº Pedido"
+          customer_company: "Empresa"
+          customer_contact: "Contacto"
+          customer_email: "Email"
+          status: "Estado"
+          payment_status: "Estado de Pago"
+          placed_at: "Fecha"
+          receive_on: "Fecha de Entrega"
+          delivery_method: "Método de Entrega"
+          item_count: "Artículos"
+          total_amount: "Subtotal"
+          grand_total: "Total General"
+          notes: "Notas"
+        customer:
+          company_name: "Empresa"
+          contact_name: "Contacto"
+          email: "Email"
+          contact_phone: "Teléfono"
+          category: "Categoría"
+          taxpayer_id: "NIF"
+          active: "Activo"
+          invitation_status: "Estado de Invitación"
+          last_sign_in_at: "Último Acceso"
+          created_at: "Creado"
 
     # Sincronización ERP (compartido entre productos y clientes)
     erp_sync:

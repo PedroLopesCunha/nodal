@@ -80,12 +80,18 @@ Rails.application.routes.draw do
       get "/", to: "dashboards#index"
       get "dashboards/metrics", to: "dashboards#metrics", as: :dashboards_metrics
       resources :orders do
+        collection do
+          get :export
+        end
         member do
           patch :apply_discount
           delete :remove_discount
         end
       end
       resources :customers do
+        collection do
+          get :export
+        end
         member do
           post :invite
         end
@@ -98,6 +104,7 @@ Rails.application.routes.draw do
       end
       resources :products do
         collection do
+          get :export
           get :import
           post :import_mapping
           post :import_process

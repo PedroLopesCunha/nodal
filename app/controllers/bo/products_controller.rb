@@ -2,6 +2,8 @@ require "csv"
 require "roo"
 
 class Bo::ProductsController < Bo::BaseController
+  include Exportable
+
   before_action :set_product, only: [:show, :edit, :update, :destroy, :configure_variants, :update_variant_configuration, :delete_photo, :set_main_photo, :related_products, :update_related_products, :reorder_related_products]
 
   # Add products choice page
@@ -210,58 +212,7 @@ class Bo::ProductsController < Bo::BaseController
   end
 
   def index
-    @products = policy_scope(current_organisation.products).includes(:categories, :product_variants).with_attached_photos
-
-    if params[:query].present?
-      matching_ids = @products.left_joins(:categories, :product_variants).where(
-        "unaccent(products.name) ILIKE unaccent(:q) OR unaccent(products.sku) ILIKE unaccent(:q) OR unaccent(products.description) ILIKE unaccent(:q) OR unaccent(categories.name) ILIKE unaccent(:q) OR unaccent(product_variants.sku) ILIKE unaccent(:q)",
-        q: "%#{params[:query]}%"
-      ).select("products.id").distinct
-      @products = @products.where(id: matching_ids)
-    end
-
-    # Category filter
-    if params[:category_id] == "none"
-      product_ids_with_category = CategoryProduct.select(:product_id)
-      @products = @products.where.not(id: product_ids_with_category)
-    elsif params[:category_id].present?
-      category = current_organisation.categories.kept.find_by(id: params[:category_id])
-      if category
-        @current_category = category
-        all_category_ids = category.subtree_ids
-        product_ids_in_category = CategoryProduct.where(category_id: all_category_ids).select(:product_id)
-        @products = @products.where(id: product_ids_in_category)
-      end
-    end
-
-    # Product type filter
-    if params[:product_type].present?
-      case params[:product_type]
-      when "simple" then @products = @products.simple
-      when "variable" then @products = @products.variable
-      end
-    end
-
-    # Price status filter
-    case params[:price_status]
-    when "on_request" then @products = @products.where(price_on_request: true)
-    when "zero_price" then @products = @products.where(price_on_request: false, unit_price: [nil, 0])
-    when "has_price" then @products = @products.where(price_on_request: false).where("unit_price > 0")
-    end
-
-    # Status filter
-    case params[:status]
-    when "available"
-      @products = @products.where(available: true).where.not(
-        id: Product.joins(:product_variants).where(has_variants: true, product_variants: { available: false }).select(:id)
-      )
-    when "unavailable"
-      @products = @products.where(available: false)
-    when "partial"
-      @products = @products.where(has_variants: true, available: true).where(
-        id: Product.joins(:product_variants).where(has_variants: true, product_variants: { available: false }).select(:id)
-      )
-    end
+    @products = apply_product_filters(policy_scope(current_organisation.products).includes(:categories, :product_variants).with_attached_photos)
 
     # Sorting
     @sort_column = %w[name sku unit_price has_variants available].include?(params[:sort]) ? params[:sort] : "name"
@@ -425,6 +376,18 @@ class Bo::ProductsController < Bo::BaseController
 
   private
 
+  def exportable_class
+    Product
+  end
+
+  def exportable_base_scope
+    policy_scope(current_organisation.products).includes(:categories)
+  end
+
+  def apply_export_filters(scope)
+    apply_product_filters(scope)
+  end
+
   def filter_params_hash
     { query: params[:query], category_id: params[:category_id], product_type: params[:product_type],
       price_status: params[:price_status], status: params[:status], sort: params[:sort], direction: params[:direction] }.compact_blank
@@ -433,6 +396,57 @@ class Bo::ProductsController < Bo::BaseController
   def sort_link_params(column)
     direction = (@sort_column == column && @sort_direction == "asc") ? "desc" : "asc"
     filter_params_hash.merge(sort: column, direction: direction)
+  end
+
+  def apply_product_filters(scope)
+    if params[:query].present?
+      matching_ids = scope.left_joins(:categories, :product_variants).where(
+        "unaccent(products.name) ILIKE unaccent(:q) OR unaccent(products.sku) ILIKE unaccent(:q) OR unaccent(products.description) ILIKE unaccent(:q) OR unaccent(categories.name) ILIKE unaccent(:q) OR unaccent(product_variants.sku) ILIKE unaccent(:q)",
+        q: "%#{params[:query]}%"
+      ).select("products.id").distinct
+      scope = scope.where(id: matching_ids)
+    end
+
+    if params[:category_id] == "none"
+      product_ids_with_category = CategoryProduct.select(:product_id)
+      scope = scope.where.not(id: product_ids_with_category)
+    elsif params[:category_id].present?
+      category = current_organisation.categories.kept.find_by(id: params[:category_id])
+      if category
+        @current_category = category
+        all_category_ids = category.subtree_ids
+        product_ids_in_category = CategoryProduct.where(category_id: all_category_ids).select(:product_id)
+        scope = scope.where(id: product_ids_in_category)
+      end
+    end
+
+    if params[:product_type].present?
+      case params[:product_type]
+      when "simple" then scope = scope.simple
+      when "variable" then scope = scope.variable
+      end
+    end
+
+    case params[:price_status]
+    when "on_request" then scope = scope.where(price_on_request: true)
+    when "zero_price" then scope = scope.where(price_on_request: false, unit_price: [nil, 0])
+    when "has_price" then scope = scope.where(price_on_request: false).where("unit_price > 0")
+    end
+
+    case params[:status]
+    when "available"
+      scope = scope.where(available: true).where.not(
+        id: Product.joins(:product_variants).where(has_variants: true, product_variants: { available: false }).select(:id)
+      )
+    when "unavailable"
+      scope = scope.where(available: false)
+    when "partial"
+      scope = scope.where(has_variants: true, available: true).where(
+        id: Product.joins(:product_variants).where(has_variants: true, product_variants: { available: false }).select(:id)
+      )
+    end
+
+    scope
   end
 
   def set_product

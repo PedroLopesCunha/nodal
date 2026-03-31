@@ -23,7 +23,7 @@
           <i class="fa-solid fa-upload"></i> <%= t('bo.products.add_products.title') %>
         <% end %>
       <% end %>
-      <a href="#" class="btn btn-outline-secondary">
+      <a href="#" class="btn btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#exportModal">
         <i class="fa-solid fa-download"></i> <%= t('bo.common.actions.export') %>
       </a>
       <%= link_to new_bo_product_path(params[:org_slug]), class: "btn btn-primary" do %>
@@ -273,5 +273,10 @@
     </div>
   <% end %>
 </div>
+
+<%= render "bo/shared/export_modal",
+    columns: Product.exportable_columns,
+    export_path: export_bo_products_path(params[:org_slug]),
+    filter_params: filter_params_hash %>
 
 <% end %>
