@@ -38,6 +38,14 @@ class ProductPolicy < ApplicationPolicy
     import?
   end
 
+  def bulk_photos?
+    import?
+  end
+
+  def bulk_photos_process?
+    import?
+  end
+
   def edit?
     belongs_to_organisation?
   end

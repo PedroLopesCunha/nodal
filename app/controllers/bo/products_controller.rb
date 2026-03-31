@@ -39,7 +39,8 @@ class Bo::ProductsController < Bo::BaseController
       images_dir = Rails.root.join("tmp", "imports", "images_#{import_key}").to_s
       FileUtils.mkdir_p(images_dir)
       params[:image_files].each do |image|
-        File.open(File.join(images_dir, image.original_filename), "wb") { |f| f.write(image.read) }
+        safe_name = image.original_filename.tr("/:", "--")
+        File.open(File.join(images_dir, safe_name), "wb") { |f| f.write(image.read) }
       end
     end
 
@@ -57,6 +58,49 @@ class Bo::ProductsController < Bo::BaseController
     FileUtils.rm_rf(images_dir) if images_dir && File.exist?(images_dir)
 
     render :bulk_create_results
+  end
+
+  # Bulk photo upload
+  def bulk_photos
+    authorize Product, :bulk_photos?
+  end
+
+  def bulk_photos_process
+    authorize Product, :bulk_photos_process?
+
+    zip_path = nil
+    images_dir = nil
+    import_key = SecureRandom.uuid
+    photo_mode = params[:photo_mode] || "append"
+
+    if params[:zip_file].present?
+      zip_path = Rails.root.join("tmp", "imports", "#{import_key}.zip").to_s
+      FileUtils.mkdir_p(File.dirname(zip_path))
+      File.open(zip_path, "wb") { |f| f.write(params[:zip_file].read) }
+    end
+
+    if params[:image_files].present?
+      images_dir = Rails.root.join("tmp", "imports", "images_#{import_key}").to_s
+      FileUtils.mkdir_p(images_dir)
+      params[:image_files].each do |image|
+        safe_name = image.original_filename.tr("/:", "--")
+        File.open(File.join(images_dir, safe_name), "wb") { |f| f.write(image.read) }
+      end
+    end
+
+    service = BulkPhotoService.new(
+      organisation: current_organisation,
+      zip_path: zip_path,
+      images_dir: images_dir,
+      photo_mode: photo_mode
+    )
+    @result = service.call
+
+    # Cleanup
+    File.delete(zip_path) if zip_path && File.exist?(zip_path)
+    FileUtils.rm_rf(images_dir) if images_dir && File.exist?(images_dir)
+
+    render :bulk_photos_results
   end
 
   # Import actions
