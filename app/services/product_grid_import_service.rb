@@ -320,8 +320,41 @@ class ProductGridImportService
   def attach_all_photos
     return if @images_by_sku.empty?
 
+    # Attach to products
     @created_products.each do |_sku, product|
       @stats[:photos_attached] += attach_photos(product)
+    end
+
+    # Attach to variants
+    @organisation.product_variants.where.not(sku: [nil, ""]).where(is_default: false).find_each do |variant|
+      sku = variant.sku
+      normalized_sku = sku.tr("/:", "--")
+      image_paths = @images_by_sku[sku] || @images_by_sku[normalized_sku]
+
+      unless image_paths
+        matching = @images_by_sku.select do |key, _|
+          stripped = key.sub(/-\d+$/, "")
+          stripped == normalized_sku || stripped == sku
+        end
+        image_paths = matching.values.flatten if matching.any?
+      end
+
+      next if image_paths.blank?
+
+      path = image_paths.first
+      next unless File.exist?(path)
+
+      if @photo_mode == "replace" && variant.photo.attached?
+        variant.photo.purge
+        variant.reload
+      end
+
+      next if @photo_mode == "append" && variant.photo.attached?
+
+      filename = File.basename(path)
+      content_type = Marcel::MimeType.for(Pathname.new(path))
+      variant.photo.attach(io: File.open(path), filename: filename, content_type: content_type)
+      @stats[:photos_attached] += 1
     end
   end
 
