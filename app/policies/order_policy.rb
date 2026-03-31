@@ -11,6 +11,10 @@ class OrderPolicy < ApplicationPolicy
     customer_owner? || member_of_organisation?
   end
 
+  def download_pdf?
+    show?
+  end
+
   def edit?
     member_of_organisation?
   end

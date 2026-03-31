@@ -188,6 +188,8 @@ GEM
       raabro (~> 1.4)
     globalid (1.3.0)
       activesupport (>= 6.1)
+    grover (1.2.9)
+      nokogiri (~> 1)
     htmlentities (4.4.2)
     httplog (1.7.3)
       rack (>= 2.0)
@@ -488,6 +490,7 @@ DEPENDENCIES
   faraday (~> 2.0)
   fb (~> 0.9)
   font-awesome-sass (~> 6.1)
+  grover (~> 1.1)
   httplog
   image_processing (~> 1.2)
   importmap-rails

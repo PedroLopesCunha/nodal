@@ -60,6 +60,7 @@ Rails.application.routes.draw do
           get :export_items
         end
         member do
+          get :download_pdf
           post :reorder
           post :add_to_cart
         end
@@ -89,6 +90,7 @@ Rails.application.routes.draw do
           get :export_items
         end
         member do
+          get :download_pdf
           patch :apply_discount
           delete :remove_discount
         end

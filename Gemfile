@@ -103,6 +103,9 @@ gem 'roo', '~> 2.10'
 # Excel file generation for exports
 gem 'caxlsx', '~> 4.1'
 
+# PDF generation from HTML (uses Chrome headless)
+gem 'grover', '~> 1.1'
+
 # Firebird database client for direct ERP connections
 # Requires libfbclient native library (installed on Heroku via Aptfile)
 # Install with: bundle config set --local with firebird && bundle install

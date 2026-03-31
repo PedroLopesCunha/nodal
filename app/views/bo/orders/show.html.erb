@@ -32,6 +32,9 @@
       <span class="badge <%= payment_bg_class %> rounded-pill px-3 py-2">
         <%= t('bo.orders.show.payment') %>: <%= t("bo.common.payment_statuses.#{@order.payment_status}") %>
       </span>
+      <%= link_to download_pdf_bo_order_path(org_slug: @current_organisation.slug, id: @order.id), class: "btn btn-outline-secondary", data: { turbo: false } do %>
+        <i class="fa-solid fa-file-pdf me-1"></i> PDF
+      <% end %>
       <%= link_to edit_bo_order_path(org_slug: @current_organisation.slug, id: @order.id, **filter_params_hash), class: "btn btn-outline-primary" do %>
         <i class="fa-solid fa-pen-to-square me-1"></i> <%= t('bo.common.actions.edit') %>
       <% end %>
