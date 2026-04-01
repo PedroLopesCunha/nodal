@@ -132,6 +132,7 @@ module Erp
         end
         variant.save!
         apply_stock_rules(variant)
+        propagate_to_inherited_variant(variant, data)
       end
 
       def find_variant_by_external_id(external_id)
@@ -144,6 +145,7 @@ module Erp
         ProductVariant.joins(:product)
                       .where(products: { organisation_id: organisation.id })
                       .where.not(sku: [nil, ''])
+                      .where(is_default: false)
                       .find_by(sku: sku)
       end
 
