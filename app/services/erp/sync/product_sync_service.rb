@@ -120,6 +120,10 @@ module Erp
 
         variant = product.default_variant
         return unless variant
+        # Skip if the default variant has its own external_id — it will be synced
+        # independently as a variant, and writing product-level stock here would
+        # clobber the variant's actual stock value every sync.
+        return if variant.external_id.present? && variant.external_id != product.external_id
 
         old_stock = variant.stock_quantity
         update_stock(variant, data)
