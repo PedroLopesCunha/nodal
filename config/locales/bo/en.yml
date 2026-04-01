@@ -139,6 +139,10 @@ en:
         uncategorized: "Other"
         variant: "Variant"
         price_label: "Price"
+        contact_us: "Contact Us"
+        get_in_touch: "Get in Touch"
+        phone: "Phone"
+        location_hours: "Location & Hours"
 
     # Export
     export:

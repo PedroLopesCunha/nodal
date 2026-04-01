@@ -131,6 +131,10 @@ es:
         uncategorized: "Otros"
         variant: "Variante"
         price_label: "Precio"
+        contact_us: "Contáctenos"
+        get_in_touch: "Póngase en Contacto"
+        phone: "Teléfono"
+        location_hours: "Ubicación y Horario"
 
     # Exportación
     export:
