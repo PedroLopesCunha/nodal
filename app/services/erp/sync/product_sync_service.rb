@@ -224,7 +224,8 @@ module Erp
         return unless inheriting_variants.count == 1
 
         variant = inheriting_variants.first
-        update_variant_attributes(variant, data)
+        # Only propagate price, not SKU/name (variant inherits SKU from default for display only)
+        variant.write_attribute(:unit_price_cents, data[:unit_price_cents]) if data.key?(:unit_price_cents)
         update_stock(variant, data) if data[:stock_quantity].present?
 
         if variant.changed?
