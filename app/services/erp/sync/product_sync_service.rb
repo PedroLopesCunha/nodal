@@ -33,6 +33,7 @@ module Erp
           variant = find_variant_by_external_id(external_id)
           if variant
             sync_variant(variant, data)
+            propagate_to_inherited_variant(variant, data)
             return
           end
         end
@@ -45,6 +46,7 @@ module Erp
             # Link to ERP for future syncs
             variant.update_columns(external_id: external_id, external_source: external_source)
             sync_variant(variant, data)
+            propagate_to_inherited_variant(variant, data)
             return
           end
 
@@ -203,6 +205,32 @@ module Erp
           product.update(available: false)
         elsif product.product_variants.where(available: true).exists?
           product.update(available: true)
+        end
+      end
+
+      # When sync matches the default variant of a variable product, propagate
+      # price and stock to the single non-default variant that inherits the SKU.
+      # Only applies when there is exactly one non-default variant without its own SKU.
+      def propagate_to_inherited_variant(default_variant, data)
+        return unless default_variant.is_default?
+
+        product = default_variant.product
+        return unless product.has_variants?
+
+        inheriting_variants = product.product_variants
+                                     .where(is_default: false)
+                                     .where(sku: [nil, ''])
+
+        return unless inheriting_variants.count == 1
+
+        variant = inheriting_variants.first
+        update_variant_attributes(variant, data)
+        update_stock(variant, data) if data[:stock_quantity].present?
+
+        if variant.changed?
+          record_changes(data[:external_id], 'ProductVariant', 'updated', variant)
+          variant.save!
+          apply_stock_rules(variant) if data[:stock_quantity].present?
         end
       end
 
