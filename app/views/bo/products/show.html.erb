@@ -89,6 +89,18 @@
           </div>
         </div>
 
+        <% variant_attrs = @product.default_variant&.attribute_values&.joins(:product_attribute)&.includes(:product_attribute)&.order('product_attributes.position') %>
+        <% if variant_attrs.present? && variant_attrs.any? %>
+          <div class="row">
+            <% variant_attrs.group_by(&:product_attribute).each do |attribute, values| %>
+              <div class="col-md-6 mb-3">
+                <small class="text-muted d-block"><%= attribute.name %></small>
+                <strong><%= values.map(&:value).join(', ') %></strong>
+              </div>
+            <% end %>
+          </div>
+        <% end %>
+
         <hr>
 
         <div>

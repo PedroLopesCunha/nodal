@@ -5,6 +5,7 @@ class Bo::ProductsController < Bo::BaseController
   include Exportable
 
   before_action :set_product, only: [:show, :edit, :update, :destroy, :configure_variants, :update_variant_configuration, :delete_photo, :set_main_photo, :related_products, :update_related_products, :reorder_related_products]
+  before_action :load_attributes_for_form, only: [:new, :edit, :create, :update]
 
   # Add products choice page
   def add_products
@@ -312,6 +313,7 @@ class Bo::ProductsController < Bo::BaseController
     authorize @product
 
     if @product.save
+      save_product_attributes
       redirect_to bo_product_path(params[:org_slug], @product), notice: "Product was successfully created."
     else
       render :new, status: :unprocessable_entity
@@ -328,6 +330,7 @@ class Bo::ProductsController < Bo::BaseController
 
     if @product.update(update_params)
       @product.photos.attach(new_photos) if new_photos
+      save_product_attributes
       redirect_to bo_product_path(params[:org_slug], @product, filter_params_hash), notice: "Product was successfully updated."
     else
       render :edit, status: :unprocessable_entity
@@ -559,6 +562,59 @@ class Bo::ProductsController < Bo::BaseController
       "\t"
     else
       ","
+    end
+  end
+
+  def load_attributes_for_form
+    @all_attributes = {}
+    @current_attribute_value_ids = []
+
+    current_organisation.product_attributes.kept.active.by_position.each do |attribute|
+      values = attribute.product_attribute_values.where(active: true).by_position
+      @all_attributes[attribute] = values
+    end
+
+    if @product&.persisted? && !@product.has_variants?
+      @current_attribute_value_ids = @product.default_variant&.attribute_values&.pluck(:id) || []
+    end
+  end
+
+  def save_product_attributes
+    return if @product.has_variants?
+
+    variant = @product.default_variant
+    return unless variant
+
+    ids = params.dig(:product, :attribute_value_ids)&.reject(&:blank?)&.map(&:to_i) || []
+
+    variant.variant_attribute_values.destroy_all
+    ids.each do |value_id|
+      variant.variant_attribute_values.create!(product_attribute_value_id: value_id)
+    end
+
+    sync_product_attribute_associations(ids)
+  end
+
+  def sync_product_attribute_associations(value_ids)
+    if value_ids.blank?
+      @product.product_product_attributes.destroy_all
+      @product.product_available_values.destroy_all
+      return
+    end
+
+    values = ProductAttributeValue.where(id: value_ids)
+    attribute_ids = values.pluck(:product_attribute_id).uniq
+
+    @product.product_product_attributes.where.not(product_attribute_id: attribute_ids).destroy_all
+    attribute_ids.each_with_index do |attr_id, index|
+      @product.product_product_attributes.find_or_create_by!(product_attribute_id: attr_id) do |ppa|
+        ppa.position = index + 1
+      end
+    end
+
+    @product.product_available_values.where.not(product_attribute_value_id: value_ids).destroy_all
+    value_ids.each do |val_id|
+      @product.product_available_values.find_or_create_by!(product_attribute_value_id: val_id)
     end
   end
 end

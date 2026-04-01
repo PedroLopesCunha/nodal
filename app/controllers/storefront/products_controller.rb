@@ -178,6 +178,13 @@ class Storefront::ProductsController < Storefront::BaseController
       end
     else
       @default_variant = @product.default_variant
+      # Load attribute values for simple products (for display)
+      if @default_variant&.attribute_values&.any?
+        @simple_attribute_values = @default_variant.attribute_values
+          .joins(:product_attribute)
+          .includes(:product_attribute)
+          .order('product_attributes.position')
+      end
     end
 
     # for_display: true shows all available discounts (ignoring min_quantity) for display purposes
