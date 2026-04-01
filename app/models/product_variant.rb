@@ -25,6 +25,7 @@ class ProductVariant < ApplicationRecord
   before_validation :set_organisation_from_product
   before_validation :set_currency_from_organisation
   before_validation :inherit_product_price, on: :create
+  after_save :mirror_to_product, if: :should_mirror_to_product?
 
   scope :by_position, -> { order(:position) }
   scope :available, -> { where(available: true) }
@@ -105,5 +106,16 @@ class ProductVariant < ApplicationRecord
 
   def inherit_product_price
     self.unit_price_cents ||= product&.unit_price
+  end
+
+  def should_mirror_to_product?
+    is_default? && product&.simple? && (saved_change_to_sku? || saved_change_to_unit_price_cents?)
+  end
+
+  def mirror_to_product
+    attrs = {}
+    attrs[:sku] = sku if saved_change_to_sku?
+    attrs[:unit_price] = unit_price_cents if saved_change_to_unit_price_cents?
+    product.update_columns(attrs) if attrs.any?
   end
 end

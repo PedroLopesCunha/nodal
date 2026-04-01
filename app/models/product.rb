@@ -1,6 +1,5 @@
 class Product < ApplicationRecord
   include Slugable
-  include ErpSyncable
   include HasExportableColumns
 
   slugify :name, secondary: :sku
@@ -52,6 +51,7 @@ class Product < ApplicationRecord
 
   after_create :create_default_variant
   after_update :sync_default_variant, if: :should_sync_default_variant?
+  after_update :clear_default_variant_for_variable, if: :became_variable?
 
   scope :simple, -> { where(has_variants: false) }
   scope :variable, -> { where(has_variants: true) }
@@ -178,15 +178,26 @@ class Product < ApplicationRecord
   def create_default_variant
     return if product_variants.exists?
 
-    product_variants.create!(
-      name: name,
-      sku: sku,
-      unit_price_cents: unit_price,
-      unit_price_currency: organisation.currency,
-      available: available,
-      is_default: true,
-      position: 1
-    )
+    if has_variants?
+      product_variants.create!(
+        name: name,
+        unit_price_currency: organisation.currency,
+        available: available,
+        is_default: true,
+        track_stock: false,
+        position: 1
+      )
+    else
+      product_variants.create!(
+        name: name,
+        sku: sku,
+        unit_price_cents: unit_price,
+        unit_price_currency: organisation.currency,
+        available: available,
+        is_default: true,
+        position: 1
+      )
+    end
   end
 
   def should_sync_default_variant?
@@ -203,5 +214,24 @@ class Product < ApplicationRecord
       unit_price_cents: unit_price,
       available: available
     )
+  end
+
+  def became_variable?
+    saved_change_to_has_variants? && has_variants?
+  end
+
+  def clear_default_variant_for_variable
+    variant = default_variant
+    return unless variant&.is_default?
+
+    variant.update_columns(
+      sku: nil,
+      unit_price_cents: nil,
+      stock_quantity: 0,
+      track_stock: false,
+      external_id: nil,
+      external_source: nil
+    )
+    update_columns(unit_price: nil)
   end
 end

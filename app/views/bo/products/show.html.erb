@@ -217,43 +217,28 @@
   <div class="col-lg-4">
     <%# Card A: ERP Sync Status %>
     <% synced_variants = @product.product_variants.synced_from_erp %>
-    <% if @product.synced_from_erp? || synced_variants.any? %>
+    <% if synced_variants.any? %>
       <div class="card mb-4">
         <div class="card-body">
           <h6 class="card-title mb-3"><i class="fa-solid fa-rotate me-1"></i> <%= t('bo.erp_sync.title') %></h6>
 
           <div class="mb-2">
             <small class="text-muted d-block"><%= t('bo.erp_sync.status_label') %></small>
-            <% if @product.synced_from_erp? %>
-              <% case @product.sync_status %>
-              <% when :synced %>
-                <span class="badge bg-success"><%= t('bo.erp_sync.synced') %></span>
-              <% when :error %>
-                <span class="badge bg-danger"><%= t('bo.erp_sync.error') %></span>
-              <% end %>
+            <% if synced_variants.with_sync_errors.any? %>
+              <span class="badge bg-danger"><%= t('bo.erp_sync.error') %></span>
             <% else %>
               <span class="badge bg-success"><%= t('bo.erp_sync.synced') %></span>
-              <small class="text-muted ms-1">(<%= t('bo.erp_sync.via_variants') %>)</small>
             <% end %>
           </div>
 
-          <% if @product.external_id.present? %>
-            <div class="mb-2">
-              <small class="text-muted d-block"><%= t('bo.erp_sync.external_id') %></small>
-              <code><%= @product.external_id %></code>
-            </div>
-          <% end %>
+          <div class="mb-2">
+            <small class="text-muted d-block"><%= t('bo.erp_sync.synced_variants') %></small>
+            <% synced_variants.each do |variant| %>
+              <div><code><%= variant.external_id %></code> <small class="text-muted"><%= variant.name %></small></div>
+            <% end %>
+          </div>
 
-          <% if synced_variants.any? %>
-            <div class="mb-2">
-              <small class="text-muted d-block"><%= t('bo.erp_sync.synced_variants') %></small>
-              <% synced_variants.each do |variant| %>
-                <div><code><%= variant.external_id %></code> <small class="text-muted"><%= variant.name %></small></div>
-              <% end %>
-            </div>
-          <% end %>
-
-          <% last_synced = @product.last_synced_at || synced_variants.maximum(:last_synced_at) %>
+          <% last_synced = synced_variants.maximum(:last_synced_at) %>
           <% if last_synced %>
             <div class="mb-2">
               <small class="text-muted d-block"><%= t('bo.erp_sync.last_synced') %></small>
@@ -261,9 +246,10 @@
             </div>
           <% end %>
 
-          <% if @product.has_sync_error? %>
+          <% error_variants = synced_variants.with_sync_errors %>
+          <% error_variants.each do |variant| %>
             <div class="border border-danger rounded bg-danger-subtle py-2 px-3 mb-0 mt-2">
-              <small class="text-danger"><i class="fa-solid fa-triangle-exclamation me-1"></i> <%= @product.sync_error %></small>
+              <small class="text-danger"><i class="fa-solid fa-triangle-exclamation me-1"></i> <%= variant.sku %>: <%= variant.sync_error %></small>
             </div>
           <% end %>
         </div>

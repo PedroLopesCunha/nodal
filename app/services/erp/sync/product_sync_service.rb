@@ -25,114 +25,50 @@ module Erp
           return
         end
 
-        # 1. Try matching a product by external_id
-        product = organisation.products.find_by(external_id: external_id, external_source: external_source)
+        # 1. Find variant by external_id (primary match)
+        variant = find_variant_by_external_id(external_id)
 
-        # 2. If no product match, try matching a variant by external_id
-        if product.nil?
-          variant = find_variant_by_external_id(external_id)
-          if variant
-            sync_variant(variant, data)
-            propagate_to_inherited_variant(variant, data)
-            return
-          end
-        end
-
-        # 3. Fallback: try matching by SKU (for manually created products/variants)
-        if product.nil?
+        # 2. Fallback: find variant by SKU
+        if variant.nil?
           sku = data[:sku] || external_id
           variant = find_variant_by_sku(sku)
           if variant
-            # Link to ERP for future syncs
             variant.update_columns(external_id: external_id, external_source: external_source)
-            sync_variant(variant, data)
-            propagate_to_inherited_variant(variant, data)
-            return
-          end
-
-          product = organisation.products.find_by(sku: sku)
-          if product
-            # Link to ERP for future syncs
-            product.update_columns(external_id: external_id, external_source: external_source)
           end
         end
 
-        # 4. No match at all — handle per sync mode
-        if product.nil?
+        # 3. No match — create or skip
+        if variant.nil?
           if update_only_mode?
             sync_log.increment_processed!
             return
           else
-            product = find_or_initialize_product(external_id)
+            variant = create_product_with_variant(data, external_id)
           end
         end
 
-        was_new = product.new_record?
-        update_product_attributes(product, data)
-
-        if was_new || product.changed?
-          record_changes(external_id, 'Product', was_new ? 'created' : 'updated', product) unless was_new
-          if product.save
-            update_variant_stock(product, data)
-            product.mark_synced!(source: external_source)
-
-            if was_new
-              record_changes(external_id, 'Product', 'created', product)
-              sync_log.increment_created!
-            else
-              sync_log.increment_updated!
-            end
-          else
-            sync_log.increment_failed!(external_id, product.errors.full_messages.join(', '))
-          end
-        else
-          # Product attributes unchanged, but still update stock
-          update_variant_stock(product, data)
-          sync_log.increment_processed!
-        end
+        sync_variant(variant, data)
       rescue StandardError => e
         sync_log.increment_failed!(data[:external_id], e.message)
       end
 
-      def find_or_initialize_product(external_id)
-        organisation.products.find_or_initialize_by(
+      def create_product_with_variant(data, external_id)
+        product = organisation.products.new(
+          name: data[:name] || external_id,
+          description: data[:description]
+        )
+        generate_slug(product)
+        product.save!
+
+        variant = product.default_variant
+        variant.update_columns(
           external_id: external_id,
           external_source: external_source
         )
-      end
 
-      def update_product_attributes(product, data)
-        product.name = data[:name] if data.key?(:name)
-        product.sku = data[:sku] if data.key?(:sku)
-        product.description = data[:description] if data.key?(:description)
-        # Use write_attribute to bypass monetize wrapper and assign cents directly
-        product.write_attribute(:unit_price, data[:unit_price_cents]) if data.key?(:unit_price_cents)
-        # Skip available override when stock rules control availability
-        if data.key?(:available) && !organisation.deactivate_out_of_stock?
-          product.available = data[:available]
-        end
-
-        generate_slug(product) if product.new_record?
-      end
-
-      def update_variant_stock(product, data)
-        return unless data[:stock_quantity].present?
-
-        variant = product.default_variant
-        return unless variant
-        # Skip if the default variant has its own external_id — it will be synced
-        # independently as a variant, and writing product-level stock here would
-        # clobber the variant's actual stock value every sync.
-        return if variant.external_id.present? && variant.external_id != product.external_id
-
-        old_stock = variant.stock_quantity
-        update_stock(variant, data)
-        if variant.changed?
-          record_changes(product.external_id, 'ProductVariant', 'stock_updated', variant)
-        end
-        variant.save!
-        apply_stock_rules(variant)
-        propagate_to_inherited_variant(variant, data)
+        record_changes(external_id, 'Product', 'created', product)
+        sync_log.increment_created!
+        variant
       end
 
       def find_variant_by_external_id(external_id)
@@ -145,7 +81,6 @@ module Erp
         ProductVariant.joins(:product)
                       .where(products: { organisation_id: organisation.id })
                       .where.not(sku: [nil, ''])
-                      .where(is_default: false)
                       .find_by(sku: sku)
       end
 
@@ -165,7 +100,6 @@ module Erp
             if attributes_changed
               sync_log.increment_updated!
             else
-              # Only stock changed, not product attributes
               sync_log.increment_processed!
             end
           else
@@ -180,7 +114,6 @@ module Erp
         variant.name = data[:name] if data.key?(:name)
         variant.sku = data[:sku] if data.key?(:sku)
         variant.write_attribute(:unit_price_cents, data[:unit_price_cents]) if data.key?(:unit_price_cents)
-        # Skip available override when stock rules control availability
         if data.key?(:available) && !organisation.deactivate_out_of_stock?
           variant.available = data[:available]
         end
@@ -188,7 +121,6 @@ module Erp
 
       def update_stock(variant, data)
         variant.stock_quantity = data[:stock_quantity]
-        # Only enable track_stock for new variants that haven't been explicitly configured
         variant.track_stock = true if variant.new_record? || !variant.persisted?
       end
 
@@ -196,14 +128,12 @@ module Erp
         return unless organisation.deactivate_out_of_stock?
         return unless variant.track_stock?
 
-        # Update variant availability based on stock
         if variant.stock_quantity.to_i <= 0
           variant.update_column(:available, false) unless variant.available == false
         else
           variant.update_column(:available, true) unless variant.available == true
         end
 
-        # Update parent product availability based on tracked variants
         product = variant.product
         tracked_variants = product.product_variants.where(track_stock: true)
 
@@ -214,40 +144,13 @@ module Erp
         end
       end
 
-      # When sync matches the default variant of a variable product, propagate
-      # price and stock to the single non-default variant that inherits the SKU.
-      # Only applies when there is exactly one non-default variant without its own SKU.
-      def propagate_to_inherited_variant(default_variant, data)
-        return unless default_variant.is_default?
-
-        product = default_variant.product
-        return unless product.has_variants?
-
-        inheriting_variants = product.product_variants
-                                     .where(is_default: false)
-                                     .where(sku: [nil, ''])
-
-        return unless inheriting_variants.count == 1
-
-        variant = inheriting_variants.first
-        # Only propagate price, not SKU/name (variant inherits SKU from default for display only)
-        variant.write_attribute(:unit_price_cents, data[:unit_price_cents]) if data.key?(:unit_price_cents)
-        update_stock(variant, data) if data[:stock_quantity].present?
-
-        if variant.changed?
-          record_changes(data[:external_id], 'ProductVariant', 'updated', variant)
-          variant.save!
-          apply_stock_rules(variant) if data[:stock_quantity].present?
-        end
-      end
-
       def update_only_mode?
         erp_configuration.product_sync_mode != 'full_sync'
       end
 
       def record_changes(external_id, record_type, action, record)
         changes = if action == 'created'
-          { name: record.name, sku: record.sku }
+          { name: record.respond_to?(:sku) ? record.name : record.name, sku: record.try(:sku) }
         else
           record.changes.transform_values { |old_val, new_val| [old_val, new_val] }
         end
