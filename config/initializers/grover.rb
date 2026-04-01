@@ -13,6 +13,11 @@ Grover.configure do |config|
     launch_args: ["--no-sandbox", "--disable-setuid-sandbox"]
   }
 
-  # Use system Chrome if puppeteer's bundled one is unavailable
-  config.options[:executable_path] = "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" if Rails.env.development?
+  chrome_path = if Rails.env.development?
+    "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
+  else
+    ENV["GOOGLE_CHROME_BIN"] || ENV["PUPPETEER_EXECUTABLE_PATH"] || ENV["GOOGLE_CHROME_SHIM"]
+  end
+
+  config.options[:executable_path] = chrome_path if chrome_path.present?
 end
