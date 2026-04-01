@@ -9,6 +9,10 @@ class ProductPolicy < ApplicationPolicy
     true
   end
 
+  def generate_catalog?
+    true
+  end
+
   def show?
     belongs_to_organisation?
   end

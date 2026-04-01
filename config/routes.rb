@@ -113,6 +113,7 @@ Rails.application.routes.draw do
         collection do
           get :export
           get :export_variants
+          get :generate_catalog
           get :import
           post :import_mapping
           post :import_process

@@ -1,0 +1,133 @@
+<div class="modal fade" id="catalogSelectionModal" tabindex="-1" aria-labelledby="catalogSelectionModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="catalogSelectionModalLabel">
+          <i class="fa-solid fa-list-check me-2"></i><%= t('bo.catalog.selection.title') %>
+        </h5>
+        <button type="button" class="btn-close" data-action="click->catalog#doneSelecting"></button>
+      </div>
+
+      <div class="modal-body">
+        <!-- Search -->
+        <div class="mb-3">
+          <div class="input-group input-group-sm">
+            <span class="input-group-text bg-white"><i class="fa-solid fa-magnifying-glass text-muted"></i></span>
+            <input type="text" class="form-control"
+                   placeholder="<%= t('bo.catalog.selection.search_placeholder') %>"
+                   data-catalog-target="searchInput"
+                   data-action="input->catalog#search">
+          </div>
+        </div>
+
+        <!-- Select/Deselect all -->
+        <div class="mb-2 d-flex gap-3">
+          <a href="#" class="small text-decoration-none" data-action="click->catalog#selectAll"><%= t('bo.export.select_all') %></a>
+          <a href="#" class="small text-decoration-none text-muted" data-action="click->catalog#deselectAll"><%= t('bo.export.deselect_all') %></a>
+        </div>
+
+        <!-- Category/Product tree -->
+        <div class="border rounded" style="max-height: 450px; overflow-y: auto;">
+          <% categories.each do |category| %>
+            <% category_products = category.products.where(organisation: current_organisation).order(:name) %>
+            <div data-catalog-target="categoryItem" data-name="<%= category.full_path %>" class="border-bottom">
+              <div class="d-flex align-items-center px-3 py-2">
+                <% has_children = category.children.kept.any? || category_products.any? %>
+                <% if has_children %>
+                  <a href="#" class="text-muted me-2" data-action="click->catalog#toggleExpand" style="width: 16px;">
+                    <i class="fa-solid fa-chevron-right small"></i>
+                  </a>
+                <% else %>
+                  <span style="width: 16px;" class="me-2"></span>
+                <% end %>
+                <input type="checkbox" class="form-check-input me-2 category-checkbox"
+                       value="<%= category.id %>"
+                       data-action="change->catalog#toggleCategory">
+                <i class="fa-solid fa-folder text-warning me-2"></i>
+                <span class="fw-medium"><%= category.full_path %></span>
+                <span class="badge bg-light text-muted ms-2"><%= category_products.count %></span>
+              </div>
+
+              <% if has_children %>
+                <div class="category-children d-none ps-4">
+                  <%# Subcategories %>
+                  <% category.children.kept.order(:name).each do |child| %>
+                    <% child_products = child.products.where(organisation: current_organisation).order(:name) %>
+                    <div data-catalog-target="categoryItem" data-name="<%= child.full_path %>" class="border-top">
+                      <div class="d-flex align-items-center px-3 py-2">
+                        <% has_child_products = child_products.any? || child.children.kept.any? %>
+                        <% if has_child_products %>
+                          <a href="#" class="text-muted me-2" data-action="click->catalog#toggleExpand" style="width: 16px;">
+                            <i class="fa-solid fa-chevron-right small"></i>
+                          </a>
+                        <% else %>
+                          <span style="width: 16px;" class="me-2"></span>
+                        <% end %>
+                        <input type="checkbox" class="form-check-input me-2 category-checkbox"
+                               value="<%= child.id %>"
+                               data-action="change->catalog#toggleCategory">
+                        <i class="fa-solid fa-folder text-warning me-2"></i>
+                        <span><%= child.name %></span>
+                        <span class="badge bg-light text-muted ms-2"><%= child_products.count %></span>
+                      </div>
+
+                      <% if has_child_products %>
+                        <div class="category-children d-none ps-4">
+                          <% child_products.each do |product| %>
+                            <div data-catalog-target="productItem" data-name="<%= product.name %>" data-sku="<%= product.sku %>" class="border-top">
+                              <div class="d-flex align-items-center px-3 py-1">
+                                <span style="width: 16px;" class="me-2"></span>
+                                <input type="checkbox" class="form-check-input me-2 product-checkbox"
+                                       value="<%= product.id %>"
+                                       data-action="change->catalog#toggleProduct">
+                                <i class="fa-solid fa-cube text-muted me-2 small"></i>
+                                <span class="small"><%= product.name %></span>
+                                <% if product.sku.present? %>
+                                  <span class="ms-2 small text-muted font-monospace"><%= product.sku %></span>
+                                <% end %>
+                              </div>
+                            </div>
+                          <% end %>
+                        </div>
+                      <% end %>
+                    </div>
+                  <% end %>
+
+                  <%# Direct products of this category %>
+                  <% category_products.each do |product| %>
+                    <div data-catalog-target="productItem" data-name="<%= product.name %>" data-sku="<%= product.sku %>" class="border-top">
+                      <div class="d-flex align-items-center px-3 py-1">
+                        <span style="width: 16px;" class="me-2"></span>
+                        <input type="checkbox" class="form-check-input me-2 product-checkbox"
+                               value="<%= product.id %>"
+                               data-action="change->catalog#toggleProduct">
+                        <i class="fa-solid fa-cube text-muted me-2 small"></i>
+                        <span class="small"><%= product.name %></span>
+                        <% if product.sku.present? %>
+                          <span class="ms-2 small text-muted font-monospace"><%= product.sku %></span>
+                        <% end %>
+                      </div>
+                    </div>
+                  <% end %>
+                </div>
+              <% end %>
+            </div>
+          <% end %>
+        </div>
+      </div>
+
+      <div class="modal-footer d-flex justify-content-between">
+        <div class="text-muted small">
+          <i class="fa-solid fa-box me-1"></i>
+          <strong data-catalog-target="productCount">0</strong> <%= t('bo.catalog.products_selected') %>
+          &middot;
+          <i class="fa-solid fa-folder me-1"></i>
+          <strong data-catalog-target="categoryCount">0</strong> <%= t('bo.catalog.categories_selected') %>
+        </div>
+        <button type="button" class="btn btn-primary" data-action="click->catalog#doneSelecting">
+          <i class="fa-solid fa-check me-1"></i> <%= t('bo.catalog.selection.done') %>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

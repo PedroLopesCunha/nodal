@@ -228,6 +228,54 @@ class Bo::ProductsController < Bo::BaseController
     @last_product_sync = current_organisation.erp_sync_logs.for_entity('products').completed.recent.first if current_organisation.erp_configuration&.enabled?
   end
 
+  def generate_catalog
+    authorize Product, :generate_catalog?
+
+    @products = policy_scope(current_organisation.products)
+                  .includes(:categories, :product_variants, product_variants: :attribute_values)
+                  .with_attached_photos
+
+    # Filter by individually selected products (from checkboxes)
+    if params[:product_ids].present?
+      selected_ids = params[:product_ids].reject(&:blank?)
+      @products = @products.where(id: selected_ids) if selected_ids.any?
+    # Or filter by selected categories (from modal)
+    elsif params[:catalog_category_ids].present?
+      category_ids = params[:catalog_category_ids].reject(&:blank?)
+      if category_ids.any?
+        product_ids = CategoryProduct.where(category_id: category_ids).select(:product_id)
+        @products = @products.where(id: product_ids)
+      end
+    end
+
+    # Only available products by default
+    @products = @products.where(available: true) if params[:only_available] != "0"
+
+    # Ordering
+    case params[:sort_by]
+    when "price" then @products = @products.order(:unit_price)
+    else @products = @products.order(:name)
+    end
+
+    @catalog_title = params[:catalog_title].presence || current_organisation.name
+    @show_prices = params[:show_prices] != "0"
+    @show_sku = params[:show_sku] == "1"
+    @show_description = params[:show_description] == "1"
+    @show_variants = params[:show_variants] == "1"
+    @show_variant_sku = params[:show_variant_sku] == "1"
+    @show_variant_price = params[:show_variant_price] == "1"
+    @show_variant_photo = params[:show_variant_photo] == "1"
+    @layout = params[:catalog_layout] == "list" ? "list" : "grid"
+    @group_by_category = params[:group_by_category] == "1"
+    @organisation = current_organisation
+
+    html = render_to_string(template: "shared/catalog/pdf", layout: false)
+    pdf = Grover.new(html, format: "A4", print_background: true).to_pdf
+
+    filename = "#{@catalog_title.parameterize}_#{Date.today.iso8601}.pdf"
+    send_data pdf, filename: filename, type: "application/pdf", disposition: "attachment"
+  end
+
   def export_variants
     authorize Product, :export?
 

@@ -23,6 +23,9 @@
           <i class="fa-solid fa-upload"></i> <%= t('bo.products.add_products.title') %>
         <% end %>
       <% end %>
+      <a href="#" class="btn btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#catalogModal">
+        <i class="fa-solid fa-file-pdf"></i> <%= t('bo.catalog.generate') %>
+      </a>
       <div class="btn-group">
         <button type="button" class="btn btn-outline-secondary dropdown-toggle" data-bs-toggle="dropdown">
           <i class="fa-solid fa-download"></i> <%= t('bo.common.actions.export') %>
@@ -291,5 +294,13 @@
     filter_params: filter_params_hash,
     modal_id: "exportVariantsModal",
     title: t('bo.export.export_variants') %>
+
+<% catalog_categories = current_organisation.categories.kept.roots.order(:name) %>
+<div data-controller="catalog">
+  <%= render "bo/shared/catalog_modal", filter_params: filter_params_hash %>
+  <%= render "bo/shared/catalog_selection_modal", categories: catalog_categories %>
+</div>
+
+</div>
 
 <% end %>
