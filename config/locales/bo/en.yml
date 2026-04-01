@@ -121,7 +121,15 @@ en:
       show_variant_photo: "Show variant photos"
       select_categories: "Categories"
       no_selection_hint: "No selection = all products"
+      products_selected: "products selected"
+      categories_selected: "categories selected"
+      define_content: "Select Content"
+      selection:
+        title: "Select Products & Categories"
+        search_placeholder: "Search by name, SKU..."
+        done: "Done"
       filters_applied: "Active filters will be applied to the catalog"
+      selected_products: "products selected"
       generate: "Generate Catalog"
       pdf:
         product_count:

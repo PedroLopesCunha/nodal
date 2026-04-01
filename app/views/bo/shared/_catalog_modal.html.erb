@@ -1,130 +1,108 @@
 <div class="modal fade" id="catalogModal" tabindex="-1" aria-labelledby="catalogModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-lg">
+  <div class="modal-dialog">
     <div class="modal-content">
       <%= form_with url: generate_catalog_bo_products_path(params[:org_slug]), method: :get, data: { turbo: false } do %>
+        <div data-catalog-target="hiddenFields"></div>
 
         <div class="modal-header">
           <h5 class="modal-title" id="catalogModalLabel">
-            <i class="fa-solid fa-book me-2"></i><%= t('bo.catalog.title') %>
+            <i class="fa-solid fa-file-pdf me-2"></i><%= t('bo.catalog.title') %>
           </h5>
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
 
-        <div class="modal-body" data-controller="export">
-          <div class="row">
-            <!-- Left: Categories -->
-            <div class="col-md-5">
-              <label class="form-label fw-semibold"><%= t('bo.catalog.select_categories') %></label>
-              <div class="mb-2">
-                <a href="#" class="small text-decoration-none"
-                   data-action="click->export#toggleAll"
-                   data-export-target="toggleLink"
-                   data-select-text="<%= t('bo.export.select_all') %>"
-                   data-deselect-text="<%= t('bo.export.deselect_all') %>">
-                  <%= t('bo.export.select_all') %>
-                </a>
-              </div>
-              <div class="border rounded p-2" style="max-height: 280px; overflow-y: auto;">
-                <% categories.each do |category| %>
-                  <div class="form-check mb-1">
-                    <%= check_box_tag "catalog_category_ids[]", category.id, false,
-                        id: "catalog_cat_#{category.id}",
-                        class: "form-check-input",
-                        data: { export_target: "checkbox", action: "change->export#checkboxChanged" } %>
-                    <%= label_tag "catalog_cat_#{category.id}", category.full_path, class: "form-check-label small" %>
-                  </div>
-                <% end %>
-              </div>
-              <small class="text-muted"><%= t('bo.catalog.no_selection_hint') %></small>
-            </div>
+        <div class="modal-body">
+          <!-- Title -->
+          <div class="mb-3">
+            <label class="form-label fw-semibold"><%= t('bo.catalog.catalog_title') %></label>
+            <%= text_field_tag :catalog_title, current_organisation.name, class: "form-control form-control-sm", placeholder: t('bo.catalog.catalog_title_placeholder') %>
+          </div>
 
-            <!-- Right: Options -->
-            <div class="col-md-7">
-              <!-- Title -->
-              <div class="mb-3">
-                <label class="form-label fw-semibold"><%= t('bo.catalog.catalog_title') %></label>
-                <%= text_field_tag :catalog_title, current_organisation.name, class: "form-control form-control-sm", placeholder: t('bo.catalog.catalog_title_placeholder') %>
-              </div>
-
-              <!-- Layout & Sort -->
-              <div class="row mb-3">
-                <div class="col-6">
-                  <label class="form-label fw-semibold"><%= t('bo.catalog.layout') %></label>
-                  <div class="d-flex gap-3">
-                    <div class="form-check">
-                      <%= radio_button_tag :catalog_layout, "grid", true, id: "layout_grid", class: "form-check-input" %>
-                      <%= label_tag :layout_grid, t('bo.catalog.grid'), class: "form-check-label" %>
-                    </div>
-                    <div class="form-check">
-                      <%= radio_button_tag :catalog_layout, "list", false, id: "layout_list", class: "form-check-input" %>
-                      <%= label_tag :layout_list, t('bo.catalog.list'), class: "form-check-label" %>
-                    </div>
-                  </div>
+          <!-- Layout & Sort -->
+          <div class="row mb-3">
+            <div class="col-6">
+              <label class="form-label fw-semibold"><%= t('bo.catalog.layout') %></label>
+              <div class="d-flex gap-3">
+                <div class="form-check">
+                  <%= radio_button_tag :catalog_layout, "grid", true, id: "layout_grid", class: "form-check-input" %>
+                  <%= label_tag :layout_grid, t('bo.catalog.grid'), class: "form-check-label" %>
                 </div>
-                <div class="col-6">
-                  <label class="form-label fw-semibold"><%= t('bo.catalog.sort_by') %></label>
-                  <select name="sort_by" class="form-select form-select-sm">
-                    <option value="name"><%= t('bo.catalog.sort_name') %></option>
-                    <option value="price"><%= t('bo.catalog.sort_price') %></option>
-                  </select>
-                </div>
-              </div>
-
-              <!-- Options -->
-              <div class="mb-3">
-                <label class="form-label fw-semibold"><%= t('bo.catalog.options') %></label>
-
-                <div class="form-check mb-1">
-                  <%= check_box_tag :show_prices, "1", true, class: "form-check-input", id: "catalog_show_prices" %>
-                  <%= label_tag :catalog_show_prices, t('bo.catalog.show_prices'), class: "form-check-label" %>
-                </div>
-
-                <div class="form-check mb-1">
-                  <%= check_box_tag :show_sku, "1", true, class: "form-check-input", id: "catalog_show_sku" %>
-                  <%= label_tag :catalog_show_sku, t('bo.catalog.show_sku'), class: "form-check-label" %>
-                </div>
-
-                <div class="form-check mb-1">
-                  <%= check_box_tag :show_description, "1", false, class: "form-check-input", id: "catalog_show_description" %>
-                  <%= label_tag :catalog_show_description, t('bo.catalog.show_description'), class: "form-check-label" %>
-                </div>
-
-                <div class="form-check mb-1">
-                  <%= check_box_tag :group_by_category, "1", true, class: "form-check-input", id: "catalog_group_by_category" %>
-                  <%= label_tag :catalog_group_by_category, t('bo.catalog.group_by_category'), class: "form-check-label" %>
-                </div>
-
-                <div class="form-check mb-1">
-                  <%= check_box_tag :only_available, "1", true, class: "form-check-input", id: "catalog_only_available" %>
-                  <%= label_tag :catalog_only_available, t('bo.catalog.only_available'), class: "form-check-label" %>
-                </div>
-              </div>
-
-              <!-- Variant options -->
-              <div class="mb-3">
-                <label class="form-label fw-semibold"><%= t('bo.catalog.variant_details') %></label>
-
-                <div class="form-check mb-1">
-                  <%= check_box_tag :show_variants, "1", true, class: "form-check-input", id: "catalog_show_variants" %>
-                  <%= label_tag :catalog_show_variants, t('bo.catalog.show_variants'), class: "form-check-label" %>
-                </div>
-
-                <div class="form-check mb-1 ms-4">
-                  <%= check_box_tag :show_variant_sku, "1", true, class: "form-check-input", id: "catalog_show_variant_sku" %>
-                  <%= label_tag :catalog_show_variant_sku, t('bo.catalog.show_variant_sku'), class: "form-check-label" %>
-                </div>
-
-                <div class="form-check mb-1 ms-4">
-                  <%= check_box_tag :show_variant_price, "1", true, class: "form-check-input", id: "catalog_show_variant_price" %>
-                  <%= label_tag :catalog_show_variant_price, t('bo.catalog.show_variant_price'), class: "form-check-label" %>
-                </div>
-
-                <div class="form-check mb-1 ms-4">
-                  <%= check_box_tag :show_variant_photo, "1", true, class: "form-check-input", id: "catalog_show_variant_photo" %>
-                  <%= label_tag :catalog_show_variant_photo, t('bo.catalog.show_variant_photo'), class: "form-check-label" %>
+                <div class="form-check">
+                  <%= radio_button_tag :catalog_layout, "list", false, id: "layout_list", class: "form-check-input" %>
+                  <%= label_tag :layout_list, t('bo.catalog.list'), class: "form-check-label" %>
                 </div>
               </div>
             </div>
+            <div class="col-6">
+              <label class="form-label fw-semibold"><%= t('bo.catalog.sort_by') %></label>
+              <select name="sort_by" class="form-select form-select-sm">
+                <option value="name"><%= t('bo.catalog.sort_name') %></option>
+                <option value="price"><%= t('bo.catalog.sort_price') %></option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Options -->
+          <div class="mb-3">
+            <label class="form-label fw-semibold"><%= t('bo.catalog.options') %></label>
+            <div class="form-check mb-1">
+              <%= check_box_tag :show_prices, "1", true, class: "form-check-input", id: "catalog_show_prices" %>
+              <%= label_tag :catalog_show_prices, t('bo.catalog.show_prices'), class: "form-check-label" %>
+            </div>
+            <div class="form-check mb-1">
+              <%= check_box_tag :show_sku, "1", true, class: "form-check-input", id: "catalog_show_sku" %>
+              <%= label_tag :catalog_show_sku, t('bo.catalog.show_sku'), class: "form-check-label" %>
+            </div>
+            <div class="form-check mb-1">
+              <%= check_box_tag :show_description, "1", false, class: "form-check-input", id: "catalog_show_description" %>
+              <%= label_tag :catalog_show_description, t('bo.catalog.show_description'), class: "form-check-label" %>
+            </div>
+            <div class="form-check mb-1">
+              <%= check_box_tag :group_by_category, "1", true, class: "form-check-input", id: "catalog_group_by_category" %>
+              <%= label_tag :catalog_group_by_category, t('bo.catalog.group_by_category'), class: "form-check-label" %>
+            </div>
+            <div class="form-check mb-1">
+              <%= check_box_tag :only_available, "1", true, class: "form-check-input", id: "catalog_only_available" %>
+              <%= label_tag :catalog_only_available, t('bo.catalog.only_available'), class: "form-check-label" %>
+            </div>
+          </div>
+
+          <!-- Variant Details -->
+          <div class="mb-3">
+            <label class="form-label fw-semibold"><%= t('bo.catalog.variant_details') %></label>
+            <div class="form-check mb-1">
+              <%= check_box_tag :show_variants, "1", true, class: "form-check-input", id: "catalog_show_variants" %>
+              <%= label_tag :catalog_show_variants, t('bo.catalog.show_variants'), class: "form-check-label" %>
+            </div>
+            <div class="form-check mb-1 ms-4">
+              <%= check_box_tag :show_variant_sku, "1", true, class: "form-check-input", id: "catalog_show_variant_sku" %>
+              <%= label_tag :catalog_show_variant_sku, t('bo.catalog.show_variant_sku'), class: "form-check-label" %>
+            </div>
+            <div class="form-check mb-1 ms-4">
+              <%= check_box_tag :show_variant_price, "1", true, class: "form-check-input", id: "catalog_show_variant_price" %>
+              <%= label_tag :catalog_show_variant_price, t('bo.catalog.show_variant_price'), class: "form-check-label" %>
+            </div>
+            <div class="form-check mb-1 ms-4">
+              <%= check_box_tag :show_variant_photo, "1", true, class: "form-check-input", id: "catalog_show_variant_photo" %>
+              <%= label_tag :catalog_show_variant_photo, t('bo.catalog.show_variant_photo'), class: "form-check-label" %>
+            </div>
+          </div>
+
+          <!-- Selection summary -->
+          <div class="border rounded p-3 bg-light">
+            <div class="d-flex justify-content-between align-items-center">
+              <div>
+                <i class="fa-solid fa-box me-1"></i>
+                <strong data-catalog-target="settingsProductCount">0</strong> <%= t('bo.catalog.products_selected') %>
+                &middot;
+                <i class="fa-solid fa-folder me-1"></i>
+                <strong data-catalog-target="settingsCategoryCount">0</strong> <%= t('bo.catalog.categories_selected') %>
+              </div>
+              <a href="#" class="btn btn-sm btn-outline-primary" data-action="click->catalog#openSelection">
+                <i class="fa-solid fa-list-check me-1"></i><%= t('bo.catalog.define_content') %>
+              </a>
+            </div>
+            <small class="text-muted"><%= t('bo.catalog.no_selection_hint') %></small>
           </div>
         </div>
 

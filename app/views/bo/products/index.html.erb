@@ -24,7 +24,7 @@
         <% end %>
       <% end %>
       <a href="#" class="btn btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#catalogModal">
-        <i class="fa-solid fa-book"></i> <%= t('bo.catalog.title') %>
+        <i class="fa-solid fa-file-pdf"></i> <%= t('bo.catalog.generate') %>
       </a>
       <div class="btn-group">
         <button type="button" class="btn btn-outline-secondary dropdown-toggle" data-bs-toggle="dropdown">
@@ -295,8 +295,12 @@
     modal_id: "exportVariantsModal",
     title: t('bo.export.export_variants') %>
 
-<%= render "bo/shared/catalog_modal",
-    filter_params: filter_params_hash,
-    categories: current_organisation.categories.kept.order(:name) %>
+<% catalog_categories = current_organisation.categories.kept.roots.order(:name) %>
+<div data-controller="catalog">
+  <%= render "bo/shared/catalog_modal", filter_params: filter_params_hash %>
+  <%= render "bo/shared/catalog_selection_modal", categories: catalog_categories %>
+</div>
+
+</div>
 
 <% end %>

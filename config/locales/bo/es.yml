@@ -113,7 +113,15 @@ es:
       show_variant_photo: "Mostrar foto de variante"
       select_categories: "Categorías"
       no_selection_hint: "Sin selección = todos los productos"
+      products_selected: "productos seleccionados"
+      categories_selected: "categorías seleccionadas"
+      define_content: "Seleccionar Contenido"
+      selection:
+        title: "Seleccionar Productos y Categorías"
+        search_placeholder: "Buscar por nombre, SKU..."
+        done: "Hecho"
       filters_applied: "Los filtros activos se aplicarán al catálogo"
+      selected_products: "productos seleccionados"
       generate: "Generar Catálogo"
       pdf:
         product_count:

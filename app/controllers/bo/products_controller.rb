@@ -235,8 +235,12 @@ class Bo::ProductsController < Bo::BaseController
                   .includes(:categories, :product_variants, product_variants: :attribute_values)
                   .with_attached_photos
 
-    # Filter by selected categories
-    if params[:catalog_category_ids].present?
+    # Filter by individually selected products (from checkboxes)
+    if params[:product_ids].present?
+      selected_ids = params[:product_ids].reject(&:blank?)
+      @products = @products.where(id: selected_ids) if selected_ids.any?
+    # Or filter by selected categories (from modal)
+    elsif params[:catalog_category_ids].present?
       category_ids = params[:catalog_category_ids].reject(&:blank?)
       if category_ids.any?
         product_ids = CategoryProduct.where(category_id: category_ids).select(:product_id)
