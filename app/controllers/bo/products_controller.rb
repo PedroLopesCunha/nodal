@@ -268,6 +268,7 @@ class Bo::ProductsController < Bo::BaseController
     @layout = params[:catalog_layout] == "list" ? "list" : "grid"
     @group_by_category = params[:group_by_category] == "1"
     @organisation = current_organisation
+    @catalog_host = request.base_url
 
     html = render_to_string(template: "shared/catalog/pdf", layout: false)
     pdf = Grover.new(html, format: "A4", print_background: true).to_pdf

@@ -80,7 +80,7 @@
   <%# Cover Page %>
   <div class="cover">
     <% if @organisation.logo.attached? %>
-      <%= image_tag url_for(@organisation.logo), class: "cover-logo" %>
+      <%= image_tag polymorphic_url(@organisation.logo, host: @catalog_host), class: "cover-logo" %>
     <% end %>
     <h1><%= @catalog_title %></h1>
     <div class="cover-date"><%= l(Date.today, format: :long) %></div>

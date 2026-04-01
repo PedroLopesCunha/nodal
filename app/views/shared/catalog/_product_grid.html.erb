@@ -1,6 +1,6 @@
 <div class="product-card">
   <% if product.photo_attached? %>
-    <%= image_tag url_for(product.photo.variant(resize_to_fill: [300, 240])), class: "product-card-img" %>
+    <%= image_tag polymorphic_url(product.photo.variant(resize_to_fill: [300, 240]), host: @catalog_host), class: "product-card-img" %>
   <% else %>
     <div class="product-card-placeholder">&#128247;</div>
   <% end %>
@@ -26,7 +26,7 @@
           <% variants.each do |variant| %>
             <div class="variant-row">
               <% if show_variant_photo && variant.photo.attached? %>
-                <%= image_tag url_for(variant.photo.variant(resize_to_fill: [24, 24])), class: "variant-thumb" %>
+                <%= image_tag polymorphic_url(variant.photo.variant(resize_to_fill: [24, 24]), host: @catalog_host), class: "variant-thumb" %>
               <% end %>
               <span class="variant-options"><%= variant.option_values_string.presence || variant.name %></span>
               <% if show_variant_sku && variant.sku.present? %>

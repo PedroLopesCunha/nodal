@@ -1,6 +1,6 @@
 <div class="product-list-item">
   <% if product.photo_attached? %>
-    <%= image_tag url_for(product.photo.variant(resize_to_fill: [120, 120])), class: "product-list-img" %>
+    <%= image_tag polymorphic_url(product.photo.variant(resize_to_fill: [120, 120]), host: @catalog_host), class: "product-list-img" %>
   <% else %>
     <div class="product-list-placeholder">&#128247;</div>
   <% end %>
@@ -30,7 +30,7 @@
                 <% if show_variant_photo %>
                   <td style="width: 24px;">
                     <% if variant.photo.attached? %>
-                      <%= image_tag url_for(variant.photo.variant(resize_to_fill: [20, 20])), class: "variant-thumb" %>
+                      <%= image_tag polymorphic_url(variant.photo.variant(resize_to_fill: [20, 20]), host: @catalog_host), class: "variant-thumb" %>
                     <% end %>
                   </td>
                 <% end %>
