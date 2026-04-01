@@ -68,7 +68,7 @@ module Erp
 
       def serialize_order_item(item)
         {
-          'product_external_id' => item.product&.external_id,
+          'product_external_id' => item.product_variant&.external_id,
           'product_sku' => item.product&.sku,
           'product_name' => item.product&.name,
           'variant_external_id' => item.product_variant&.external_id,
