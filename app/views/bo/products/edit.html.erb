@@ -126,6 +126,25 @@
         </div>
       </div>
 
+      <% unless @product.has_variants? %>
+        <% if @all_attributes.present? %>
+          <div class="card mb-3">
+            <div class="card-body">
+              <h5 class="card-title mb-4"><%= t('bo.products.form.attributes', default: 'Atributos') %></h5>
+              <p class="text-muted small mb-3"><%= t('bo.products.form.attributes_hint', default: 'Selecione atributos para catalogar este produto nos filtros da loja.') %></p>
+
+              <% @all_attributes.each do |attribute, values| %>
+                <%= render 'bo/product_variants/attribute_select',
+                    attribute: attribute, values: values,
+                    current_value_ids: @current_attribute_value_ids,
+                    used_value_ids: [],
+                    input_name: "product[attribute_value_ids][]" %>
+              <% end %>
+            </div>
+          </div>
+        <% end %>
+      <% end %>
+
       <div class="card">
         <div class="card-body">
           <h5 class="card-title mb-4"><%= t('bo.products.form.product_images') %></h5>

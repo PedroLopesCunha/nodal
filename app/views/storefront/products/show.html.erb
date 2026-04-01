@@ -264,6 +264,18 @@
           </div>
         <% end %>
 
+        <!-- Attributes display (for simple products) -->
+        <% if !@product.has_variants? && @simple_attribute_values.present? %>
+          <div class="mb-4">
+            <% @simple_attribute_values.group_by(&:product_attribute).each do |attribute, values| %>
+              <div class="mb-2">
+                <span class="fw-semibold"><%= attribute.name %>:</span>
+                <span class="text-muted"><%= values.map(&:value).join(', ') %></span>
+              </div>
+            <% end %>
+          </div>
+        <% end %>
+
         <!-- Variant Selector (for variable products) -->
         <% if @product.has_variants? && @attributes_with_values.present? %>
           <div class="mb-4">

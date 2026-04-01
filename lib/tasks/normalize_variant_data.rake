@@ -13,7 +13,7 @@ namespace :data do
     puts "Organisation: #{org.name} (#{org.slug})"
     puts ""
 
-    stats = { simple_fixed: 0, variable_fixed: 0, ext_id_moved: 0, ext_id_bootstrapped: 0, errors: [] }
+    stats = { simple_fixed: 0, variable_fixed: 0, ext_id_moved: 0, ext_id_bootstrapped: 0, orphan_assigned: 0, errors: [] }
 
     # === SIMPLE PRODUCTS ===
     puts "--- Simple Products (has_variants: false) ---"
@@ -133,6 +133,17 @@ namespace :data do
         )
       end
 
+      # Assign product SKU to the single orphan variant (was inheriting from default)
+      orphan_variants = product.product_variants.where(is_default: false, sku: [nil, ''])
+      if orphan_variants.count == 1 && product.sku.present?
+        orphan = orphan_variants.first
+        changes << "  variant '#{orphan.name}': assign sku '#{product.sku}' (single orphan)"
+        unless dry_run
+          orphan.update_columns(sku: product.sku, external_id: product.sku)
+        end
+        stats[:orphan_assigned] += 1
+      end
+
       # Bootstrap external_id = sku for non-default variants
       product.product_variants.where(is_default: false).where.not(sku: [nil, '']).find_each do |v|
         if v.external_id.blank?
@@ -157,7 +168,79 @@ namespace :data do
     puts "Simple products fixed: #{stats[:simple_fixed]}"
     puts "Variable products fixed: #{stats[:variable_fixed]}"
     puts "External IDs moved product→variant: #{stats[:ext_id_moved]}"
+    puts "Orphan variants assigned product SKU: #{stats[:orphan_assigned]}"
     puts "External IDs bootstrapped (=sku): #{stats[:ext_id_bootstrapped]}"
+    puts "Errors: #{stats[:errors].count}"
+    stats[:errors].each { |e| puts "  #{e}" }
+    puts ""
+    puts dry_run ? "DRY RUN complete. Run with 'execute' to apply changes." : "DONE. Changes applied."
+  end
+
+  desc "Convert fake-variable products (variable with only default variant) back to simple, preserving attributes"
+  task :convert_fake_variables, [:org_slug, :mode] => :environment do |_t, args|
+    org_slug = args[:org_slug]
+    mode = args[:mode] || 'dry_run'
+
+    abort "Usage: bin/rails 'data:convert_fake_variables[org_slug,dry_run|execute]'" unless org_slug.present?
+
+    org = Organisation.find_by!(slug: org_slug)
+    dry_run = mode != 'execute'
+
+    puts dry_run ? "=== DRY RUN ===" : "=== EXECUTING ==="
+    puts "Organisation: #{org.name} (#{org.slug})"
+    puts ""
+
+    stats = { converted: 0, skipped: 0, errors: [] }
+
+    # Find variable products with only the default variant (no non-default variants)
+    product_ids = ActiveRecord::Base.connection.execute("
+      SELECT p.id
+      FROM products p
+      WHERE p.organisation_id = #{org.id}
+      AND p.has_variants = true
+      AND NOT EXISTS (
+        SELECT 1 FROM product_variants pv
+        WHERE pv.product_id = p.id AND pv.is_default = false
+      )
+      ORDER BY p.id
+    ").map { |r| r['id'] }
+
+    puts "Found #{product_ids.count} fake-variable products"
+    puts ""
+
+    product_ids.each do |pid|
+      product = Product.find(pid)
+      variant = product.default_variant
+      next unless variant
+
+      if product.sku.blank?
+        puts "  SKIP ##{product.id} '#{product.name}' - no product SKU"
+        stats[:skipped] += 1
+        next
+      end
+
+      attrs = product.product_attributes.map(&:name).join(', ')
+      puts "  ##{product.id} '#{product.name}' (SKU: #{product.sku}) attrs: [#{attrs}]"
+      puts "    → set has_variants=false, restore variant SKU/external_id/track_stock"
+
+      unless dry_run
+        variant.update_columns(
+          sku: product.sku,
+          external_id: product.sku,
+          track_stock: true
+        )
+        product.update_columns(has_variants: false)
+      end
+
+      stats[:converted] += 1
+    rescue => e
+      stats[:errors] << "Product ##{pid}: #{e.message}"
+    end
+
+    puts ""
+    puts "=== Summary ==="
+    puts "Converted to simple: #{stats[:converted]}"
+    puts "Skipped (no SKU): #{stats[:skipped]}"
     puts "Errors: #{stats[:errors].count}"
     stats[:errors].each { |e| puts "  #{e}" }
     puts ""

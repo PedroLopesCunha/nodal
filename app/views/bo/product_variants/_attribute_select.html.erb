@@ -1,6 +1,7 @@
 <div class="mb-3" data-controller="variant-attribute-select" data-variant-attribute-select-attribute-id-value="<%= attribute.id %>">
   <label class="form-label"><%= attribute.name %></label>
-  <select name="product_variant[attribute_value_ids][]" class="form-select"
+  <% field_name = local_assigns[:input_name] || "product_variant[attribute_value_ids][]" %>
+  <select name="<%= field_name %>" class="form-select"
           data-variant-attribute-select-target="select"
           data-action="change->variant-attribute-select#toggleInput">
     <option value=""><%= t('bo.product_variants.form.select_option', attribute: attribute.name) %></option>
