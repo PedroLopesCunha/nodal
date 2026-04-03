@@ -2,7 +2,7 @@
 
 <div data-controller="task-progress"
      data-task-progress-url-value="<%= bo_background_task_path(params[:org_slug], @task, format: :json) %>"
-     data-task-progress-redirect-value="<%= bo_products_path(params[:org_slug]) %>">
+     data-task-progress-redirect-value="<%= bo_background_tasks_path(params[:org_slug]) %>">
 
 <div class="bo-page-header">
   <div class="d-flex align-items-center gap-3">
