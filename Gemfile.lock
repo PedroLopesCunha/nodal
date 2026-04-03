@@ -244,16 +244,6 @@ GEM
       logger
     mini_mime (1.1.5)
     minitest (5.26.2)
-    mission_control-jobs (0.6.0)
-      actioncable (>= 7.1)
-      actionpack (>= 7.1)
-      activejob (>= 7.1)
-      activerecord (>= 7.1)
-      importmap-rails (>= 1.2.1)
-      irb (~> 1.13)
-      railties (>= 7.1)
-      stimulus-rails
-      turbo-rails
     monetize (1.13.0)
       money (~> 6.12)
     money (6.19.0)
@@ -499,7 +489,6 @@ DEPENDENCIES
   kramdown
   kramdown-parser-gfm
   letter_opener_web
-  mission_control-jobs (~> 0.6)
   money-rails (~> 1.12)
   open-uri
   pagy (~> 9.0)

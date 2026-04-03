@@ -88,7 +88,6 @@ gem 'pagy', '~> 9.0'
 
 # background jobs
 gem 'solid_queue', '~> 1.1'
-gem 'mission_control-jobs', '~> 0.6'
 
 # HTTP client for ERP integrations
 gem 'faraday', '~> 2.0'
