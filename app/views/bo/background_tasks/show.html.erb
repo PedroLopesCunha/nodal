@@ -1,5 +1,9 @@
 <% content_for :bo_main_content do %>
 
+<div data-controller="task-progress"
+     data-task-progress-url-value="<%= bo_background_task_path(params[:org_slug], @task, format: :json) %>"
+     data-task-progress-redirect-value="<%= bo_products_path(params[:org_slug]) %>">
+
 <div class="bo-page-header">
   <div class="d-flex align-items-center gap-3">
     <div class="rounded bg-primary d-flex align-items-center justify-content-center text-white" style="width: 60px; height: 60px;">
@@ -12,9 +16,7 @@
   </div>
 </div>
 
-<div class="bo-page-body" data-controller="task-progress"
-     data-task-progress-url-value="<%= bo_background_task_path(params[:org_slug], @task, format: :json) %>"
-     data-task-progress-redirect-value="<%= bo_products_path(params[:org_slug]) %>">
+<div class="bo-page-body">
 
   <div class="row justify-content-center">
     <div class="col-md-8">
@@ -44,6 +46,8 @@
       </div>
     </div>
   </div>
+
+</div>
 
 </div>
 
