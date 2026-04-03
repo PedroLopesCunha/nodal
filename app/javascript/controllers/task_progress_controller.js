@@ -1,0 +1,121 @@
+import { Controller } from "@hotwired/stimulus"
+
+export default class extends Controller {
+  static targets = ["progressBar", "percentText", "statusText", "progressSection", "resultSection", "icon", "title", "subtitle"]
+  static values = { url: String, redirect: String }
+
+  connect() {
+    this.poll()
+  }
+
+  disconnect() {
+    if (this.timer) clearTimeout(this.timer)
+  }
+
+  async poll() {
+    try {
+      const response = await fetch(this.urlValue)
+      const data = await response.json()
+
+      this.updateProgress(data)
+
+      if (data.status === "completed") {
+        this.showResult(data)
+      } else if (data.status === "failed") {
+        this.showError(data)
+      } else {
+        this.timer = setTimeout(() => this.poll(), 2000)
+      }
+    } catch {
+      this.timer = setTimeout(() => this.poll(), 3000)
+    }
+  }
+
+  updateProgress(data) {
+    const pct = data.progress_percentage || 0
+    this.progressBarTarget.style.width = `${pct}%`
+    this.percentTextTarget.textContent = `${pct}%`
+
+    if (data.status === "running") {
+      const progress = data.progress || 0
+      const total = data.total || "?"
+      this.statusTextTarget.textContent = `A processar... ${progress}/${total}`
+    }
+  }
+
+  showResult(data) {
+    this.progressBarTarget.style.width = "100%"
+    this.progressBarTarget.classList.remove("progress-bar-animated")
+    this.progressBarTarget.classList.add("bg-success")
+    this.percentTextTarget.textContent = "100%"
+    this.statusTextTarget.textContent = "Concluído"
+
+    if (this.hasIconTarget) {
+      this.iconTarget.className = "fa-solid fa-check fa-lg"
+    }
+    if (this.hasSubtitleTarget) {
+      this.subtitleTarget.textContent = "Processo terminado com sucesso"
+    }
+
+    const result = data.result || {}
+    this.resultSectionTarget.classList.remove("d-none")
+    this.resultSectionTarget.innerHTML = this.buildResultHtml(result)
+  }
+
+  showError(data) {
+    this.progressBarTarget.classList.remove("progress-bar-animated")
+    this.progressBarTarget.classList.add("bg-danger")
+    this.statusTextTarget.textContent = "Erro"
+
+    if (this.hasIconTarget) {
+      this.iconTarget.className = "fa-solid fa-xmark fa-lg"
+    }
+    if (this.hasSubtitleTarget) {
+      this.subtitleTarget.textContent = "Ocorreu um erro"
+    }
+
+    this.resultSectionTarget.classList.remove("d-none")
+    this.resultSectionTarget.innerHTML = `
+      <div class="alert alert-danger mt-3 mb-0">
+        <i class="fa-solid fa-triangle-exclamation me-1"></i>
+        ${data.error_message || "Erro desconhecido"}
+      </div>`
+  }
+
+  buildResultHtml(result) {
+    const stats = result.stats || {}
+    const errors = result.errors || []
+
+    let html = '<div class="mt-3">'
+
+    // Stats
+    const statItems = []
+    if (stats.products_created) statItems.push(`<strong>${stats.products_created}</strong> produto(s) criado(s)`)
+    if (stats.products_updated) statItems.push(`<strong>${stats.products_updated}</strong> produto(s) atualizado(s)`)
+    if (stats.variants_created) statItems.push(`<strong>${stats.variants_created}</strong> variante(s) criada(s)`)
+    if (stats.attributes_created) statItems.push(`<strong>${stats.attributes_created}</strong> atributo(s) criado(s)`)
+    if (stats.photos_attached) statItems.push(`<strong>${stats.photos_attached}</strong> foto(s) anexada(s)`)
+    if (stats.matched) statItems.push(`<strong>${stats.matched}</strong> foto(s) associada(s)`)
+    if (stats.unmatched) statItems.push(`<strong>${stats.unmatched}</strong> foto(s) sem correspondência`)
+
+    if (statItems.length > 0) {
+      html += `<div class="alert alert-success"><i class="fa-solid fa-check-circle me-1"></i> ${statItems.join(" &middot; ")}</div>`
+    }
+
+    // Errors
+    if (errors.length > 0) {
+      html += `<div class="alert alert-warning"><i class="fa-solid fa-triangle-exclamation me-1"></i> <strong>${errors.length} erro(s):</strong><ul class="mb-0 mt-1">`
+      errors.forEach(e => {
+        const field = e.field ? ` (${e.field})` : ""
+        const row = e.row ? `Linha ${e.row}` : ""
+        html += `<li>${row}${field}: ${e.message}</li>`
+      })
+      html += "</ul></div>"
+    }
+
+    // Back link
+    html += `<a href="${this.redirectValue}" class="btn btn-primary mt-2"><i class="fa-solid fa-arrow-left me-1"></i> Voltar</a>`
+    html += "</div>"
+    return html
+  }
+}

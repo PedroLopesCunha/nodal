@@ -227,6 +227,9 @@ Rails.application.routes.draw do
         get :email_logs
       end
 
+      # Background Tasks
+      resources :background_tasks, only: [:show]
+
       # ERP Integration
       resource :erp_settings, only: [:edit, :update] do
         post :test_connection

@@ -35,6 +35,7 @@ class Organisation < ApplicationRecord
   has_many :promo_codes, dependent: :destroy
   has_one :erp_configuration, dependent: :destroy
   has_many :erp_sync_logs, dependent: :destroy
+  has_many :background_tasks, dependent: :destroy
   has_many :email_logs, dependent: :destroy
   has_many :discount_email_notifications, dependent: :destroy
   has_many :homepage_banners, dependent: :destroy

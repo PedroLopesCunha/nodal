@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2026_04_03_113825) do
+ActiveRecord::Schema[7.1].define(version: 2026_04_03_115306) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
   enable_extension "unaccent"
@@ -66,6 +66,24 @@ ActiveRecord::Schema[7.1].define(version: 2026_04_03_113825) do
     t.datetime "updated_at", null: false
     t.boolean "active", default: true, null: false
     t.index ["addressable_type", "addressable_id"], name: "index_addresses_on_addressable"
+  end
+
+  create_table "background_tasks", force: :cascade do |t|
+    t.bigint "organisation_id", null: false
+    t.bigint "member_id", null: false
+    t.string "task_type"
+    t.string "status"
+    t.integer "progress"
+    t.integer "total"
+    t.jsonb "result"
+    t.text "error_message"
+    t.datetime "started_at"
+    t.datetime "completed_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["member_id"], name: "index_background_tasks_on_member_id"
+    t.index ["organisation_id"], name: "index_background_tasks_on_organisation_id"
+    t.index ["status"], name: "index_background_tasks_on_status"
   end
 
   create_table "categories", force: :cascade do |t|
@@ -821,6 +839,8 @@ ActiveRecord::Schema[7.1].define(version: 2026_04_03_113825) do
 
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
+  add_foreign_key "background_tasks", "members"
+  add_foreign_key "background_tasks", "organisations"
   add_foreign_key "categories", "organisations"
   add_foreign_key "category_products", "categories"
   add_foreign_key "category_products", "products"

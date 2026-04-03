@@ -47,20 +47,23 @@ class Bo::ProductsController < Bo::BaseController
       end
     end
 
-    service = ProductGridImportService.new(
-      organisation: current_organisation,
+    task = current_organisation.background_tasks.create!(
+      member: current_member,
+      task_type: "product_grid_import",
+      status: :pending,
+      total: rows.size
+    )
+
+    ProductGridImportJob.perform_later(
+      task.id,
+      organisation_id: current_organisation.id,
       rows: rows,
       zip_path: zip_path,
       images_dir: images_dir,
       photo_mode: params[:photo_mode] || "append"
     )
-    @result = service.call
 
-    # Cleanup temp files
-    File.delete(zip_path) if zip_path && File.exist?(zip_path)
-    FileUtils.rm_rf(images_dir) if images_dir && File.exist?(images_dir)
-
-    render :bulk_create_results
+    redirect_to bo_background_task_path(params[:org_slug], task)
   end
 
   # Bulk photo upload
@@ -93,19 +96,21 @@ class Bo::ProductsController < Bo::BaseController
       end
     end
 
-    service = BulkPhotoService.new(
-      organisation: current_organisation,
+    task = current_organisation.background_tasks.create!(
+      member: current_member,
+      task_type: "bulk_photo_import",
+      status: :pending
+    )
+
+    BulkPhotoJob.perform_later(
+      task.id,
+      organisation_id: current_organisation.id,
       zip_path: zip_path,
       images_dir: images_dir,
       photo_mode: photo_mode
     )
-    @result = service.call
 
-    # Cleanup
-    File.delete(zip_path) if zip_path && File.exist?(zip_path)
-    FileUtils.rm_rf(images_dir) if images_dir && File.exist?(images_dir)
-
-    render :bulk_photos_results
+    redirect_to bo_background_task_path(params[:org_slug], task)
   end
 
   # Import actions
@@ -190,8 +195,15 @@ class Bo::ProductsController < Bo::BaseController
     category_id = session["import_#{import_key}_category_id"]
     photo_mode = session["import_#{import_key}_photo_mode"] || "append"
 
-    service = ProductImportService.new(
-      organisation: current_organisation,
+    task = current_organisation.background_tasks.create!(
+      member: current_member,
+      task_type: "product_csv_import",
+      status: :pending
+    )
+
+    ProductImportJob.perform_later(
+      task.id,
+      organisation_id: current_organisation.id,
       csv_content: csv_content,
       column_mapping: mapping,
       col_sep: col_sep,
@@ -201,19 +213,15 @@ class Bo::ProductsController < Bo::BaseController
       form_category_id: category_id
     )
 
-    @result = service.call
-
-    # Clean up temp files and session
+    # Clean up session (temp files cleaned by job)
     File.delete(temp_path) if File.exist?(temp_path)
-    File.delete(zip_path) if zip_path && File.exist?(zip_path)
-    FileUtils.rm_rf(images_dir) if images_dir && File.exist?(images_dir)
     session.delete("import_#{import_key}_col_sep")
     session.delete("import_#{import_key}_zip")
     session.delete("import_#{import_key}_images_dir")
     session.delete("import_#{import_key}_category_id")
     session.delete("import_#{import_key}_photo_mode")
 
-    render :import_results
+    redirect_to bo_background_task_path(params[:org_slug], task)
   end
 
   def index

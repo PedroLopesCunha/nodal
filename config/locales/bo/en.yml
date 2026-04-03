@@ -1587,3 +1587,13 @@ en:
       invitation_resent: "Invitation resent successfully"
       language_updated: "Language updated successfully"
       error_occurred: "An error occurred. Please try again."
+    background_tasks:
+      processing: "Processing..."
+      please_wait: "Please wait while the task is being processed"
+      starting: "Starting..."
+      product_grid_import:
+        title: "Importing products"
+      product_csv_import:
+        title: "Importing products"
+      bulk_photo_import:
+        title: "Importing photos"
