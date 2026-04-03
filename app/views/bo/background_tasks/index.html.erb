@@ -51,6 +51,11 @@
                 </td>
                 <td class="text-muted small"><%= l(task.created_at, format: :short) %></td>
                 <td class="text-end">
+                  <% if task.file.attached? %>
+                    <%= link_to download_bo_background_task_path(params[:org_slug], task), class: "btn btn-sm btn-outline-success me-1" do %>
+                      <i class="fa-solid fa-download"></i>
+                    <% end %>
+                  <% end %>
                   <%= link_to bo_background_task_path(params[:org_slug], task), class: "btn btn-sm btn-outline-secondary" do %>
                     <i class="fa-solid fa-eye"></i>
                   <% end %>
