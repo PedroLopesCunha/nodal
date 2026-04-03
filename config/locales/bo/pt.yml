@@ -255,6 +255,7 @@ pt:
       settings: "Definições"
       log_out: "Sair"
       view_storefront: "Ver Loja"
+      tasks: "Tarefas"
 
     # Secção Dashboard
     dashboards:
@@ -1587,3 +1588,15 @@ pt:
         title: "A importar produtos"
       bulk_photo_import:
         title: "A importar fotos"
+      statuses:
+        pending: "Pendente"
+        running: "Em progresso"
+        completed: "Concluído"
+        failed: "Erro"
+      index:
+        title: "Tarefas"
+        subtitle: "Tarefas recentes em background"
+        type: "Tipo"
+        status: "Estado"
+        date: "Data"
+        empty: "Nenhuma tarefa recente"

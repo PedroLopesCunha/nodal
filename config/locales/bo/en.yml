@@ -258,6 +258,7 @@ en:
       settings: "Settings"
       log_out: "Log out"
       view_storefront: "View Storefront"
+      tasks: "Tasks"
 
     # Dashboard section
     dashboards:
@@ -1597,3 +1598,15 @@ en:
         title: "Importing products"
       bulk_photo_import:
         title: "Importing photos"
+      statuses:
+        pending: "Pending"
+        running: "In progress"
+        completed: "Completed"
+        failed: "Failed"
+      index:
+        title: "Tasks"
+        subtitle: "Recent background tasks"
+        type: "Type"
+        status: "Status"
+        date: "Date"
+        empty: "No recent tasks"

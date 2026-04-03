@@ -15,5 +15,6 @@ class Bo::BaseController < ApplicationController
 
   def set_sidebar_counts
     @unreviewed_orders_count = current_organisation.orders.unreviewed.count
+    @running_tasks_count = current_organisation.background_tasks.where(status: [:pending, :running]).count
   end
 end

@@ -228,7 +228,7 @@ Rails.application.routes.draw do
       end
 
       # Background Tasks
-      resources :background_tasks, only: [:show]
+      resources :background_tasks, only: [:index, :show]
 
       # ERP Integration
       resource :erp_settings, only: [:edit, :update] do

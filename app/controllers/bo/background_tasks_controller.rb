@@ -1,4 +1,12 @@
 class Bo::BackgroundTasksController < Bo::BaseController
+  def index
+    authorize BackgroundTask
+    @tasks = current_organisation.background_tasks
+      .where(member: current_member)
+      .recent
+      .limit(20)
+  end
+
   def show
     @task = current_organisation.background_tasks.find(params[:id])
     authorize @task
