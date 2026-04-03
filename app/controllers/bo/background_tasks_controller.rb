@@ -1,7 +1,6 @@
 class Bo::BackgroundTasksController < Bo::BaseController
   def index
-    authorize BackgroundTask
-    @tasks = current_organisation.background_tasks
+    @tasks = policy_scope(BackgroundTask)
       .where(member: current_member)
       .recent
       .limit(20)
