@@ -60,14 +60,7 @@
     </div>
 
     <!-- Thumbnails (product photos + variant photos) -->
-    <%
-      all_photos = @product.photos.to_a
-      if @product.has_variants? && defined?(@variants)
-        @variants.each do |v|
-          all_photos << v.photo if v.photo.attached?
-        end
-      end
-    %>
+    <% all_photos = @product.all_photos %>
     <% if all_photos.any? %>
       <div class="d-flex justify-content-center gap-2 mt-3 flex-wrap">
         <% all_photos.each do |photo| %>
