@@ -28,16 +28,22 @@
           </thead>
           <tbody>
             <% @tasks.each do |task| %>
-              <tr>
+              <% unseen = task.viewed_at.nil? && task.status.in?(%w[completed failed]) %>
+              <tr class="<%= 'table-light fw-semibold' if unseen %>" style="cursor: pointer;"
+                  onclick="window.location='<%= bo_background_task_path(params[:org_slug], task) %>'">
                 <td>
                   <% icon = case task.task_type
                     when "product_grid_import" then "fa-table-cells"
                     when "product_csv_import" then "fa-file-csv"
                     when "bulk_photo_import" then "fa-images"
+                    when "generate_catalog" then "fa-file-pdf"
                     else "fa-gear"
                   end %>
-                  <i class="fa-solid <%= icon %> me-2 text-muted"></i>
+                  <i class="fa-solid <%= icon %> me-2 <%= unseen ? 'text-primary' : 'text-muted' %>"></i>
                   <%= t("bo.background_tasks.#{task.task_type}.title", default: task.task_type.humanize) %>
+                  <% if unseen %>
+                    <span class="badge bg-primary ms-2" style="font-size: 9px;">novo</span>
+                  <% end %>
                 </td>
                 <td>
                   <% badge_class = case task.status
@@ -51,14 +57,11 @@
                   </span>
                 </td>
                 <td class="text-muted small"><%= l(task.created_at, format: :short) %></td>
-                <td class="text-end">
+                <td class="text-end" onclick="event.stopPropagation()">
                   <% if task.file.attached? %>
                     <%= link_to download_bo_background_task_path(params[:org_slug], task), class: "btn btn-sm btn-outline-success me-1" do %>
                       <i class="fa-solid fa-download"></i>
                     <% end %>
-                  <% end %>
-                  <%= link_to bo_background_task_path(params[:org_slug], task), class: "btn btn-sm btn-outline-secondary" do %>
-                    <i class="fa-solid fa-eye"></i>
                   <% end %>
                 </td>
               </tr>
