@@ -29,12 +29,8 @@ class Storefront::CheckoutsController < Storefront::BaseController
       @order.terms_accepted_at = Time.current if checkout_params[:terms_accepted] == "1"
       @order.finalize_checkout!(same_as_shipping: checkout_params[:same_as_shipping] == "1")
 
-      begin
-        CustomerMailer.with(customer: current_customer, order: @order).confirm_order.deliver_now
-        MemberMailer.with(customer: current_customer, order: @order, org_slug: params[:org_slug]).notificate_customer_order.deliver_now
-      rescue => e
-        Rails.logger.error("Checkout email delivery failed for Order ##{@order.order_number}: #{e.class} - #{e.message}")
-      end
+      CustomerMailer.with(customer: current_customer, order: @order).confirm_order.deliver_later
+      MemberMailer.with(customer: current_customer, order: @order, org_slug: params[:org_slug]).notificate_customer_order.deliver_later
 
       redirect_to order_path(org_slug: params[:org_slug], id: @order), notice: "Order placed successfully!"
     rescue ActiveRecord::RecordInvalid => e

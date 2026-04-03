@@ -9,11 +9,11 @@ class DiscountEmailNotification < ApplicationRecord
   def send_email!(member:)
     case notifiable_type
     when 'ProductDiscount', 'OrderDiscount'
-      CustomerMailer.with(discount: notifiable, organisation: organisation).notify_clients_about_discount.deliver_now
+      CustomerMailer.with(discount: notifiable, organisation: organisation).notify_clients_about_discount.deliver_later
     when 'CustomerDiscount', 'CustomerProductDiscount'
-      CustomerMailer.with(discount: notifiable, organisation: organisation).notify_customer_about_discount.deliver_now
+      CustomerMailer.with(discount: notifiable, organisation: organisation).notify_customer_about_discount.deliver_later
     when 'PromoCode'
-      CustomerMailer.with(promo_code: notifiable, organisation: organisation).notify_promo_code.deliver_now
+      CustomerMailer.with(promo_code: notifiable, organisation: organisation).notify_promo_code.deliver_later
     end
 
     update!(status: 'sent', sent_at: Time.current, sent_by: member)
