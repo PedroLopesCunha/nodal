@@ -70,10 +70,13 @@
       <% end %>
     </li>
     <% if admin_or_owner? %>
-      <li class="bo-sidebar-item <%= 'active' if controller_name.in?(%w[settings erp_settings]) %>">
+      <li class="bo-sidebar-item <%= 'active' if controller_name.in?(%w[settings erp_settings homepage_settings email_settings background_tasks]) %>">
         <%= link_to edit_bo_settings_path do %>
           <i class="fa-solid fa-gear"></i>
           <span><%= t('bo.sidebar.settings') %></span>
+          <% if @unseen_tasks_count && @unseen_tasks_count > 0 %>
+            <span class="badge rounded-pill bg-primary ms-auto"><%= @unseen_tasks_count %></span>
+          <% end %>
         <% end %>
       </li>
     <% end %>

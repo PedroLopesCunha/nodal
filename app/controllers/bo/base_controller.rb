@@ -15,5 +15,12 @@ class Bo::BaseController < ApplicationController
 
   def set_sidebar_counts
     @unreviewed_orders_count = current_organisation.orders.unreviewed.count
+    @unseen_tasks_count = current_organisation.background_tasks
+      .where(member: current_member)
+      .where(status: [:pending, :running])
+      .or(current_organisation.background_tasks
+        .where(member: current_member)
+        .where(status: [:completed, :failed], viewed_at: nil))
+      .count
   end
 end

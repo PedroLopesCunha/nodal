@@ -4,14 +4,22 @@ module Exportable
   def export
     authorize exportable_class, :export?
 
-    columns = exportable_class.exportable_columns_for(params[:columns])
-    format = params[:format_type] || "csv"
-    extension = format == "xlsx" ? "xlsx" : "csv"
+    task = current_organisation.background_tasks.create!(
+      member: current_member,
+      task_type: "export_#{exportable_class.model_name.plural}",
+      status: :pending
+    )
 
-    records = apply_export_filters(exportable_base_scope)
-    result = ExportService.new(records: records, columns: columns, format: format).call
+    ExportJob.perform_later(
+      task.id,
+      organisation_id: current_organisation.id,
+      export_class: exportable_class.name,
+      export_type: exportable_class.model_name.plural,
+      columns: params[:columns],
+      format: params[:format_type] || "csv",
+      filter_params: filter_params_hash
+    )
 
-    filename = "#{exportable_class.model_name.plural}_#{Date.today.iso8601}.#{extension}"
-    send_data result[:data], filename: filename, type: result[:content_type], disposition: "attachment"
+    redirect_to bo_background_task_path(params[:org_slug], task)
   end
 end

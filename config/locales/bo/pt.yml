@@ -255,6 +255,7 @@ pt:
       settings: "Definições"
       log_out: "Sair"
       view_storefront: "Ver Loja"
+      tasks: "Tarefas"
 
     # Secção Dashboard
     dashboards:
@@ -1301,6 +1302,12 @@ pt:
 
     # Secção Definições
     settings:
+      tabs:
+        general: "Geral"
+        homepage: "Homepage"
+        email: "Email"
+        erp_integration: "Integração ERP"
+        tasks: "Tarefas"
       edit:
         title: "Definições da Organização"
         general_info: "Informação Geral"
@@ -1577,3 +1584,38 @@ pt:
       invitation_resent: "Convite reenviado com sucesso"
       language_updated: "Idioma atualizado com sucesso"
       error_occurred: "Ocorreu um erro. Por favor tente novamente."
+    background_tasks:
+      processing: "A processar..."
+      please_wait: "Aguarde enquanto o processo é executado"
+      starting: "A iniciar..."
+      product_grid_import:
+        title: "A importar produtos"
+      product_csv_import:
+        title: "A importar produtos"
+      bulk_photo_import:
+        title: "A importar fotos"
+      generate_catalog:
+        title: "A gerar catálogo"
+      export_products:
+        title: "A exportar produtos"
+      export_product_variants:
+        title: "A exportar variantes"
+      export_orders:
+        title: "A exportar encomendas"
+      export_order_items:
+        title: "A exportar linhas de encomenda"
+      export_customers:
+        title: "A exportar clientes"
+      no_file: "Ficheiro não disponível"
+      statuses:
+        pending: "Pendente"
+        running: "Em progresso"
+        completed: "Concluído"
+        failed: "Erro"
+      index:
+        title: "Tarefas"
+        subtitle: "Tarefas recentes em background"
+        type: "Tipo"
+        status: "Estado"
+        date: "Data"
+        empty: "Nenhuma tarefa recente"

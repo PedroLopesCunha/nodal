@@ -47,20 +47,23 @@ class Bo::ProductsController < Bo::BaseController
       end
     end
 
-    service = ProductGridImportService.new(
-      organisation: current_organisation,
+    task = current_organisation.background_tasks.create!(
+      member: current_member,
+      task_type: "product_grid_import",
+      status: :pending,
+      total: rows.size
+    )
+
+    ProductGridImportJob.perform_later(
+      task.id,
+      organisation_id: current_organisation.id,
       rows: rows,
       zip_path: zip_path,
       images_dir: images_dir,
       photo_mode: params[:photo_mode] || "append"
     )
-    @result = service.call
 
-    # Cleanup temp files
-    File.delete(zip_path) if zip_path && File.exist?(zip_path)
-    FileUtils.rm_rf(images_dir) if images_dir && File.exist?(images_dir)
-
-    render :bulk_create_results
+    redirect_to bo_background_task_path(params[:org_slug], task)
   end
 
   # Bulk photo upload
@@ -93,19 +96,21 @@ class Bo::ProductsController < Bo::BaseController
       end
     end
 
-    service = BulkPhotoService.new(
-      organisation: current_organisation,
+    task = current_organisation.background_tasks.create!(
+      member: current_member,
+      task_type: "bulk_photo_import",
+      status: :pending
+    )
+
+    BulkPhotoJob.perform_later(
+      task.id,
+      organisation_id: current_organisation.id,
       zip_path: zip_path,
       images_dir: images_dir,
       photo_mode: photo_mode
     )
-    @result = service.call
 
-    # Cleanup
-    File.delete(zip_path) if zip_path && File.exist?(zip_path)
-    FileUtils.rm_rf(images_dir) if images_dir && File.exist?(images_dir)
-
-    render :bulk_photos_results
+    redirect_to bo_background_task_path(params[:org_slug], task)
   end
 
   # Import actions
@@ -190,8 +195,15 @@ class Bo::ProductsController < Bo::BaseController
     category_id = session["import_#{import_key}_category_id"]
     photo_mode = session["import_#{import_key}_photo_mode"] || "append"
 
-    service = ProductImportService.new(
-      organisation: current_organisation,
+    task = current_organisation.background_tasks.create!(
+      member: current_member,
+      task_type: "product_csv_import",
+      status: :pending
+    )
+
+    ProductImportJob.perform_later(
+      task.id,
+      organisation_id: current_organisation.id,
       csv_content: csv_content,
       column_mapping: mapping,
       col_sep: col_sep,
@@ -201,19 +213,15 @@ class Bo::ProductsController < Bo::BaseController
       form_category_id: category_id
     )
 
-    @result = service.call
-
-    # Clean up temp files and session
+    # Clean up session (temp files cleaned by job)
     File.delete(temp_path) if File.exist?(temp_path)
-    File.delete(zip_path) if zip_path && File.exist?(zip_path)
-    FileUtils.rm_rf(images_dir) if images_dir && File.exist?(images_dir)
     session.delete("import_#{import_key}_col_sep")
     session.delete("import_#{import_key}_zip")
     session.delete("import_#{import_key}_images_dir")
     session.delete("import_#{import_key}_category_id")
     session.delete("import_#{import_key}_photo_mode")
 
-    render :import_results
+    redirect_to bo_background_task_path(params[:org_slug], task)
   end
 
   def index
@@ -236,67 +244,62 @@ class Bo::ProductsController < Bo::BaseController
   def generate_catalog
     authorize Product, :generate_catalog?
 
-    @products = policy_scope(current_organisation.products)
-                  .includes(:categories, :product_variants, product_variants: :attribute_values)
-                  .with_attached_photos
+    product_ids = params[:product_ids]&.reject(&:blank?)
+    category_ids = params[:catalog_category_ids]&.reject(&:blank?)
 
-    # Filter by individually selected products (from checkboxes)
-    if params[:product_ids].present?
-      selected_ids = params[:product_ids].reject(&:blank?)
-      @products = @products.where(id: selected_ids) if selected_ids.any?
-    # Or filter by selected categories (from modal)
-    elsif params[:catalog_category_ids].present?
-      category_ids = params[:catalog_category_ids].reject(&:blank?)
-      if category_ids.any?
-        product_ids = CategoryProduct.where(category_id: category_ids).select(:product_id)
-        @products = @products.where(id: product_ids)
-      end
-    end
+    options = {
+      "catalog_title" => params[:catalog_title],
+      "show_prices" => params[:show_prices],
+      "show_sku" => params[:show_sku],
+      "show_description" => params[:show_description],
+      "show_variants" => params[:show_variants],
+      "show_variant_sku" => params[:show_variant_sku],
+      "show_variant_price" => params[:show_variant_price],
+      "show_variant_photo" => params[:show_variant_photo],
+      "catalog_layout" => params[:catalog_layout],
+      "group_by_category" => params[:group_by_category],
+      "only_available" => params[:only_available],
+      "sort_by" => params[:sort_by],
+      "base_url" => request.base_url
+    }
 
-    # Only available products by default
-    @products = @products.where(available: true) if params[:only_available] != "0"
+    task = current_organisation.background_tasks.create!(
+      member: current_member,
+      task_type: "generate_catalog",
+      status: :pending
+    )
 
-    # Ordering
-    case params[:sort_by]
-    when "price" then @products = @products.order(:unit_price)
-    else @products = @products.order(:name)
-    end
+    GenerateCatalogJob.perform_later(
+      task.id,
+      organisation_id: current_organisation.id,
+      product_ids: product_ids,
+      category_ids: category_ids,
+      options: options
+    )
 
-    @catalog_title = params[:catalog_title].presence || current_organisation.name
-    @show_prices = params[:show_prices] != "0"
-    @show_sku = params[:show_sku] == "1"
-    @show_description = params[:show_description] == "1"
-    @show_variants = params[:show_variants] == "1"
-    @show_variant_sku = params[:show_variant_sku] == "1"
-    @show_variant_price = params[:show_variant_price] == "1"
-    @show_variant_photo = params[:show_variant_photo] == "1"
-    @layout = params[:catalog_layout] == "list" ? "list" : "grid"
-    @group_by_category = params[:group_by_category] == "1"
-    @organisation = current_organisation
-    @catalog_host = request.base_url
-
-    html = render_to_string(template: "shared/catalog/pdf", layout: false)
-    pdf = Grover.new(html, format: "A4", print_background: true).to_pdf
-
-    filename = "#{@catalog_title.parameterize}_#{Date.today.iso8601}.pdf"
-    send_data pdf, filename: filename, type: "application/pdf", disposition: "attachment"
+    redirect_to bo_background_task_path(params[:org_slug], task)
   end
 
   def export_variants
     authorize Product, :export?
 
-    columns = ProductVariant.exportable_columns_for(params[:columns])
-    format = params[:format_type] || "csv"
-    extension = format == "xlsx" ? "xlsx" : "csv"
+    task = current_organisation.background_tasks.create!(
+      member: current_member,
+      task_type: "export_product_variants",
+      status: :pending
+    )
 
-    product_ids = apply_product_filters(policy_scope(current_organisation.products)).select(:id)
-    records = ProductVariant.where(product_id: product_ids)
-                            .includes(:product, :attribute_values, product: :categories)
-                            .order(:product_id, :position)
+    ExportJob.perform_later(
+      task.id,
+      organisation_id: current_organisation.id,
+      export_class: "ProductVariant",
+      export_type: "product_variants",
+      columns: params[:columns],
+      format: params[:format_type] || "csv",
+      filter_params: filter_params_hash
+    )
 
-    result = ExportService.new(records: records, columns: columns, format: format).call
-    filename = "product_variants_#{Date.today.iso8601}.#{extension}"
-    send_data result[:data], filename: filename, type: result[:content_type], disposition: "attachment"
+    redirect_to bo_background_task_path(params[:org_slug], task)
   end
 
   def show

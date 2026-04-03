@@ -258,6 +258,7 @@ en:
       settings: "Settings"
       log_out: "Log out"
       view_storefront: "View Storefront"
+      tasks: "Tasks"
 
     # Dashboard section
     dashboards:
@@ -1311,6 +1312,12 @@ en:
 
     # Settings section
     settings:
+      tabs:
+        general: "General"
+        homepage: "Homepage"
+        email: "Email"
+        erp_integration: "ERP Integration"
+        tasks: "Tasks"
       edit:
         title: "Organisation Settings"
         general_info: "General Information"
@@ -1587,3 +1594,38 @@ en:
       invitation_resent: "Invitation resent successfully"
       language_updated: "Language updated successfully"
       error_occurred: "An error occurred. Please try again."
+    background_tasks:
+      processing: "Processing..."
+      please_wait: "Please wait while the task is being processed"
+      starting: "Starting..."
+      product_grid_import:
+        title: "Importing products"
+      product_csv_import:
+        title: "Importing products"
+      bulk_photo_import:
+        title: "Importing photos"
+      generate_catalog:
+        title: "Generating catalog"
+      export_products:
+        title: "Exporting products"
+      export_product_variants:
+        title: "Exporting variants"
+      export_orders:
+        title: "Exporting orders"
+      export_order_items:
+        title: "Exporting order items"
+      export_customers:
+        title: "Exporting customers"
+      no_file: "File not available"
+      statuses:
+        pending: "Pending"
+        running: "In progress"
+        completed: "Completed"
+        failed: "Failed"
+      index:
+        title: "Tasks"
+        subtitle: "Recent background tasks"
+        type: "Type"
+        status: "Status"
+        date: "Date"
+        empty: "No recent tasks"
