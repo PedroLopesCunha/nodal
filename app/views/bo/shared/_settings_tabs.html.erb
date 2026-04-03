@@ -25,6 +25,15 @@
           <i class="fa-solid fa-plug me-2"></i><%= t('bo.settings.tabs.erp_integration', default: 'ERP Integration') %>
         <% end %>
       </li>
+      <li class="nav-item" role="presentation">
+        <%= link_to bo_background_tasks_path(params[:org_slug]),
+            class: "nav-link rounded-0 py-3 #{'active' if controller_name == 'background_tasks'}" do %>
+          <i class="fa-solid fa-list-check me-2"></i><%= t('bo.settings.tabs.tasks', default: 'Tasks') %>
+          <% if @unseen_tasks_count && @unseen_tasks_count > 0 %>
+            <span class="badge rounded-pill bg-primary ms-1"><%= @unseen_tasks_count %></span>
+          <% end %>
+        <% end %>
+      </li>
     </ul>
   </div>
 </div>

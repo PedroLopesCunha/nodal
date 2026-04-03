@@ -1302,6 +1302,12 @@ pt:
 
     # Secção Definições
     settings:
+      tabs:
+        general: "Geral"
+        homepage: "Homepage"
+        email: "Email"
+        erp_integration: "Integração ERP"
+        tasks: "Tarefas"
       edit:
         title: "Definições da Organização"
         general_info: "Informação Geral"

@@ -1312,6 +1312,12 @@ en:
 
     # Settings section
     settings:
+      tabs:
+        general: "General"
+        homepage: "Homepage"
+        email: "Email"
+        erp_integration: "ERP Integration"
+        tasks: "Tasks"
       edit:
         title: "Organisation Settings"
         general_info: "General Information"

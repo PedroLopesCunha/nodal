@@ -9,6 +9,7 @@ class Bo::BackgroundTasksController < Bo::BaseController
   def show
     @task = current_organisation.background_tasks.find(params[:id])
     authorize @task
+    @task.update_column(:viewed_at, Time.current) if @task.viewed_at.nil? && @task.status.in?(%w[completed failed])
 
     respond_to do |format|
       format.html

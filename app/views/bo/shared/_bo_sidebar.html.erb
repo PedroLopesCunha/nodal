@@ -57,19 +57,6 @@
 
   <!-- Bottom Navigation -->
   <ul class="bo-sidebar-nav-bottom">
-    <li class="bo-sidebar-item <%= 'active' if controller_name == 'background_tasks' %>">
-      <%= link_to bo_background_tasks_path do %>
-        <% if @running_tasks_count && @running_tasks_count > 0 %>
-          <i class="fa-solid fa-spinner fa-spin"></i>
-        <% else %>
-          <i class="fa-solid fa-list-check"></i>
-        <% end %>
-        <span><%= t('bo.sidebar.tasks') %></span>
-        <% if @running_tasks_count && @running_tasks_count > 0 %>
-          <span class="badge rounded-pill bg-primary ms-auto"><%= @running_tasks_count %></span>
-        <% end %>
-      <% end %>
-    </li>
     <li class="bo-sidebar-item bo-sidebar-storefront">
       <%= link_to products_path(org_slug: current_organisation.slug), target: "_blank" do %>
         <i class="fa-solid fa-store"></i>
@@ -83,10 +70,13 @@
       <% end %>
     </li>
     <% if admin_or_owner? %>
-      <li class="bo-sidebar-item <%= 'active' if controller_name.in?(%w[settings erp_settings]) %>">
+      <li class="bo-sidebar-item <%= 'active' if controller_name.in?(%w[settings erp_settings homepage_settings email_settings background_tasks]) %>">
         <%= link_to edit_bo_settings_path do %>
           <i class="fa-solid fa-gear"></i>
           <span><%= t('bo.sidebar.settings') %></span>
+          <% if @unseen_tasks_count && @unseen_tasks_count > 0 %>
+            <span class="badge rounded-pill bg-primary ms-auto"><%= @unseen_tasks_count %></span>
+          <% end %>
         <% end %>
       </li>
     <% end %>
