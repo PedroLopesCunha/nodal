@@ -99,21 +99,22 @@ class BulkPhotoService
     name = File.basename(filename, File.extname(filename))
     sku_part = name.split(/\s+/).first
     return nil if sku_part.blank?
-    sku_part
+    sku_part.downcase
   end
 
   def find_images_for_sku(sku)
+    sku_down = sku.downcase
     # Normalize: replace / and : with - for comparison (handles macOS/Windows/Linux)
-    normalized_sku = sku.tr("/:", "--")
+    normalized_sku = sku_down.tr("/:", "--")
 
     # Try exact match first, then normalized
-    paths = @images_by_sku[sku] || @images_by_sku[normalized_sku]
+    paths = @images_by_sku[sku_down] || @images_by_sku[normalized_sku]
     return paths if paths.present?
 
     # Check with numeric suffix stripped (e.g., SKU-1.jpg matches SKU)
     matching = @images_by_sku.select do |key, _|
       stripped = key.sub(/-\d+$/, "")
-      stripped == normalized_sku || stripped == sku
+      stripped == normalized_sku || stripped == sku_down
     end
     return nil if matching.empty?
     matching.values.flatten

@@ -43,16 +43,17 @@
       <% discount_breakdown = @discount_calculator.discount_breakdown %>
 
       <!-- Main Image -->
+      <% all_photos = @product.all_photos %>
       <div class="d-flex align-items-center justify-content-center product-detail-image-container" style="min-height: 400px; padding: 40px;">
-        <% if @product.photo_attached? %>
-          <%= image_tag @product.photo, class: "img-fluid", style: "max-height: 350px; object-fit: contain;", data: { image_gallery_target: "mainImage", variant_selector_target: "image" } %>
+        <% if all_photos.any? %>
+          <%= image_tag all_photos.first, class: "img-fluid", style: "max-height: 350px; object-fit: contain;", data: { image_gallery_target: "mainImage", variant_selector_target: "image" } %>
         <% else %>
           <i class="fa-solid fa-image fa-5x text-muted"></i>
         <% end %>
       </div>
 
       <!-- Zoom Button -->
-      <% if @product.photo_attached? %>
+      <% if all_photos.any? %>
         <button class="btn btn-dark btn-sm position-absolute" style="bottom: 16px; right: 16px; border-radius: 20px; padding: 6px 16px;" data-bs-toggle="modal" data-bs-target="#imageModal">
           <i class="fa-solid fa-magnifying-glass-plus me-1"></i><%= t('storefront.products.show.zoom') %>
         </button>
@@ -60,14 +61,7 @@
     </div>
 
     <!-- Thumbnails (product photos + variant photos) -->
-    <%
-      all_photos = @product.photos.to_a
-      if @product.has_variants? && defined?(@variants)
-        @variants.each do |v|
-          all_photos << v.photo if v.photo.attached?
-        end
-      end
-    %>
+    <% all_photos = @product.all_photos %>
     <% if all_photos.any? %>
       <div class="d-flex justify-content-center gap-2 mt-3 flex-wrap">
         <% all_photos.each do |photo| %>
@@ -441,7 +435,7 @@
                style="background: #f8f9fa; min-height: 100vh;"
                data-controller="image-zoom"
                data-action="wheel->image-zoom#wheel mousedown->image-zoom#mousedown mousemove->image-zoom#mousemove mouseup->image-zoom#mouseup mouseleave->image-zoom#mouseleave dblclick->image-zoom#dblclick touchstart->image-zoom#touchstart touchmove->image-zoom#touchmove touchend->image-zoom#touchend">
-            <%= image_tag @product.photo, id: "zoomModalImage",
+            <%= image_tag all_photos.first, id: "zoomModalImage",
                 style: "max-height: 90vh; max-width: 100%; object-fit: contain; cursor: zoom-in; transition: opacity 0.15s;",
                 data: { image_zoom_target: "image", variant_selector_target: "zoomImage", modal_gallery_target: "image" } %>
 

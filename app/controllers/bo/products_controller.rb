@@ -66,6 +66,8 @@ class Bo::ProductsController < Bo::BaseController
   # Bulk photo upload
   def bulk_photos
     authorize Product, :bulk_photos?
+    @all_skus = current_organisation.products.pluck(:sku).compact_blank +
+                current_organisation.product_variants.where.not(sku: [nil, ""]).pluck(:sku)
   end
 
   def bulk_photos_process
@@ -110,6 +112,8 @@ class Bo::ProductsController < Bo::BaseController
   def import
     authorize Product, :import?
     @categories = current_organisation.categories.kept.order(:name)
+    @all_skus = current_organisation.products.pluck(:sku).compact_blank +
+                current_organisation.product_variants.where.not(sku: [nil, ""]).pluck(:sku)
   end
 
   def import_mapping

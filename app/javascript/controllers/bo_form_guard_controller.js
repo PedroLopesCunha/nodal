@@ -25,12 +25,15 @@ export default class extends Controller {
         }
       }
     }
+    // Allow any child controller to dismiss the guard before a dynamic submit
+    this.onDismiss = () => { this.dirty = false; this.submitting = true }
     // Reset after Turbo navigation completes
     this.onTurboLoad = () => { this.dirty = false; this.submitting = false }
 
     this.element.addEventListener("input", this.onInput)
     this.element.addEventListener("change", this.onInput)
     this.element.addEventListener("submit", this.onSubmit)
+    this.element.addEventListener("form-guard:dismiss", this.onDismiss)
     window.addEventListener("beforeunload", this.onBeforeUnload)
     document.addEventListener("turbo:before-visit", this.onTurboBeforeVisit)
     document.addEventListener("turbo:load", this.onTurboLoad)
@@ -40,6 +43,7 @@ export default class extends Controller {
     this.element.removeEventListener("input", this.onInput)
     this.element.removeEventListener("change", this.onInput)
     this.element.removeEventListener("submit", this.onSubmit)
+    this.element.removeEventListener("form-guard:dismiss", this.onDismiss)
     window.removeEventListener("beforeunload", this.onBeforeUnload)
     document.removeEventListener("turbo:before-visit", this.onTurboBeforeVisit)
     document.removeEventListener("turbo:load", this.onTurboLoad)

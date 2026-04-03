@@ -44,6 +44,17 @@ class Product < ApplicationRecord
     photos.attached? && photos.any?
   end
 
+  # Aggregates product photos + variant photos (for variable products)
+  def all_photos
+    result = photos.to_a
+    if has_variants?
+      product_variants.where(is_default: false).each do |v|
+        result << v.photo if v.photo.attached?
+      end
+    end
+    result
+  end
+
   validates :slug, uniqueness: true
   validates :name, presence: true
   validates :description, length: { maximum: 250 }, allow_blank: true
