@@ -1,6 +1,7 @@
 class Bo::BackgroundTasksController < Bo::BaseController
   def show
     @task = current_organisation.background_tasks.find(params[:id])
+    authorize @task
 
     respond_to do |format|
       format.html
