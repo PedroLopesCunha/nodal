@@ -29,7 +29,7 @@
 
 <div class="bo-page-body">
 
-<%= form_with url: import_mapping_bo_products_path(params[:org_slug]), method: :post, multipart: true, id: "import-form", data: { controller: "file-upload import-form", turbo: false } do %>
+<%= form_with url: import_mapping_bo_products_path(params[:org_slug]), method: :post, multipart: true, id: "import-form", data: { controller: "file-upload import-form", turbo: false, import_form_all_skus_value: @all_skus.to_json } do %>
 
 <div class="row">
   <div class="col-md-8">
@@ -169,6 +169,7 @@
         </div>
       </div>
     </div>
+    <div data-import-form-target="photoWarnings"></div>
   </div>
 </div>
 
