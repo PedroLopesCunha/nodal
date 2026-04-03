@@ -277,21 +277,22 @@ class ProductImportService
     sku_part = name.split(/\s+/).first
     return nil if sku_part.blank?
 
-    sku_part
+    sku_part.downcase
   end
 
   # Try to find images for a product SKU, checking multiple normalizations
   def find_images_for_sku(sku)
+    sku_down = sku.downcase
     # Try exact match first (handles SKUs like B16-9037)
-    paths = @images_by_sku[sku] || @images_by_sku[sku.tr("/", "-")]
+    paths = @images_by_sku[sku_down] || @images_by_sku[sku_down.tr("/", "-")]
     return paths if paths.present?
 
     # Collect images where filename SKU matches after stripping numeric suffix
     # e.g., TEST-002-1.jpg and TEST-002-2.jpg both match SKU TEST-002
-    normalized_sku = sku.tr("/", "-")
+    normalized_sku = sku_down.tr("/", "-")
     matching = @images_by_sku.select do |key, _|
       stripped = key.sub(/-\d+$/, "")
-      stripped == normalized_sku || stripped == sku
+      stripped == normalized_sku || stripped == sku_down
     end
     return nil if matching.empty?
 
@@ -348,7 +349,7 @@ class ProductImportService
 
   def attach_variant_photos(results)
     @organisation.product_variants.where.not(sku: [nil, ""]).where(is_default: false).find_each do |variant|
-      sku = variant.sku
+      sku = variant.sku.downcase
       normalized_sku = sku.tr("/:", "--")
       image_paths = @images_by_sku[sku] || @images_by_sku[normalized_sku]
 

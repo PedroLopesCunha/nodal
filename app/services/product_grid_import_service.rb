@@ -327,7 +327,7 @@ class ProductGridImportService
 
     # Attach to variants
     @organisation.product_variants.where.not(sku: [nil, ""]).where(is_default: false).find_each do |variant|
-      sku = variant.sku
+      sku = variant.sku.downcase
       normalized_sku = sku.tr("/:", "--")
       image_paths = @images_by_sku[sku] || @images_by_sku[normalized_sku]
 
@@ -405,17 +405,18 @@ class ProductGridImportService
     name = File.basename(filename, File.extname(filename))
     sku_part = name.split(/\s+/).first
     return nil if sku_part.blank?
-    sku_part
+    sku_part.downcase
   end
 
   def find_images_for_sku(sku)
-    paths = @images_by_sku[sku] || @images_by_sku[sku.tr("/", "-")]
+    sku_down = sku.downcase
+    paths = @images_by_sku[sku_down] || @images_by_sku[sku_down.tr("/", "-")]
     return paths if paths.present?
 
-    normalized_sku = sku.tr("/", "-")
+    normalized_sku = sku_down.tr("/", "-")
     matching = @images_by_sku.select do |key, _|
       stripped = key.sub(/-\d+$/, "")
-      stripped == normalized_sku || stripped == sku
+      stripped == normalized_sku || stripped == sku_down
     end
     return nil if matching.empty?
     matching.values.flatten

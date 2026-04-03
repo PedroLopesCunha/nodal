@@ -16,7 +16,7 @@ const ATTR_VAL_COLS = [COL.ATTR1_VAL, COL.ATTR2_VAL, COL.ATTR3_VAL]
 const DISABLED_BG = "#f1f5f9"
 
 export default class extends Controller {
-  static targets = ["spreadsheet", "submitButton", "errorsPanel", "photoDropZone", "zipInput", "imageInput", "photoFileName", "photoModeSection", "photoMode"]
+  static targets = ["spreadsheet", "submitButton", "errorsPanel", "photoDropZone", "zipInput", "imageInput", "photoFileName", "photoModeSection", "photoMode", "photoWarnings"]
   static values = {
     categories: Array,
     attributes: Array,
@@ -84,7 +84,17 @@ export default class extends Controller {
       oneditionstart: this.handleEditionStart.bind(this),
       oninsertrow: this.handleRowChange.bind(this),
       ondeleterow: this.handleRowChange.bind(this),
-      contextMenu: false
+      contextMenu: (obj, x, y, e) => {
+        const row = parseInt(y)
+        if (isNaN(row)) return []
+
+        return [
+          { title: "Inserir linha acima", onclick: () => { obj.insertRow(1, row, 1) } },
+          { title: "Inserir linha abaixo", onclick: () => { obj.insertRow(1, row, 0) } },
+          { type: "line" },
+          { title: "Remover linha", onclick: () => { obj.deleteRow(row, 1) } }
+        ]
+      }
     })
   }
 
@@ -302,7 +312,8 @@ export default class extends Controller {
     // Styling is applied at the end via applyAllStyles()
 
     // Track SKUs for duplicate check
-    const skuMap = {} // sku -> [rowIndices]
+    const productSkuMap = {} // sku -> [rowIndices] for simple/variable
+    const variantSkuMap = {} // sku -> [rowIndices] for variation
 
     data.forEach((rowData, rowIndex) => {
       const tipo = (rowData[COL.TIPO] || "").trim()
@@ -337,11 +348,12 @@ export default class extends Controller {
         }
       }
 
-      // Track SKU for duplicates
+      // Track SKU for duplicates (separate maps for products vs variations)
       const sku = (rowData[COL.SKU] || "").trim()
       if (sku) {
-        if (!skuMap[sku]) skuMap[sku] = []
-        skuMap[sku].push(rowIndex)
+        const map = tipo === "variation" ? variantSkuMap : productSkuMap
+        if (!map[sku]) map[sku] = []
+        map[sku].push(rowIndex)
 
         // Warning: SKU exists in DB
         if (this.allSkusValue.includes(sku)) {
@@ -403,13 +415,15 @@ export default class extends Controller {
       }
     })
 
-    // Duplicate SKU check
-    Object.entries(skuMap).forEach(([sku, rows]) => {
-      if (rows.length > 1) {
-        rows.forEach(r => {
-          this.addError(r, COL.SKU, `SKU '${sku}' duplicado (linhas ${rows.map(x => x + 1).join(", ")})`)
-        })
-      }
+    // Duplicate SKU check (products and variations checked separately)
+    ;[productSkuMap, variantSkuMap].forEach(map => {
+      Object.entries(map).forEach(([sku, rows]) => {
+        if (rows.length > 1) {
+          rows.forEach(r => {
+            this.addError(r, COL.SKU, `SKU '${sku}' duplicado (linhas ${rows.map(x => x + 1).join(", ")})`)
+          })
+        }
+      })
     })
 
     // Apply all styles in one pass
@@ -670,6 +684,7 @@ export default class extends Controller {
     } else {
       this.imageInputTarget.files = files
       this.showPhotoInfo(`<i class="fa-solid fa-images text-success me-1"></i> ${files.length} imagem(ns)`)
+      this.checkPhotoMatches(files)
     }
   }
 
@@ -682,12 +697,91 @@ export default class extends Controller {
   imagesSelected() {
     if (this.imageInputTarget.files.length > 0) {
       this.showPhotoInfo(`<i class="fa-solid fa-images text-success me-1"></i> ${this.imageInputTarget.files.length} imagem(ns)`)
+      this.checkPhotoMatches(this.imageInputTarget.files)
     }
   }
 
   showPhotoInfo(html) {
     this.photoFileNameTarget.innerHTML = html
     this.photoModeSectionTarget.classList.remove("d-none")
+  }
+
+  extractSkuFromFilename(filename) {
+    const name = filename.replace(/\.[^.]+$/, "")
+    const skuPart = name.split(/\s+/)[0]
+    return skuPart ? skuPart.toLowerCase() : null
+  }
+
+  checkPhotoMatches(files) {
+    if (!this.hasPhotoWarningsTarget) return
+    if (!this.excludedPhotos) this.excludedPhotos = new Set()
+
+    const data = this.sheet.getData()
+    const gridSkus = new Set()
+    data.forEach(row => {
+      const sku = (row[COL.SKU] || "").trim().toLowerCase()
+      if (sku) gridSkus.add(sku)
+    })
+    // Also include existing SKUs from DB
+    this.allSkusValue.forEach(s => gridSkus.add(s.toLowerCase()))
+
+    const unmatched = []
+    for (const file of files) {
+      if (this.excludedPhotos.has(file.name)) continue
+      const sku = this.extractSkuFromFilename(file.name)
+      if (!sku) { unmatched.push(file.name); continue }
+      // Strip trailing -N suffix for multi-photo matching
+      const baseSku = sku.replace(/-\d+$/, "")
+      if (!gridSkus.has(sku) && !gridSkus.has(baseSku)) {
+        unmatched.push(file.name)
+      }
+    }
+
+    if (unmatched.length > 0) {
+      this.photoWarningsTarget.innerHTML = `
+        <div class="alert alert-warning py-2 px-3 mt-2 mb-0" style="font-size: 13px;">
+          <i class="fa-solid fa-triangle-exclamation me-1"></i>
+          <strong>${unmatched.length} foto(s)</strong> sem SKU correspondente na grelha:
+          <div class="mt-1">${unmatched.map(f =>
+            `<span class="d-inline-flex align-items-center me-2 mb-1"><code>${f}</code>
+             <button type="button" class="btn btn-sm p-0 ms-1 text-danger" data-action="click->bulk-create#removePhoto" data-photo-name="${f}" title="Remover">
+               <i class="fa-solid fa-xmark"></i>
+             </button></span>`
+          ).join("")}</div>
+        </div>`
+    } else {
+      this.photoWarningsTarget.innerHTML = ""
+    }
+  }
+
+  removePhoto(event) {
+    const name = event.currentTarget.dataset.photoName
+    if (!this.excludedPhotos) this.excludedPhotos = new Set()
+    this.excludedPhotos.add(name)
+
+    // Rebuild the filtered file list
+    this.rebuildImageInput()
+    this.checkPhotoMatches(this.imageInputTarget.files)
+    this.updatePhotoCount()
+  }
+
+  rebuildImageInput() {
+    const dt = new DataTransfer()
+    for (const file of this.imageInputTarget.files) {
+      if (!this.excludedPhotos.has(file.name)) dt.items.add(file)
+    }
+    this.imageInputTarget.files = dt.files
+  }
+
+  updatePhotoCount() {
+    const count = this.imageInputTarget.files.length
+    if (count > 0) {
+      this.showPhotoInfo(`<i class="fa-solid fa-images text-success me-1"></i> ${count} imagem(ns)`)
+    } else {
+      this.photoFileNameTarget.innerHTML = `<span class="text-muted">${this.photoFileNameTarget.dataset.hint || ""}</span>`
+      this.photoModeSectionTarget.classList.add("d-none")
+      this.photoWarningsTarget.innerHTML = ""
+    }
   }
 
   // ─── Submit ────────────────────────────────────────────────
