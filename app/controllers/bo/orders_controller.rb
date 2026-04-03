@@ -85,16 +85,23 @@ class Bo::OrdersController < Bo::BaseController
   def export_items
     authorize Order, :export?
 
-    columns = OrderItem.exportable_columns_for(params[:columns])
-    format = params[:format_type] || "csv"
-    extension = format == "xlsx" ? "xlsx" : "csv"
+    task = current_organisation.background_tasks.create!(
+      member: current_member,
+      task_type: "export_order_items",
+      status: :pending
+    )
 
-    order_ids = apply_order_filters(policy_scope(current_organisation.orders.placed)).select(:id)
-    records = OrderItem.where(order_id: order_ids).includes(:order, :product, :product_variant, order: :customer)
+    ExportJob.perform_later(
+      task.id,
+      organisation_id: current_organisation.id,
+      export_class: "OrderItem",
+      export_type: "order_items",
+      columns: params[:columns],
+      format: params[:format_type] || "csv",
+      filter_params: filter_params_hash
+    )
 
-    result = ExportService.new(records: records, columns: columns, format: format).call
-    filename = "order_items_#{Date.today.iso8601}.#{extension}"
-    send_data result[:data], filename: filename, type: result[:content_type], disposition: "attachment"
+    redirect_to bo_background_task_path(params[:org_slug], task)
   end
 
   helper_method :filter_params_hash

@@ -37,6 +37,7 @@
                     when "product_csv_import" then "fa-file-csv"
                     when "bulk_photo_import" then "fa-images"
                     when "generate_catalog" then "fa-file-pdf"
+                    when /^export_/ then "fa-file-export"
                     else "fa-gear"
                   end %>
                   <i class="fa-solid <%= icon %> me-2 <%= unseen ? 'text-primary' : 'text-muted' %>"></i>

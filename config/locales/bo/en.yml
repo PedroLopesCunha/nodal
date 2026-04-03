@@ -1606,6 +1606,16 @@ en:
         title: "Importing photos"
       generate_catalog:
         title: "Generating catalog"
+      export_products:
+        title: "Exporting products"
+      export_product_variants:
+        title: "Exporting variants"
+      export_orders:
+        title: "Exporting orders"
+      export_order_items:
+        title: "Exporting order items"
+      export_customers:
+        title: "Exporting customers"
       no_file: "File not available"
       statuses:
         pending: "Pending"

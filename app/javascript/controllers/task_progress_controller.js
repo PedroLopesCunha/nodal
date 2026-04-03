@@ -97,6 +97,7 @@ export default class extends Controller {
     if (stats.photos_attached) statItems.push(`<strong>${stats.photos_attached}</strong> foto(s) anexada(s)`)
     if (stats.products_matched) statItems.push(`<strong>${stats.products_matched}</strong> produto(s) com foto`)
     if (stats.product_count) statItems.push(`<strong>${stats.product_count}</strong> produto(s) no catálogo`)
+    if (stats.record_count) statItems.push(`<strong>${stats.record_count}</strong> registo(s) exportado(s)`)
 
     if (statItems.length > 0) {
       html += `<div class="alert alert-success"><i class="fa-solid fa-check-circle me-1"></i> ${statItems.join(" &middot; ")}</div>`

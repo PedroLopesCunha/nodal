@@ -1596,6 +1596,16 @@ pt:
         title: "A importar fotos"
       generate_catalog:
         title: "A gerar catálogo"
+      export_products:
+        title: "A exportar produtos"
+      export_product_variants:
+        title: "A exportar variantes"
+      export_orders:
+        title: "A exportar encomendas"
+      export_order_items:
+        title: "A exportar linhas de encomenda"
+      export_customers:
+        title: "A exportar clientes"
       no_file: "Ficheiro não disponível"
       statuses:
         pending: "Pendente"

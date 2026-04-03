@@ -283,18 +283,23 @@ class Bo::ProductsController < Bo::BaseController
   def export_variants
     authorize Product, :export?
 
-    columns = ProductVariant.exportable_columns_for(params[:columns])
-    format = params[:format_type] || "csv"
-    extension = format == "xlsx" ? "xlsx" : "csv"
+    task = current_organisation.background_tasks.create!(
+      member: current_member,
+      task_type: "export_product_variants",
+      status: :pending
+    )
 
-    product_ids = apply_product_filters(policy_scope(current_organisation.products)).select(:id)
-    records = ProductVariant.where(product_id: product_ids)
-                            .includes(:product, :attribute_values, product: :categories)
-                            .order(:product_id, :position)
+    ExportJob.perform_later(
+      task.id,
+      organisation_id: current_organisation.id,
+      export_class: "ProductVariant",
+      export_type: "product_variants",
+      columns: params[:columns],
+      format: params[:format_type] || "csv",
+      filter_params: filter_params_hash
+    )
 
-    result = ExportService.new(records: records, columns: columns, format: format).call
-    filename = "product_variants_#{Date.today.iso8601}.#{extension}"
-    send_data result[:data], filename: filename, type: result[:content_type], disposition: "attachment"
+    redirect_to bo_background_task_path(params[:org_slug], task)
   end
 
   def show
