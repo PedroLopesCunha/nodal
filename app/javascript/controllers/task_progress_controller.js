@@ -90,13 +90,12 @@ export default class extends Controller {
 
     // Stats
     const statItems = []
-    if (stats.products_created) statItems.push(`<strong>${stats.products_created}</strong> produto(s) criado(s)`)
-    if (stats.products_updated) statItems.push(`<strong>${stats.products_updated}</strong> produto(s) atualizado(s)`)
+    if (stats.products_created || stats.created) statItems.push(`<strong>${stats.products_created || stats.created}</strong> produto(s) criado(s)`)
+    if (stats.products_updated || stats.updated) statItems.push(`<strong>${stats.products_updated || stats.updated}</strong> produto(s) atualizado(s)`)
     if (stats.variants_created) statItems.push(`<strong>${stats.variants_created}</strong> variante(s) criada(s)`)
     if (stats.attributes_created) statItems.push(`<strong>${stats.attributes_created}</strong> atributo(s) criado(s)`)
     if (stats.photos_attached) statItems.push(`<strong>${stats.photos_attached}</strong> foto(s) anexada(s)`)
-    if (stats.matched) statItems.push(`<strong>${stats.matched}</strong> foto(s) associada(s)`)
-    if (stats.unmatched) statItems.push(`<strong>${stats.unmatched}</strong> foto(s) sem correspondência`)
+    if (stats.products_matched) statItems.push(`<strong>${stats.products_matched}</strong> produto(s) com foto`)
 
     if (statItems.length > 0) {
       html += `<div class="alert alert-success"><i class="fa-solid fa-check-circle me-1"></i> ${statItems.join(" &middot; ")}</div>`

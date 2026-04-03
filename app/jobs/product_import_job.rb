@@ -19,7 +19,7 @@ class ProductImportJob < ApplicationJob
     )
     result = service.call
 
-    save_result(result)
+    save_result({ stats: result.to_h.except(:errors), errors: result.errors })
   ensure
     File.delete(zip_path) if zip_path && File.exist?(zip_path)
     FileUtils.rm_rf(images_dir) if images_dir && File.exist?(images_dir)

@@ -18,7 +18,7 @@ class ProductGridImportJob < ApplicationJob
     )
     result = service.call
 
-    save_result(result)
+    save_result({ stats: result.to_h.except(:errors), errors: result.errors })
     update_progress(rows.size)
   ensure
     File.delete(zip_path) if zip_path && File.exist?(zip_path)
