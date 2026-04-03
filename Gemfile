@@ -87,9 +87,8 @@ gem 'money-rails', '~> 1.12'
 gem 'pagy', '~> 9.0'
 
 # background jobs
-gem 'sidekiq', '~> 7.0'
-gem 'sidekiq-scheduler', '~> 5.0'
-gem 'redis', '~> 5.0'
+gem 'solid_queue', '~> 1.1'
+gem 'mission_control-jobs', '~> 0.6'
 
 # HTTP client for ERP integrations
 gem 'faraday', '~> 2.0'

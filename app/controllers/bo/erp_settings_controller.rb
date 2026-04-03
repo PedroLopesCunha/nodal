@@ -93,14 +93,7 @@ class Bo::ErpSettingsController < Bo::BaseController
       return
     end
 
-    # Run in a background thread so the response returns immediately
-    # (avoids Heroku's 30-second request timeout on large datasets)
-    org_id = current_organisation.id
-    Thread.new do
-      Rails.application.executor.wrap do
-        ErpSyncJob.perform_now(org_id, sync_type: 'manual')
-      end
-    end
+    ErpSyncJob.perform_later(current_organisation.id, sync_type: 'manual')
 
     redirect_to edit_bo_erp_settings_path(org_slug: current_organisation.slug),
                 notice: "Sync started. Refresh the page to check progress."

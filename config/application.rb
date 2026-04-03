@@ -37,7 +37,7 @@ module Nodal
     config.i18n.fallbacks = true
     config.i18n.load_path += Dir[Rails.root.join('config', 'locales', '**', '*.{rb,yml}')]
 
-    # Use Sidekiq for background jobs
-    config.active_job.queue_adapter = :sidekiq
+    # Use Solid Queue for background jobs (PostgreSQL-backed, no Redis needed)
+    config.active_job.queue_adapter = :solid_queue
   end
 end
