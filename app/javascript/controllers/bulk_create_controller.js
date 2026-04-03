@@ -728,6 +728,8 @@ export default class extends Controller {
     this.submitButtonTarget.disabled = true
     this.submitButtonTarget.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> A processar...'
 
+    this.element.dispatchEvent(new CustomEvent("form-guard:dismiss", { bubbles: true }))
+
     const form = document.createElement("form")
     form.method = "POST"
     form.action = this.submitUrlValue
