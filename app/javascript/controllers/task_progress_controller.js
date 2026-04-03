@@ -59,7 +59,7 @@ export default class extends Controller {
 
     const result = data.result || {}
     this.resultSectionTarget.classList.remove("d-none")
-    this.resultSectionTarget.innerHTML = this.buildResultHtml(result)
+    this.resultSectionTarget.innerHTML = this.buildResultHtml(result, data.download_url)
   }
 
   showError(data) {
@@ -82,7 +82,7 @@ export default class extends Controller {
       </div>`
   }
 
-  buildResultHtml(result) {
+  buildResultHtml(result, downloadUrl) {
     const stats = result.stats || {}
     const errors = result.errors || []
 
@@ -96,6 +96,7 @@ export default class extends Controller {
     if (stats.attributes_created) statItems.push(`<strong>${stats.attributes_created}</strong> atributo(s) criado(s)`)
     if (stats.photos_attached) statItems.push(`<strong>${stats.photos_attached}</strong> foto(s) anexada(s)`)
     if (stats.products_matched) statItems.push(`<strong>${stats.products_matched}</strong> produto(s) com foto`)
+    if (stats.product_count) statItems.push(`<strong>${stats.product_count}</strong> produto(s) no catálogo`)
 
     if (statItems.length > 0) {
       html += `<div class="alert alert-success"><i class="fa-solid fa-check-circle me-1"></i> ${statItems.join(" &middot; ")}</div>`
@@ -110,6 +111,11 @@ export default class extends Controller {
         html += `<li>${row}${field}: ${e.message}</li>`
       })
       html += "</ul></div>"
+    }
+
+    // Download link (if file attached)
+    if (downloadUrl) {
+      html += `<a href="${downloadUrl}" class="btn btn-success mt-2 me-2"><i class="fa-solid fa-download me-1"></i> Descarregar</a>`
     }
 
     // Back link

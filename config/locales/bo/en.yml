@@ -1598,6 +1598,9 @@ en:
         title: "Importing products"
       bulk_photo_import:
         title: "Importing photos"
+      generate_catalog:
+        title: "Generating catalog"
+      no_file: "File not available"
       statuses:
         pending: "Pending"
         running: "In progress"

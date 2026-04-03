@@ -2,6 +2,8 @@ class BackgroundTask < ApplicationRecord
   belongs_to :organisation
   belongs_to :member
 
+  has_one_attached :file
+
   enum :status, {
     pending: "pending",
     running: "running",

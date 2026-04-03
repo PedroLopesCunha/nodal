@@ -1588,6 +1588,9 @@ pt:
         title: "A importar produtos"
       bulk_photo_import:
         title: "A importar fotos"
+      generate_catalog:
+        title: "A gerar catálogo"
+      no_file: "Ficheiro não disponível"
       statuses:
         pending: "Pendente"
         running: "Em progresso"

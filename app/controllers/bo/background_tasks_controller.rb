@@ -13,7 +13,7 @@ class Bo::BackgroundTasksController < Bo::BaseController
     respond_to do |format|
       format.html
       format.json do
-        render json: {
+        json = {
           status: @task.status,
           progress: @task.progress,
           total: @task.total,
@@ -21,7 +21,20 @@ class Bo::BackgroundTasksController < Bo::BaseController
           result: @task.result,
           error_message: @task.error_message
         }
+        json[:download_url] = download_bo_background_task_path(params[:org_slug], @task) if @task.file.attached?
+        render json: json
       end
+    end
+  end
+
+  def download
+    @task = current_organisation.background_tasks.find(params[:id])
+    authorize @task, :show?
+
+    if @task.file.attached?
+      redirect_to rails_blob_path(@task.file, disposition: "attachment"), allow_other_host: true
+    else
+      redirect_to bo_background_task_path(params[:org_slug], @task), alert: t("bo.background_tasks.no_file")
     end
   end
 end
