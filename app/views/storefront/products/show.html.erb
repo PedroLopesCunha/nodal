@@ -43,7 +43,12 @@
       <% discount_breakdown = @discount_calculator.discount_breakdown %>
 
       <!-- Main Image -->
-      <% all_photos = @product.all_photos %>
+      <%
+        all_photos = @product.photos.to_a
+        if @product.has_variants? && defined?(@variants)
+          @variants.each { |v| all_photos << v.photo if v.photo.attached? }
+        end
+      %>
       <div class="d-flex align-items-center justify-content-center product-detail-image-container" style="min-height: 400px; padding: 40px;">
         <% if all_photos.any? %>
           <%= image_tag all_photos.first, class: "img-fluid", style: "max-height: 350px; object-fit: contain;", data: { image_gallery_target: "mainImage", variant_selector_target: "image" } %>
