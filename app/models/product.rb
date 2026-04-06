@@ -139,7 +139,9 @@ class Product < ApplicationRecord
 
   def purchasable?
     return false if price_on_request?
-    product_variants.published.any?(&:purchasable?)
+    variants = product_variants.published
+    variants = variants.where(is_default: false) if has_variants? && product_variants.where(is_default: false).exists?
+    variants.any?(&:purchasable?)
   end
 
   def price_range

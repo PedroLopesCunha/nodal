@@ -48,7 +48,7 @@
                 <th><%= t('bo.product_variants.index.sku') %></th>
                 <th><%= t('bo.product_variants.index.price') %></th>
                 <th><%= t('bo.product_variants.index.stock') %></th>
-                <th><%= t('bo.product_variants.index.status') %></th>
+                <th><%= t('bo.product_variants.index.storefront') %></th>
                 <th style="width: 100px;"></th>
               </tr>
             </thead>
@@ -88,10 +88,18 @@
                     <% end %>
                   </td>
                   <td>
-                    <% if variant.published? %>
-                      <span class="badge bg-success"><%= t('bo.common.status.active') %></span>
+                    <% if variant.is_default? && @product.has_variants? %>
+                      <span class="badge bg-light text-muted"><%= t('bo.product_variants.index.base_variant') %></span>
+                    <% elsif !variant.published? %>
+                      <span class="badge bg-secondary"><%= t('bo.product_variants.index.unpublished') %></span>
+                    <% elsif variant.purchasable? %>
+                      <span class="badge bg-success"><%= t('bo.product_variants.index.purchasable') %></span>
+                    <% elsif !variant.in_stock? && variant.effective_stock_policy == 'show_badge' %>
+                      <span class="badge bg-warning text-dark"><%= t('bo.product_variants.index.badge_no_stock') %></span>
+                    <% elsif !variant.in_stock? && variant.effective_stock_policy == 'hide' %>
+                      <span class="badge bg-danger"><%= t('bo.product_variants.index.hidden') %></span>
                     <% else %>
-                      <span class="badge bg-secondary"><%= t('bo.common.status.inactive') %></span>
+                      <span class="badge bg-success"><%= t('bo.product_variants.index.purchasable') %></span>
                     <% end %>
                   </td>
                   <td onclick="event.stopPropagation();">

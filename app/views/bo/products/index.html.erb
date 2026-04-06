@@ -66,7 +66,7 @@
 
   <div class="card mb-4">
   <div class="card-body">
-    <%= form_with url: bo_products_path(params[:org_slug]), method: :get do %>
+    <%= form_with url: bo_products_path(params[:org_slug]), method: :get, data: { turbo: false } do %>
       <%= hidden_field_tag :sort, params[:sort] if params[:sort].present? %>
       <%= hidden_field_tag :direction, params[:direction] if params[:direction].present? %>
       <div class="d-flex align-items-center mb-0">
@@ -89,8 +89,8 @@
           <% end %>
         <% end %>
       </div>
-      <div class="row mt-3">
-        <div class="col-md-3">
+      <div class="row mt-3 g-2">
+        <div class="col">
           <select name="category_id" class="form-select form-select-sm" onchange="this.form.submit()">
             <option value=""><%= t('bo.products.index.filters.all_categories') %></option>
             <option value="none" <%= 'selected' if params[:category_id] == 'none' %>><%= t('bo.products.index.filters.no_category') %></option>
@@ -99,14 +99,14 @@
             <% end %>
           </select>
         </div>
-        <div class="col-md-3">
+        <div class="col">
           <select name="product_type" class="form-select form-select-sm" onchange="this.form.submit()">
             <option value=""><%= t('bo.products.index.filters.all_types') %></option>
             <option value="simple" <%= 'selected' if params[:product_type] == 'simple' %>><%= t('bo.products.index.table.simple') %></option>
             <option value="variable" <%= 'selected' if params[:product_type] == 'variable' %>><%= t('bo.products.index.table.variable') %></option>
           </select>
         </div>
-        <div class="col-md-3">
+        <div class="col">
           <select name="price_status" class="form-select form-select-sm" onchange="this.form.submit()">
             <option value=""><%= t('bo.products.index.filters.all_prices') %></option>
             <option value="on_request" <%= 'selected' if params[:price_status] == 'on_request' %>><%= t('bo.products.index.filters.price_on_request') %></option>
@@ -114,12 +114,20 @@
             <option value="has_price" <%= 'selected' if params[:price_status] == 'has_price' %>><%= t('bo.products.index.filters.has_price') %></option>
           </select>
         </div>
-        <div class="col-md-3">
+        <div class="col">
           <select name="status" class="form-select form-select-sm" onchange="this.form.submit()">
             <option value=""><%= t('bo.products.index.filters.all_statuses') %></option>
-            <option value="available" <%= 'selected' if params[:status] == 'available' %>><%= t('bo.products.index.filters.available') %></option>
-            <option value="unavailable" <%= 'selected' if params[:status] == 'unavailable' %>><%= t('bo.products.index.filters.unavailable') %></option>
+            <option value="published" <%= 'selected' if params[:status] == 'published' %>><%= t('bo.products.index.filters.available') %></option>
+            <option value="unpublished" <%= 'selected' if params[:status] == 'unpublished' %>><%= t('bo.products.index.filters.unavailable') %></option>
             <option value="partial" <%= 'selected' if params[:status] == 'partial' %>><%= t('bo.products.index.filters.partial') %></option>
+          </select>
+        </div>
+        <div class="col">
+          <select name="storefront" class="form-select form-select-sm" onchange="this.form.submit()">
+            <option value=""><%= t('bo.products.index.filters.all_storefront') %></option>
+            <option value="purchasable" <%= 'selected' if params[:storefront] == 'purchasable' %>><%= t('bo.products.index.filters.purchasable') %></option>
+            <option value="no_stock" <%= 'selected' if params[:storefront] == 'no_stock' %>><%= t('bo.products.index.filters.no_stock') %></option>
+            <option value="hidden" <%= 'selected' if params[:storefront] == 'hidden' %>><%= t('bo.products.index.filters.hidden') %></option>
           </select>
         </div>
       </div>
@@ -200,13 +208,14 @@
           <% end %>
         </th>
         <th class="text-center">
-          <%= link_to bo_products_path(params[:org_slug], sort_link_params("available")), class: "text-decoration-none text-dark" do %>
-            <%= t('bo.common.tables.status') %>
-            <% if @sort_column == "available" %>
+          <%= link_to bo_products_path(params[:org_slug], sort_link_params("published")), class: "text-decoration-none text-dark" do %>
+            <%= t('bo.products.index.table.status_header') %>
+            <% if @sort_column == "published" %>
               <i class="fa-solid fa-sort-<%= @sort_direction == 'asc' ? 'up' : 'down' %> ms-1 small"></i>
             <% end %>
           <% end %>
         </th>
+        <th class="text-center"><%= t('bo.products.index.table.storefront_header') %></th>
         <th class="text-center"><%= t('bo.common.actions_column') %></th>
       </tr>
     </thead>
@@ -240,11 +249,14 @@
               <%= product.display_price %>
             <% end %>
           </td>
+          <%# Estado (published) column %>
           <td class="text-center">
-            <% if product.variable? %>
-              <% published_count = product.product_variants.count { |v| v.published? } %>
-              <% total_count = product.product_variants.size %>
-              <% if published_count == total_count %>
+            <% if !product.published? %>
+              <span class="badge bg-danger-subtle text-danger"><%= t('bo.products.index.table.unavailable') %></span>
+            <% elsif product.variable? %>
+              <% published_count = product.product_variants.where(is_default: false).count { |v| v.published? } %>
+              <% total_count = product.product_variants.where(is_default: false).count %>
+              <% if total_count == 0 || published_count == total_count %>
                 <span class="badge bg-success-subtle text-success"><%= t('bo.products.index.table.available') %></span>
               <% elsif published_count == 0 %>
                 <span class="badge bg-danger-subtle text-danger"><%= t('bo.products.index.table.unavailable') %></span>
@@ -252,11 +264,18 @@
                 <span class="badge bg-warning-subtle text-warning" data-bs-toggle="tooltip" title="<%= t('bo.products.index.table.variants_available', available: published_count, total: total_count) %>"><%= t('bo.products.index.table.partial') %></span>
               <% end %>
             <% else %>
-              <% if product.published? %>
-                <span class="badge bg-success-subtle text-success"><%= t('bo.products.index.table.available') %></span>
-              <% else %>
-                <span class="badge bg-danger-subtle text-danger"><%= t('bo.products.index.table.unavailable') %></span>
-              <% end %>
+              <span class="badge bg-success-subtle text-success"><%= t('bo.products.index.table.available') %></span>
+            <% end %>
+          </td>
+          <%# Loja (storefront result) column %>
+          <td class="text-center">
+            <% case storefront_state(product) %>
+            <% when "purchasable" %>
+              <span class="badge bg-success-subtle text-success"><%= t('bo.products.index.table.purchasable') %></span>
+            <% when "no_stock" %>
+              <span class="badge bg-warning-subtle text-warning"><%= t('bo.products.index.table.no_stock') %></span>
+            <% when "hidden" %>
+              <span class="badge bg-danger-subtle text-danger"><%= t('bo.products.index.table.hidden') %></span>
             <% end %>
           </td>
           <td class="text-center product-actions" style="white-space: nowrap;" onclick="event.stopPropagation();">

@@ -451,7 +451,7 @@ class Bo::ProductsController < Bo::BaseController
     head :unprocessable_entity
   end
 
-  helper_method :filter_params_hash, :sort_link_params
+  helper_method :filter_params_hash, :sort_link_params, :storefront_state
 
   private
 
@@ -469,12 +469,22 @@ class Bo::ProductsController < Bo::BaseController
 
   def filter_params_hash
     { query: params[:query], category_id: params[:category_id], product_type: params[:product_type],
-      price_status: params[:price_status], status: params[:status], sort: params[:sort], direction: params[:direction] }.compact_blank
+      price_status: params[:price_status], status: params[:status], storefront: params[:storefront],
+      sort: params[:sort], direction: params[:direction] }.compact_blank
   end
 
   def sort_link_params(column)
     direction = (@sort_column == column && @sort_direction == "asc") ? "desc" : "asc"
     filter_params_hash.merge(sort: column, direction: direction)
+  end
+
+  def storefront_state(product)
+    return "hidden" unless product.published?
+    return "purchasable" if product.purchasable?
+    # Published but not purchasable — check if any variant is visible
+    variants = product.variable? ? product.product_variants.select { |v| !v.is_default? && v.published? } : product.product_variants.select(&:published?)
+    has_visible = variants.any? { |v| v.available? || v.effective_stock_policy != 'hide' }
+    has_visible ? "no_stock" : "hidden"
   end
 
   def apply_product_filters(scope)
@@ -513,16 +523,23 @@ class Bo::ProductsController < Bo::BaseController
     end
 
     case params[:status]
-    when "available"
+    when "published"
       scope = scope.where(published: true).where.not(
         id: Product.joins(:product_variants).where(has_variants: true, product_variants: { published: false }).select(:id)
       )
-    when "unavailable"
+    when "unpublished"
       scope = scope.where(published: false)
     when "partial"
       scope = scope.where(has_variants: true, published: true).where(
         id: Product.joins(:product_variants).where(has_variants: true, product_variants: { published: false }).select(:id)
       )
+    end
+
+    if params[:storefront].present?
+      # Compute storefront state in Ruby (depends on effective_stock_policy which resolves inherit)
+      all_products = scope.includes(:product_variants).to_a
+      filtered_ids = all_products.select { |p| storefront_state(p) == params[:storefront] }.map(&:id)
+      scope = scope.where(id: filtered_ids)
     end
 
     scope

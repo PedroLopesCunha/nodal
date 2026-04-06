@@ -11,6 +11,9 @@ class Bo::SettingsController < Bo::BaseController
     authorize @organisation, policy_class: SettingPolicy
 
     if @organisation.update(organisation_params)
+      if @organisation.saved_change_to_out_of_stock_strategy?
+        RecalculateStockJob.perform_later(@organisation.id)
+      end
       redirect_to edit_bo_settings_path(org_slug: @organisation.slug), notice: "Settings updated successfully."
     else
       render :edit, status: :unprocessable_entity
