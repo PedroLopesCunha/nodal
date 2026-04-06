@@ -58,7 +58,7 @@ class Storefront::HomeController < Storefront::BaseController
 
     if current_organisation.hide_out_of_stock?
       keep_visible_ids = current_organisation.product_variants
-                           .where(hide_when_unavailable: false)
+                           .where.not(stock_policy: ['hide', 'inherit'])
                            .select(:product_id)
       products = products.where(available: true)
                    .or(products.where(id: keep_visible_ids))
@@ -108,7 +108,7 @@ class Storefront::HomeController < Storefront::BaseController
 
     if current_organisation.hide_out_of_stock?
       keep_visible_ids = current_organisation.product_variants
-                           .where(hide_when_unavailable: false)
+                           .where.not(stock_policy: ['hide', 'inherit'])
                            .select(:product_id)
       base = base.where(available: true)
                  .or(base.where(id: keep_visible_ids))

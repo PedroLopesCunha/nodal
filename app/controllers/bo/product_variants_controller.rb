@@ -20,9 +20,7 @@ class Bo::ProductVariantsController < Bo::BaseController
 
     if @variant.save
       assign_attribute_values
-      if current_organisation.deactivate_out_of_stock?
-        StockRulesService.new(current_organisation).apply_to_variant(@variant)
-      end
+      StockRulesService.new(current_organisation).apply_to_variant(@variant)
       redirect_to bo_product_variants_path(params[:org_slug], @product), notice: t('bo.flash.variant_created')
     else
       load_attribute_values_for_form
@@ -44,10 +42,7 @@ class Bo::ProductVariantsController < Bo::BaseController
       update_attribute_values
 
       service = StockRulesService.new(current_organisation)
-      if stock_changed && current_organisation.deactivate_out_of_stock?
-        service.apply_to_variant(@variant)
-      end
-      # Always recalculate product availability (published or stock may have changed)
+      service.apply_to_variant(@variant)
       service.recalculate_product_availability(@product)
 
       redirect_to bo_product_variants_path(params[:org_slug], @product), notice: t('bo.flash.variant_updated')
@@ -98,7 +93,7 @@ class Bo::ProductVariantsController < Bo::BaseController
 
   def variant_params
     params.require(:product_variant).permit(
-      :name, :sku, :price, :stock_quantity, :track_stock, :published, :is_default, :photo, :hide_when_unavailable
+      :name, :sku, :price, :stock_quantity, :track_stock, :published, :is_default, :photo, :stock_policy
     )
   end
 

@@ -201,9 +201,9 @@
                       <span class="badge bg-secondary"><%= t('bo.products.show.variant_storefront_unpublished') %></span>
                     <% elsif variant.purchasable? %>
                       <span class="badge bg-success"><%= t('bo.products.show.variant_storefront_purchasable') %></span>
-                    <% elsif !variant.in_stock? && !variant.hide_when_unavailable? && current_organisation.hide_out_of_stock? %>
+                    <% elsif !variant.in_stock? && variant.effective_stock_policy == 'show_badge' %>
                       <span class="badge bg-warning text-dark"><%= t('bo.products.show.variant_storefront_badge_no_stock') %></span>
-                    <% elsif !variant.in_stock? && current_organisation.hide_out_of_stock? %>
+                    <% elsif !variant.in_stock? && variant.effective_stock_policy == 'hide' %>
                       <span class="badge bg-danger"><%= t('bo.products.show.variant_storefront_hidden') %></span>
                     <% elsif !variant.in_stock? %>
                       <span class="badge bg-warning text-dark"><%= t('bo.products.show.variant_storefront_visible_no_stock') %></span>
@@ -284,9 +284,11 @@
             if !@product.published?
               product_visible = false
               hidden_reason = :unpublished
-            elsif strategy == 'hide' && !@product.available?
-              # Check if any variant opts out of hiding
-              product_visible = @product.product_variants.where(hide_when_unavailable: false).exists?
+            elsif !@product.available?
+              # Check if any variant has a non-hide policy (would still show)
+              product_visible = @product.product_variants.published.where(is_default: false).any? { |v|
+                v.effective_stock_policy != 'hide'
+              }
               hidden_reason = :out_of_stock unless product_visible
             else
               product_visible = true
@@ -329,10 +331,10 @@
                   <% elsif variant.purchasable? %>
                     <i class="fa-solid fa-circle text-success me-1" style="font-size: 8px; vertical-align: middle;"></i>
                     <%= t('bo.products.show.variant_result_purchasable') %>
-                  <% elsif !variant.in_stock? && !variant.hide_when_unavailable? && current_organisation.hide_out_of_stock? %>
+                  <% elsif !variant.in_stock? && variant.effective_stock_policy == 'show_badge' %>
                     <i class="fa-solid fa-circle text-warning me-1" style="font-size: 8px; vertical-align: middle;"></i>
                     <%= t('bo.products.show.variant_result_badge_no_stock') %>
-                  <% elsif !variant.in_stock? && current_organisation.hide_out_of_stock? %>
+                  <% elsif !variant.in_stock? && variant.effective_stock_policy == 'hide' %>
                     <i class="fa-solid fa-circle text-danger me-1" style="font-size: 8px; vertical-align: middle;"></i>
                     <%= t('bo.products.show.variant_result_hidden') %>
                   <% elsif !variant.in_stock? %>

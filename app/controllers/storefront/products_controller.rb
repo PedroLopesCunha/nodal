@@ -2,11 +2,12 @@ class Storefront::ProductsController < Storefront::BaseController
   def index
     base_products = policy_scope(current_organisation.products).includes(:categories, :product_discounts)
                       .where(published: true)
+    # Hide unavailable products, unless any variant has a non-hide policy
+    keep_visible_ids = current_organisation.product_variants
+                                           .where.not(stock_policy: ['hide', 'inherit'])
+                                           .select(:product_id)
     if current_organisation.hide_out_of_stock?
-      # Hide out-of-stock products, unless any variant opts out of hiding
-      keep_visible_ids = current_organisation.product_variants
-                                             .where(hide_when_unavailable: false)
-                                             .select(:product_id)
+      # For inherit+hide org, also keep products with inherit variants that aren't hidden
       base_products = base_products.where(available: true)
                                    .or(base_products.where(id: keep_visible_ids))
     end
@@ -141,8 +142,12 @@ class Storefront::ProductsController < Storefront::BaseController
       return
     end
 
-    if current_organisation.hide_out_of_stock? && !@product.available?
-      unless @product.product_variants.exists?(hide_when_unavailable: false)
+    if !@product.available?
+      # Product has no available variants — check if any variant's policy would still show it
+      has_visible = @product.product_variants.published.where(is_default: false).any? { |v|
+        v.effective_stock_policy != 'hide'
+      }
+      unless has_visible
         redirect_to products_path(org_slug: current_organisation.slug), alert: I18n.t('storefront.products.not_available')
         return
       end
@@ -156,17 +161,12 @@ class Storefront::ProductsController < Storefront::BaseController
 
     # Load variants data for variable products
     if @product.has_variants?
-      # Only show published, non-default variants; within those, filter by stock rules if org hides out-of-stock
-      base_variants = @product.product_variants.published.where(is_default: false)
-      if current_organisation.hide_out_of_stock?
-        # Show variants that are in stock, OR opted out of hiding (hide_when_unavailable explicitly false)
-        @variants = base_variants
-                            .where(available: true)
-                            .or(base_variants.where(available: false).where(hide_when_unavailable: false))
+      # Only show published, non-default variants; filter out hidden-when-unavailable
+      all_variants = @product.product_variants.published.where(is_default: false)
                             .by_position.includes(:attribute_values)
-      else
-        @variants = base_variants.by_position.includes(:attribute_values)
-      end
+      @variants = all_variants.select { |v|
+        v.available? || v.effective_stock_policy != 'hide'
+      }
       # Only show attribute values that lead to at least one available variant
       variant_value_ids = @variants.flat_map { |v| v.attribute_values.map(&:id) }.to_set
       @attributes_with_values = @product.available_values_by_attribute.transform_values { |values|
