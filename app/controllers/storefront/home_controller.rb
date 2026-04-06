@@ -34,7 +34,7 @@ class Storefront::HomeController < Storefront::BaseController
         .distinct
     end
 
-    @products_count = current_organisation.products.where(available: true).count
+    @products_count = current_organisation.products.where(published: true).count
 
     # Build discount info for all displayed products
     all_products = @featured_products + @frequent_products + @new_products
@@ -53,7 +53,7 @@ class Storefront::HomeController < Storefront::BaseController
     return [] if featured_product_ids.empty?
 
     products = current_organisation.products
-                 .where(id: featured_product_ids, available: true)
+                 .where(id: featured_product_ids, published: true)
                  .includes(:categories, :product_discounts)
 
     if current_organisation.hide_out_of_stock?
@@ -85,7 +85,7 @@ class Storefront::HomeController < Storefront::BaseController
     return [] if frequent_product_ids.empty?
 
     products = current_organisation.products
-                 .where(id: frequent_product_ids, available: true)
+                 .where(id: frequent_product_ids, published: true)
                  .includes(:categories, :product_discounts)
 
     # Preserve frequency order
@@ -101,7 +101,7 @@ class Storefront::HomeController < Storefront::BaseController
 
     base = current_organisation.products
              .where("products.created_at > ?", cutoff)
-             .where(available: true)
+             .where(published: true)
              .includes(:categories, :product_discounts)
              .order(created_at: :desc)
              .limit(12)

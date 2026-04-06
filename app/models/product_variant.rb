@@ -29,6 +29,7 @@ class ProductVariant < ApplicationRecord
 
   scope :by_position, -> { order(:position) }
   scope :available, -> { where(available: true) }
+  scope :published, -> { where(published: true) }
   scope :default, -> { where(is_default: true) }
 
   def self.exportable_columns
@@ -43,8 +44,8 @@ class ProductVariant < ApplicationRecord
         value: ->(r) { r.sku } },
       { key: :unit_price, label: I18n.t("bo.export.columns.variant.unit_price"), default: true,
         value: ->(r) { r.price&.format } },
-      { key: :available, label: I18n.t("bo.export.columns.variant.available"), default: true,
-        value: ->(r) { r.available? ? I18n.t("bo.common.yes") : I18n.t("bo.common.no") } },
+      { key: :published, label: I18n.t("bo.export.columns.variant.published"), default: true,
+        value: ->(r) { r.published? ? I18n.t("bo.common.yes") : I18n.t("bo.common.no") } },
       { key: :stock_quantity, label: I18n.t("bo.export.columns.variant.stock_quantity"), default: true,
         value: ->(r) { r.track_stock? ? r.stock_quantity : I18n.t("bo.export.columns.variant.unlimited") } },
       { key: :track_stock, label: I18n.t("bo.export.columns.variant.track_stock"), default: false,
@@ -58,13 +59,20 @@ class ProductVariant < ApplicationRecord
     ]
   end
 
+  def hide_when_unavailable?
+    hide_when_unavailable != false
+  end
+
   def in_stock?
     return true unless track_stock?
     stock_quantity.to_i > 0
   end
 
   def purchasable?
-    available? && in_stock? && !product.price_on_request?
+    return false unless published? && !product.price_on_request?
+    # With do_nothing strategy, stock doesn't prevent purchase
+    return true if organisation.out_of_stock_strategy == 'do_nothing'
+    in_stock?
   end
 
   def option_values_string
@@ -109,13 +117,14 @@ class ProductVariant < ApplicationRecord
   end
 
   def should_mirror_to_product?
-    is_default? && product&.simple? && (saved_change_to_sku? || saved_change_to_unit_price_cents?)
+    is_default? && product&.simple? && (saved_change_to_sku? || saved_change_to_unit_price_cents? || saved_change_to_published?)
   end
 
   def mirror_to_product
     attrs = {}
     attrs[:sku] = sku if saved_change_to_sku?
     attrs[:unit_price] = unit_price_cents if saved_change_to_unit_price_cents?
+    attrs[:published] = published if saved_change_to_published?
     product.update_columns(attrs) if attrs.any?
   end
 end

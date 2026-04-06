@@ -35,7 +35,7 @@ class RelatedProductsFetcher
     return [] if related_ids.empty?
 
     # Fetch the products and preserve order
-    products = Product.where(id: related_ids, available: true).index_by(&:id)
+    products = Product.where(id: related_ids, published: true).index_by(&:id)
     related_ids.map { |id| products[id] }.compact.take(@limit)
   end
 
@@ -44,7 +44,7 @@ class RelatedProductsFetcher
 
     same_category_products
       .where.not(id: exclude_ids)
-      .where(available: true)
+      .where(published: true)
       .order(created_at: :desc)
       .limit(limit)
       .to_a

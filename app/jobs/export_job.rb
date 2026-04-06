@@ -65,8 +65,8 @@ class ExportJob < ApplicationJob
     scope = scope.joins(:categories).where(categories: { id: params[:category_id] }) if params[:category_id].present?
     scope = scope.where(has_variants: true) if params[:product_type] == "variable"
     scope = scope.where(has_variants: false) if params[:product_type] == "simple"
-    scope = scope.where(available: true) if params[:status] == "active"
-    scope = scope.where(available: false) if params[:status] == "inactive"
+    scope = scope.where(published: true) if params[:status] == "active"
+    scope = scope.where(published: false) if params[:status] == "inactive"
     scope
   end
 

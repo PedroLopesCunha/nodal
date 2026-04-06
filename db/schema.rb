@@ -575,10 +575,11 @@ ActiveRecord::Schema[7.1].define(version: 2026_04_03_123050) do
     t.string "external_source"
     t.datetime "last_synced_at"
     t.text "sync_error"
-    t.boolean "hide_when_unavailable"
+    t.boolean "hide_when_unavailable", default: true, null: false
     t.boolean "exclude_from_discounts"
     t.string "custom_discount_type"
     t.decimal "custom_discount_value"
+    t.boolean "published", default: true, null: false
     t.index ["organisation_id", "sku"], name: "index_product_variants_on_organisation_id_and_sku", unique: true, where: "((sku IS NOT NULL) AND ((sku)::text <> ''::text))"
     t.index ["organisation_id"], name: "index_product_variants_on_organisation_id"
     t.index ["product_id", "available"], name: "index_product_variants_on_product_id_and_available"
@@ -613,6 +614,7 @@ ActiveRecord::Schema[7.1].define(version: 2026_04_03_123050) do
     t.bigint "cover_photo_blob_id"
     t.boolean "price_on_request"
     t.boolean "featured"
+    t.boolean "published", default: true, null: false
     t.index ["category_id"], name: "index_products_on_category_id"
     t.index ["organisation_id", "external_id", "external_source"], name: "index_products_on_org_external_id_source", unique: true, where: "(external_id IS NOT NULL)"
     t.index ["organisation_id"], name: "index_products_on_organisation_id"

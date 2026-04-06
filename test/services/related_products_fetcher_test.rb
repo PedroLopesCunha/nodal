@@ -87,8 +87,8 @@ class RelatedProductsFetcherTest < ActiveSupport::TestCase
     assert result.include?(@related1)
   end
 
-  test "excludes unavailable products from auto-fill" do
-    @related1.update!(available: false)
+  test "excludes unpublished products from auto-fill" do
+    @related1.update!(published: false)
 
     fetcher = RelatedProductsFetcher.new(product: @product, limit: 4)
     result = fetcher.fetch

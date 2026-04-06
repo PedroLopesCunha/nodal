@@ -156,10 +156,10 @@
           <h5 class="card-title mb-4"><%= t('bo.products.form.availability') %></h5>
 
           <div class="form-check form-switch">
-            <%= f.check_box :available, class: "form-check-input", role: "switch", id: "availableSwitch", checked: true %>
-            <label class="form-check-label" for="availableSwitch"><%= t('bo.products.form.available_for_sale') %></label>
+            <%= f.check_box :published, class: "form-check-input", role: "switch", id: "publishedSwitch", checked: true %>
+            <label class="form-check-label" for="publishedSwitch"><%= t('bo.products.form.published') %></label>
           </div>
-          <small class="text-muted"><%= t('bo.products.form.unavailable_hint') %></small>
+          <small class="text-muted"><%= t('bo.products.form.unpublished_hint') %></small>
 
           <div class="form-check form-switch mt-3">
             <%= f.check_box :price_on_request, class: "form-check-input", role: "switch", id: "priceOnRequestSwitch" %>

@@ -20,7 +20,7 @@
       <% end %>
     <% end %>
     <% if show_variants && product.has_variants? %>
-      <% variants = product.product_variants.reject(&:is_default?).select(&:available?) %>
+      <% variants = product.product_variants.reject(&:is_default?).select(&:published?) %>
       <% if variants.any? %>
         <div class="product-card-variants-detail">
           <% variants.each do |variant| %>

@@ -27,7 +27,7 @@
       "variant-selector-default-price-cents-value" => @default_variant&.unit_price_cents || @product.unit_price,
       "variant-selector-default-final-price-cents-value" => @discount_calculator.final_price.cents,
       "variant-selector-default-has-discount-value" => @discount_calculator.discount_breakdown[:has_discount].to_s,
-      "variant-selector-default-discount-percentage-value" => (@discount_calculator.discount_breakdown[:has_discount] ? (@discount_calculator.discount_breakdown[:effective_discount][:percentage] * 100).round(0) : 0).to_s,
+      "variant-selector-default-discount-percentage-value" => (@discount_calculator.discount_breakdown[:has_discount] && @discount_calculator.discount_breakdown[:effective_discount][:percentage].to_f.finite? ? (@discount_calculator.discount_breakdown[:effective_discount][:percentage] * 100).round(0) : 0).to_s,
       "variant-selector-min-quantity-value" => @product.min_quantity || 1,
       "variant-selector-default-sku-value" => @product.sku,
       "variant-selector-in-stock-text-value" => t('storefront.products.show.in_stock'),
@@ -112,7 +112,7 @@
               </span>
               <span class="badge bg-success fs-6 <%= 'd-none' unless discount_breakdown[:has_discount] %>" data-variant-selector-target="discountBadge">
                 <% if discount_breakdown[:has_discount] %>
-                  -<%= (discount_breakdown[:effective_discount][:percentage] * 100).round(0) %>% OFF
+                  -<%= ((discount_breakdown[:effective_discount][:percentage].to_f * 100).finite? ? (discount_breakdown[:effective_discount][:percentage] * 100).round(0) : 0) %>% OFF
                 <% end %>
               </span>
             </div>
@@ -125,7 +125,7 @@
                 <%= humanized_money_with_symbol(discount_breakdown[:final_price]) %>
               </span>
               <span class="badge bg-success fs-6">
-                -<%= (discount_breakdown[:effective_discount][:percentage] * 100).round(0) %>% OFF
+                -<%= ((discount_breakdown[:effective_discount][:percentage].to_f * 100).finite? ? (discount_breakdown[:effective_discount][:percentage] * 100).round(0) : 0) %>% OFF
               </span>
               <% if discount_breakdown[:applied_discounts].any? { |d| d[:type] == :product || d[:type] == :category } %>
                 <span class="badge bg-danger fs-6 ms-1"><%= t('storefront.products.index.sale_badge') %></span>
@@ -357,7 +357,7 @@
                 <%= number_field_tag "order_item[quantity]", @product.min_quantity || 1, min: @product.min_quantity || 1, class: "form-control text-center", style: "width: 70px;" %>
               </div>
 
-              <button type="submit" class="btn btn-primary btn-lg px-4" style="border-radius: 8px;" <%= 'disabled' unless @product.available? %>>
+              <button type="submit" class="btn btn-primary btn-lg px-4" style="border-radius: 8px;" <%= 'disabled' unless @product.purchasable? %>>
                 <i class="fa-solid fa-cart-plus me-2"></i><%= t('storefront.products.show.add_to_cart') %>
               </button>
 
@@ -365,7 +365,7 @@
                 <i class="fa-solid fa-calculator me-2"></i><%= t('storefront.products.show.estimated_total') %>
                 <% if discount_breakdown[:has_discount] %>
                   <%= humanized_money_with_symbol(discount_breakdown[:final_price]) %>
-                  <small class="text-success">(-<%= (discount_breakdown[:effective_discount][:percentage] * 100).round(0) %>%)</small>
+                  <small class="text-success">(-<%= ((discount_breakdown[:effective_discount][:percentage].to_f * 100).finite? ? (discount_breakdown[:effective_discount][:percentage] * 100).round(0) : 0) %>%)</small>
                 <% else %>
                   <%= humanized_money_with_symbol(@product.price) %>
                 <% end %>

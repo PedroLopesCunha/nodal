@@ -242,17 +242,17 @@
           </td>
           <td class="text-center">
             <% if product.variable? %>
-              <% available_count = product.product_variants.count { |v| v.available? } %>
+              <% published_count = product.product_variants.count { |v| v.published? } %>
               <% total_count = product.product_variants.size %>
-              <% if available_count == total_count %>
+              <% if published_count == total_count %>
                 <span class="badge bg-success-subtle text-success"><%= t('bo.products.index.table.available') %></span>
-              <% elsif available_count == 0 %>
+              <% elsif published_count == 0 %>
                 <span class="badge bg-danger-subtle text-danger"><%= t('bo.products.index.table.unavailable') %></span>
               <% else %>
-                <span class="badge bg-warning-subtle text-warning" data-bs-toggle="tooltip" title="<%= t('bo.products.index.table.variants_available', available: available_count, total: total_count) %>"><%= t('bo.products.index.table.partial') %></span>
+                <span class="badge bg-warning-subtle text-warning" data-bs-toggle="tooltip" title="<%= t('bo.products.index.table.variants_available', available: published_count, total: total_count) %>"><%= t('bo.products.index.table.partial') %></span>
               <% end %>
             <% else %>
-              <% if product.available? %>
+              <% if product.published? %>
                 <span class="badge bg-success-subtle text-success"><%= t('bo.products.index.table.available') %></span>
               <% else %>
                 <span class="badge bg-danger-subtle text-danger"><%= t('bo.products.index.table.unavailable') %></span>

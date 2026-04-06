@@ -217,7 +217,7 @@ namespace :import do
             sku: var_sku.presence,
             unit_price_cents: var_price,
             unit_price_currency: organisation.currency,
-            available: true,
+            published: true,
             is_default: false,
             organisation: organisation
           )

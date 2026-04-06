@@ -1,8 +1,9 @@
 class Storefront::ProductsController < Storefront::BaseController
   def index
     base_products = policy_scope(current_organisation.products).includes(:categories, :product_discounts)
+                      .where(published: true)
     if current_organisation.hide_out_of_stock?
-      # Hide unavailable products, unless any variant opts out of hiding
+      # Hide out-of-stock products, unless any variant opts out of hiding
       keep_visible_ids = current_organisation.product_variants
                                              .where(hide_when_unavailable: false)
                                              .select(:product_id)
@@ -96,7 +97,7 @@ class Storefront::ProductsController < Storefront::BaseController
           .joins(product_variants: :variant_attribute_values)
           .joins("INNER JOIN product_attribute_values pav ON pav.id = variant_attribute_values.product_attribute_value_id")
           .joins("INNER JOIN product_attributes pa ON pa.id = pav.product_attribute_id")
-          .where(product_variants: { available: true })
+          .where(product_variants: { published: true })
           .where("pa.slug = ? AND pav.slug IN (?)", attr_slug, value_slugs)
           .distinct.pluck(:id)
         attr_filtered_ids = attr_filtered_ids ? (attr_filtered_ids & ids) : ids
@@ -109,7 +110,7 @@ class Storefront::ProductsController < Storefront::BaseController
 
     # Sort
     @current_sort = params[:sort].presence || "name_asc"
-    min_variant_price = "(SELECT MIN(pv.unit_price_cents) FROM product_variants pv WHERE pv.product_id = products.id AND pv.available = true)"
+    min_variant_price = "(SELECT MIN(pv.unit_price_cents) FROM product_variants pv WHERE pv.product_id = products.id AND pv.published = true)"
     sorted_products = case @current_sort
                       when "name_desc" then products.order(name: :desc)
                       when "price_asc" then products.order(Arel.sql("#{min_variant_price} ASC NULLS LAST, products.name ASC"))
@@ -135,9 +136,14 @@ class Storefront::ProductsController < Storefront::BaseController
     @product = current_organisation.products.find(params[:id])
     authorize @product
 
+    unless @product.published?
+      redirect_to products_path(org_slug: current_organisation.slug), alert: I18n.t('storefront.products.not_available')
+      return
+    end
+
     if current_organisation.hide_out_of_stock? && !@product.available?
       unless @product.product_variants.exists?(hide_when_unavailable: false)
-        redirect_to storefront_products_path, alert: I18n.t('storefront.products.not_available')
+        redirect_to products_path(org_slug: current_organisation.slug), alert: I18n.t('storefront.products.not_available')
         return
       end
     end
@@ -150,14 +156,16 @@ class Storefront::ProductsController < Storefront::BaseController
 
     # Load variants data for variable products
     if @product.has_variants?
-      # Include unavailable variants that opted out of hiding (show with "Sem Stock" badge)
+      # Only show published, non-default variants; within those, filter by stock rules if org hides out-of-stock
+      base_variants = @product.product_variants.published.where(is_default: false)
       if current_organisation.hide_out_of_stock?
-        @variants = @product.product_variants
+        # Show variants that are in stock, OR opted out of hiding (hide_when_unavailable explicitly false)
+        @variants = base_variants
                             .where(available: true)
-                            .or(@product.product_variants.where(available: false, hide_when_unavailable: false))
+                            .or(base_variants.where(available: false).where(hide_when_unavailable: false))
                             .by_position.includes(:attribute_values)
       else
-        @variants = @product.product_variants.available.by_position.includes(:attribute_values)
+        @variants = base_variants.by_position.includes(:attribute_values)
       end
       # Only show attribute values that lead to at least one available variant
       variant_value_ids = @variants.flat_map { |v| v.attribute_values.map(&:id) }.to_set
@@ -173,7 +181,7 @@ class Storefront::ProductsController < Storefront::BaseController
         hash[v.id] = {
           has_discount: bd[:has_discount],
           final_price_cents: bd[:final_price].cents,
-          discount_percentage: bd[:has_discount] ? (bd[:effective_discount][:percentage] * 100).round(0) : 0
+          discount_percentage: bd[:has_discount] && bd[:effective_discount][:percentage].to_f.finite? ? (bd[:effective_discount][:percentage] * 100).round(0) : 0
         }
       end
     else
@@ -254,7 +262,7 @@ class Storefront::ProductsController < Storefront::BaseController
     rows = ProductAttributeValue
       .joins(:product_attribute, variant_attribute_values: { product_variant: :product })
       .where(products: { id: product_ids })
-      .where(product_variants: { available: true })
+      .where(product_variants: { published: true })
       .group("product_attributes.id", "product_attributes.name", "product_attributes.slug", "product_attributes.position",
              "product_attribute_values.id", "product_attribute_values.value", "product_attribute_values.slug",
              "product_attribute_values.color_hex", "product_attribute_values.position")

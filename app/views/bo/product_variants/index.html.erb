@@ -88,7 +88,7 @@
                     <% end %>
                   </td>
                   <td>
-                    <% if variant.available? %>
+                    <% if variant.published? %>
                       <span class="badge bg-success"><%= t('bo.common.status.active') %></span>
                     <% else %>
                       <span class="badge bg-secondary"><%= t('bo.common.status.inactive') %></span>

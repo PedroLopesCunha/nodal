@@ -115,7 +115,7 @@ module Erp
         variant.sku = data[:sku] if data.key?(:sku)
         variant.write_attribute(:unit_price_cents, data[:unit_price_cents]) if data.key?(:unit_price_cents)
         if data.key?(:available) && !organisation.deactivate_out_of_stock?
-          variant.available = data[:available]
+          variant.published = data[:available]
         end
       end
 
@@ -125,23 +125,7 @@ module Erp
       end
 
       def apply_stock_rules(variant)
-        return unless organisation.deactivate_out_of_stock?
-        return unless variant.track_stock?
-
-        if variant.stock_quantity.to_i <= 0
-          variant.update_column(:available, false) unless variant.available == false
-        else
-          variant.update_column(:available, true) unless variant.available == true
-        end
-
-        product = variant.product
-        tracked_variants = product.product_variants.where(track_stock: true)
-
-        if tracked_variants.exists? && tracked_variants.where('stock_quantity > 0').none?
-          product.update(available: false)
-        elsif product.product_variants.where(available: true).exists?
-          product.update(available: true)
-        end
+        StockRulesService.new(organisation).apply_to_variant(variant)
       end
 
       def update_only_mode?

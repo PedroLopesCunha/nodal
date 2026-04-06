@@ -2,7 +2,7 @@ class Storefront::OrderItemsController < Storefront::BaseController
   before_action :require_customer!
 
   def create
-    @product = current_organisation.products.where(available: true).find(params[:product_id])
+    @product = current_organisation.products.where(published: true).find(params[:product_id])
 
     if @product.price_on_request?
       redirect_to product_path(org_slug: params[:org_slug], id: @product, category: params[:category], queries: params[:queries], page: params[:page]), alert: t('storefront.products.show.price_on_request_not_purchasable')

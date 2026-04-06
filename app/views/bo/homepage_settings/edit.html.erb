@@ -329,7 +329,7 @@
         </div>
         <div class="modal-body">
           <% existing_product_ids = @featured_products.map(&:product_id) %>
-          <% available_products = current_organisation.products.where.not(id: existing_product_ids).where(available: true).order(:name) %>
+          <% available_products = current_organisation.products.where.not(id: existing_product_ids).where(published: true).order(:name) %>
           <% if available_products.any? %>
             <div class="mb-3">
               <input type="text" class="form-control" placeholder="<%= t('bo.homepage_settings.search') %>"
