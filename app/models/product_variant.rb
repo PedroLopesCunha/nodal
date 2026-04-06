@@ -59,8 +59,18 @@ class ProductVariant < ApplicationRecord
     ]
   end
 
-  def hide_when_unavailable?
-    hide_when_unavailable != false
+  STOCK_POLICIES = %w[inherit track_only show_badge hide].freeze
+
+  validates :stock_policy, inclusion: { in: STOCK_POLICIES }
+
+  def effective_stock_policy
+    return stock_policy unless stock_policy == 'inherit'
+    case organisation.out_of_stock_strategy
+    when 'do_nothing' then 'track_only'
+    when 'deactivate' then 'show_badge'
+    when 'hide' then 'hide'
+    else 'track_only'
+    end
   end
 
   def in_stock?
@@ -70,8 +80,7 @@ class ProductVariant < ApplicationRecord
 
   def purchasable?
     return false unless published? && !product.price_on_request?
-    # With do_nothing strategy, stock doesn't prevent purchase
-    return true if organisation.out_of_stock_strategy == 'do_nothing'
+    return true if effective_stock_policy == 'track_only'
     in_stock?
   end
 

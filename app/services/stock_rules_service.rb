@@ -4,11 +4,18 @@ class StockRulesService
   end
 
   def apply_to_variant(variant)
-    return unless @organisation.deactivate_out_of_stock?
     return unless variant.track_stock?
 
-    new_available = variant.stock_quantity.to_i > 0
-    variant.update_column(:available, new_available) if variant.available != new_available
+    policy = variant.effective_stock_policy
+    # track_only: stock doesn't affect availability
+    if policy == 'track_only'
+      variant.update_column(:available, true) unless variant.available
+    else
+      # show_badge or hide: available reflects actual stock
+      new_available = variant.stock_quantity.to_i > 0
+      variant.update_column(:available, new_available) if variant.available != new_available
+    end
+
     recalculate_product_availability(variant.product)
   end
 

@@ -28,9 +28,9 @@ namespace :maintenance do
       puts "  Fixed #{fixed_products} product available flags"
     end
 
-    # Backfill nil hide_when_unavailable to true (intended default)
-    nil_count = ProductVariant.where(hide_when_unavailable: nil).update_all(hide_when_unavailable: true)
-    puts "Backfilled #{nil_count} variants with hide_when_unavailable=nil to true"
+    # Ensure all stock_policy values are valid
+    invalid = ProductVariant.where.not(stock_policy: ProductVariant::STOCK_POLICIES).count
+    puts "Variants with invalid stock_policy: #{invalid}" if invalid > 0
 
     puts "Done!"
   end

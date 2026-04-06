@@ -85,10 +85,18 @@
             <%= f.label :published, t('bo.product_variants.form.published'), class: "form-check-label" %>
           </div>
 
-          <div class="form-check mb-3">
-            <%= f.check_box :hide_when_unavailable, class: "form-check-input" %>
-            <%= f.label :hide_when_unavailable, t('bo.product_variants.form.hide_when_unavailable'), class: "form-check-label" %>
-            <small class="text-muted d-block"><%= t('bo.product_variants.form.hide_when_unavailable_hint') %></small>
+          <div class="mb-3">
+            <%= f.label :stock_policy, t('bo.product_variants.form.stock_policy'), class: "form-label" %>
+            <% org_strategy = t("bo.product_variants.form.stock_policy_org_#{current_organisation.out_of_stock_strategy}") %>
+            <%= f.select :stock_policy,
+              options_for_select([
+                [t('bo.product_variants.form.stock_policy_inherit', strategy: org_strategy), 'inherit'],
+                [t('bo.product_variants.form.stock_policy_track_only'), 'track_only'],
+                [t('bo.product_variants.form.stock_policy_show_badge'), 'show_badge'],
+                [t('bo.product_variants.form.stock_policy_hide'), 'hide']
+              ], variant.stock_policy || 'inherit'),
+              {}, class: "form-select form-select-sm" %>
+            <small class="text-muted d-block mt-1"><%= t('bo.product_variants.form.stock_policy_hint') %></small>
           </div>
 
           <% if variant.persisted? && !variant.is_default? %>

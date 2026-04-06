@@ -98,7 +98,7 @@ class Storefront::ShoppingListsController < Storefront::BaseController
 
     if current_organisation.hide_out_of_stock?
       keep_visible_ids = current_organisation.product_variants
-                                             .where(hide_when_unavailable: false)
+                                             .where.not(stock_policy: ['hide', 'inherit'])
                                              .select(:product_id)
       base_products = base_products.where(available: true)
                                    .or(base_products.where(id: keep_visible_ids))

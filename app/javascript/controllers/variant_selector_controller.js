@@ -211,12 +211,10 @@ export default class extends Controller {
     }
 
     if (this.hasStockTarget) {
-      if (variant.track_stock) {
-        if (variant.in_stock) {
-          this.stockTarget.innerHTML = `<i class="fa-solid fa-circle-check me-1 text-success"></i> ${this.inStockTextValue}`
-        } else {
-          this.stockTarget.innerHTML = `<i class="fa-solid fa-circle-xmark me-1 text-danger"></i> ${this.outOfStockTextValue}`
-        }
+      if (variant.purchasable) {
+        this.stockTarget.innerHTML = `<i class="fa-solid fa-circle-check me-1 text-success"></i> ${this.inStockTextValue}`
+      } else if (variant.track_stock && !variant.in_stock) {
+        this.stockTarget.innerHTML = `<i class="fa-solid fa-circle-xmark me-1 text-danger"></i> ${this.outOfStockTextValue}`
       } else {
         this.stockTarget.innerHTML = `<i class="fa-solid fa-circle-check me-1 text-success"></i> ${this.inStockTextValue}`
       }
