@@ -433,7 +433,7 @@ namespace :sync do
             description: row["Descrição breve"]&.strip,
             unit_price: is_variable ? nil : csv_price,
             has_variants: is_variable,
-            available: true
+            published: true
           )
           created_products[sku] = product
 
@@ -490,7 +490,7 @@ namespace :sync do
               sku: var_row["REF"]&.strip.presence,
               unit_price_cents: var_price,
               unit_price_currency: org.currency,
-              available: true,
+              published: true,
               is_default: false,
               organisation: org
             )
@@ -552,7 +552,7 @@ namespace :sync do
             sku: item[:sku].presence,
             unit_price_cents: item[:price],
             unit_price_currency: org.currency,
-            available: true,
+            published: true,
             is_default: false,
             organisation: org
           )

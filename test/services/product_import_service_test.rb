@@ -191,13 +191,11 @@ class ProductImportServiceTest < ActiveSupport::TestCase
 
     assert_equal 4, result.created
 
-    # Verify available field is set correctly if product has available attribute
-    if Product.column_names.include?("available")
-      product1 = @organisation.products.find_by(name: "Product 1")
-      product2 = @organisation.products.find_by(name: "Product 2")
-      assert_equal true, product1.available
-      assert_equal false, product2.available
-    end
+    # Verify published field is set correctly (CSV "available" maps to published)
+    product1 = @organisation.products.find_by(name: "Product 1")
+    product2 = @organisation.products.find_by(name: "Product 2")
+    assert_equal true, product1.published
+    assert_equal false, product2.published
   end
 
   test "returns correct totals" do

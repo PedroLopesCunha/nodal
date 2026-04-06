@@ -93,7 +93,7 @@ class ProductGridImportService
           description: row["descricao"].presence,
           unit_price: parse_price(row["preco"]),
           has_variants: false,
-          available: true
+          published: true
         )
         product.organisation = @organisation unless product.persisted?
 
@@ -124,7 +124,7 @@ class ProductGridImportService
           name: row["nome"],
           description: row["descricao"].presence,
           has_variants: true,
-          available: true
+          published: true
         )
         product.organisation = @organisation unless product.persisted?
 
@@ -172,7 +172,7 @@ class ProductGridImportService
             sku: variant_sku,
             unit_price_cents: parse_price(row["preco"]),
             unit_price_currency: @organisation.currency,
-            available: true,
+            published: true,
             is_default: false,
             organisation: @organisation
           )

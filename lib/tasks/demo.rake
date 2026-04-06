@@ -148,7 +148,7 @@ class DemoLoader
       unit_price:      price_cents,
       unit_description: unit_desc,
       min_quantity:    min_qty,
-      available:       true,
+      published:       true,
       has_variants:    false
     )
 
@@ -176,7 +176,7 @@ class DemoLoader
       unit_price:      base_price,
       unit_description: unit_desc,
       min_quantity:    min_qty,
-      available:       true,
+      published:       true,
       has_variants:    true,
       variants_generated: true
     )
@@ -206,7 +206,7 @@ class DemoLoader
         unit_price_currency:  org.currency,
         stock_quantity:       v[:stock] || 150,
         track_stock:          true,
-        available:            true,
+        published:            true,
         is_default:           i == 0,
         position:             i + 1
       )

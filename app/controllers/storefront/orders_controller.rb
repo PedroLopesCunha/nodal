@@ -74,7 +74,7 @@ class Storefront::OrdersController < Storefront::BaseController
     original_order.order_items.includes(:product, :product_variant).each do |item|
       product = item.product
 
-      if product.nil? || !product.available?
+      if product.nil? || !product.published?
         skipped_items << item.product&.name || "Unknown product"
         next
       end
@@ -127,7 +127,7 @@ class Storefront::OrdersController < Storefront::BaseController
     original_order.order_items.includes(:product, :product_variant).each do |item|
       product = item.product
 
-      if product.nil? || !product.available?
+      if product.nil? || !product.published?
         skipped_items << item.product&.name || "Unknown product"
         next
       end

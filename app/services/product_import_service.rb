@@ -180,7 +180,7 @@ class ProductImportService
       when "price"
         product.unit_price = value
       when "available"
-        product.available = value if product.respond_to?(:available=)
+        product.published = value if product.respond_to?(:published=)
       else
         product.send("#{field}=", value) if product.respond_to?("#{field}=")
       end

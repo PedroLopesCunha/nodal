@@ -79,8 +79,8 @@ class Product < ApplicationRecord
         value: ->(r) { r.price&.format } },
       { key: :price_on_request, label: I18n.t("bo.export.columns.product.price_on_request"), default: false,
         value: ->(r) { r.price_on_request? ? I18n.t("bo.common.yes") : I18n.t("bo.common.no") } },
-      { key: :available, label: I18n.t("bo.export.columns.product.available"), default: true,
-        value: ->(r) { r.available? ? I18n.t("bo.common.yes") : I18n.t("bo.common.no") } },
+      { key: :published, label: I18n.t("bo.export.columns.product.published"), default: true,
+        value: ->(r) { r.published? ? I18n.t("bo.common.yes") : I18n.t("bo.common.no") } },
       { key: :product_type, label: I18n.t("bo.export.columns.product.product_type"), default: true,
         value: ->(r) { r.has_variants? ? I18n.t("bo.products.index.table.variable") : I18n.t("bo.products.index.table.simple") } },
       { key: :categories, label: I18n.t("bo.export.columns.product.categories"), default: true,
@@ -139,11 +139,11 @@ class Product < ApplicationRecord
 
   def purchasable?
     return false if price_on_request?
-    product_variants.available.any?(&:purchasable?)
+    product_variants.published.any?(&:purchasable?)
   end
 
   def price_range
-    variants = product_variants.available
+    variants = product_variants.published
     # Exclude default base variant from range calculation for variable products
     variants = variants.where(is_default: false) if has_variants? && product_variants.where(is_default: false).exists?
     prices = variants.pluck(:unit_price_cents).compact
@@ -193,7 +193,7 @@ class Product < ApplicationRecord
       product_variants.create!(
         name: name,
         unit_price_currency: organisation.currency,
-        available: available,
+        published: published,
         is_default: true,
         track_stock: false,
         position: 1
@@ -204,7 +204,7 @@ class Product < ApplicationRecord
         sku: sku,
         unit_price_cents: unit_price,
         unit_price_currency: organisation.currency,
-        available: available,
+        published: published,
         is_default: true,
         position: 1
       )
@@ -212,7 +212,7 @@ class Product < ApplicationRecord
   end
 
   def should_sync_default_variant?
-    !has_variants? && (saved_change_to_name? || saved_change_to_unit_price? || saved_change_to_sku? || saved_change_to_available?)
+    !has_variants? && (saved_change_to_name? || saved_change_to_unit_price? || saved_change_to_sku? || saved_change_to_published?)
   end
 
   def sync_default_variant
@@ -223,7 +223,7 @@ class Product < ApplicationRecord
       name: name,
       sku: sku,
       unit_price_cents: unit_price,
-      available: available
+      published: published
     )
   end
 

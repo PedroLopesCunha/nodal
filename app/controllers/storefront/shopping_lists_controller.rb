@@ -60,7 +60,7 @@ class Storefront::ShoppingListsController < Storefront::BaseController
     @shopping_list.shopping_list_items.includes(:product, :product_variant).each do |item|
       product = item.product
 
-      if product.nil? || !product.available?
+      if product.nil? || !product.published?
         skipped_items << item.product&.name || "Unknown product"
         next
       end
@@ -93,7 +93,7 @@ class Storefront::ShoppingListsController < Storefront::BaseController
   end
 
   def product_picker
-    base_products = current_organisation.products.where(available: true)
+    base_products = current_organisation.products.where(published: true)
                       .includes(:categories, :product_variants)
 
     if current_organisation.hide_out_of_stock?

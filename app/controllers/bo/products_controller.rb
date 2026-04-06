@@ -228,7 +228,7 @@ class Bo::ProductsController < Bo::BaseController
     @products = apply_product_filters(policy_scope(current_organisation.products).includes(:categories, :product_variants).with_attached_photos)
 
     # Sorting
-    @sort_column = %w[name sku unit_price has_variants available].include?(params[:sort]) ? params[:sort] : "name"
+    @sort_column = %w[name sku unit_price has_variants published].include?(params[:sort]) ? params[:sort] : "name"
     @sort_direction = %w[asc desc].include?(params[:direction]) ? params[:direction] : "asc"
     @products = @products.order(@sort_column => @sort_direction)
 
@@ -321,6 +321,9 @@ class Bo::ProductsController < Bo::BaseController
 
     if @product.save
       save_product_attributes
+      if current_organisation.deactivate_out_of_stock? && @product.default_variant
+        StockRulesService.new(current_organisation).apply_to_variant(@product.default_variant)
+      end
       redirect_to bo_product_path(params[:org_slug], @product), notice: "Product was successfully created."
     else
       render :new, status: :unprocessable_entity
@@ -410,7 +413,7 @@ class Bo::ProductsController < Bo::BaseController
 
     @available_products = current_organisation.products
                                                .where.not(id: [@product.id] + related_ids)
-                                               .where(available: true)
+                                               .where(published: true)
                                                .order(:name)
   end
 
@@ -511,14 +514,14 @@ class Bo::ProductsController < Bo::BaseController
 
     case params[:status]
     when "available"
-      scope = scope.where(available: true).where.not(
-        id: Product.joins(:product_variants).where(has_variants: true, product_variants: { available: false }).select(:id)
+      scope = scope.where(published: true).where.not(
+        id: Product.joins(:product_variants).where(has_variants: true, product_variants: { published: false }).select(:id)
       )
     when "unavailable"
-      scope = scope.where(available: false)
+      scope = scope.where(published: false)
     when "partial"
-      scope = scope.where(has_variants: true, available: true).where(
-        id: Product.joins(:product_variants).where(has_variants: true, product_variants: { available: false }).select(:id)
+      scope = scope.where(has_variants: true, published: true).where(
+        id: Product.joins(:product_variants).where(has_variants: true, product_variants: { published: false }).select(:id)
       )
     end
 
@@ -531,7 +534,7 @@ class Bo::ProductsController < Bo::BaseController
   end
 
   def product_params
-    params.require(:product).permit(:name, :slug, :sku, :description, :price, :unit_description, :min_quantity, :min_quantity_type, :available, :price_on_request, :category_id, category_ids: [], photos: [])
+    params.require(:product).permit(:name, :slug, :sku, :description, :price, :unit_description, :min_quantity, :min_quantity_type, :published, :price_on_request, :category_id, category_ids: [], photos: [])
   end
 
   def parse_uploaded_file(uploaded_file)

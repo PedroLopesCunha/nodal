@@ -54,9 +54,9 @@
               <td>
                 <%= form_with url: shopping_list_items_path(org_slug: params[:org_slug], shopping_list_id: shopping_list), method: :post, class: "d-flex align-items-center gap-1" do %>
                   <%= hidden_field_tag :product_id, product.id %>
-                  <% if product.has_variants? && product.product_variants.available.count > 1 %>
+                  <% if product.has_variants? && product.product_variants.published.count > 1 %>
                     <%= select_tag :variant_id,
-                      options_from_collection_for_select(product.product_variants.available.by_position, :id, :option_values_string, product.default_variant&.id),
+                      options_from_collection_for_select(product.product_variants.published.by_position, :id, :option_values_string, product.default_variant&.id),
                       class: "form-select form-select-sm", style: "max-width: 100px; font-size: 0.75rem;" %>
                   <% elsif product.default_variant %>
                     <%= hidden_field_tag :variant_id, product.default_variant.id %>
