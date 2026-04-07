@@ -480,7 +480,7 @@ class ProductGridImportService
     stock_service = StockRulesService.new(@organisation)
 
     @created_products.each_value do |product|
-      product.product_variants.where(is_default: false).each do |variant|
+      product.product_variants.each do |variant|
         stock_service.apply_to_variant(variant)
       end
       stock_service.recalculate_product_availability(product.reload)
