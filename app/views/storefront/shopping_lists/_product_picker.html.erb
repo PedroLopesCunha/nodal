@@ -30,8 +30,8 @@
           <% products.each do |product| %>
             <tr>
               <td>
-                <% if product.photo_attached? %>
-                  <%= image_tag product.photo.variant(resize_to_limit: [40, 40]), class: "rounded", style: "width: 36px; height: 36px; object-fit: cover;" %>
+                <% if (display = product.display_photo) %>
+                  <%= image_tag display.variant(resize_to_limit: [40, 40]), class: "rounded", style: "width: 36px; height: 36px; object-fit: cover;" %>
                 <% else %>
                   <div class="rounded d-flex align-items-center justify-content-center" style="width: 36px; height: 36px; background: #f1f5f9;">
                     <i class="fa-solid fa-image text-muted" style="font-size: 0.7rem;"></i>

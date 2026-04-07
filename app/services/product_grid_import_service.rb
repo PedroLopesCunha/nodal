@@ -291,10 +291,15 @@ class ProductGridImportService
   def assign_category(product, category_name)
     return if category_name.blank?
 
-    category = @organisation.categories.kept.find_by("unaccent(name) ILIKE unaccent(?)", category_name)
+    # The grid sends full_path (e.g., "Moldura Prata > Criança"), match against it
+    category = category_lookup[category_name.downcase.strip]
     return unless category
 
     product.categories << category unless product.categories.include?(category)
+  end
+
+  def category_lookup
+    @category_lookup ||= @organisation.categories.kept.index_by { |c| c.full_path.downcase.strip }
   end
 
   def parse_price(value)

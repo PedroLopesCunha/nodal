@@ -119,7 +119,7 @@
           <div class="home-carousel__item">
             <%= render "storefront/home/visual_card",
                         link_path: product_path(org_slug: params[:org_slug], id: product),
-                        image: product.photo_attached? ? product.photo : nil,
+                        image: product.display_photo,
                         name: product.name %>
           </div>
         <% end %>
@@ -234,7 +234,7 @@
                 <div class="home-carousel__item home-carousel__item--portal">
                   <%= render "storefront/home/visual_card",
                               link_path: product_path(org_slug: params[:org_slug], id: product),
-                              image: product.photo_attached? ? product.photo : nil,
+                              image: product.display_photo,
                               name: product.name %>
                 </div>
               <% end %>
@@ -276,7 +276,7 @@
               <div class="home-carousel__item home-carousel__item--portal">
                 <%= render "storefront/home/visual_card",
                             link_path: product_path(org_slug: params[:org_slug], id: product),
-                            image: product.photo_attached? ? product.photo : nil,
+                            image: product.display_photo,
                             name: product.name,
                             badge: t('storefront.home.new_products.new_badge', default: 'Novo') %>
               </div>

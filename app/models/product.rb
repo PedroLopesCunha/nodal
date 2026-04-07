@@ -44,6 +44,17 @@ class Product < ApplicationRecord
     photos.attached? && photos.any?
   end
 
+  # Returns a display photo, falling back to variant photos for variable products
+  def display_photo
+    return photo if photo_attached?
+    return nil unless has_variants?
+
+    product_variants.where(is_default: false).each do |v|
+      return v.photo if v.photo.attached?
+    end
+    nil
+  end
+
   # Aggregates product photos + variant photos (for variable products)
   def all_photos
     result = photos.to_a

@@ -215,8 +215,8 @@
               <div class="card h-100 product-card">
                 <% discount_info = @product_discounts[product.id] %>
                 <div class="product-card-image">
-                  <% if product.photo_attached? %>
-                    <%= image_tag product.photo, alt: product.name %>
+                  <% if (display = product.display_photo) %>
+                    <%= image_tag display, alt: product.name %>
                   <% else %>
                     <i class="fa-solid fa-image placeholder-icon"></i>
                   <% end %>
