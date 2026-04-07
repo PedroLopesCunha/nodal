@@ -58,7 +58,7 @@ export default class extends Controller {
 
     this.sheet = window.jspreadsheet(this.spreadsheetTarget, {
       data: [[]],
-      minDimensions: [NUM_COLS, 5],
+      minDimensions: [NUM_COLS, 10],
       defaultColWidth: 120,
       tableOverflow: true,
       tableWidth: "100%",
@@ -338,6 +338,11 @@ export default class extends Controller {
       // Description max 250 chars
       if (rowData[COL.DESC] && rowData[COL.DESC].length > 250) {
         this.addError(rowIndex, COL.DESC, "Descri\u00E7\u00E3o n\u00E3o pode exceder 250 caracteres")
+      }
+
+      // Warn if description is empty (for simple and variable products)
+      if (tipo !== "variation" && (!rowData[COL.DESC] || rowData[COL.DESC].trim() === "")) {
+        this.addWarning(rowIndex, COL.DESC, "Conv\u00E9m os produtos terem uma descri\u00E7\u00E3o")
       }
 
       // Price format validation (if provided)
