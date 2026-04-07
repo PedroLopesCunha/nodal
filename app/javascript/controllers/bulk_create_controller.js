@@ -73,11 +73,11 @@ export default class extends Controller {
         { title: "SKU Pai", type: "dropdown", width: 110, source: [...this.variableSkusValue], autocomplete: true },
         { title: "Categoria", type: "dropdown", width: 140, source: categoryNames, autocomplete: true },
         { title: "Attr 1 Nome", type: "dropdown", width: 120, source: attributeNames, autocomplete: true },
-        { title: "Attr 1 Valor(es)", type: "dropdown", width: 140, source: [], autocomplete: true },
+        { title: "Attr 1 Valor(es)", type: "dropdown", width: 140, source: [], autocomplete: true, newOptions: true },
         { title: "Attr 2 Nome", type: "dropdown", width: 120, source: attributeNames, autocomplete: true },
-        { title: "Attr 2 Valor(es)", type: "dropdown", width: 140, source: [], autocomplete: true },
+        { title: "Attr 2 Valor(es)", type: "dropdown", width: 140, source: [], autocomplete: true, newOptions: true },
         { title: "Attr 3 Nome", type: "dropdown", width: 120, source: attributeNames, autocomplete: true },
-        { title: "Attr 3 Valor(es)", type: "dropdown", width: 140, source: [], autocomplete: true }
+        { title: "Attr 3 Valor(es)", type: "dropdown", width: 140, source: [], autocomplete: true, newOptions: true }
       ],
       onchange: this.handleCellChange.bind(this),
       onbeforechange: this.handleBeforeChange.bind(this),
@@ -418,6 +418,19 @@ export default class extends Controller {
           this.addError(rowIndex, COL.ATTR1_VAL, "Selecione pelo menos 1 valor de atributo")
         }
       }
+
+      // Warn when attribute values are new (will be created)
+      ATTR_VAL_COLS.forEach((valCol, i) => {
+        const val = (rowData[valCol] || "").trim()
+        if (!val) return
+        const attrName = (rowData[ATTR_NOME_COLS[i]] || "").trim()
+        if (!attrName) return
+        const attr = this.attributesValue.find(a => a.name === attrName)
+        const existingValues = attr ? attr.values.map(v => v.value) : []
+        if (!existingValues.includes(val)) {
+          this.addWarning(rowIndex, valCol, `Novo valor '${val}' ser\u00E1 criado no atributo '${attrName}'`)
+        }
+      })
     })
 
     // Duplicate SKU check (products and variations checked separately)
