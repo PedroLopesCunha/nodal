@@ -50,6 +50,9 @@ class ProductGridImportService
     # Attach photos outside the transaction (same pattern as ProductImportService)
     attach_all_photos if @errors.empty?
 
+    # Recalculate stock-based availability for all created/updated products
+    recalculate_availability if @errors.empty?
+
     Result.new(
       **@stats,
       errors: @errors,
@@ -471,6 +474,17 @@ class ProductGridImportService
     end
 
     count
+  end
+
+  def recalculate_availability
+    stock_service = StockRulesService.new(@organisation)
+
+    @created_products.each_value do |product|
+      product.product_variants.where(is_default: false).each do |variant|
+        stock_service.apply_to_variant(variant)
+      end
+      stock_service.recalculate_product_availability(product.reload)
+    end
   end
 
   def cleanup_extracted_images
