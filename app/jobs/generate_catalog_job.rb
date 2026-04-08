@@ -50,10 +50,16 @@ class GenerateCatalogJob < ApplicationJob
       resource_type: "raw",
       folder: "#{Rails.env}/catalogs",
       public_id: filename.sub(".pdf", ""),
-      overwrite: true
+      overwrite: true,
+      type: "upload"
     )
     tempfile.close!
 
-    save_result({ filename: filename, product_count: products.size, download_url: result["secure_url"] })
+    save_result({
+      filename: filename,
+      product_count: products.size,
+      cloudinary_public_id: result["public_id"],
+      cloudinary_url: result["secure_url"]
+    })
   end
 end
