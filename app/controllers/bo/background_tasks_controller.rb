@@ -22,10 +22,7 @@ class Bo::BackgroundTasksController < Bo::BaseController
           result: @task.result,
           error_message: @task.error_message
         }
-        result = @task.result || {}
-        if result["cloudinary_url"].present? || @task.file.attached?
-          json[:download_url] = download_bo_background_task_path(params[:org_slug], @task)
-        end
+        json[:download_url] = download_bo_background_task_path(params[:org_slug], @task) if @task.file.attached?
         render json: json
       end
     end
@@ -35,11 +32,7 @@ class Bo::BackgroundTasksController < Bo::BaseController
     @task = current_organisation.background_tasks.find(params[:id])
     authorize @task, :show?
 
-    result = @task.result || {}
-
-    if result["cloudinary_url"].present?
-      redirect_to result["cloudinary_url"], allow_other_host: true
-    elsif @task.file.attached?
+    if @task.file.attached?
       send_data @task.file.download,
         filename: @task.file.filename.to_s,
         content_type: @task.file.content_type,
