@@ -10,7 +10,12 @@ Grover.configure do |config|
       right: "15mm"
     },
     print_background: true,
-    launch_args: ["--no-sandbox", "--disable-setuid-sandbox"]
+    launch_args: [
+      "--no-sandbox",
+      "--disable-setuid-sandbox",
+      "--disable-dev-shm-usage",
+      "--disable-gpu"
+    ]
   }
 
   chrome_path = if Rails.env.development?
