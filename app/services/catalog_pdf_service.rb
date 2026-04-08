@@ -1,5 +1,4 @@
 require "combine_pdf"
-require "faraday"
 require "base64"
 
 class CatalogPdfService
@@ -112,15 +111,10 @@ class CatalogPdfService
   end
 
   def download_image(attachment, small: false)
-    url = attachment.url
-    response = Faraday.get(url) do |req|
-      req.options.timeout = IMAGE_TIMEOUT
-      req.options.open_timeout = 5
-    end
-    return nil unless response.success?
-
-    content_type = response.headers["content-type"] || "image/jpeg"
-    "data:#{content_type};base64,#{Base64.strict_encode64(response.body)}"
+    blob = attachment.blob
+    data = blob.download
+    content_type = blob.content_type || "image/jpeg"
+    "data:#{content_type};base64,#{Base64.strict_encode64(data)}"
   rescue StandardError => e
     Rails.logger.warn("[CatalogPDF] Failed to download image: #{e.message}")
     nil
