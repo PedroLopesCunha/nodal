@@ -1,5 +1,7 @@
 <div class="product-list-item">
-  <% if product.photo_attached? %>
+  <% if image_map[product.id] %>
+    <img src="<%= image_map[product.id] %>" class="product-list-img" />
+  <% elsif product.photo_attached? && !defined?(@image_map) %>
     <%= image_tag polymorphic_url(product.photo.variant(resize_to_fill: [120, 120]), host: @catalog_host), class: "product-list-img" %>
   <% else %>
     <div class="product-list-placeholder">&#128247;</div>
@@ -29,7 +31,10 @@
               <tr>
                 <% if show_variant_photo %>
                   <td style="width: 24px;">
-                    <% if variant.photo.attached? %>
+                    <% variant_img = image_map["variant_#{variant.id}"] rescue nil %>
+                    <% if variant_img %>
+                      <img src="<%= variant_img %>" class="variant-thumb" />
+                    <% elsif variant.photo.attached? && !defined?(@image_map) %>
                       <%= image_tag polymorphic_url(variant.photo.variant(resize_to_fill: [20, 20]), host: @catalog_host), class: "variant-thumb" %>
                     <% end %>
                   </td>

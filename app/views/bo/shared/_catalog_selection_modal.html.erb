@@ -74,7 +74,7 @@
                       <% if has_child_products %>
                         <div class="category-children d-none ps-4">
                           <% child_products.each do |product| %>
-                            <div data-catalog-target="productItem" data-name="<%= product.name %>" data-sku="<%= product.sku %>" class="border-top">
+                            <div data-catalog-target="productItem" data-name="<%= product.name %>" data-sku="<%= product.sku %>" data-variant-skus="<%= product.product_variants.where(is_default: false).pluck(:sku).compact.join(' ') %>" data-category="<%= product.primary_category&.full_path %>" class="border-top">
                               <div class="d-flex align-items-center px-3 py-1">
                                 <span style="width: 16px;" class="me-2"></span>
                                 <input type="checkbox" class="form-check-input me-2 product-checkbox"

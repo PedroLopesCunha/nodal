@@ -14,11 +14,15 @@ export default class extends Controller {
     this.updateCounts()
   }
 
+  normalize(str) {
+    return (str || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase()
+  }
+
   // Search
   search() {
-    const query = this.searchInputTarget.value.toLowerCase().trim()
+    const query = this.normalize(this.searchInputTarget.value.trim())
     this.categoryItemTargets.forEach(item => {
-      const name = (item.dataset.name || "").toLowerCase()
+      const name = this.normalize(item.dataset.name)
       const match = !query || name.includes(query)
       item.style.display = match ? "" : "none"
       // Also show if any child product matches
@@ -26,9 +30,11 @@ export default class extends Controller {
         const products = item.querySelectorAll("[data-catalog-target='productItem']")
         let childMatch = false
         products.forEach(p => {
-          const pName = (p.dataset.name || "").toLowerCase()
-          const pSku = (p.dataset.sku || "").toLowerCase()
-          if (pName.includes(query) || pSku.includes(query)) childMatch = true
+          const pName = this.normalize(p.dataset.name)
+          const pSku = this.normalize(p.dataset.sku)
+          const pVariantSkus = this.normalize(p.dataset.variantSkus)
+          const pCategory = this.normalize(p.dataset.category)
+          if (pName.includes(query) || pSku.includes(query) || pVariantSkus.includes(query) || pCategory.includes(query)) childMatch = true
         })
         if (childMatch) item.style.display = ""
       }
@@ -37,9 +43,11 @@ export default class extends Controller {
     // Search standalone product items too
     this.productItemTargets.forEach(item => {
       if (item.closest("[data-catalog-target='categoryItem']")) return // handled above
-      const name = (item.dataset.name || "").toLowerCase()
-      const sku = (item.dataset.sku || "").toLowerCase()
-      item.style.display = (!query || name.includes(query) || sku.includes(query)) ? "" : "none"
+      const name = this.normalize(item.dataset.name)
+      const sku = this.normalize(item.dataset.sku)
+      const variantSkus = this.normalize(item.dataset.variantSkus)
+      const category = this.normalize(item.dataset.category)
+      item.style.display = (!query || name.includes(query) || sku.includes(query) || variantSkus.includes(query) || category.includes(query)) ? "" : "none"
     })
   }
 
