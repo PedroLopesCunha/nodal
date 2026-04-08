@@ -37,16 +37,23 @@ class GenerateCatalogJob < ApplicationJob
       update_progress(progress, total)
     end
 
-    # Attach result
+    # Upload PDF to Cloudinary as raw file (not image)
     catalog_title = options["catalog_title"].presence || organisation.name
     filename = "#{catalog_title.parameterize}_#{Date.today.iso8601}.pdf"
 
-    @background_task.file.attach(
-      io: StringIO.new(pdf),
-      filename: filename,
-      content_type: "application/pdf"
-    )
+    tempfile = Tempfile.new([filename, ".pdf"], binmode: true)
+    tempfile.write(pdf)
+    tempfile.rewind
 
-    save_result({ filename: filename, product_count: products.size })
+    result = Cloudinary::Uploader.upload(
+      tempfile.path,
+      resource_type: "raw",
+      folder: "#{Rails.env}/catalogs",
+      public_id: filename.sub(".pdf", ""),
+      overwrite: true
+    )
+    tempfile.close!
+
+    save_result({ filename: filename, product_count: products.size, download_url: result["secure_url"] })
   end
 end

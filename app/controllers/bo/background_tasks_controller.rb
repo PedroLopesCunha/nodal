@@ -22,7 +22,12 @@ class Bo::BackgroundTasksController < Bo::BaseController
           result: @task.result,
           error_message: @task.error_message
         }
-        json[:download_url] = download_bo_background_task_path(params[:org_slug], @task) if @task.file.attached?
+        # Catalog PDFs are stored directly in Cloudinary (raw), other tasks use ActiveStorage
+        if @task.result.is_a?(Hash) && @task.result["download_url"].present?
+          json[:download_url] = @task.result["download_url"]
+        elsif @task.file.attached?
+          json[:download_url] = download_bo_background_task_path(params[:org_slug], @task)
+        end
         render json: json
       end
     end
