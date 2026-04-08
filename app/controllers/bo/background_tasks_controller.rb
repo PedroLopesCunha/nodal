@@ -33,7 +33,10 @@ class Bo::BackgroundTasksController < Bo::BaseController
     authorize @task, :show?
 
     if @task.file.attached?
-      redirect_to rails_blob_path(@task.file, disposition: "attachment"), allow_other_host: true
+      send_data @task.file.download,
+        filename: @task.file.filename.to_s,
+        content_type: @task.file.content_type,
+        disposition: "attachment"
     else
       redirect_to bo_background_task_path(params[:org_slug], @task), alert: t("bo.background_tasks.no_file")
     end
