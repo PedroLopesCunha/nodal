@@ -111,9 +111,11 @@ class CatalogPdfService
   end
 
   def download_image(attachment, small: false)
-    blob = attachment.blob
-    data = blob.download
-    content_type = blob.content_type || "image/jpeg"
+    limit = small ? [100, 100] : [400, 400]
+    variant = attachment.variant(resize_to_limit: limit)
+    variant.processed
+    data = variant.download
+    content_type = attachment.blob.content_type || "image/jpeg"
     "data:#{content_type};base64,#{Base64.strict_encode64(data)}"
   rescue StandardError => e
     Rails.logger.warn("[CatalogPDF] Failed to download image: #{e.message}")
