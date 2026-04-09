@@ -1,7 +1,7 @@
 import { Controller } from "@hotwired/stimulus"
 
 export default class extends Controller {
-  static targets = ["progressBar", "percentText", "statusText", "progressSection", "resultSection", "icon", "title", "subtitle"]
+  static targets = ["progressBar", "percentText", "statusText", "progressSection", "resultSection", "cancelSection", "icon", "title", "subtitle"]
   static values = { url: String, redirect: String }
 
   connect() {
@@ -20,9 +20,14 @@ export default class extends Controller {
       this.updateProgress(data)
 
       if (data.status === "completed") {
+        this.hideCancelButton()
         this.showResult(data)
       } else if (data.status === "failed") {
+        this.hideCancelButton()
         this.showError(data)
+      } else if (data.status === "cancelled") {
+        this.hideCancelButton()
+        this.showCancelled()
       } else {
         this.timer = setTimeout(() => this.poll(), 2000)
       }
@@ -60,6 +65,32 @@ export default class extends Controller {
     const result = data.result || {}
     this.resultSectionTarget.classList.remove("d-none")
     this.resultSectionTarget.innerHTML = this.buildResultHtml(result, data.download_url)
+  }
+
+  hideCancelButton() {
+    if (this.hasCancelSectionTarget) {
+      this.cancelSectionTarget.classList.add("d-none")
+    }
+  }
+
+  showCancelled() {
+    this.progressBarTarget.classList.remove("progress-bar-animated")
+    this.progressBarTarget.classList.add("bg-secondary")
+    this.statusTextTarget.textContent = "Cancelado"
+
+    if (this.hasIconTarget) {
+      this.iconTarget.className = "fa-solid fa-ban fa-lg"
+    }
+    if (this.hasSubtitleTarget) {
+      this.subtitleTarget.textContent = "Processo cancelado"
+    }
+
+    this.resultSectionTarget.classList.remove("d-none")
+    this.resultSectionTarget.innerHTML = `
+      <div class="alert alert-secondary mt-3 mb-0">
+        <i class="fa-solid fa-ban me-1"></i> Este processo foi cancelado.
+      </div>
+      <a href="${this.redirectValue}" class="btn btn-primary mt-2"><i class="fa-solid fa-arrow-left me-1"></i> Voltar</a>`
   }
 
   showError(data) {

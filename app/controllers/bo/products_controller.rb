@@ -241,6 +241,27 @@ class Bo::ProductsController < Bo::BaseController
     @last_product_sync = current_organisation.erp_sync_logs.for_entity('products').completed.recent.first if current_organisation.erp_configuration&.enabled?
   end
 
+  def catalog_selection
+    authorize Product, :generate_catalog?
+
+    @categories = current_organisation.categories.kept.roots.order(:name)
+
+    if params[:query].present?
+      scope = current_organisation.products.includes(:categories, :product_variants)
+      matching_ids = scope.left_joins(:categories, :product_variants).where(
+        "unaccent(products.name) ILIKE unaccent(:q) OR unaccent(products.sku) ILIKE unaccent(:q) OR unaccent(categories.name) ILIKE unaccent(:q) OR unaccent(product_variants.sku) ILIKE unaccent(:q)",
+        q: "%#{params[:query]}%"
+      ).select("products.id").distinct
+      scope = scope.where(id: matching_ids).order(:name)
+      @pagy, @products = pagy(scope, items: 30)
+      @search_mode = true
+    else
+      @search_mode = false
+    end
+
+    render partial: "catalog_selection_content", formats: [:html]
+  end
+
   def generate_catalog
     authorize Product, :generate_catalog?
 

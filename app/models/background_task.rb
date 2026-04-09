@@ -8,7 +8,8 @@ class BackgroundTask < ApplicationRecord
     pending: "pending",
     running: "running",
     completed: "completed",
-    failed: "failed"
+    failed: "failed",
+    cancelled: "cancelled"
   }, default: :pending
 
   scope :recent, -> { order(created_at: :desc) }
