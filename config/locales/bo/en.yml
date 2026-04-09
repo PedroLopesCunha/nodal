@@ -1622,6 +1622,9 @@ en:
       processing: "Processing..."
       please_wait: "Please wait while the task is being processed"
       starting: "Starting..."
+      cancel: "Cancel"
+      cancel_confirm: "Are you sure you want to cancel this task?"
+      cancelled: "Task cancelled."
       product_grid_import:
         title: "Importing products"
       product_csv_import:

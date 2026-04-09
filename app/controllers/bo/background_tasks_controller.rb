@@ -9,7 +9,7 @@ class Bo::BackgroundTasksController < Bo::BaseController
   def show
     @task = current_organisation.background_tasks.find(params[:id])
     authorize @task
-    @task.update_column(:viewed_at, Time.current) if @task.viewed_at.nil? && @task.status.in?(%w[completed failed])
+    @task.update_column(:viewed_at, Time.current) if @task.viewed_at.nil? && @task.status.in?(%w[completed failed cancelled])
 
     respond_to do |format|
       format.html
@@ -26,6 +26,13 @@ class Bo::BackgroundTasksController < Bo::BaseController
         render json: json
       end
     end
+  end
+
+  def cancel
+    @task = current_organisation.background_tasks.find(params[:id])
+    authorize @task
+    @task.update!(status: :cancelled)
+    redirect_to bo_background_tasks_path(params[:org_slug]), notice: t("bo.background_tasks.cancelled")
   end
 
   def download

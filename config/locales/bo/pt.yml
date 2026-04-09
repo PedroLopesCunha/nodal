@@ -1612,6 +1612,9 @@ pt:
       processing: "A processar..."
       please_wait: "Aguarde enquanto o processo é executado"
       starting: "A iniciar..."
+      cancel: "Cancelar"
+      cancel_confirm: "Tem a certeza que deseja cancelar este processo?"
+      cancelled: "Processo cancelado."
       product_grid_import:
         title: "A importar produtos"
       product_csv_import:

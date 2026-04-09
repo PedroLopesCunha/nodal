@@ -2,7 +2,7 @@ import { Controller } from "@hotwired/stimulus"
 
 export default class extends Controller {
   static targets = [
-    "searchInput", "categoryItem", "productItem",
+    "searchInput", "selectionFrame",
     "categoryCount", "productCount",
     "settingsCategoryCount", "settingsProductCount",
     "hiddenFields"
@@ -11,50 +11,61 @@ export default class extends Controller {
   connect() {
     this.selectedCategories = new Set()
     this.selectedProducts = new Set()
+    this.searchTimeout = null
+    this.updateCounts()
+
+    // Re-apply checkbox states after turbo frame loads
+    document.addEventListener("turbo:frame-load", this.handleFrameLoad)
+  }
+
+  disconnect() {
+    document.removeEventListener("turbo:frame-load", this.handleFrameLoad)
+    clearTimeout(this.searchTimeout)
+  }
+
+  handleFrameLoad = (event) => {
+    if (event.target.id === "catalog_selection") {
+      this.restoreSelections()
+      this.restoreSearchFocus()
+    }
+  }
+
+  restoreSelections() {
+    const frame = this.hasSelectionFrameTarget ? this.selectionFrameTarget : document.getElementById("catalog_selection")
+    if (!frame) return
+
+    frame.querySelectorAll(".product-checkbox").forEach(cb => {
+      cb.checked = this.selectedProducts.has(cb.value)
+    })
+    frame.querySelectorAll(".category-checkbox").forEach(cb => {
+      cb.checked = this.selectedCategories.has(cb.value)
+    })
     this.updateCounts()
   }
 
-  normalize(str) {
-    return (str || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase()
+  restoreSearchFocus() {
+    if (!this.hasSearchInputTarget) return
+    const input = this.searchInputTarget
+    if (input.value) {
+      input.focus()
+      input.setSelectionRange(input.value.length, input.value.length)
+    }
   }
 
-  // Search
-  search() {
-    const query = this.normalize(this.searchInputTarget.value.trim())
-    this.categoryItemTargets.forEach(item => {
-      const name = this.normalize(item.dataset.name)
-      const match = !query || name.includes(query)
-      item.style.display = match ? "" : "none"
-      // Also show if any child product matches
-      if (!match) {
-        const products = item.querySelectorAll("[data-catalog-target='productItem']")
-        let childMatch = false
-        products.forEach(p => {
-          const pName = this.normalize(p.dataset.name)
-          const pSku = this.normalize(p.dataset.sku)
-          const pVariantSkus = this.normalize(p.dataset.variantSkus)
-          const pCategory = this.normalize(p.dataset.category)
-          if (pName.includes(query) || pSku.includes(query) || pVariantSkus.includes(query) || pCategory.includes(query)) childMatch = true
-        })
-        if (childMatch) item.style.display = ""
-      }
-    })
-
-    // Search standalone product items too
-    this.productItemTargets.forEach(item => {
-      if (item.closest("[data-catalog-target='categoryItem']")) return // handled above
-      const name = this.normalize(item.dataset.name)
-      const sku = this.normalize(item.dataset.sku)
-      const variantSkus = this.normalize(item.dataset.variantSkus)
-      const category = this.normalize(item.dataset.category)
-      item.style.display = (!query || name.includes(query) || sku.includes(query) || variantSkus.includes(query) || category.includes(query)) ? "" : "none"
-    })
+  // Debounced search — submits the form after 300ms
+  debouncedSearch() {
+    clearTimeout(this.searchTimeout)
+    this.searchTimeout = setTimeout(() => {
+      const input = this.searchInputTarget
+      const form = input.closest("form")
+      if (form) form.requestSubmit()
+    }, 300)
   }
 
   // Toggle category expand/collapse
   toggleExpand(event) {
     event.preventDefault()
-    const container = event.currentTarget.closest("[data-catalog-target='categoryItem']")
+    const container = event.currentTarget.closest("[data-catalog-role='category-row']")
     const children = container.querySelector(".category-children")
     const icon = event.currentTarget.querySelector("i")
     if (children) {
@@ -68,18 +79,16 @@ export default class extends Controller {
   toggleCategory(event) {
     const checkbox = event.currentTarget
     const categoryId = checkbox.value
-    const container = checkbox.closest("[data-catalog-target='categoryItem']")
+    const container = checkbox.closest("[data-catalog-role='category-row']")
 
     if (checkbox.checked) {
       this.selectedCategories.add(categoryId)
-      // Check all product children
       container.querySelectorAll(".product-checkbox").forEach(cb => {
         cb.checked = true
         this.selectedProducts.add(cb.value)
       })
     } else {
       this.selectedCategories.delete(categoryId)
-      // Uncheck all product children
       container.querySelectorAll(".product-checkbox").forEach(cb => {
         cb.checked = false
         this.selectedProducts.delete(cb.value)
@@ -91,39 +100,41 @@ export default class extends Controller {
   // Toggle individual product
   toggleProduct(event) {
     const checkbox = event.currentTarget
-    const productId = checkbox.value
-
     if (checkbox.checked) {
-      this.selectedProducts.add(productId)
+      this.selectedProducts.add(checkbox.value)
     } else {
-      this.selectedProducts.delete(productId)
+      this.selectedProducts.delete(checkbox.value)
       // Uncheck parent category if a product is unchecked
-      const categoryItem = checkbox.closest("[data-catalog-target='categoryItem']")
-      if (categoryItem) {
-        const catCheckbox = categoryItem.querySelector(".category-checkbox")
-        if (catCheckbox) catCheckbox.checked = false
-        this.selectedCategories.delete(catCheckbox?.value)
+      const categoryRow = checkbox.closest("[data-catalog-role='category-row']")
+      if (categoryRow) {
+        const catCheckbox = categoryRow.querySelector(".category-checkbox")
+        if (catCheckbox) {
+          catCheckbox.checked = false
+          this.selectedCategories.delete(catCheckbox.value)
+        }
       }
     }
     this.updateCounts()
   }
 
-  // Select all visible
-  selectAll(event) {
+  // Select all visible on current page
+  selectAllVisible(event) {
     event.preventDefault()
-    this.categoryItemTargets.forEach(item => {
-      if (item.style.display === "none") return
-      const cb = item.querySelector(".category-checkbox")
-      if (cb) { cb.checked = true; this.selectedCategories.add(cb.value) }
-      item.querySelectorAll(".product-checkbox").forEach(pcb => {
-        pcb.checked = true
-        this.selectedProducts.add(pcb.value)
-      })
+    const frame = document.getElementById("catalog_selection")
+    if (!frame) return
+
+    frame.querySelectorAll(".category-checkbox").forEach(cb => {
+      cb.checked = true
+      this.selectedCategories.add(cb.value)
+    })
+    frame.querySelectorAll(".product-checkbox").forEach(cb => {
+      cb.checked = true
+      this.selectedProducts.add(cb.value)
     })
     this.updateCounts()
   }
 
-  // Deselect all
+  // Deselect all (global)
   deselectAll(event) {
     event.preventDefault()
     this.selectedCategories.clear()
@@ -136,15 +147,11 @@ export default class extends Controller {
     const catCount = this.selectedCategories.size
     const prodCount = this.selectedProducts.size
 
-    // Update in selection modal
     if (this.hasCategoryCountTarget) this.categoryCountTarget.textContent = catCount
     if (this.hasProductCountTarget) this.productCountTarget.textContent = prodCount
-
-    // Update in settings modal
     if (this.hasSettingsCategoryCountTarget) this.settingsCategoryCountTarget.textContent = catCount
     if (this.hasSettingsProductCountTarget) this.settingsProductCountTarget.textContent = prodCount
 
-    // Update hidden fields
     if (this.hasHiddenFieldsTarget) {
       const container = this.hiddenFieldsTarget
       container.innerHTML = ""
@@ -165,11 +172,10 @@ export default class extends Controller {
     }
   }
 
-  // Called when closing selection modal - go back to settings
+  // Called when closing selection modal — go back to settings
   doneSelecting() {
     const selectionModal = bootstrap.Modal.getInstance(document.getElementById("catalogSelectionModal"))
     if (selectionModal) selectionModal.hide()
-    // Small delay to let modal close animation finish
     setTimeout(() => {
       const settingsModal = bootstrap.Modal.getOrCreateInstance(document.getElementById("catalogModal"))
       settingsModal.show()
@@ -182,6 +188,10 @@ export default class extends Controller {
     const settingsModal = bootstrap.Modal.getInstance(document.getElementById("catalogModal"))
     if (settingsModal) settingsModal.hide()
     setTimeout(() => {
+      // Lazy load: set src on first open
+      if (this.hasSelectionFrameTarget && !this.selectionFrameTarget.src) {
+        this.selectionFrameTarget.src = this.selectionFrameTarget.dataset.src
+      }
       const selectionModal = bootstrap.Modal.getOrCreateInstance(document.getElementById("catalogSelectionModal"))
       selectionModal.show()
     }, 300)

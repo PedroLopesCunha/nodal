@@ -7,6 +7,10 @@ class BackgroundTaskPolicy < ApplicationPolicy
     record_belongs_to_user_organisation?
   end
 
+  def cancel?
+    record_belongs_to_user_organisation? && record.status.in?(%w[pending running])
+  end
+
   class Scope < ApplicationPolicy::Scope
     def resolve
       scope.where(organisation: organisation)

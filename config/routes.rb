@@ -123,6 +123,7 @@ Rails.application.routes.draw do
           get :bulk_create_process, to: redirect { |params| "/#{params[:org_slug]}/bo/products/bulk_create" }
           get :bulk_photos
           post :bulk_photos_process
+          get :catalog_selection
         end
         member do
           get :configure_variants
@@ -231,6 +232,7 @@ Rails.application.routes.draw do
       resources :background_tasks, only: [:index, :show] do
         member do
           get :download
+          patch :cancel
         end
       end
 

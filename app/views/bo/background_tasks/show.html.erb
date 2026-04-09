@@ -38,6 +38,17 @@
             </div>
           </div>
 
+          <!-- Cancel button (visible while pending/running) -->
+          <div class="text-center mt-3" data-task-progress-target="cancelSection">
+            <% if @task.status.in?(%w[pending running]) %>
+              <%= button_to t('bo.background_tasks.cancel'),
+                    cancel_bo_background_task_path(params[:org_slug], @task),
+                    method: :patch,
+                    class: "btn btn-outline-danger btn-sm",
+                    data: { turbo_confirm: t('bo.background_tasks.cancel_confirm') } %>
+            <% end %>
+          </div>
+
           <!-- Result (hidden until done) -->
           <div class="d-none" data-task-progress-target="resultSection">
           </div>

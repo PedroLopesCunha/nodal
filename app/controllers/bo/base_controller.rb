@@ -20,7 +20,7 @@ class Bo::BaseController < ApplicationController
       .where(status: [:pending, :running])
       .or(current_organisation.background_tasks
         .where(member: current_member)
-        .where(status: [:completed, :failed], viewed_at: nil))
+        .where(status: [:completed, :failed, :cancelled], viewed_at: nil))
       .count
   end
 end
