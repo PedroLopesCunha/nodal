@@ -27,6 +27,7 @@ class Customer < ApplicationRecord
   has_many :promo_code_customers, dependent: :destroy
   has_many :promo_codes, through: :promo_code_customers
   has_many :promo_code_redemptions, dependent: :destroy
+  has_many :email_logs, dependent: :nullify
 
   validates :company_name, presence: true
   validates :contact_name, presence: true
