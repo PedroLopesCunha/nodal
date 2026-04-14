@@ -111,8 +111,9 @@ class Storefront::ProductsController < Storefront::BaseController
       products = products.where(id: attr_filtered_ids || [])
     end
 
-    # Collect available attribute filters from the current filtered product set
-    @available_attributes = build_available_attributes(products, @current_attrs)
+    # Collect available attribute filters only when a category is selected
+    # (showing attributes across all categories is confusing — values from unrelated categories mix together)
+    @available_attributes = @current_category ? build_available_attributes(products, @current_attrs) : []
 
     # Sort
     @current_sort = params[:sort].presence || "name_asc"
