@@ -33,6 +33,7 @@ export default class extends Controller {
     this.disabledCells = new Set() // "row,col" keys
     this._updatingType = false
     this._programmaticChange = false
+    this._validateTimer = null
     this.waitForLibrary()
   }
 
@@ -176,18 +177,24 @@ export default class extends Controller {
       }
     }
 
-    this.validateAll()
-    this.renderErrorPanel()
-    this.updateSubmitButton()
+    this.scheduleValidation()
+  }
+
+  scheduleValidation() {
+    if (this._validateTimer) clearTimeout(this._validateTimer)
+    this._validateTimer = setTimeout(() => {
+      this._validateTimer = null
+      this.validateAll()
+      this.renderErrorPanel()
+      this.updateSubmitButton()
+    }, 150)
   }
 
   handleRowChange() {
     // Delay to let jspreadsheet finish updating
     setTimeout(() => {
       this.updateParentSkuDropdown()
-      this.validateAll()
-      this.renderErrorPanel()
-      this.updateSubmitButton()
+      this.scheduleValidation()
     }, 50)
   }
 
@@ -468,29 +475,32 @@ export default class extends Controller {
 
   applyAllStyles() {
     const data = this.sheet.getData()
+
+    // Build lookup sets for O(1) access instead of .some() per cell
+    const errorCells = new Set()
+    this.errors.forEach(e => errorCells.add(`${e.row},${e.col}`))
+    const warningCells = new Set()
+    this.warnings.forEach(w => warningCells.add(`${w.row},${w.col}`))
+
+    // Batch all style changes into a single object for setStyle
+    const styles = {}
     for (let r = 0; r < data.length; r++) {
       for (let c = 0; c < NUM_COLS; c++) {
         const cellName = window.jspreadsheet.getColumnNameFromId([c, r])
         const key = `${r},${c}`
-        const hasError = this.errors.some(e => e.row === r && e.col === c)
-        const hasWarning = this.warnings.some(w => w.row === r && w.col === c)
-        const isDisabled = this.disabledCells.has(key)
 
-        if (hasError) {
-          this.sheet.setStyle(cellName, "background-color", "#f8d7da")
-          this.sheet.setStyle(cellName, "color", "")
-        } else if (hasWarning) {
-          this.sheet.setStyle(cellName, "background-color", "#fff3cd")
-          this.sheet.setStyle(cellName, "color", "")
-        } else if (isDisabled) {
-          this.sheet.setStyle(cellName, "background-color", DISABLED_BG)
-          this.sheet.setStyle(cellName, "color", "#94a3b8")
+        if (errorCells.has(key)) {
+          styles[cellName] = "background-color: #f8d7da;"
+        } else if (warningCells.has(key)) {
+          styles[cellName] = "background-color: #fff3cd;"
+        } else if (this.disabledCells.has(key)) {
+          styles[cellName] = `background-color: ${DISABLED_BG}; color: #94a3b8;`
         } else {
-          this.sheet.setStyle(cellName, "background-color", "")
-          this.sheet.setStyle(cellName, "color", "")
+          styles[cellName] = ""
         }
       }
     }
+    this.sheet.setStyle(styles)
   }
 
   // ─── Error Panel ───────────────────────────────────────────
