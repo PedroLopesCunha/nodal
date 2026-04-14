@@ -125,3 +125,30 @@
     --bs-gutter-y: 0.75rem;
   }
 }
+
+// Mobile product card refinements
+@media (max-width: 575.98px) {
+  .product-card {
+    border-radius: 8px;
+
+    .card-body {
+      padding: 0.5rem 0.625rem;
+    }
+
+    .product-card-title {
+      font-size: 0.85rem;
+    }
+
+    .card-footer {
+      padding: 0.4rem 0.625rem;
+    }
+
+    .product-card-category {
+      font-size: 0.6rem;
+    }
+
+    .product-card-price {
+      font-size: 0.85rem;
+    }
+  }
+}

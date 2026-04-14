@@ -1,5 +1,5 @@
 <%= render "storefront/shared/page_header",
-  title: t('storefront.carts.show.title'),
+  title: nil,
   back_path: products_path(org_slug: params[:org_slug]),
   back_label: t('storefront.products.show.back_to_products') %>
 
@@ -75,7 +75,7 @@
                         </div>
                       <% end %>
                       <div>
-                        <div class="fw-medium"><%= item.product.name %></div>
+                        <%= link_to item.product.name, product_path(org_slug: params[:org_slug], id: item.product), class: "fw-medium text-decoration-none text-body" %>
                         <% if item.product_variant && item.product_variant.attribute_values.any? %>
                           <small class="text-primary"><%= item.product_variant.sku.presence || item.variant_name %></small>
                           <br>
@@ -140,7 +140,7 @@
                     </div>
                   <% end %>
                   <div class="flex-grow-1 min-width-0 me-2">
-                    <div class="fw-semibold text-truncate" style="font-size: 0.9rem;"><%= item.product.name %></div>
+                    <%= link_to item.product.name, product_path(org_slug: params[:org_slug], id: item.product), class: "fw-semibold text-truncate d-block text-decoration-none text-body", style: "font-size: 0.9rem;" %>
                   </div>
                   <%# Inline quantity controls %>
                   <%= form_with model: item, url: order_item_path(org_slug: params[:org_slug], id: item), method: :patch, local: true, class: "flex-shrink-0", data: { controller: "cart-quantity" } do |f| %>
@@ -199,15 +199,17 @@
         </div>
       </div>
 
-      <div class="d-flex flex-column flex-sm-row justify-content-between gap-2 mt-3">
-        <%= link_to products_path(org_slug: params[:org_slug]), class: "btn btn-outline-secondary" do %>
-          <i class="fa-solid fa-arrow-left me-2"></i><%= t('storefront.carts.show.continue_shopping') %>
+      <div class="d-flex justify-content-between align-items-center mt-3">
+        <%= link_to products_path(org_slug: params[:org_slug]), class: "btn btn-sm text-muted", style: "font-size: 0.8rem;" do %>
+          <i class="fa-solid fa-chevron-left me-1"></i><%= t('storefront.carts.show.continue_shopping') %>
         <% end %>
-        <%= button_to t('storefront.carts.show.clear_cart'), clear_cart_path(org_slug: params[:org_slug]), method: :delete, class: "btn btn-outline-danger", data: { turbo_confirm: t('storefront.carts.show.confirm_clear_cart') } %>
+        <%= button_to clear_cart_path(org_slug: params[:org_slug]), method: :delete, class: "btn btn-sm text-muted", style: "font-size: 0.8rem;", data: { turbo_confirm: t('storefront.carts.show.confirm_clear_cart') } do %>
+          <i class="fa-solid fa-trash me-1"></i><%= t('storefront.carts.show.clear_cart') %>
+        <% end %>
       </div>
     </div>
 
-    <div class="col-lg-4">
+    <div class="col-lg-4 d-none d-lg-block">
       <div class="card border-0 shadow-sm" style="border-radius: 12px;">
         <div class="card-body">
           <h5 class="card-title mb-3"><%= t('storefront.carts.show.order_summary') %></h5>
@@ -292,23 +294,27 @@
     </div>
   </div>
 
-  <%# Sticky bottom checkout bar (mobile only) %>
-  <div class="cart-sticky-bar d-lg-none fixed-bottom bg-white border-top shadow-lg p-3">
-    <% if @current_organisation.free_shipping_enabled? && !@order.qualifies_for_free_shipping? %>
-      <div class="d-flex align-items-center mb-2">
-        <i class="fa-solid fa-truck text-muted me-2 small"></i>
-        <span class="text-muted small flex-grow-1"><%= t('storefront.carts.show.free_shipping_progress', amount: humanized_money_with_symbol(@order.free_shipping_amount_remaining)) %></span>
-        <% progress = (@order.total_with_auto_discount.cents.to_f / @current_organisation.free_shipping_threshold.cents * 100).clamp(0, 100) %>
-        <div class="progress flex-shrink-0" style="height: 4px; width: 60px;">
-          <div class="progress-bar bg-secondary" role="progressbar" style="width: <%= progress %>%"></div>
+  <%# Suggested products carousel %>
+  <% if @suggested_products.present? %>
+    <section class="mt-4 mb-5" data-controller="horizontal-scroll">
+      <h6 class="fw-semibold mb-3"><%= t('storefront.carts.show.you_might_like') %></h6>
+      <div class="home-carousel-wrapper">
+        <div data-horizontal-scroll-target="container" class="home-carousel">
+          <% @suggested_products.each do |product| %>
+            <div class="home-carousel__item home-carousel__item--portal">
+              <%= render "storefront/home/visual_card",
+                          link_path: product_path(org_slug: params[:org_slug], id: product),
+                          image: product.display_photo,
+                          name: product.name %>
+            </div>
+          <% end %>
         </div>
       </div>
-    <% elsif @current_organisation.free_shipping_enabled? && @order.qualifies_for_free_shipping? %>
-      <div class="text-center mb-2">
-        <i class="fa-solid fa-truck text-success me-1"></i>
-        <span class="text-success small"><%= t('storefront.carts.show.free_shipping_applied') %></span>
-      </div>
-    <% end %>
+    </section>
+  <% end %>
+
+  <%# Sticky bottom checkout bar (mobile only) %>
+  <div class="cart-sticky-bar d-lg-none fixed-bottom bg-white border-top shadow-lg p-3">
     <div class="d-flex justify-content-between align-items-center mb-2">
       <span class="text-muted small"><%= t('storefront.common.items', count: @order.item_count) %></span>
       <span class="fw-bold fs-5"><%= humanized_money_with_symbol(@order.total_with_auto_discount) %></span>

@@ -10,6 +10,13 @@ export default class extends Controller {
     this.containerTarget.addEventListener("scroll", () => this.updateButtons())
     // Re-check after images load
     this.containerTarget.addEventListener("load", () => this.updateButtons(), true)
+    // Auto-scroll active item into view (for category chips etc.)
+    const active = this.containerTarget.querySelector(".active")
+    if (active) {
+      requestAnimationFrame(() => {
+        active.scrollIntoView({ inline: "center", behavior: "smooth", block: "nearest" })
+      })
+    }
   }
 
   scrollLeft() {
