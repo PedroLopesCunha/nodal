@@ -102,7 +102,7 @@ class Bo::ErpSettingsController < Bo::BaseController
   def sync_logs
     authorize @erp_configuration, policy_class: ErpSettingPolicy
 
-    @sync_logs = current_organisation.erp_sync_logs.recent.limit(50)
+    @pagy, @sync_logs = pagy(current_organisation.erp_sync_logs.recent, items: 20)
   end
 
   private

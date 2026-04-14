@@ -211,11 +211,7 @@
         </table>
       </div>
 
-      <% if @sync_logs.respond_to?(:total_pages) && @sync_logs.total_pages > 1 %>
-        <nav class="mt-4">
-          <%= paginate @sync_logs %>
-        </nav>
-      <% end %>
+      <%== pagy_bootstrap_nav(@pagy) %>
     <% else %>
       <div class="text-center py-5">
         <i class="fa-solid fa-inbox text-muted" style="font-size: 3rem;"></i>
