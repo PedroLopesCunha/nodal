@@ -76,7 +76,7 @@
 
             <div style="max-height: 400px; overflow-y: auto;">
               <% @available_products.each do |product| %>
-                <div class="d-flex align-items-center gap-3 p-2 mb-2 border rounded" data-related-products-target="availableItem" data-product-id="<%= product.id %>" data-product-name="<%= product.name.downcase %>">
+                <div class="d-flex align-items-center gap-3 p-2 mb-2 border rounded" data-related-products-target="availableItem" data-product-id="<%= product.id %>" data-product-name="<%= product.name.downcase %>" data-product-sku="<%= [product.sku, product.product_variants.map(&:sku).compact].flatten.join(' ').downcase %>" data-product-category="<%= product.primary_category&.name&.downcase %>">
                   <% if product.photo_attached? %>
                     <%= image_tag product.photo, style: "width: 40px; height: 40px; object-fit: cover; border-radius: 4px;" %>
                   <% else %>
@@ -86,7 +86,7 @@
                   <% end %>
                   <div class="flex-grow-1">
                     <strong><%= product.name %></strong>
-                    <small class="text-muted d-block"><%= product.primary_category&.name %></small>
+                    <small class="text-muted d-block"><%= [product.sku, product.primary_category&.name].compact_blank.join(' · ') %></small>
                   </div>
                   <button type="button" class="btn btn-sm btn-outline-primary" data-action="click->related-products#add" data-product-id="<%= product.id %>" data-product-name="<%= product.name %>" data-product-category="<%= product.primary_category&.name %>" data-product-image="<%= product.photo_attached? ? url_for(product.photo) : '' %>">
                     <i class="fa-solid fa-plus"></i>

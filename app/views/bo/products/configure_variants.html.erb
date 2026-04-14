@@ -83,7 +83,7 @@
                            placeholder="<%= t('bo.products.configure_variants.filter_values') %>"
                            data-action="input->variant-configuration#filterValues">
                     <div class="d-flex flex-wrap gap-2">
-                      <% attribute.product_attribute_values.active.by_position.each do |value| %>
+                      <% attribute.product_attribute_values.active.naturally_sorted.each do |value| %>
                         <div class="form-check">
                           <input type="checkbox"
                                  name="product[available_attribute_value_ids][]"

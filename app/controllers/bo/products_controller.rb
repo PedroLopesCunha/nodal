@@ -15,7 +15,7 @@ class Bo::ProductsController < Bo::BaseController
   # Bulk create with spreadsheet grid
   def bulk_create
     authorize Product, :bulk_create?
-    @categories = current_organisation.categories.kept.order(:name)
+    @categories = current_organisation.categories.kept.sorted_by_full_path
     @product_attributes = current_organisation.product_attributes.kept.active.by_position
                             .includes(:product_attribute_values)
     @all_skus = current_organisation.products.pluck(:sku).compact
@@ -116,7 +116,7 @@ class Bo::ProductsController < Bo::BaseController
   # Import actions
   def import
     authorize Product, :import?
-    @categories = current_organisation.categories.kept.order(:name)
+    @categories = current_organisation.categories.kept.sorted_by_full_path
     @all_skus = current_organisation.products.pluck(:sku).compact_blank +
                 current_organisation.product_variants.where.not(sku: [nil, ""]).pluck(:sku)
   end
@@ -235,7 +235,7 @@ class Bo::ProductsController < Bo::BaseController
     @pagy, @products = pagy(@products)
 
     # Load categories for filter dropdown
-    @categories = current_organisation.categories.kept.order(:name)
+    @categories = current_organisation.categories.kept.sorted_by_full_path
 
     # Load last ERP product sync log (if ERP enabled)
     @last_product_sync = current_organisation.erp_sync_logs.for_entity('products').completed.recent.first if current_organisation.erp_configuration&.enabled?
@@ -618,7 +618,7 @@ class Bo::ProductsController < Bo::BaseController
     @current_attribute_value_ids = []
 
     current_organisation.product_attributes.kept.active.by_position.each do |attribute|
-      values = attribute.product_attribute_values.where(active: true).by_position
+      values = attribute.product_attribute_values.where(active: true).naturally_sorted
       @all_attributes[attribute] = values
     end
 

@@ -56,6 +56,8 @@ export default class extends Controller {
 
     this.availableItemTargets.forEach(item => {
       const productName = item.dataset.productName || ''
+      const productSku = item.dataset.productSku || ''
+      const productCategory = item.dataset.productCategory || ''
       const productId = item.dataset.productId
       const isSelected = this.selectedListTarget.querySelector(`[data-sortable-id="${productId}"]`)
 
@@ -65,8 +67,8 @@ export default class extends Controller {
         return
       }
 
-      // Show/hide based on search query
-      if (query === '' || productName.includes(query)) {
+      // Show/hide based on search query (name, SKU, or category)
+      if (query === '' || productName.includes(query) || productSku.includes(query) || productCategory.includes(query)) {
         item.classList.remove('d-none')
       } else {
         item.classList.add('d-none')

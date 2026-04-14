@@ -57,6 +57,10 @@ class Category < ApplicationRecord
     ancestors.map(&:name).push(name).join(' > ')
   end
 
+  def self.sorted_by_full_path
+    all.sort_by(&:full_path)
+  end
+
   private
 
   def generate_slug

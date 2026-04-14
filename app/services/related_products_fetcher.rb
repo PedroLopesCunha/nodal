@@ -3,6 +3,7 @@ class RelatedProductsFetcher
 
   def initialize(product:, limit: DEFAULT_LIMIT)
     @product = product
+    @organisation = product.organisation
     @limit = limit
   end
 
@@ -27,15 +28,13 @@ class RelatedProductsFetcher
   end
 
   def manual_related_products
-    # Get the related product IDs in order
     related_ids = @product.related_product_associations
                           .order(:position)
                           .pluck(:related_product_id)
 
     return [] if related_ids.empty?
 
-    # Fetch the products and preserve order
-    products = Product.where(id: related_ids, published: true).index_by(&:id)
+    products = visible_scope.where(id: related_ids).index_by(&:id)
     related_ids.map { |id| products[id] }.compact.take(@limit)
   end
 
@@ -43,8 +42,8 @@ class RelatedProductsFetcher
     exclude_ids = exclude_ids + [@product.id]
 
     same_category_products
+      .merge(visible_scope)
       .where.not(id: exclude_ids)
-      .where(published: true)
       .order(created_at: :desc)
       .limit(limit)
       .to_a
@@ -56,14 +55,25 @@ class RelatedProductsFetcher
 
     return Product.none if category_ids.empty?
 
-    # Get product IDs from category_products join table
     product_ids_from_categories = CategoryProduct.where(category_id: category_ids).pluck(:product_id)
-
-    # Also include products with legacy category_id
-    product_ids_from_legacy = Product.where(category_id: category_ids, organisation_id: @product.organisation_id).pluck(:id)
+    product_ids_from_legacy = Product.where(category_id: category_ids, organisation_id: @organisation.id).pluck(:id)
 
     all_product_ids = (product_ids_from_categories + product_ids_from_legacy).uniq
 
-    Product.where(id: all_product_ids, organisation_id: @product.organisation_id)
+    Product.where(id: all_product_ids, organisation_id: @organisation.id)
+  end
+
+  # Apply the same visibility rules as the storefront product listing
+  def visible_scope
+    scope = @organisation.products.where(published: true)
+
+    if @organisation.hide_out_of_stock?
+      keep_visible_ids = @organisation.product_variants
+                                      .where.not(stock_policy: ['hide', 'inherit'])
+                                      .select(:product_id)
+      scope = scope.where(available: true).or(scope.where(id: keep_visible_ids))
+    end
+
+    scope
   end
 end

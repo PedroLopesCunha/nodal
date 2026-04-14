@@ -33,16 +33,16 @@
             <div class="col-md-12">
               <label class="form-label"><%= t('bo.categories.form.parent_category') %></label>
               <%
-                # Get all categories except current one, ordered by ancestry for tree-like display
+                # Get all categories except current one, sorted by full path
                 parent_options = current_organisation.categories.kept
                   .where.not(id: category.id)
-                  .order(:ancestry, :position)
+                  .sorted_by_full_path
                   .map { |c| [c.full_path, c.id] }
               %>
               <%= f.select :parent_id,
                     parent_options,
                     { include_blank: t('bo.categories.form.no_parent') },
-                    { class: "form-select", data: { category_form_target: "parentSelect", action: "change->category-form#checkDepth" } } %>
+                    { class: "form-select", data: { controller: "tom-select", category_form_target: "parentSelect", action: "change->category-form#checkDepth" } } %>
               <small class="text-muted"><%= t('bo.categories.form.parent_hint') %></small>
               <div class="alert alert-warning mt-2 d-none" data-category-form-target="depthWarning">
                 <i class="fa-solid fa-triangle-exclamation"></i>

@@ -33,9 +33,14 @@ class Storefront::ProductsController < Storefront::BaseController
     # Children lookup to avoid N+1 in tree rendering
     @category_children = @all_kept_categories.group_by(&:parent_id)
 
-    # Parse single selected category
+    # Parse single selected category (accepts id or slug)
     if params[:category].present?
-      @current_category = current_organisation.categories.kept.find_by(id: params[:category].to_i)
+      cat_param = params[:category]
+      @current_category = if cat_param.to_s =~ /\A\d+\z/
+        current_organisation.categories.kept.find_by(id: cat_param)
+      else
+        current_organisation.categories.kept.find_by(slug: cat_param)
+      end
     end
     # Keep as array for backward compatibility with shared views
     @current_categories = @current_category ? [ @current_category ] : []
@@ -266,7 +271,7 @@ class Storefront::ProductsController < Storefront::BaseController
       .group("product_attributes.id", "product_attributes.name", "product_attributes.slug", "product_attributes.position",
              "product_attribute_values.id", "product_attribute_values.value", "product_attribute_values.slug",
              "product_attribute_values.color_hex", "product_attribute_values.position")
-      .order("product_attributes.position", "product_attribute_values.position")
+      .order(Arel.sql("product_attributes.position"))
       .pluck(
         Arel.sql("product_attributes.id"), Arel.sql("product_attributes.name"), Arel.sql("product_attributes.slug"),
         Arel.sql("product_attribute_values.id"), Arel.sql("product_attribute_values.value"), Arel.sql("product_attribute_values.slug"),
@@ -285,6 +290,18 @@ class Storefront::ProductsController < Storefront::BaseController
         count: count,
         selected: current_attrs[attr_slug]&.include?(val_slug) || false
       }
+    end
+
+    # Sort values: numeric-first (natural sort), then alphabetical
+    attrs_hash.each_value do |attr|
+      attr[:values].sort_by! do |v|
+        label = v[:label].to_s
+        if label.match?(/\A\d/)
+          [0, label.length, label.downcase]
+        else
+          [1, label.downcase]
+        end
+      end
     end
 
     attrs_hash.values
