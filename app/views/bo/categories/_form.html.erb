@@ -42,7 +42,7 @@
               <%= f.select :parent_id,
                     parent_options,
                     { include_blank: t('bo.categories.form.no_parent') },
-                    { class: "form-select", data: { category_form_target: "parentSelect", action: "change->category-form#checkDepth" } } %>
+                    { class: "form-select", data: { controller: "tom-select", category_form_target: "parentSelect", action: "change->category-form#checkDepth" } } %>
               <small class="text-muted"><%= t('bo.categories.form.parent_hint') %></small>
               <div class="alert alert-warning mt-2 d-none" data-category-form-target="depthWarning">
                 <i class="fa-solid fa-triangle-exclamation"></i>

@@ -91,7 +91,7 @@
       </div>
       <div class="row mt-3 g-2">
         <div class="col">
-          <select name="category_id" class="form-select form-select-sm" onchange="this.form.submit()">
+          <select name="category_id" class="form-select form-select-sm" onchange="this.form.submit()" data-controller="tom-select">
             <option value=""><%= t('bo.products.index.filters.all_categories') %></option>
             <option value="none" <%= 'selected' if params[:category_id] == 'none' %>><%= t('bo.products.index.filters.no_category') %></option>
             <% @categories.each do |category| %>

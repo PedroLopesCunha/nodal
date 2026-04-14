@@ -38,7 +38,7 @@
             <h5 class="card-title mb-4"><%= t('bo.orders.form.customer') %></h5>
             <div class="mb-3">
               <%= f.label :customer_id, t('bo.orders.form.select_customer'), class: "form-label" %>
-              <%= f.collection_select :customer_id, @customers, :id, :company_name, { prompt: t('bo.orders.form.choose_customer') }, { class: "form-select" } %>
+              <%= f.collection_select :customer_id, @customers, :id, :company_name, { prompt: t('bo.orders.form.choose_customer') }, { class: "form-select", data: { controller: "tom-select" } } %>
             </div>
           </div>
         </div>

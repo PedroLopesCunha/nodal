@@ -78,7 +78,7 @@
             </select>
           </div>
           <div class="col-md-3">
-            <select name="customer_id" class="form-select form-select-sm" onchange="this.form.submit()">
+            <select name="customer_id" class="form-select form-select-sm" onchange="this.form.submit()" data-controller="tom-select">
               <option value=""><%= t('bo.orders.index.filters.all_customers') %></option>
               <% @customers.each do |customer| %>
                 <option value="<%= customer.id %>" <%= 'selected' if params[:customer_id].to_s == customer.id.to_s %>><%= customer.company_name %></option>

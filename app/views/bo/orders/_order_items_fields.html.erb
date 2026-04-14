@@ -1,9 +1,9 @@
 <tr data-new-record="<%= f.object.new_record? %>">
   <td>
     <%= f.select :product_id,
-        options_for_select(products.map { |p| [p.name, p.id, { 'data-price': p.price.to_f }] }, f.object.product_id),
+        options_for_select(products.map { |p| [p.name, p.id, { 'data-price': p.price.to_f, 'data-sku': p.sku }] }, f.object.product_id),
         { prompt: t('bo.orders.form.select_product') },
-        { class: "form-select form-select-sm", data: { action: "change->order-items#updatePrice" } } %>
+        { class: "form-select form-select-sm", data: { controller: "tom-select", action: "change->order-items#updatePrice" } } %>
   </td>
   <td>
     <%= f.number_field :quantity, class: "form-control form-control-sm", min: 1, value: f.object.quantity || 1, data: { quantity_field: true, action: "input->order-items#calculate" } %>
