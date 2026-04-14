@@ -299,6 +299,48 @@ $breakpoint-mobile: 768px;
   }
 }
 
+// Storefront mobile navbar collapse polish
+@media (max-width: 991.98px) {
+  #customerNav {
+    padding: 0.5rem 0;
+
+    .navbar-nav {
+      padding: 0.25rem 0;
+
+      .nav-item {
+        .nav-link {
+          padding: 0.75rem 1rem;
+          font-size: 0.95rem;
+          font-weight: 500;
+          color: #333;
+          border-radius: 8px;
+          margin: 1px 0;
+          transition: background-color 0.15s ease;
+
+          &:hover,
+          &:active {
+            background-color: #f5f5f5;
+          }
+
+          &.active {
+            color: var(--org-primary, #008060);
+            font-weight: 600;
+            background-color: rgba(var(--org-primary-rgb, 0, 128, 96), 0.06);
+          }
+        }
+      }
+    }
+
+    // User section at bottom
+    .d-flex.align-items-center.gap-4 {
+      padding: 0.75rem 1rem;
+      margin-top: 0.25rem;
+      border-top: 1px solid #f0f0f0;
+      justify-content: flex-end;
+    }
+  }
+}
+
 // Storefront user dropdown button
 .user-dropdown-btn {
   border: none;

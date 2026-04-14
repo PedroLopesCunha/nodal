@@ -110,6 +110,31 @@
   }
 }
 
+// --- Applied Filters Horizontal Scroll ---
+.applied-filters-bar {
+  overflow: hidden;
+  position: relative;
+}
+
+.applied-filters-track {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+
+  @media (max-width: 991.98px) {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    padding-bottom: 2px;
+
+    &::-webkit-scrollbar {
+      display: none;
+    }
+  }
+}
+
 // --- Hide text on action buttons mobile, show only icons ---
 @media (max-width: 575.98px) {
   .order-actions .btn span,

@@ -2,28 +2,41 @@ import { Controller } from "@hotwired/stimulus"
 
 // Connects to data-controller="storefront-category-tree"
 export default class extends Controller {
-  static targets = ["item", "toggle", "children", "icon"]
+  static targets = ["item", "children", "icon", "parentLink"]
 
-  toggle(event) {
-    const button = event.currentTarget
-    const item = button.closest(".category-tree-item")
-    const children = item.querySelector(".category-children")
-    const icon = button.querySelector(".toggle-icon")
+  toggleFromLink(event) {
+    const link = event.currentTarget
+    const item = link.closest(".category-list-item")
+    const children = item.querySelector(":scope > .category-children")
 
-    if (children) {
-      const isExpanded = !children.classList.contains("collapsed")
+    if (!children) return
 
-      if (isExpanded) {
-        children.classList.add("collapsed")
-        icon.classList.remove("fa-minus")
-        icon.classList.add("fa-plus")
-        button.setAttribute("aria-expanded", "false")
-      } else {
-        children.classList.remove("collapsed")
-        icon.classList.remove("fa-plus")
-        icon.classList.add("fa-minus")
-        button.setAttribute("aria-expanded", "true")
-      }
+    const isExpanded = !children.classList.contains("collapsed")
+
+    // If already on this category (link is active), just toggle children
+    if (link.classList.contains("active")) {
+      event.preventDefault()
+      this._toggle(children, item)
+      return
+    }
+
+    // If children are collapsed, expand them but also follow the link
+    if (!isExpanded) {
+      this._toggle(children, item)
+    }
+    // Let the link navigate normally
+  }
+
+  _toggle(children, item) {
+    const icon = item.querySelector(":scope > .category-link .category-chevron")
+    const isExpanded = !children.classList.contains("collapsed")
+
+    if (isExpanded) {
+      children.classList.add("collapsed")
+      if (icon) icon.classList.remove("expanded")
+    } else {
+      children.classList.remove("collapsed")
+      if (icon) icon.classList.add("expanded")
     }
   }
 }

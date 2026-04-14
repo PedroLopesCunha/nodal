@@ -1,8 +1,43 @@
-// Filter Offcanvas Styles
-// Mobile-optimized category filter drawer
+// Mobile Filter Bottom Sheet
+// Slides up from bottom with refinement filters only
 
+.mobile-filter-sheet {
+  border-radius: 16px 16px 0 0 !important;
+  max-height: 85vh !important;
+
+  .offcanvas-header {
+    padding: 1rem 1.25rem;
+    border-bottom: 1px solid #eee;
+  }
+
+  .offcanvas-body {
+    padding: 1.25rem;
+  }
+
+  .filter-section-title {
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: #999;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-bottom: 0.75rem;
+  }
+
+  // Touch-friendly links in attribute filters
+  .accordion-button {
+    font-size: 0.9rem;
+    font-weight: 500;
+  }
+
+  .accordion-body a {
+    min-height: 40px;
+    display: flex;
+    align-items: center;
+  }
+}
+
+// Legacy offcanvas ID support (for any remaining references)
 #categoryFilterOffcanvas {
-  // Set max-width for larger phones/tablets in portrait
   max-width: 320px;
 
   .offcanvas-header {
@@ -13,37 +48,13 @@
     padding-top: 1.5rem;
   }
 
-  // Ensure category tree items have proper touch targets
   .category-sidebar {
     .category-link {
-      padding: 0.625rem 0.5rem; // Increase padding for touch
-      min-height: 44px; // Minimum touch target
-      display: flex;
-      align-items: center;
-    }
-
-    .toggle-btn {
-      width: 44px;
-      height: 44px;
-      min-width: 44px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      min-height: 44px;
     }
   }
 
-  // Active filter badge styling
   .badge {
     font-size: 0.75rem;
-  }
-}
-
-// Mobile filter button in header
-.btn[data-bs-target="#categoryFilterOffcanvas"] {
-  white-space: nowrap;
-
-  .badge {
-    font-size: 0.65rem;
-    padding: 0.25em 0.5em;
   }
 }

@@ -6,35 +6,27 @@
   has_children = children_list.any?
   is_expanded = is_selected || is_ancestor || local_assigns[:expanded]
 
-  # Single-select: click selects, click again deselects
   link_params = { org_slug: params[:org_slug], queries: params[:queries] }
   link_params[:category] = category.id unless is_selected
   link_params[:sort] = params[:sort] if params[:sort].present?
+  count = @category_counts[category.id] || 0
 %>
 
-<li class="category-tree-item" data-storefront-category-tree-target="item" data-category-id="<%= category.id %>">
-  <div class="d-flex align-items-center">
-    <% if has_children %>
-      <button type="button"
-              class="toggle-btn text-muted"
-              data-action="storefront-category-tree#toggle"
-              data-storefront-category-tree-target="toggle"
-              aria-expanded="<%= is_expanded %>">
-        <i class="fa-solid <%= is_expanded ? 'fa-minus' : 'fa-plus' %> toggle-icon" data-storefront-category-tree-target="icon"></i>
-      </button>
-    <% else %>
-      <span class="toggle-btn-spacer"></span>
-    <% end %>
-
-    <%= link_to products_path(**link_params),
-        class: "category-link flex-grow-1 py-1 #{'active fw-bold text-primary' if is_selected}" do %>
-      <%= category.name %>
-      <span class="category-count">(<%= @category_counts[category.id] || 0 %>)</span>
-    <% end %>
-  </div>
+<li class="category-list-item" data-storefront-category-tree-target="item" data-category-id="<%= category.id %>">
+  <%= link_to products_path(**link_params),
+      class: "category-link #{'active' if is_selected}",
+      data: has_children ? { action: "click->storefront-category-tree#toggleFromLink", storefront_category_tree_target: "parentLink" } : {} do %>
+    <span class="category-link-name"><%= category.name %></span>
+    <span class="category-link-right">
+      <span class="category-count"><%= count %></span>
+      <% if has_children %>
+        <i class="fa-solid fa-chevron-right category-chevron <%= 'expanded' if is_expanded %>" data-storefront-category-tree-target="icon"></i>
+      <% end %>
+    </span>
+  <% end %>
 
   <% if has_children %>
-    <ul class="list-unstyled ms-3 category-children <%= 'collapsed' unless is_expanded %>"
+    <ul class="category-list category-children <%= 'collapsed' unless is_expanded %>"
         data-storefront-category-tree-target="children">
       <% children_list.each do |child| %>
         <%= render 'storefront/shared/category_tree_item', category: child, current_categories: local_assigns[:current_categories] %>

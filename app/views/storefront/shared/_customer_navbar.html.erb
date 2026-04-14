@@ -18,19 +18,19 @@
       <% end %>
 
       <%# Mobile cart icon + hamburger (visible only on mobile) %>
-      <div class="d-flex align-items-center d-lg-none">
+      <div class="d-flex align-items-center gap-2 d-lg-none">
         <% if current_customer %>
-          <%= link_to cart_path(org_slug: params[:org_slug]), class: "btn btn-outline-primary border-0 position-relative me-2 #{'active' if controller_name == 'carts'}" do %>
+          <%= link_to cart_path(org_slug: params[:org_slug]), class: "btn btn-outline-primary border-0 position-relative p-2 #{'active' if controller_name == 'carts'}", style: "font-size: 1.05rem;" do %>
             <i class="fa-solid fa-cart-shopping"></i>
             <% if cart_line_item_count > 0 %>
-              <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill cart-badge">
+              <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill cart-badge" style="font-size: 0.6rem;">
                 <%= cart_line_item_count %>
               </span>
             <% end %>
           <% end %>
         <% end %>
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#customerNav">
-          <span class="navbar-toggler-icon"></span>
+        <button class="navbar-toggler border-0 p-2" type="button" data-bs-toggle="collapse" data-bs-target="#customerNav">
+          <span class="navbar-toggler-icon" style="width: 1.4em; height: 1.4em;"></span>
         </button>
       </div>
 
@@ -106,7 +106,7 @@
       </div>
     </div>
   </nav>
-  <% if current_organisation&.free_shipping_enabled? && controller_name != 'home' %>
+  <% if current_organisation&.free_shipping_enabled? && controller_name.in?(%w[home carts]) %>
     <div class="py-2 text-center small fw-medium" style="background-color: #d1e7dd; color: #0f5132;">
       <i class="fa-solid fa-truck me-1"></i>
       <%= t('storefront.free_shipping.banner', amount: humanized_money_with_symbol(current_organisation.free_shipping_threshold)) %>

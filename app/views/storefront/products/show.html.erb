@@ -1,5 +1,5 @@
-<%= link_to products_path(org_slug: params[:org_slug], category: params[:category], queries: params[:queries], attrs: params[:attrs]&.to_unsafe_h, page: params[:page]), class: "btn btn-outline-secondary mb-4 mt-5" do %>
-  <i class="fa-solid fa-arrow-left me-2"></i><%= t('storefront.products.show.back_to_products') %>
+<%= link_to products_path(org_slug: params[:org_slug], category: params[:category], queries: params[:queries], attrs: params[:attrs]&.to_unsafe_h, page: params[:page]), class: "text-muted text-decoration-none small d-inline-flex align-items-center mb-3 mt-4" do %>
+  <i class="fa-solid fa-chevron-left me-1" style="font-size: 0.7rem;"></i> <%= t('storefront.products.show.back_to_products') %>
 <% end %>
 
 <%
@@ -283,22 +283,48 @@
             <% @attributes_with_values.each do |attribute, values| %>
               <div class="mb-3">
                 <% if values.size == 1 %>
-                  <%# Single value: display as static info, no dropdown needed %>
                   <span class="fw-semibold"><%= attribute.name %>:</span>
                   <span class="text-muted"><%= values.first.value %></span>
-                  <select class="form-select d-none" data-variant-selector-target="select">
-                    <option value="<%= values.first.id %>" selected><%= values.first.value %></option>
-                  </select>
+                  <input type="hidden" data-single-attribute-value="<%= values.first.id %>">
+                <% elsif attribute.display_type == 'color_swatches' %>
+                  <label class="form-label fw-semibold mb-2"><%= attribute.name %></label>
+                  <div class="d-flex flex-wrap gap-2" data-variant-selector-target="group">
+                    <% values.each do |value| %>
+                      <% is_default = @default_variant&.purchasable? && @default_variant&.attribute_values&.include?(value) %>
+                      <button type="button"
+                              class="btn btn-outline-secondary position-relative <%= 'active' if is_default %>"
+                              style="width: 42px; height: 42px; padding: 3px; border-radius: 50%; border-width: 2px;"
+                              data-variant-selector-target="button"
+                              data-value-id="<%= value.id %>"
+                              data-action="click->variant-selector#selectOption"
+                              title="<%= value.value %>">
+                        <span class="d-block w-100 h-100 rounded-circle" style="background-color: <%= value.color_hex.presence || '#ccc' %>;"></span>
+                      </button>
+                    <% end %>
+                  </div>
+                <% elsif attribute.display_type == 'buttons' %>
+                  <label class="form-label fw-semibold mb-2"><%= attribute.name %></label>
+                  <div class="d-flex flex-wrap gap-2" data-variant-selector-target="group">
+                    <% values.each do |value| %>
+                      <% is_default = @default_variant&.purchasable? && @default_variant&.attribute_values&.include?(value) %>
+                      <button type="button"
+                              class="btn btn-outline-secondary <%= 'active' if is_default %>"
+                              style="min-width: 48px; border-radius: 8px; padding: 6px 16px; font-weight: 500;"
+                              data-variant-selector-target="button"
+                              data-value-id="<%= value.id %>"
+                              data-action="click->variant-selector#selectOption">
+                        <%= value.value %>
+                      </button>
+                    <% end %>
+                  </div>
                 <% else %>
+                  <%# dropdown (default) %>
                   <label class="form-label fw-semibold"><%= attribute.name %></label>
                   <select class="form-select" data-variant-selector-target="select" data-action="change->variant-selector#change">
                     <option value=""><%= t('storefront.products.show.select_option', attribute: attribute.name) %></option>
                     <% values.each do |value| %>
                       <option value="<%= value.id %>"
-                              <%= 'selected' if @default_variant&.purchasable? && @default_variant&.attribute_values&.include?(value) %>
-                              <% if value.color_hex.present? %>
-                                data-color="<%= value.color_hex %>"
-                              <% end %>>
+                              <%= 'selected' if @default_variant&.purchasable? && @default_variant&.attribute_values&.include?(value) %>>
                         <%= value.value %>
                       </option>
                     <% end %>
@@ -321,11 +347,13 @@
                   <%= number_field_tag "order_item[quantity]", @product.min_quantity || 1, min: @product.min_quantity || 1, class: "form-control text-center", style: "width: 70px;", data: { variant_selector_target: "quantity", action: "change->variant-selector#updateTotal input->variant-selector#updateTotal" } %>
                 </div>
 
-                <button type="submit" class="btn btn-primary btn-lg px-4" style="border-radius: 8px;"
-                        data-variant-selector-target="addToCart"
-                        <%= 'disabled' unless @default_variant&.purchasable? %>>
-                  <i class="fa-solid fa-cart-plus me-2"></i><%= t('storefront.products.show.add_to_cart') %>
-                </button>
+                <div class="d-flex align-items-center gap-2">
+                  <button type="submit" class="btn btn-primary btn-lg px-4 flex-grow-1" style="border-radius: 8px;"
+                          data-variant-selector-target="addToCart"
+                          <%= 'disabled' unless @default_variant&.purchasable? %>>
+                    <i class="fa-solid fa-cart-plus me-2"></i><%= t('storefront.products.show.add_to_cart') %>
+                  </button>
+                </div>
 
                 <div class="text-muted">
                   <i class="fa-solid fa-calculator me-2"></i><%= t('storefront.products.show.estimated_total') %>
@@ -434,6 +462,13 @@
     <div class="modal-dialog modal-fullscreen">
       <div class="modal-content bg-white">
         <div class="d-flex h-100">
+
+          <!-- Mobile close button (visible only on mobile, where the sidebar with close is hidden) -->
+          <button type="button" class="btn d-md-none position-absolute d-flex align-items-center justify-content-center"
+                  style="top: 16px; right: 16px; width: 44px; height: 44px; background: white; border: 1px solid #dee2e6; border-radius: 50%; box-shadow: 0 2px 8px rgba(0,0,0,0.15); z-index: 10;"
+                  data-bs-dismiss="modal" aria-label="Close">
+            <i class="fa-solid fa-xmark fa-lg"></i>
+          </button>
 
           <!-- Left: Main Image -->
           <div class="flex-grow-1 d-flex align-items-center justify-content-center position-relative"

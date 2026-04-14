@@ -145,7 +145,7 @@ en:
         categories: "Categories"
         all_products: "All Products"
         filters_button: "Filters"
-        filters_title: "Filters & Categories"
+        filters_title: "Filters"
         clear_filters: "Clear filters"
         filters:
           active: "Active filters"
@@ -157,6 +157,9 @@ en:
         min_order: "Min. order"
         price_on_request: "Price on Request"
         showing_products: "Showing %{from}-%{to} of %{count} products"
+        products_count:
+          one: "product"
+          other: "products"
         sort:
           label: "Sort by"
           name_asc: "Name A-Z"
@@ -232,6 +235,7 @@ en:
         confirm_remove_item: "Remove this item?"
         confirm_clear_cart: "Are you sure you want to clear your cart?"
         remove_item: "Remove"
+        you_might_like: "You might also like"
         decrease_quantity: "Decrease quantity"
         increase_quantity: "Increase quantity"
         order_summary: "Order Summary"

@@ -815,6 +815,12 @@ es:
         statistics: "Estadísticas"
         total_values: "Total de Valores"
         products_using: "Productos Usando"
+        display_type: "Presentación en Tienda"
+        display_type_hint: "Cómo aparece este atributo en la tienda"
+        display_types:
+          dropdown: "Dropdown (lista desplegable)"
+          buttons: "Botones"
+          color_swatches: "Swatches de color"
         help_title: "Sobre Atributos"
         help_text: "Los atributos definen las variaciones disponibles para productos. Por ejemplo, un atributo 'Color' puede tener valores como 'Rojo', 'Azul', 'Verde'. Los productos pueden usar estos atributos para crear variantes."
         placeholders:
