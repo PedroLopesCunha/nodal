@@ -11,8 +11,12 @@
     <div class="col-md-2">
       <label class="form-label small"><%= t('bo.product_attributes.form.color') %></label>
       <div class="input-group input-group-sm">
-        <%= f.color_field :color_hex, class: "form-control form-control-color form-control-sm", value: f.object.color_hex.presence || "#6c757d", style: "width: 38px;" %>
-        <%= f.text_field :color_hex, class: "form-control form-control-sm", placeholder: "#FFFFFF", style: "font-size: 0.75rem;" %>
+        <input type="color" class="form-control form-control-color form-control-sm"
+               value="<%= f.object.color_hex.presence || '#6c757d' %>"
+               style="width: 38px;"
+               oninput="this.nextElementSibling.value = this.value">
+        <%= f.text_field :color_hex, class: "form-control form-control-sm", placeholder: "#FFFFFF", style: "font-size: 0.75rem;",
+            oninput: "this.previousElementSibling.value = this.value || '#6c757d'" %>
       </div>
     </div>
     <div class="col-md-2 text-end">

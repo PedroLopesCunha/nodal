@@ -892,6 +892,12 @@ en:
         statistics: "Statistics"
         total_values: "Total Values"
         products_using: "Products Using"
+        display_type: "Storefront Display"
+        display_type_hint: "How this attribute appears in the storefront"
+        display_types:
+          dropdown: "Dropdown"
+          buttons: "Buttons"
+          color_swatches: "Color swatches"
         help_title: "About Attributes"
         help_text: "Attributes define the variations available for products. For example, a 'Color' attribute might have values like 'Red', 'Blue', 'Green'. Products can then use these attributes to create variants."
         placeholders:

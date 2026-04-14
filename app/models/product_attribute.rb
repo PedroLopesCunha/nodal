@@ -10,8 +10,11 @@ class ProductAttribute < ApplicationRecord
 
   accepts_nested_attributes_for :product_attribute_values, allow_destroy: true, reject_if: :all_blank
 
+  DISPLAY_TYPES = %w[dropdown buttons color_swatches].freeze
+
   validates :name, presence: true
   validates :slug, presence: true, uniqueness: { scope: :organisation_id }
+  validates :display_type, inclusion: { in: DISPLAY_TYPES }
 
   before_validation :generate_slug, if: -> { slug.blank? && name.present? }
 

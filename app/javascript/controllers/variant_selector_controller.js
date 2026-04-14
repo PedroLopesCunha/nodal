@@ -1,7 +1,7 @@
 import { Controller } from "@hotwired/stimulus"
 
 export default class extends Controller {
-  static targets = ["select", "variantId", "price", "originalPrice", "sku", "stock", "addToCart", "image", "zoomImage", "mainPrice", "discountBadge", "quantity"]
+  static targets = ["select", "group", "button", "variantId", "price", "originalPrice", "sku", "stock", "addToCart", "image", "zoomImage", "mainPrice", "discountBadge", "quantity"]
   static values = {
     variants: Array,
     currencySymbol: String,
@@ -19,7 +19,7 @@ export default class extends Controller {
   connect() {
     this.selectedVariant = null
     this.originalImageUrl = this.hasImageTarget ? this.imageTarget.src : null
-    // Store all original options per select for filtering
+    // Store original options for dropdown selects
     this.originalOptions = this.selectTargets.map(select => {
       return Array.from(select.options).map(opt => ({
         value: opt.value,
@@ -33,64 +33,141 @@ export default class extends Controller {
     this.updateTotal()
   }
 
+  // Called when a dropdown changes
   change() {
     this.filterAvailableOptions()
     this.updateSelection()
     this.updateTotal()
   }
 
-  filterAvailableOptions() {
-    const selects = this.selectTargets.filter(s => !s.classList.contains("d-none"))
+  // Called when a button/swatch is clicked
+  selectOption(event) {
+    const button = event.currentTarget
+    const group = button.closest("[data-variant-selector-target='group']")
 
-    selects.forEach((currentSelect, currentIndex) => {
-      // Get selected values from ALL OTHER selects (not this one)
+    if (button.classList.contains("active")) {
+      button.classList.remove("active")
+    } else {
+      group.querySelectorAll("[data-variant-selector-target='button']").forEach(btn => {
+        btn.classList.remove("active")
+      })
+      button.classList.add("active")
+    }
+
+    this.filterAvailableOptions()
+    this.updateSelection()
+    this.updateTotal()
+  }
+
+  filterAvailableOptions() {
+    // Collect all attribute selectors (both dropdowns and button groups)
+    const selectors = this._getAllSelectors()
+
+    selectors.forEach((current, currentIndex) => {
+      // Get selected values from all OTHER selectors
       const otherSelections = []
-      selects.forEach((otherSelect, otherIndex) => {
-        if (otherIndex !== currentIndex && otherSelect.value) {
-          otherSelections.push(parseInt(otherSelect.value))
-        }
+      selectors.forEach((other, otherIndex) => {
+        if (otherIndex === currentIndex) return
+        const val = this._getSelectorValue(other)
+        if (val) otherSelections.push(val)
       })
 
-      // Find which values for THIS select's attribute are compatible
-      // with the other selections
+      // Find compatible values
       const compatibleValueIds = new Set()
+      const allValueIds = this._getSelectorValueIds(current)
 
       this.variantsValue.forEach(variant => {
-        // Check if this variant matches all other selections
         const matchesOthers = otherSelections.every(selectedId =>
           variant.attribute_value_ids.includes(selectedId)
         )
-
         if (matchesOthers) {
-          // This variant is compatible — its attribute values for this select are valid
-          const originalValueIds = this.originalOptions[this.selectTargets.indexOf(currentSelect)]
-            .filter(opt => opt.value)
-            .map(opt => parseInt(opt.value))
-
           variant.attribute_value_ids.forEach(valueId => {
-            if (originalValueIds.includes(valueId)) {
+            if (allValueIds.includes(valueId)) {
               compatibleValueIds.add(valueId)
             }
           })
         }
       })
 
-      // Update the options: disable incompatible ones
-      const currentValue = currentSelect.value
-      Array.from(currentSelect.options).forEach(option => {
-        if (!option.value) return // Skip placeholder
-        const valueId = parseInt(option.value)
-        const isCompatible = compatibleValueIds.has(valueId)
-        option.disabled = !isCompatible
-        option.style.display = isCompatible ? "" : "none"
-      })
+      // Apply filtering
+      if (current.type === "select") {
+        this._filterSelect(current.element, compatibleValueIds)
+      } else {
+        this._filterButtonGroup(current.element, compatibleValueIds)
+      }
+    })
+  }
 
-      // If current selection is no longer compatible, reset to first compatible
-      if (currentValue && !compatibleValueIds.has(parseInt(currentValue))) {
-        const firstCompatible = Array.from(currentSelect.options).find(
-          opt => opt.value && !opt.disabled
-        )
-        currentSelect.value = firstCompatible ? firstCompatible.value : ""
+  _getAllSelectors() {
+    const selectors = []
+
+    // Visible dropdown selects
+    this.selectTargets.forEach(select => {
+      if (!select.classList.contains("d-none")) {
+        selectors.push({ type: "select", element: select })
+      }
+    })
+
+    // Button groups
+    this.groupTargets.forEach(group => {
+      selectors.push({ type: "group", element: group })
+    })
+
+    return selectors
+  }
+
+  _getSelectorValue(selector) {
+    if (selector.type === "select") {
+      return selector.element.value ? parseInt(selector.element.value) : null
+    } else {
+      const activeBtn = selector.element.querySelector("[data-variant-selector-target='button'].active")
+      return activeBtn ? parseInt(activeBtn.dataset.valueId) : null
+    }
+  }
+
+  _getSelectorValueIds(selector) {
+    if (selector.type === "select") {
+      const selectIndex = this.selectTargets.indexOf(selector.element)
+      return this.originalOptions[selectIndex]
+        .filter(opt => opt.value)
+        .map(opt => parseInt(opt.value))
+    } else {
+      return Array.from(
+        selector.element.querySelectorAll("[data-variant-selector-target='button']")
+      ).map(btn => parseInt(btn.dataset.valueId))
+    }
+  }
+
+  _filterSelect(select, compatibleValueIds) {
+    const currentValue = select.value
+    Array.from(select.options).forEach(option => {
+      if (!option.value) return
+      const valueId = parseInt(option.value)
+      const isCompatible = compatibleValueIds.has(valueId)
+      option.disabled = !isCompatible
+      option.style.display = isCompatible ? "" : "none"
+    })
+
+    if (currentValue && !compatibleValueIds.has(parseInt(currentValue))) {
+      const firstCompatible = Array.from(select.options).find(
+        opt => opt.value && !opt.disabled
+      )
+      select.value = firstCompatible ? firstCompatible.value : ""
+    }
+  }
+
+  _filterButtonGroup(group, compatibleValueIds) {
+    group.querySelectorAll("[data-variant-selector-target='button']").forEach(btn => {
+      const valueId = parseInt(btn.dataset.valueId)
+      const isCompatible = compatibleValueIds.has(valueId)
+      btn.disabled = !isCompatible
+      if (!isCompatible) {
+        btn.classList.add("opacity-25")
+        if (btn.classList.contains("active")) {
+          btn.classList.remove("active")
+        }
+      } else {
+        btn.classList.remove("opacity-25")
       }
     })
   }
@@ -177,11 +254,27 @@ export default class extends Controller {
 
   getSelectedValues() {
     const values = []
+
+    // From dropdown selects
     this.selectTargets.forEach(select => {
       if (select.value) {
         values.push(parseInt(select.value))
       }
     })
+
+    // From button groups
+    this.groupTargets.forEach(group => {
+      const activeBtn = group.querySelector("[data-variant-selector-target='button'].active")
+      if (activeBtn) {
+        values.push(parseInt(activeBtn.dataset.valueId))
+      }
+    })
+
+    // From hidden single-value inputs
+    this.element.querySelectorAll("input[data-single-attribute-value]").forEach(input => {
+      values.push(parseInt(input.dataset.singleAttributeValue))
+    })
+
     return values.sort((a, b) => a - b)
   }
 

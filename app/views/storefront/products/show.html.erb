@@ -283,22 +283,48 @@
             <% @attributes_with_values.each do |attribute, values| %>
               <div class="mb-3">
                 <% if values.size == 1 %>
-                  <%# Single value: display as static info, no dropdown needed %>
                   <span class="fw-semibold"><%= attribute.name %>:</span>
                   <span class="text-muted"><%= values.first.value %></span>
-                  <select class="form-select d-none" data-variant-selector-target="select">
-                    <option value="<%= values.first.id %>" selected><%= values.first.value %></option>
-                  </select>
+                  <input type="hidden" data-single-attribute-value="<%= values.first.id %>">
+                <% elsif attribute.display_type == 'color_swatches' %>
+                  <label class="form-label fw-semibold mb-2"><%= attribute.name %></label>
+                  <div class="d-flex flex-wrap gap-2" data-variant-selector-target="group">
+                    <% values.each do |value| %>
+                      <% is_default = @default_variant&.purchasable? && @default_variant&.attribute_values&.include?(value) %>
+                      <button type="button"
+                              class="btn btn-outline-secondary position-relative <%= 'active' if is_default %>"
+                              style="width: 42px; height: 42px; padding: 3px; border-radius: 50%; border-width: 2px;"
+                              data-variant-selector-target="button"
+                              data-value-id="<%= value.id %>"
+                              data-action="click->variant-selector#selectOption"
+                              title="<%= value.value %>">
+                        <span class="d-block w-100 h-100 rounded-circle" style="background-color: <%= value.color_hex.presence || '#ccc' %>;"></span>
+                      </button>
+                    <% end %>
+                  </div>
+                <% elsif attribute.display_type == 'buttons' %>
+                  <label class="form-label fw-semibold mb-2"><%= attribute.name %></label>
+                  <div class="d-flex flex-wrap gap-2" data-variant-selector-target="group">
+                    <% values.each do |value| %>
+                      <% is_default = @default_variant&.purchasable? && @default_variant&.attribute_values&.include?(value) %>
+                      <button type="button"
+                              class="btn btn-outline-secondary <%= 'active' if is_default %>"
+                              style="min-width: 48px; border-radius: 8px; padding: 6px 16px; font-weight: 500;"
+                              data-variant-selector-target="button"
+                              data-value-id="<%= value.id %>"
+                              data-action="click->variant-selector#selectOption">
+                        <%= value.value %>
+                      </button>
+                    <% end %>
+                  </div>
                 <% else %>
+                  <%# dropdown (default) %>
                   <label class="form-label fw-semibold"><%= attribute.name %></label>
                   <select class="form-select" data-variant-selector-target="select" data-action="change->variant-selector#change">
                     <option value=""><%= t('storefront.products.show.select_option', attribute: attribute.name) %></option>
                     <% values.each do |value| %>
                       <option value="<%= value.id %>"
-                              <%= 'selected' if @default_variant&.purchasable? && @default_variant&.attribute_values&.include?(value) %>
-                              <% if value.color_hex.present? %>
-                                data-color="<%= value.color_hex %>"
-                              <% end %>>
+                              <%= 'selected' if @default_variant&.purchasable? && @default_variant&.attribute_values&.include?(value) %>>
                         <%= value.value %>
                       </option>
                     <% end %>
