@@ -16,6 +16,7 @@ class ProductAttributeValue < ApplicationRecord
 
   scope :by_position, -> { order(:position) }
   scope :active, -> { where(active: true) }
+  scope :naturally_sorted, -> { order(Arel.sql("LENGTH(value), value")) }
 
   delegate :organisation, to: :product_attribute
 

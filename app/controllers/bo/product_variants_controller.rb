@@ -134,7 +134,7 @@ class Bo::ProductVariantsController < Bo::BaseController
     @extra_values_by_attribute = {}
 
     all_attributes.each do |attribute|
-      values = attribute.product_attribute_values.where(active: true).by_position
+      values = attribute.product_attribute_values.where(active: true).naturally_sorted
       if product_attribute_ids.include?(attribute.id)
         @product_values_by_attribute[attribute] = values
       else

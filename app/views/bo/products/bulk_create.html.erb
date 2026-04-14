@@ -16,7 +16,7 @@
 
 <div data-controller="bulk-create"
      data-bulk-create-categories-value="<%= @categories.map { |c| { id: c.id, name: c.full_path } }.to_json %>"
-     data-bulk-create-attributes-value="<%= @product_attributes.map { |a| { id: a.id, name: a.name, values: a.product_attribute_values.by_position.map { |v| { id: v.id, value: v.value } } } }.to_json %>"
+     data-bulk-create-attributes-value="<%= @product_attributes.map { |a| { id: a.id, name: a.name, values: a.product_attribute_values.naturally_sorted.map { |v| { id: v.id, value: v.value } } } }.to_json %>"
      data-bulk-create-all-skus-value="<%= @all_skus.to_json %>"
      data-bulk-create-variable-skus-value="<%= @variable_skus.to_json %>"
      data-bulk-create-submit-url-value="<%= bulk_create_process_bo_products_path(params[:org_slug]) %>"

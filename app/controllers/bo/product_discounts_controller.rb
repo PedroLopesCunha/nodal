@@ -96,7 +96,7 @@ class Bo::ProductDiscountsController < Bo::BaseController
     @categories = current_organisation.categories.kept.arrange_serializable do |parent, children|
       { id: parent.id, name: parent.full_path, children: children }
     end
-    @categories_for_select = current_organisation.categories.kept.order(:name).map do |cat|
+    @categories_for_select = current_organisation.categories.kept.sorted_by_full_path.map do |cat|
       [cat.full_path, cat.id]
     end
   end

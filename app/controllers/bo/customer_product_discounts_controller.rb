@@ -136,7 +136,7 @@ class Bo::CustomerProductDiscountsController < Bo::BaseController
     @customers = current_organisation.customers.order(:company_name)
     @customer_categories = current_organisation.customer_categories.ordered
     @products = current_organisation.products.order(:name)
-    @categories_for_select = current_organisation.categories.kept.order(:name).map do |cat|
+    @categories_for_select = current_organisation.categories.kept.sorted_by_full_path.map do |cat|
       [cat.full_path, cat.id]
     end
   end

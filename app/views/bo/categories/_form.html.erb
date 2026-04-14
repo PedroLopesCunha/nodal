@@ -33,10 +33,10 @@
             <div class="col-md-12">
               <label class="form-label"><%= t('bo.categories.form.parent_category') %></label>
               <%
-                # Get all categories except current one, ordered by ancestry for tree-like display
+                # Get all categories except current one, sorted by full path
                 parent_options = current_organisation.categories.kept
                   .where.not(id: category.id)
-                  .order(:ancestry, :position)
+                  .sorted_by_full_path
                   .map { |c| [c.full_path, c.id] }
               %>
               <%= f.select :parent_id,
