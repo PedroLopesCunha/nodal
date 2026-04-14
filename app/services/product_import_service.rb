@@ -26,6 +26,7 @@ class ProductImportService
     @photo_mode = photo_mode # "append" or "replace"
     @form_category_id = form_category_id
     @images_by_sku = {}
+    @imported_products = []
   end
 
   def call
@@ -40,6 +41,8 @@ class ProductImportService
 
     # Also match photos to variants by SKU
     attach_variant_photos(results) if @images_by_sku.present?
+
+    recalculate_availability
 
     Result.new(**results, total: results[:created] + results[:updated])
   ensure
@@ -75,6 +78,8 @@ class ProductImportService
     assign_category(product, attributes)
 
     if product.save
+      @imported_products << product
+
       if product.previously_new_record?
         results[:created] += 1
       else
@@ -379,6 +384,17 @@ class ProductImportService
       results[:photos_attached] += 1
     rescue => e
       results[:errors] << { row: nil, field: sku, message: e.message }
+    end
+  end
+
+  def recalculate_availability
+    stock_service = StockRulesService.new(@organisation)
+
+    @imported_products.uniq.each do |product|
+      product.product_variants.each do |variant|
+        stock_service.apply_to_variant(variant)
+      end
+      stock_service.recalculate_product_availability(product.reload)
     end
   end
 
