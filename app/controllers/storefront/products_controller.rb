@@ -33,9 +33,14 @@ class Storefront::ProductsController < Storefront::BaseController
     # Children lookup to avoid N+1 in tree rendering
     @category_children = @all_kept_categories.group_by(&:parent_id)
 
-    # Parse single selected category
+    # Parse single selected category (accepts id or slug)
     if params[:category].present?
-      @current_category = current_organisation.categories.kept.find_by(id: params[:category].to_i)
+      cat_param = params[:category]
+      @current_category = if cat_param.to_s =~ /\A\d+\z/
+        current_organisation.categories.kept.find_by(id: cat_param)
+      else
+        current_organisation.categories.kept.find_by(slug: cat_param)
+      end
     end
     # Keep as array for backward compatibility with shared views
     @current_categories = @current_category ? [ @current_category ] : []

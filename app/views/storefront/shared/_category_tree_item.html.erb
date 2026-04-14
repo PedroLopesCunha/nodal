@@ -1,5 +1,5 @@
 <%
-  current_category_id = params[:category].present? ? params[:category].to_i : nil
+  current_category_id = @current_category&.id
   is_selected = category.id == current_category_id
   is_ancestor = local_assigns[:current_categories]&.any? { |c| c.ancestor_ids.include?(category.id) }
   children_list = @category_children[category.id] || []
