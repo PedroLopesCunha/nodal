@@ -108,6 +108,10 @@ en:
       sort_name: "Name"
       sort_price: "Price"
       sort_category: "Category"
+      client_name: "Client / Company"
+      client_name_placeholder: "e.g. Acme Corp"
+      observations: "Observations"
+      observations_placeholder: "Notes to include in the catalog..."
       options: "Options"
       show_prices: "Show prices"
       show_sku: "Show SKU"
@@ -116,6 +120,7 @@ en:
       group_by_category: "Group by category"
       only_available: "Only available products"
       variant_details: "Variant Details"
+      only_available_variants: "Only available variants"
       show_variant_sku: "Show variant SKU"
       show_variant_price: "Show variant prices"
       show_variant_photo: "Show variant photos"
@@ -143,6 +148,7 @@ en:
         get_in_touch: "Get in Touch"
         phone: "Phone"
         location_hours: "Location & Hours"
+        observations: "Observations"
 
     # Export
     export:

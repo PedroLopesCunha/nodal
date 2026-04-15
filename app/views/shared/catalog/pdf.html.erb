@@ -101,13 +101,13 @@
       <% if @layout == "grid" %>
         <div class="product-grid">
           <% products.each do |product| %>
-            <%= render partial: "shared/catalog/product_grid", locals: { product: product, show_prices: @show_prices, show_sku: @show_sku, show_description: @show_description, show_variants: @show_variants, show_variant_sku: @show_variant_sku, show_variant_price: @show_variant_price, show_variant_photo: @show_variant_photo } %>
+            <%= render partial: "shared/catalog/product_grid", locals: { product: product, show_prices: @show_prices, show_sku: @show_sku, show_description: @show_description, show_variants: @show_variants, show_variant_sku: @show_variant_sku, show_variant_price: @show_variant_price, show_variant_photo: @show_variant_photo, only_available_variants: @only_available_variants } %>
           <% end %>
         </div>
       <% else %>
         <div class="product-list">
           <% products.each do |product| %>
-            <%= render partial: "shared/catalog/product_list", locals: { product: product, show_prices: @show_prices, show_sku: @show_sku, show_description: @show_description, show_variants: @show_variants, show_variant_sku: @show_variant_sku, show_variant_price: @show_variant_price, show_variant_photo: @show_variant_photo } %>
+            <%= render partial: "shared/catalog/product_list", locals: { product: product, show_prices: @show_prices, show_sku: @show_sku, show_description: @show_description, show_variants: @show_variants, show_variant_sku: @show_variant_sku, show_variant_price: @show_variant_price, show_variant_photo: @show_variant_photo, only_available_variants: @only_available_variants } %>
           <% end %>
         </div>
       <% end %>
@@ -116,13 +116,13 @@
     <% if @layout == "grid" %>
       <div class="product-grid">
         <% @products.each do |product| %>
-          <%= render partial: "shared/catalog/product_grid", locals: { product: product, show_prices: @show_prices, show_sku: @show_sku, show_description: @show_description, show_variants: @show_variants, show_variant_sku: @show_variant_sku, show_variant_price: @show_variant_price, show_variant_photo: @show_variant_photo } %>
+          <%= render partial: "shared/catalog/product_grid", locals: { product: product, show_prices: @show_prices, show_sku: @show_sku, show_description: @show_description, show_variants: @show_variants, show_variant_sku: @show_variant_sku, show_variant_price: @show_variant_price, show_variant_photo: @show_variant_photo, only_available_variants: @only_available_variants } %>
         <% end %>
       </div>
     <% else %>
       <div class="product-list">
         <% @products.each do |product| %>
-          <%= render partial: "shared/catalog/product_list", locals: { product: product, show_prices: @show_prices, show_sku: @show_sku, show_description: @show_description, show_variants: @show_variants, show_variant_sku: @show_variant_sku, show_variant_price: @show_variant_price, show_variant_photo: @show_variant_photo } %>
+          <%= render partial: "shared/catalog/product_list", locals: { product: product, show_prices: @show_prices, show_sku: @show_sku, show_description: @show_description, show_variants: @show_variants, show_variant_sku: @show_variant_sku, show_variant_price: @show_variant_price, show_variant_photo: @show_variant_photo, only_available_variants: @only_available_variants } %>
         <% end %>
       </div>
     <% end %>

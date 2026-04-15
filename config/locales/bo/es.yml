@@ -100,6 +100,10 @@ es:
       sort_name: "Nombre"
       sort_price: "Precio"
       sort_category: "Categoría"
+      client_name: "Cliente / Empresa"
+      client_name_placeholder: "ej. Empresa Ejemplo"
+      observations: "Observaciones"
+      observations_placeholder: "Notas para incluir en el catálogo..."
       options: "Opciones"
       show_prices: "Mostrar precios"
       show_sku: "Mostrar SKU"
@@ -108,6 +112,7 @@ es:
       group_by_category: "Agrupar por categoría"
       only_available: "Solo productos disponibles"
       variant_details: "Detalles de Variantes"
+      only_available_variants: "Solo variantes disponibles"
       show_variant_sku: "Mostrar SKU de variante"
       show_variant_price: "Mostrar precio de variante"
       show_variant_photo: "Mostrar foto de variante"
@@ -135,6 +140,7 @@ es:
         get_in_touch: "Póngase en Contacto"
         phone: "Teléfono"
         location_hours: "Ubicación y Horario"
+        observations: "Observaciones"
 
     # Exportación
     export:

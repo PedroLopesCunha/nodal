@@ -18,6 +18,18 @@
             <%= text_field_tag :catalog_title, current_organisation.name, class: "form-control form-control-sm", placeholder: t('bo.catalog.catalog_title_placeholder') %>
           </div>
 
+          <!-- Client Name -->
+          <div class="mb-3">
+            <label class="form-label fw-semibold"><%= t('bo.catalog.client_name') %></label>
+            <%= text_field_tag :client_name, nil, class: "form-control form-control-sm", placeholder: t('bo.catalog.client_name_placeholder') %>
+          </div>
+
+          <!-- Observations -->
+          <div class="mb-3">
+            <label class="form-label fw-semibold"><%= t('bo.catalog.observations') %></label>
+            <%= text_area_tag :observations, nil, class: "form-control form-control-sm", rows: 3, placeholder: t('bo.catalog.observations_placeholder') %>
+          </div>
+
           <!-- Layout & Sort -->
           <div class="row mb-3">
             <div class="col-6">
@@ -73,6 +85,10 @@
             <div class="form-check mb-1">
               <%= check_box_tag :show_variants, "1", true, class: "form-check-input", id: "catalog_show_variants" %>
               <%= label_tag :catalog_show_variants, t('bo.catalog.show_variants'), class: "form-check-label" %>
+            </div>
+            <div class="form-check mb-1 ms-4">
+              <%= check_box_tag :only_available_variants, "1", true, class: "form-check-input", id: "catalog_only_available_variants" %>
+              <%= label_tag :catalog_only_available_variants, t('bo.catalog.only_available_variants'), class: "form-check-label" %>
             </div>
             <div class="form-check mb-1 ms-4">
               <%= check_box_tag :show_variant_sku, "1", true, class: "form-check-input", id: "catalog_show_variant_sku" %>

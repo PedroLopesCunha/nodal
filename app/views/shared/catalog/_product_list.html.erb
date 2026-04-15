@@ -16,6 +16,7 @@
     <% end %>
     <% if show_variants && product.has_variants? %>
       <% variants = product.product_variants.reject(&:is_default?).select(&:published?) %>
+      <% variants = variants.select(&:available?) if only_available_variants %>
       <% if variants.any? %>
         <table class="variant-table">
           <thead>
