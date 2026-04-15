@@ -15,6 +15,7 @@ class CatalogPdfService
     @catalog_host = options["base_url"] || "http://localhost:3000"
     @show_variants = options["show_variants"] == "1"
     @show_variant_photo = options["show_variant_photo"] == "1"
+    @only_available_variants = options["only_available_variants"] != "0"
   end
 
   def generate(&progress_callback)
@@ -52,6 +53,7 @@ class CatalogPdfService
         organisation: @organisation,
         catalog_title: catalog_title,
         product_count: @products.size,
+        client_name: @options["client_name"].presence,
         logo_data: logo_data,
         catalog_host: @catalog_host
       }
@@ -82,14 +84,16 @@ class CatalogPdfService
   end
 
   def generate_contact_pdf
-    return nil unless @organisation.has_contact_info?
+    observations = @options["observations"].presence
+    return nil unless @organisation.has_contact_info? || observations
 
     html = @renderer.render(
       template: "shared/catalog/contact_pdf",
       layout: false,
       assigns: {
         organisation: @organisation,
-        catalog_title: catalog_title
+        catalog_title: catalog_title,
+        observations: observations
       }
     )
     render_pdf(html)
@@ -102,7 +106,9 @@ class CatalogPdfService
 
       next unless @show_variants && product.has_variants?
 
-      product.product_variants.reject(&:is_default?).select(&:published?).each do |variant|
+      variants = product.product_variants.reject(&:is_default?).select(&:published?)
+      variants = variants.select(&:available?) if @only_available_variants
+      variants.each do |variant|
         next unless @show_variant_photo && variant.photo.attached?
         map["variant_#{variant.id}"] = download_image(variant.photo, small: true)
       end
@@ -196,6 +202,7 @@ class CatalogPdfService
       show_variant_sku: @options["show_variant_sku"] == "1",
       show_variant_price: @options["show_variant_price"] == "1",
       show_variant_photo: @show_variant_photo,
+      only_available_variants: @only_available_variants,
       layout: @options["catalog_layout"] == "list" ? "list" : "grid",
       group_by_category: @options["group_by_category"] == "1",
       grouped: grouped,

@@ -279,7 +279,10 @@ class Bo::ProductsController < Bo::BaseController
       "show_variant_photo" => params[:show_variant_photo],
       "catalog_layout" => params[:catalog_layout],
       "group_by_category" => params[:group_by_category],
+      "client_name" => params[:client_name],
+      "observations" => params[:observations],
       "only_available" => params[:only_available],
+      "only_available_variants" => params[:only_available_variants],
       "sort_by" => params[:sort_by],
       "base_url" => request.base_url
     }

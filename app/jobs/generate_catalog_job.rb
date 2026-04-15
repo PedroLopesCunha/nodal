@@ -19,7 +19,9 @@ class GenerateCatalogJob < ApplicationJob
       products = products.where(id: product_ids_from_cats)
     end
 
-    products = products.where(published: true) if options["only_available"] != "0"
+    if options["only_available"] != "0"
+      products = products.where(published: true, available: true)
+    end
 
     case options["sort_by"]
     when "price" then products = products.order(:unit_price)
