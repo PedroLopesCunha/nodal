@@ -204,6 +204,8 @@ class ProductGridImportService
   end
 
   def setup_simple_product_attributes(product, row)
+    variant = product.default_variant
+
     NUM_ATTRS.times do |i|
       attr_name = row["atributo_#{i + 1}_nome"]
       attr_value = row["atributo_#{i + 1}_valores"]
@@ -220,6 +222,9 @@ class ProductGridImportService
 
       # For simple products, set the available value too
       product.product_available_values.find_or_create_by!(product_attribute_value: av)
+
+      # Also assign to the default variant so attributes display correctly
+      variant&.variant_attribute_values&.find_or_create_by!(product_attribute_value: av)
     end
   end
 
