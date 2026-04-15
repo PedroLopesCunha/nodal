@@ -293,12 +293,13 @@ class Storefront::ProductsController < Storefront::BaseController
       }
     end
 
-    # Sort values: numeric-first (natural sort), then alphabetical
+    # Sort values: numeric-first (by numeric value), then alphabetical
     attrs_hash.each_value do |attr|
       attr[:values].sort_by! do |v|
         label = v[:label].to_s
-        if label.match?(/\A\d/)
-          [0, label.length, label.downcase]
+        num = label[/\A[\d.]+/]
+        if num
+          [0, num.to_f]
         else
           [1, label.downcase]
         end

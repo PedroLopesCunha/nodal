@@ -16,7 +16,7 @@ class ProductAttributeValue < ApplicationRecord
 
   scope :by_position, -> { order(:position) }
   scope :active, -> { where(active: true) }
-  scope :naturally_sorted, -> { order(Arel.sql("LENGTH(value), value")) }
+  scope :naturally_sorted, -> { order(Arel.sql("CAST(regexp_replace(value, '[^0-9.]', '', 'g') AS NUMERIC) NULLS LAST, value")) }
 
   delegate :organisation, to: :product_attribute
 
