@@ -16,7 +16,16 @@ class ProductAttributeValue < ApplicationRecord
 
   scope :by_position, -> { order(:position) }
   scope :active, -> { where(active: true) }
-  scope :naturally_sorted, -> { order(Arel.sql("CAST(regexp_replace(value, '[^0-9.]', '', 'g') AS NUMERIC) NULLS LAST, value")) }
+  scope :naturally_sorted, -> {
+    order(Arel.sql(<<~SQL.squish))
+      CASE
+        WHEN regexp_replace(value, '[^0-9.]', '', 'g') ~ '^[0-9]+(\\.[0-9]+)?$'
+        THEN CAST(regexp_replace(value, '[^0-9.]', '', 'g') AS NUMERIC)
+        ELSE 999999
+      END,
+      value
+    SQL
+  }
 
   delegate :organisation, to: :product_attribute
 
