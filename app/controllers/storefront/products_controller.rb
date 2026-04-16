@@ -60,19 +60,7 @@ class Storefront::ProductsController < Storefront::BaseController
     @current_queries = Array(params[:queries]).map(&:strip).reject(&:blank?).uniq
 
     # Build product IDs from search queries (OR logic across all terms)
-    search_product_ids = []
-    @current_queries.each do |term|
-      query = "%#{term}%"
-      # Search in product name, description, and category names
-      ids_by_category_name = base_products.joins(:categories)
-                                          .where("unaccent(categories.name) ILIKE unaccent(?)", query)
-                                          .pluck(:id)
-      ids_by_product = base_products.left_joins(:product_variants).where(
-        "unaccent(products.name) ILIKE unaccent(?) OR unaccent(products.description) ILIKE unaccent(?) OR unaccent(products.sku) ILIKE unaccent(?) OR unaccent(product_variants.sku) ILIKE unaccent(?)", query, query, query, query
-      ).pluck(:id)
-      search_product_ids += ids_by_product + ids_by_category_name
-    end
-    search_product_ids = search_product_ids.uniq
+    search_product_ids = search_products(base_products, @current_queries)
 
     # Combine with AND logic: category AND search (intersection)
     if @current_category && @current_queries.any?
@@ -218,6 +206,42 @@ class Storefront::ProductsController < Storefront::BaseController
   end
 
   private
+
+  TRIGRAM_THRESHOLD = 0.3
+
+  def search_products(base_products, queries)
+    return [] if queries.blank?
+
+    product_ids = []
+    queries.each do |term|
+      ids = exact_search(base_products, term)
+      ids = fuzzy_search(base_products, term) if ids.empty?
+      product_ids += ids
+    end
+    product_ids.uniq
+  end
+
+  def exact_search(base_products, term)
+    query = "%#{term}%"
+    ids_by_category = base_products.joins(:categories)
+                                   .where("unaccent(categories.name) ILIKE unaccent(?)", query)
+                                   .pluck(:id)
+    ids_by_product = base_products.left_joins(:product_variants).where(
+      "unaccent(products.name) ILIKE unaccent(?) OR unaccent(products.description) ILIKE unaccent(?) OR unaccent(products.sku) ILIKE unaccent(?) OR unaccent(product_variants.sku) ILIKE unaccent(?)",
+      query, query, query, query
+    ).pluck(:id)
+    (ids_by_product + ids_by_category).uniq
+  end
+
+  def fuzzy_search(base_products, term)
+    ids_by_product = base_products.where(
+      "similarity(unaccent(products.name), unaccent(?)) > ?", term, TRIGRAM_THRESHOLD
+    ).pluck(:id)
+    ids_by_category = base_products.joins(:categories).where(
+      "similarity(unaccent(categories.name), unaccent(?)) > ?", term, TRIGRAM_THRESHOLD
+    ).pluck(:id)
+    (ids_by_product + ids_by_category).uniq
+  end
 
   def build_active_filters
     filters = []
