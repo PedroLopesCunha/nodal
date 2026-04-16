@@ -83,7 +83,7 @@ class Bo::ProductAttributesController < Bo::BaseController
 
   def product_attribute_params
     params.require(:product_attribute).permit(
-      :name, :slug, :active, :display_type,
+      :name, :slug, :active, :display_type, :show_on_card, :card_display_mode,
       product_attribute_values_attributes: [:id, :value, :slug, :color_hex, :position, :active, :_destroy]
     )
   end

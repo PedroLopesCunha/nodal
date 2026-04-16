@@ -65,6 +65,46 @@
     min-height: 2.8em; // Reserve space for 2 lines
   }
 
+  // Attribute display on card
+  .product-card-attribute {
+    display: flex;
+    align-items: baseline;
+    gap: 4px;
+    margin-top: 5px;
+    font-size: 0.72rem;
+    line-height: 1.4;
+    overflow: hidden;
+    white-space: nowrap;
+  }
+
+  .product-card-attr-name {
+    color: #888;
+    font-weight: 500;
+    flex-shrink: 0;
+  }
+
+  .product-card-attr-chips {
+    display: flex;
+    gap: 3px;
+    overflow: hidden;
+    flex: 1;
+    min-width: 0;
+  }
+
+  .product-card-attr-chip {
+    display: inline-block;
+    padding: 0 5px;
+    background: #f0f0f0;
+    border-radius: 3px;
+    color: #555;
+    font-weight: 500;
+    flex-shrink: 0;
+  }
+
+  .product-card-attr-value {
+    color: #555;
+  }
+
   // Card footer with price
   .card-footer {
     background-color: #fff;
@@ -149,6 +189,16 @@
 
     .product-card-price {
       font-size: 0.85rem;
+    }
+
+    .product-card-attribute {
+      font-size: 0.65rem;
+      gap: 2px;
+      margin-top: 4px;
+    }
+
+    .product-card-attr-chip {
+      padding: 0 4px;
     }
   }
 }

@@ -80,7 +80,8 @@ export default class extends Controller {
     if (data.categories?.length) {
       html += `<div class="autocomplete-section-label">Categorias</div>`
       data.categories.forEach((c) => {
-        const name = this._highlight(c.name, query)
+        const display = c.path || c.name
+        const name = this._highlight(display, query)
         html += `<a href="${c.url}" class="autocomplete-item">
           <i class="fa-solid fa-folder autocomplete-type-icon"></i>
           <span class="autocomplete-name">${name}</span>
