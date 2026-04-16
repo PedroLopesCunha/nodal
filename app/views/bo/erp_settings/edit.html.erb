@@ -236,7 +236,7 @@
                                     data: { erp_settings_target: "productMapping", field: field } %>
             <% end %>
 
-            <% %w[external_id company_name contact_name email contact_phone active].each do |field| %>
+            <% %w[external_id company_name contact_name email contact_phone taxpayer_id active].each do |field| %>
               <%= hidden_field_tag "erp_configuration[credentials][field_mappings][customers][#{field}]",
                                     customers_mappings[field],
                                     data: { erp_settings_target: "customerMapping", field: field } %>
