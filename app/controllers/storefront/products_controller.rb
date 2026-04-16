@@ -130,12 +130,16 @@ class Storefront::ProductsController < Storefront::BaseController
       product_ids = @products.map(&:id)
       card_attr_ids = @card_attributes.map(&:id)
 
-      # Get attribute value IDs from published+available variants only
+      # Get attribute values from published+available non-default variants (variable products)
+      # AND from default variants (simple products)
       visible_value_ids = VariantAttributeValue
         .joins(product_variant: :product)
         .joins(:product_attribute_value)
         .where(products: { id: product_ids })
-        .where(product_variants: { published: true, available: true, is_default: false })
+        .where(product_variants: { published: true, available: true })
+        .where(
+          "product_variants.is_default = false OR (product_variants.is_default = true AND products.has_variants = false)"
+        )
         .where(product_attribute_values: { product_attribute_id: card_attr_ids })
         .pluck(:product_id, :product_attribute_value_id)
 
