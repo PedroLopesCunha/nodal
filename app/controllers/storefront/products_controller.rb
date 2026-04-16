@@ -234,10 +234,10 @@ class Storefront::ProductsController < Storefront::BaseController
 
   def fuzzy_search(base_products, term)
     ids_by_product = base_products.where(
-      "similarity(unaccent(products.name), unaccent(?)) > ?", term, TRIGRAM_THRESHOLD
+      "word_similarity(unaccent(?), unaccent(products.name)) > ?", term, TRIGRAM_THRESHOLD
     ).pluck(:id)
     ids_by_category = base_products.joins(:categories).where(
-      "similarity(unaccent(categories.name), unaccent(?)) > ?", term, TRIGRAM_THRESHOLD
+      "word_similarity(unaccent(?), unaccent(categories.name)) > ?", term, TRIGRAM_THRESHOLD
     ).pluck(:id)
     (ids_by_product + ids_by_category).uniq
   end
