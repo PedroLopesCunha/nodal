@@ -28,6 +28,13 @@ module Erp
         customer = find_or_initialize_customer(external_id, data[:email])
         was_new = customer.new_record?
 
+        # Skip update for customers that have been invited or are active
+        # to preserve manual edits made to their profiles
+        if !was_new && customer.invitation_status != :not_invited
+          sync_log.increment_processed!
+          return
+        end
+
         update_customer_attributes(customer, data, was_new)
 
         if was_new || customer.changed?
