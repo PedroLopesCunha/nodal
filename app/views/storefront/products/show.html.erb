@@ -84,7 +84,7 @@
 
   <!-- Right Column - Product Details -->
   <div class="col-lg-6">
-    <div class="card border-0 shadow-sm h-100" style="border-radius: 12px;">
+    <div class="card border-0 shadow-sm" style="border-radius: 12px;">
       <div class="card-body p-4">
         <!-- Product Name -->
         <h1 class="mb-2" style="font-size: 2rem; font-weight: 600;"><%= @product.name %></h1>
@@ -287,35 +287,65 @@
                   <span class="text-muted"><%= values.first.value %></span>
                   <input type="hidden" data-single-attribute-value="<%= values.first.id %>">
                 <% elsif attribute.display_type == 'color_swatches' %>
-                  <label class="form-label fw-semibold mb-2"><%= attribute.name %></label>
-                  <div class="d-flex flex-wrap gap-2" data-variant-selector-target="group">
-                    <% values.each do |value| %>
-                      <% is_default = @default_variant&.purchasable? && @default_variant&.attribute_values&.include?(value) %>
-                      <button type="button"
-                              class="btn btn-outline-secondary position-relative <%= 'active' if is_default %>"
-                              style="width: 42px; height: 42px; padding: 3px; border-radius: 50%; border-width: 2px;"
-                              data-variant-selector-target="button"
-                              data-value-id="<%= value.id %>"
-                              data-action="click->variant-selector#selectOption"
-                              title="<%= value.value %>">
-                        <span class="d-block w-100 h-100 rounded-circle" style="background-color: <%= value.color_hex.presence || '#ccc' %>;"></span>
-                      </button>
-                    <% end %>
+                  <% max_visible = 9 %>
+                  <div <%= "data-controller=expandable" if values.size > max_visible %>>
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                      <label class="form-label fw-semibold mb-0"><%= attribute.name %></label>
+                      <% if values.size > max_visible %>
+                        <a href="#" class="text-primary text-decoration-none small"
+                           style="font-size: 0.85rem;"
+                           data-expandable-target="toggle"
+                           data-collapse-label="<%= t('storefront.products.show.less_options') %> <i class='fa-solid fa-chevron-up fa-xs'></i>"
+                           data-action="click->expandable#toggle">
+                          +<%= values.size - max_visible %> <%= t('storefront.products.show.more_options') %> <i class="fa-solid fa-chevron-down fa-xs"></i>
+                        </a>
+                      <% end %>
+                    </div>
+                    <div class="d-flex flex-wrap gap-2" data-variant-selector-target="group">
+                      <% values.each_with_index do |value, idx| %>
+                        <% is_default = @default_variant&.purchasable? && @default_variant&.attribute_values&.include?(value) %>
+                        <button type="button"
+                                class="btn btn-outline-secondary position-relative <%= 'active' if is_default %>"
+                                style="width: 42px; height: 42px; padding: 3px; border-radius: 50%; border-width: 2px;<%= ' display: none;' if idx >= max_visible && values.size > max_visible %>"
+                                data-variant-selector-target="button"
+                                data-value-id="<%= value.id %>"
+                                data-action="click->variant-selector#selectOption"
+                                title="<%= value.value %>"
+                                <% if idx >= max_visible && values.size > max_visible %>data-expandable-target="item"<% end %>>
+                          <span class="d-block w-100 h-100 rounded-circle" style="background-color: <%= value.color_hex.presence || '#ccc' %>;"></span>
+                        </button>
+                      <% end %>
+                    </div>
                   </div>
                 <% elsif attribute.display_type == 'buttons' %>
-                  <label class="form-label fw-semibold mb-2"><%= attribute.name %></label>
-                  <div class="d-flex flex-wrap gap-2" data-variant-selector-target="group">
-                    <% values.each do |value| %>
-                      <% is_default = @default_variant&.purchasable? && @default_variant&.attribute_values&.include?(value) %>
-                      <button type="button"
-                              class="btn btn-outline-secondary <%= 'active' if is_default %>"
-                              style="min-width: 48px; border-radius: 8px; padding: 6px 16px; font-weight: 500;"
-                              data-variant-selector-target="button"
-                              data-value-id="<%= value.id %>"
-                              data-action="click->variant-selector#selectOption">
-                        <%= value.value %>
-                      </button>
-                    <% end %>
+                  <% max_visible = 9 %>
+                  <div <%= "data-controller=expandable" if values.size > max_visible %>>
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                      <label class="form-label fw-semibold mb-0"><%= attribute.name %></label>
+                      <% if values.size > max_visible %>
+                        <a href="#" class="text-primary text-decoration-none small"
+                           style="font-size: 0.85rem;"
+                           data-expandable-target="toggle"
+                           data-collapse-label="<%= t('storefront.products.show.less_options') %> <i class='fa-solid fa-chevron-up fa-xs'></i>"
+                           data-action="click->expandable#toggle">
+                          +<%= values.size - max_visible %> <%= t('storefront.products.show.more_options') %> <i class="fa-solid fa-chevron-down fa-xs"></i>
+                        </a>
+                      <% end %>
+                    </div>
+                    <div class="d-flex flex-wrap gap-2" data-variant-selector-target="group">
+                      <% values.each_with_index do |value, idx| %>
+                        <% is_default = @default_variant&.purchasable? && @default_variant&.attribute_values&.include?(value) %>
+                        <button type="button"
+                                class="btn btn-outline-secondary <%= 'active' if is_default %>"
+                                style="min-width: 48px; border-radius: 8px; padding: 6px 12px; font-weight: 500; text-align: center;<%= ' display: none;' if idx >= max_visible && values.size > max_visible %>"
+                                data-variant-selector-target="button"
+                                data-value-id="<%= value.id %>"
+                                data-action="click->variant-selector#selectOption"
+                                <% if idx >= max_visible && values.size > max_visible %>data-expandable-target="item"<% end %>>
+                          <%= value.value %>
+                        </button>
+                      <% end %>
+                    </div>
                   </div>
                 <% else %>
                   <%# dropdown (default) %>

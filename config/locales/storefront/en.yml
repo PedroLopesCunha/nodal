@@ -199,6 +199,8 @@ en:
         stackable: "Stackable"
         select_options: "Select Options"
         select_option: "Select %{attribute}..."
+        more_options: "options"
+        less_options: "Show less"
         from_price: "From %{price}"
         related_products: "You may also like"
         price_on_request: "Price on Request"

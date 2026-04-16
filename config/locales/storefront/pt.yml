@@ -199,6 +199,8 @@ pt:
         stackable: "Acumulável"
         select_options: "Selecionar Opções"
         select_option: "Selecione %{attribute}..."
+        more_options: "opções"
+        less_options: "Mostrar menos"
         from_price: "A partir de %{price}"
         related_products: "Também pode gostar"
         price_on_request: "Preço sob consulta"
