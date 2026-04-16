@@ -34,7 +34,9 @@ Rails.application.routes.draw do
     scope module: :storefront do
       get 'home', to: 'home#show', as: :home
       resource :contact, only: [:show]
-      resources :products, only: [:index, :show]
+      resources :products, only: [:index, :show] do
+        get :autocomplete, on: :collection
+      end
 
       # Cart (current draft order)
       resource :cart, only: [:show] do

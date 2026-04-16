@@ -242,16 +242,23 @@ class ProductGridImportService
   end
 
   def backfill_variable_available_values
-    # For each variable product created, deduce available values from its variations
-    @created_products.each do |_sku, product|
-      next unless product.has_variants?
+    # For all variable products in the org, ensure available values match variant data
+    @organisation.products.where(has_variants: true)
+       .includes(:product_attributes, :product_available_values, product_variants: :attribute_values)
+       .find_each do |product|
+      variant_value_ids = product.product_variants.reject(&:is_default?).select(&:published?)
+                                 .flat_map { |v| v.attribute_values.map(&:id) }.uniq
+      existing_ids = product.product_available_values.pluck(:product_attribute_value_id)
+      missing_ids = variant_value_ids - existing_ids
+      next if missing_ids.empty?
 
-      product.product_available_values.delete_all
-
-      product.product_variants.where(is_default: false).each do |variant|
-        variant.attribute_values.each do |av|
-          product.product_available_values.find_or_create_by!(product_attribute_value: av)
+      ProductAttributeValue.where(id: missing_ids).includes(:product_attribute).each do |val|
+        attr = val.product_attribute
+        unless product.product_attributes.include?(attr)
+          product.product_product_attributes.create!(product_attribute: attr)
+          product.reload
         end
+        product.product_available_values.find_or_create_by!(product_attribute_value: val)
       end
     end
   end
