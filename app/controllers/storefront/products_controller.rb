@@ -207,7 +207,7 @@ class Storefront::ProductsController < Storefront::BaseController
 
   private
 
-  TRIGRAM_THRESHOLD = 0.3
+  TRIGRAM_THRESHOLD = 0.5
 
   def search_products(base_products, queries)
     return [] if queries.blank?

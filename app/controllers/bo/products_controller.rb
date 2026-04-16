@@ -253,7 +253,7 @@ class Bo::ProductsController < Bo::BaseController
         q: "%#{params[:query]}%"
       ).select("products.id").distinct
       fuzzy_ids = scope.left_joins(:categories).where(
-        "word_similarity(unaccent(:q), unaccent(products.name)) > 0.3 OR word_similarity(unaccent(:q), unaccent(categories.name)) > 0.3",
+        "word_similarity(unaccent(:q), unaccent(products.name)) > 0.5 OR word_similarity(unaccent(:q), unaccent(categories.name)) > 0.5",
         q: params[:query]
       ).select("products.id").distinct
       scope = scope.where(id: exact_ids).or(scope.where(id: fuzzy_ids)).order(:name)
@@ -522,7 +522,7 @@ class Bo::ProductsController < Bo::BaseController
         q: "%#{params[:query]}%"
       ).select("products.id").distinct
       fuzzy_ids = scope.left_joins(:categories).where(
-        "word_similarity(unaccent(:q), unaccent(products.name)) > 0.3 OR word_similarity(unaccent(:q), unaccent(categories.name)) > 0.3",
+        "word_similarity(unaccent(:q), unaccent(products.name)) > 0.5 OR word_similarity(unaccent(:q), unaccent(categories.name)) > 0.5",
         q: params[:query]
       ).select("products.id").distinct
       scope = scope.where(id: exact_ids).or(scope.where(id: fuzzy_ids))
