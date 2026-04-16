@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2026_04_16_080619) do
+ActiveRecord::Schema[7.1].define(version: 2026_04_16_114253) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_trgm"
   enable_extension "plpgsql"
@@ -513,6 +513,8 @@ ActiveRecord::Schema[7.1].define(version: 2026_04_16_080619) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.string "display_type"
+    t.boolean "show_on_card"
+    t.string "card_display_mode"
     t.index ["discarded_at"], name: "index_product_attributes_on_discarded_at"
     t.index ["organisation_id", "position"], name: "index_product_attributes_on_organisation_id_and_position"
     t.index ["organisation_id", "slug"], name: "index_product_attributes_on_organisation_id_and_slug", unique: true

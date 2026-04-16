@@ -887,6 +887,12 @@ en:
         name: "Attribute Name"
         slug: "Slug"
         active: "Active"
+        show_on_card: "Show on product card"
+        card_display_mode: "Card display mode"
+        card_display_mode_hint: "How to display values when product has 2+ options"
+        card_display_modes:
+          values: "Show values"
+          count: "Show count only"
         name_hint: "e.g., Color, Size, Material"
         slug_hint: "Auto-generated if left blank"
         values_title: "Attribute Values"

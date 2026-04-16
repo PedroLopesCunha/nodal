@@ -132,6 +132,7 @@ es:
         subtitle: "%{org_name}"
         search: "Buscar"
         search_placeholder: "Buscar productos..."
+        options: "opciones"
         categories: "Categorías"
         all_products: "Todos los Productos"
         filters_button: "Filtros"

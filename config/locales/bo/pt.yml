@@ -869,6 +869,12 @@ pt:
         name: "Nome do Atributo"
         slug: "Slug"
         active: "Ativo"
+        show_on_card: "Mostrar no cartão do produto"
+        card_display_mode: "Modo de exibição no cartão"
+        card_display_mode_hint: "Como mostrar valores quando o produto tem 2+ opções"
+        card_display_modes:
+          values: "Mostrar valores"
+          count: "Mostrar apenas contagem"
         name_hint: "ex: Cor, Tamanho, Material"
         slug_hint: "Auto-gerado se deixado em branco"
         values_title: "Valores do Atributo"

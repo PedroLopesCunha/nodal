@@ -295,6 +295,26 @@
                     <span class="product-card-category"><%= product.primary_category.name %></span>
                   <% end %>
                   <h5 class="product-card-title"><%= product.name %></h5>
+                  <% if @card_attributes&.any? && @card_attribute_data %>
+                    <% product_data = @card_attribute_data[product.id] %>
+                    <% if product_data %>
+                      <% @card_attributes.each do |attr| %>
+                        <% attr_values = product_data[attr] %>
+                        <% next if attr_values.blank? %>
+                        <% values = attr_values.map(&:value).uniq %>
+                        <div class="product-card-attribute">
+                          <span class="product-card-attr-name"><%= attr.name %>:</span>
+                          <% if values.size == 1 %>
+                            <span class="product-card-attr-value"><%= values.first %></span>
+                          <% elsif attr.card_display_mode == 'count' %>
+                            <span class="product-card-attr-value"><%= values.size %> <%= t('storefront.products.index.options') %></span>
+                          <% else %>
+                            <span class="product-card-attr-chips"><% values.each do |v| %><span class="product-card-attr-chip"><%= v %></span><% end %></span>
+                          <% end %>
+                        </div>
+                      <% end %>
+                    <% end %>
+                  <% end %>
                 </div>
                 <div class="card-footer">
                   <div class="d-flex justify-content-between align-items-center">

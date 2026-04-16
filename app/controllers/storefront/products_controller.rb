@@ -124,6 +124,33 @@ class Storefront::ProductsController < Storefront::BaseController
       hash[product.id] = calculator.discount_breakdown
     end
 
+    # Load card attributes (show_on_card) for product listing
+    @card_attributes = current_organisation.product_attributes.where(show_on_card: true).by_position
+    if @card_attributes.any?
+      product_ids = @products.map(&:id)
+      card_attr_ids = @card_attributes.map(&:id)
+
+      # Get attribute value IDs from published+available variants only
+      visible_value_ids = VariantAttributeValue
+        .joins(product_variant: :product)
+        .joins(:product_attribute_value)
+        .where(products: { id: product_ids })
+        .where(product_variants: { published: true, available: true, is_default: false })
+        .where(product_attribute_values: { product_attribute_id: card_attr_ids })
+        .pluck(:product_id, :product_attribute_value_id)
+
+      # Group by product_id => [value_ids]
+      visible_by_product = visible_value_ids.group_by(&:first).transform_values { |pairs| pairs.map(&:last).uniq }
+
+      # Load the actual attribute values
+      all_value_ids = visible_value_ids.map(&:last).uniq
+      values_by_id = ProductAttributeValue.where(id: all_value_ids).includes(:product_attribute).index_by(&:id)
+
+      @card_attribute_data = visible_by_product.transform_values do |value_ids|
+        value_ids.map { |id| values_by_id[id] }.compact.group_by(&:product_attribute)
+      end
+    end
+
     @active_filters = build_active_filters
   end
 
