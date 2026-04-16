@@ -214,8 +214,7 @@ class Storefront::ProductsController < Storefront::BaseController
 
     product_ids = []
     queries.each do |term|
-      ids = exact_search(base_products, term)
-      ids = fuzzy_search(base_products, term) if ids.empty?
+      ids = exact_search(base_products, term) + fuzzy_search(base_products, term)
       product_ids += ids
     end
     product_ids.uniq
