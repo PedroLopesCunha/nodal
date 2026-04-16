@@ -127,6 +127,57 @@ class Storefront::ProductsController < Storefront::BaseController
     @active_filters = build_active_filters
   end
 
+  def autocomplete
+    skip_authorization
+    query = params[:q].to_s.strip
+    if query.length < 2
+      render json: []
+      return
+    end
+
+    base = policy_scope(current_organisation.products).where(published: true, available: true)
+    like_query = "%#{query}%"
+
+    # Find matching categories
+    categories = current_organisation.categories.kept
+                   .where("unaccent(categories.name) ILIKE unaccent(?)", like_query)
+                   .order(:name)
+                   .limit(4)
+
+    if categories.empty?
+      categories = current_organisation.categories.kept
+                     .where("word_similarity(unaccent(?), unaccent(categories.name)) > ?", query, TRIGRAM_THRESHOLD)
+                     .order(:name)
+                     .limit(4)
+    end
+
+    # Find matching products (by name, SKU, variant SKU, or category name)
+    by_fields = base.left_joins(:product_variants)
+                    .where("unaccent(products.name) ILIKE unaccent(?) OR unaccent(products.sku) ILIKE unaccent(?) OR unaccent(product_variants.sku) ILIKE unaccent(?)", like_query, like_query, like_query)
+    by_cat = base.joins(:categories)
+                 .where("unaccent(categories.name) ILIKE unaccent(?)", like_query)
+    products = by_fields.or(base.where(id: by_cat.select(:id)))
+                   .select("products.id, products.name, products.slug, products.sku")
+                   .distinct
+                   .order(:name)
+                   .limit(5)
+
+    if products.empty?
+      products = base.where("word_similarity(unaccent(?), unaccent(products.name)) > ?", query, TRIGRAM_THRESHOLD)
+                     .select(:id, :name, :slug, :sku)
+                     .order(:name)
+                     .limit(5)
+    end
+
+    results = {
+      categories: categories.map { |c| { name: c.name, url: products_path(org_slug: params[:org_slug], category: c.slug) } },
+      products: products.map { |p| { name: p.name, sku: p.sku, url: product_path(p, org_slug: params[:org_slug]) } },
+      search_url: products_path(org_slug: params[:org_slug], "queries[]": query)
+    }
+
+    render json: results
+  end
+
   def show
     @product = current_organisation.products.find(params[:id])
     authorize @product

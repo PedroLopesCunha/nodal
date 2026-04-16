@@ -126,11 +126,12 @@
       <%= hidden_field_tag 'category', params[:category] if params[:category].present? %>
       <%= hidden_field_tag 'sort', params[:sort] if params[:sort].present? %>
       <%= render 'storefront/products/attrs_hidden_fields' %>
-      <div class="input-group input-group-sm">
-        <%= text_field_tag 'queries[]', nil, class: "form-control", placeholder: t('storefront.products.index.search_placeholder'), data: { mobile_search_toggle_target: "input" } %>
+      <div class="input-group input-group-sm autocomplete-wrapper" data-controller="autocomplete-search" data-autocomplete-search-url-value="<%= autocomplete_products_path(org_slug: params[:org_slug]) %>">
+        <%= text_field_tag 'queries[]', nil, class: "form-control", placeholder: t('storefront.products.index.search_placeholder'), data: { mobile_search_toggle_target: "input", autocomplete_search_target: "input", action: "input->autocomplete-search#search keydown->autocomplete-search#navigate" }, autocomplete: "off" %>
         <button type="submit" class="btn btn-outline-secondary" aria-label="Search">
           <i class="fa-solid fa-magnifying-glass"></i>
         </button>
+        <div class="autocomplete-results" data-autocomplete-search-target="results"></div>
       </div>
     <% end %>
   </div>
@@ -228,12 +229,13 @@
       <% end %>
       <%= hidden_field_tag 'sort', params[:sort] if params[:sort].present? %>
       <%= render 'storefront/products/attrs_hidden_fields' %>
-      <div class="search-minimal">
-        <%= text_field_tag 'queries[]', nil, class: "form-control", placeholder: t('storefront.products.index.search_placeholder') %>
+      <div class="search-minimal autocomplete-wrapper" data-controller="autocomplete-search" data-autocomplete-search-url-value="<%= autocomplete_products_path(org_slug: params[:org_slug]) %>">
+        <%= text_field_tag 'queries[]', nil, class: "form-control", placeholder: t('storefront.products.index.search_placeholder'), data: { autocomplete_search_target: "input", action: "input->autocomplete-search#search keydown->autocomplete-search#navigate" }, autocomplete: "off" %>
         <i class="fa-solid fa-magnifying-glass search-minimal-icon"></i>
         <button type="submit" class="search-minimal-btn" aria-label="Search">
           <i class="fa-solid fa-arrow-right"></i>
         </button>
+        <div class="autocomplete-results" data-autocomplete-search-target="results"></div>
       </div>
     <% end %>
   </div>
