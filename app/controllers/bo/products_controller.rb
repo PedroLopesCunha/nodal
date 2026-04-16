@@ -248,11 +248,15 @@ class Bo::ProductsController < Bo::BaseController
 
     if params[:query].present?
       scope = current_organisation.products.includes(:categories, :product_variants)
-      matching_ids = scope.left_joins(:categories, :product_variants).where(
+      exact_ids = scope.left_joins(:categories, :product_variants).where(
         "unaccent(products.name) ILIKE unaccent(:q) OR unaccent(products.sku) ILIKE unaccent(:q) OR unaccent(categories.name) ILIKE unaccent(:q) OR unaccent(product_variants.sku) ILIKE unaccent(:q)",
         q: "%#{params[:query]}%"
       ).select("products.id").distinct
-      scope = scope.where(id: matching_ids).order(:name)
+      fuzzy_ids = scope.left_joins(:categories).where(
+        "similarity(unaccent(products.name), unaccent(:q)) > 0.3 OR similarity(unaccent(categories.name), unaccent(:q)) > 0.3",
+        q: params[:query]
+      ).select("products.id").distinct
+      scope = scope.where(id: exact_ids).or(scope.where(id: fuzzy_ids)).order(:name)
       @pagy, @products = pagy(scope, items: 30)
       @search_mode = true
     else
@@ -513,11 +517,15 @@ class Bo::ProductsController < Bo::BaseController
 
   def apply_product_filters(scope)
     if params[:query].present?
-      matching_ids = scope.left_joins(:categories, :product_variants).where(
+      exact_ids = scope.left_joins(:categories, :product_variants).where(
         "unaccent(products.name) ILIKE unaccent(:q) OR unaccent(products.sku) ILIKE unaccent(:q) OR unaccent(products.description) ILIKE unaccent(:q) OR unaccent(categories.name) ILIKE unaccent(:q) OR unaccent(product_variants.sku) ILIKE unaccent(:q)",
         q: "%#{params[:query]}%"
       ).select("products.id").distinct
-      scope = scope.where(id: matching_ids)
+      fuzzy_ids = scope.left_joins(:categories).where(
+        "similarity(unaccent(products.name), unaccent(:q)) > 0.3 OR similarity(unaccent(categories.name), unaccent(:q)) > 0.3",
+        q: params[:query]
+      ).select("products.id").distinct
+      scope = scope.where(id: exact_ids).or(scope.where(id: fuzzy_ids))
     end
 
     if params[:category_id] == "none"
