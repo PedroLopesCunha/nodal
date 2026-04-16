@@ -185,7 +185,7 @@ class Product < ApplicationRecord
         .joins(:product_attribute)
         .where(product_attributes: { id: attribute.id })
         .includes(:product_attribute)
-        .by_position
+        .naturally_sorted
     end
   end
 
