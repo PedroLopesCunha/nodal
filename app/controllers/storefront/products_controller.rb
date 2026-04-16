@@ -170,7 +170,7 @@ class Storefront::ProductsController < Storefront::BaseController
     end
 
     results = {
-      categories: categories.map { |c| { name: c.name, url: products_path(org_slug: params[:org_slug], category: c.slug) } },
+      categories: categories.map { |c| { name: c.name, path: c.full_path, url: products_path(org_slug: params[:org_slug], category: c.slug) } },
       products: products.map { |p| { name: p.name, sku: p.sku, url: product_path(p, org_slug: params[:org_slug]) } },
       search_url: products_path(org_slug: params[:org_slug], "queries[]": query)
     }
