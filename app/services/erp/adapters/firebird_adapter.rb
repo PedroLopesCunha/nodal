@@ -48,7 +48,7 @@ module Erp
         return [] unless valid_credentials?
 
         rows = with_connection do |db|
-          query_as_hashes(db, "SELECT * FROM #{safe_table_name(products_table)}")
+          query_as_hashes(db, build_select_sql(products_table, products_filter))
         end
 
         rows.map { |row| normalize_product(normalize_row(row)) }
@@ -60,7 +60,7 @@ module Erp
         return [] unless valid_credentials?
 
         rows = with_connection do |db|
-          query_as_hashes(db, "SELECT * FROM #{safe_table_name(customers_table)}")
+          query_as_hashes(db, build_select_sql(customers_table, customers_filter))
         end
 
         rows.map { |row| normalize_customer(normalize_row(row)) }
@@ -75,7 +75,7 @@ module Erp
         return unless valid_credentials?
 
         with_connection do |db|
-          each_row_as_hash(db, "SELECT * FROM #{safe_table_name(products_table)}") do |row|
+          each_row_as_hash(db, build_select_sql(products_table, products_filter)) do |row|
             yield normalize_product(normalize_row(row))
           end
         end
@@ -88,9 +88,38 @@ module Erp
         return unless valid_credentials?
 
         with_connection do |db|
-          each_row_as_hash(db, "SELECT * FROM #{safe_table_name(customers_table)}") do |row|
+          each_row_as_hash(db, build_select_sql(customers_table, customers_filter)) do |row|
             yield normalize_customer(normalize_row(row))
           end
+        end
+      rescue => e
+        raise_erp_error(e)
+      end
+
+      # Returns the row count the given filter would select for the entity type.
+      # When filter is nil, falls back to the configured filter for the entity.
+      # Used by the UI to validate filters before running a sync.
+      def count_rows(entity_type, filter = :unset)
+        return 0 unless valid_credentials?
+
+        table = case entity_type.to_s
+                when 'products'  then products_table
+                when 'customers' then customers_table
+                else raise Erp::ApiError, "Unsupported entity_type: #{entity_type}"
+                end
+
+        effective_filter = if filter == :unset
+                             entity_type.to_s == 'products' ? products_filter : customers_filter
+                           else
+                             filter.to_s.strip.presence
+                           end
+
+        sql = "SELECT COUNT(*) FROM #{safe_table_name(table)}"
+        sql += " WHERE #{effective_filter}" if effective_filter
+
+        with_connection do |db|
+          row = db.execute(sql).fetch
+          row && row[0].to_i
         end
       rescue => e
         raise_erp_error(e)
@@ -245,6 +274,12 @@ module Erp
         cursor&.close
       end
 
+      def build_select_sql(table, filter)
+        sql = "SELECT * FROM #{safe_table_name(table)}"
+        sql += " WHERE #{filter}" if filter.present?
+        sql
+      end
+
       # Streaming variant of query_as_hashes — yields each row as a hash without
       # accumulating all rows in memory.
       def each_row_as_hash(db, sql)
@@ -274,6 +309,14 @@ module Erp
 
       def order_items_table
         credentials[:order_items_table].presence || 'ORDER_ITEMS'
+      end
+
+      def products_filter
+        credentials[:products_filter].to_s.strip.presence
+      end
+
+      def customers_filter
+        credentials[:customers_filter].to_s.strip.presence
       end
 
       # Firebird charset name (used for connection)

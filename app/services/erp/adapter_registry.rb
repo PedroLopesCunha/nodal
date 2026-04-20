@@ -23,7 +23,9 @@ module Erp
           username: { label: 'Username', type: :text, required: true, placeholder: 'SYSDBA', default: 'SYSDBA' },
           password: { label: 'Password', type: :password, required: true, placeholder: 'Database password' },
           products_table: { label: 'Products Table', type: :text, required: false, placeholder: 'PRODUCTS', default: 'PRODUCTS' },
+          products_filter: { label: 'Products Filter (WHERE)', type: :sql_filter, required: false, placeholder: 'ex: ARMAZEM = 1', entity_type: 'products' },
           customers_table: { label: 'Customers Table', type: :text, required: false, placeholder: 'CUSTOMERS', default: 'CUSTOMERS' },
+          customers_filter: { label: 'Customers Filter (WHERE)', type: :sql_filter, required: false, placeholder: "ex: TIPO = 'A'", entity_type: 'customers' },
           orders_table: { label: 'Orders Table', type: :text, required: false, placeholder: 'ORDERS', default: 'ORDERS' },
           order_items_table: { label: 'Order Items Table', type: :text, required: false, placeholder: 'ORDER_ITEMS', default: 'ORDER_ITEMS' },
           encoding: { label: 'Character Encoding', type: :text, required: false, placeholder: 'WIN1252', default: 'WIN1252' }

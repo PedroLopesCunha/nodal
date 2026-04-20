@@ -1,5 +1,5 @@
 class Bo::ErpSettingsController < Bo::BaseController
-  skip_before_action :verify_authenticity_token, only: [:test_connection, :fetch_sample]
+  skip_before_action :verify_authenticity_token, only: [:test_connection, :fetch_sample, :test_filter]
   before_action :set_erp_configuration
 
   def edit
@@ -82,6 +82,27 @@ class Bo::ErpSettingsController < Bo::BaseController
     end
 
     render json: result
+  end
+
+  def test_filter
+    authorize @erp_configuration, policy_class: ErpSettingPolicy
+
+    adapter = @erp_configuration.adapter
+    unless adapter&.respond_to?(:count_rows)
+      render json: { success: false, error: 'Filter testing not supported for this adapter' }
+      return
+    end
+
+    entity_type = params[:entity_type].to_s
+    unless %w[products customers].include?(entity_type)
+      render json: { success: false, error: 'Invalid entity type' }
+      return
+    end
+
+    count = adapter.count_rows(entity_type, params[:filter])
+    render json: { success: true, count: count }
+  rescue => e
+    render json: { success: false, error: e.message }
   end
 
   def sync_now
