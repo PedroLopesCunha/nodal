@@ -25,7 +25,9 @@ export default class extends Controller {
     "orderMapping",
     "orderItemMapping",
     "adapterCredentials",
-    "productSyncMode"
+    "productSyncMode",
+    "filterInput",
+    "filterResult"
   ]
 
   // Nodal field definitions
@@ -404,6 +406,52 @@ export default class extends Controller {
     }
   }
 
+  async testFilter(event) {
+    event.preventDefault()
+
+    const button = event.currentTarget
+    const entityType = button.dataset.entityType
+
+    const input = this.filterInputTargets.find(el => el.dataset.entityType === entityType)
+    const result = this.filterResultTargets.find(el => el.dataset.entityType === entityType)
+    if (!input || !result) return
+
+    const originalHtml = button.innerHTML
+    button.disabled = true
+    button.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> A testar...'
+    result.innerHTML = ''
+    result.className = 'text-muted d-block mt-1'
+
+    try {
+      const response = await fetch(this.testFilterUrl, {
+        method: 'POST',
+        headers: {
+          'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').content,
+          'Accept': 'application/json',
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ entity_type: entityType, filter: input.value })
+      })
+
+      const data = await response.json()
+
+      if (data.success) {
+        result.className = 'text-success d-block mt-1'
+        result.innerHTML = `<i class="fa-solid fa-check-circle"></i> Filtro devolve <strong>${data.count.toLocaleString()}</strong> linha(s)`
+      } else {
+        result.className = 'text-danger d-block mt-1'
+        result.innerHTML = `<i class="fa-solid fa-times-circle"></i> ${data.error || 'Erro ao testar filtro'}`
+      }
+    } catch (error) {
+      result.className = 'text-danger d-block mt-1'
+      result.innerHTML = '<i class="fa-solid fa-times-circle"></i> Falha no teste'
+      console.error('Test filter error:', error)
+    } finally {
+      button.disabled = false
+      button.innerHTML = originalHtml
+    }
+  }
+
   get testConnectionUrl() {
     const path = window.location.pathname
     return path.replace(/\/edit$/, '/test_connection')
@@ -412,5 +460,10 @@ export default class extends Controller {
   get fetchSampleUrl() {
     const path = window.location.pathname
     return path.replace(/\/edit$/, '/fetch_sample')
+  }
+
+  get testFilterUrl() {
+    const path = window.location.pathname
+    return path.replace(/\/edit$/, '/test_filter')
   }
 }
