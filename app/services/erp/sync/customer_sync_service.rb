@@ -7,11 +7,14 @@ module Erp
         'customers'
       end
 
-      def perform_sync
-        customers_data = adapter.fetch_customers
+      GC_INTERVAL = 500
 
-        customers_data.each do |customer_data|
+      def perform_sync
+        count = 0
+        adapter.each_customer do |customer_data|
           sync_customer(customer_data)
+          count += 1
+          GC.start if (count % GC_INTERVAL).zero?
         end
       end
 

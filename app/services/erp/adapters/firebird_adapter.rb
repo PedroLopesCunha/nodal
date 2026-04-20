@@ -68,6 +68,34 @@ module Erp
         raise_erp_error(e)
       end
 
+      # Streams products one at a time through the cursor without materializing
+      # the full result set. Keeps peak memory bounded regardless of table size.
+      def each_product(&block)
+        return enum_for(:each_product) unless block_given?
+        return unless valid_credentials?
+
+        with_connection do |db|
+          each_row_as_hash(db, "SELECT * FROM #{safe_table_name(products_table)}") do |row|
+            yield normalize_product(normalize_row(row))
+          end
+        end
+      rescue => e
+        raise_erp_error(e)
+      end
+
+      def each_customer(&block)
+        return enum_for(:each_customer) unless block_given?
+        return unless valid_credentials?
+
+        with_connection do |db|
+          each_row_as_hash(db, "SELECT * FROM #{safe_table_name(customers_table)}") do |row|
+            yield normalize_customer(normalize_row(row))
+          end
+        end
+      rescue => e
+        raise_erp_error(e)
+      end
+
       def fetch_sample_product
         return nil unless valid_credentials?
 
@@ -213,6 +241,20 @@ module Erp
           rows << hash
         end
         rows
+      ensure
+        cursor&.close
+      end
+
+      # Streaming variant of query_as_hashes — yields each row as a hash without
+      # accumulating all rows in memory.
+      def each_row_as_hash(db, sql)
+        cursor = db.execute(sql)
+        columns = cursor.fields.map { |f| f.name.to_s }
+        while (row = cursor.fetch)
+          hash = {}
+          columns.each_with_index { |col, i| hash[col] = row[i] }
+          yield hash
+        end
       ensure
         cursor&.close
       end
