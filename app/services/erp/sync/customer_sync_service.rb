@@ -7,11 +7,14 @@ module Erp
         'customers'
       end
 
-      def perform_sync
-        customers_data = adapter.fetch_customers
+      GC_INTERVAL = 500
 
-        customers_data.each do |customer_data|
+      def perform_sync
+        count = 0
+        adapter.each_customer do |customer_data|
           sync_customer(customer_data)
+          count += 1
+          GC.start if (count % GC_INTERVAL).zero?
         end
       end
 
@@ -27,6 +30,13 @@ module Erp
 
         customer = find_or_initialize_customer(external_id, data[:email])
         was_new = customer.new_record?
+
+        # Skip update for customers that have been invited or are active
+        # to preserve manual edits made to their profiles
+        if !was_new && customer.invitation_status != :not_invited
+          sync_log.increment_processed!
+          return
+        end
 
         update_customer_attributes(customer, data, was_new)
 

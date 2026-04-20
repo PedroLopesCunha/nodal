@@ -7,11 +7,14 @@ module Erp
         'products'
       end
 
-      def perform_sync
-        products_data = adapter.fetch_products
+      GC_INTERVAL = 500
 
-        products_data.each do |product_data|
+      def perform_sync
+        count = 0
+        adapter.each_product do |product_data|
           sync_product(product_data)
+          count += 1
+          GC.start if (count % GC_INTERVAL).zero?
         end
       end
 
