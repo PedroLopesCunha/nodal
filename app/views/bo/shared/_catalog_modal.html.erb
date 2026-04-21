@@ -58,6 +58,7 @@
           <div class="mb-3">
             <label class="form-label fw-semibold"><%= t('bo.catalog.options') %></label>
             <div class="form-check mb-1">
+              <%= hidden_field_tag :show_prices, "0" %>
               <%= check_box_tag :show_prices, "1", true, class: "form-check-input", id: "catalog_show_prices" %>
               <%= label_tag :catalog_show_prices, t('bo.catalog.show_prices'), class: "form-check-label" %>
             </div>
@@ -74,6 +75,7 @@
               <%= label_tag :catalog_group_by_category, t('bo.catalog.group_by_category'), class: "form-check-label" %>
             </div>
             <div class="form-check mb-1">
+              <%= hidden_field_tag :only_available, "0" %>
               <%= check_box_tag :only_available, "1", true, class: "form-check-input", id: "catalog_only_available" %>
               <%= label_tag :catalog_only_available, t('bo.catalog.only_available'), class: "form-check-label" %>
             </div>
@@ -87,6 +89,7 @@
               <%= label_tag :catalog_show_variants, t('bo.catalog.show_variants'), class: "form-check-label" %>
             </div>
             <div class="form-check mb-1 ms-4">
+              <%= hidden_field_tag :only_available_variants, "0" %>
               <%= check_box_tag :only_available_variants, "1", true, class: "form-check-input", id: "catalog_only_available_variants" %>
               <%= label_tag :catalog_only_available_variants, t('bo.catalog.only_available_variants'), class: "form-check-label" %>
             </div>
