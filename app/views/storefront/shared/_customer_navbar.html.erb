@@ -6,6 +6,12 @@
       <%= link_to t('storefront.member_browse.return_to_dashboard'), bo_path(org_slug: current_organisation.slug), class: "ms-2", style: "color: #000; text-decoration: underline;" %>
     </div>
   <% end %>
+  <% if current_customer&.hide_prices? %>
+    <div class="py-2 text-center small" style="background-color: #fff3cd; color: #664d03;">
+      <i class="fa-solid fa-eye-slash me-1"></i>
+      <%= t('storefront.navbar.hide_prices_hint') %>
+    </div>
+  <% end %>
   <nav class="navbar navbar-expand-lg navbar-light bg-white border-bottom" style="position: relative !important; top: auto !important; left: auto !important; height: auto !important; padding: 0.25rem 1rem !important;">
     <div class="container">
       <%= link_to home_path(org_slug: params[:org_slug]), class: "navbar-brand fw-bold d-flex align-items-center gap-1" do %>
@@ -85,6 +91,18 @@
                     <i class="fa-solid fa-user-gear me-2"></i><%= t('storefront.navbar.account') %>
                   <% end %>
                 </li>
+                <li>
+                  <%= button_to toggle_hide_prices_account_path(org_slug: params[:org_slug]),
+                        method: :patch,
+                        class: "dropdown-item",
+                        form: { style: "display: block;" } do %>
+                    <% if current_customer.hide_prices? %>
+                      <i class="fa-solid fa-eye me-2"></i><%= t('storefront.navbar.show_prices') %>
+                    <% else %>
+                      <i class="fa-solid fa-eye-slash me-2"></i><%= t('storefront.navbar.hide_prices') %>
+                    <% end %>
+                  <% end %>
+                </li>
                 <li><hr class="dropdown-divider"></li>
                 <li>
                   <%= link_to destroy_customer_session_path(org_slug: params[:org_slug]), class: "dropdown-item", data: { turbo_method: :delete } do %>
@@ -106,7 +124,7 @@
       </div>
     </div>
   </nav>
-  <% if current_organisation&.free_shipping_enabled? && controller_name.in?(%w[home carts]) %>
+  <% if show_prices? && current_organisation&.free_shipping_enabled? && controller_name.in?(%w[home carts]) %>
     <div class="py-2 text-center small fw-medium" style="background-color: #d1e7dd; color: #0f5132;">
       <i class="fa-solid fa-truck me-1"></i>
       <%= t('storefront.free_shipping.banner', amount: humanized_money_with_symbol(current_organisation.free_shipping_threshold)) %>

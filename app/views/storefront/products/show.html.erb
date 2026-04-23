@@ -93,6 +93,7 @@
         <p class="text-muted mb-4"><%= @product.description %></p>
 
         <!-- Price -->
+        <% if show_prices? %>
         <div class="mb-3">
           <% if @product.price_on_request? %>
             <span class="text-primary" style="font-size: 2rem; font-weight: 700;"><%= t('storefront.products.show.price_on_request') %></span>
@@ -138,9 +139,10 @@
             <span class="text-muted fs-5">/ <%= @product.unit_description %></span>
           <% end %>
         </div>
+        <% end %>
 
         <!-- Discount Details Section -->
-        <% if discount_breakdown[:has_discount] && !@product.price_on_request? %>
+        <% if show_prices? && discount_breakdown[:has_discount] && !@product.price_on_request? %>
           <div class="alert alert-success mb-4" style="border-radius: 10px;">
             <h6 class="alert-heading mb-3">
               <i class="fa-solid fa-tags me-2"></i><%= t('storefront.products.show.available_discounts') %>
@@ -385,6 +387,7 @@
                   </button>
                 </div>
 
+                <% if show_prices? %>
                 <div class="text-muted">
                   <i class="fa-solid fa-calculator me-2"></i><%= t('storefront.products.show.estimated_total') %>
                   <span data-variant-selector-target="price">
@@ -395,6 +398,7 @@
                     <% end %>
                   </span>
                 </div>
+                <% end %>
               <% end %>
             <% end %>
             <% unless browsing_as_member? %>
@@ -419,6 +423,7 @@
                 <i class="fa-solid fa-cart-plus me-2"></i><%= t('storefront.products.show.add_to_cart') %>
               </button>
 
+              <% if show_prices? %>
               <div class="text-muted">
                 <i class="fa-solid fa-calculator me-2"></i><%= t('storefront.products.show.estimated_total') %>
                 <% if discount_breakdown[:has_discount] %>
@@ -428,6 +433,7 @@
                   <%= humanized_money_with_symbol(@product.price) %>
                 <% end %>
               </div>
+              <% end %>
             <% end %>
           <% end %>
           <% unless browsing_as_member? %>

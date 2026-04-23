@@ -37,8 +37,8 @@ export default class extends Controller {
         const shipping = isPickup || qualifiesForFree ? 0 : this.shippingCostValue
         const total = this.subtotalValue + this.taxValue + shipping
 
-        this.shippingAmountTarget.textContent = this.formatCurrency(shipping)
-        this.totalAmountTarget.textContent = this.formatCurrency(total)
+        if (this.hasShippingAmountTarget) this.shippingAmountTarget.textContent = this.formatCurrency(shipping)
+        if (this.hasTotalAmountTarget) this.totalAmountTarget.textContent = this.formatCurrency(total)
     }
 
     toggleShippingAddress() {

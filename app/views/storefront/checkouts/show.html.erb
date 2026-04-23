@@ -32,8 +32,10 @@
                 <tr>
                   <th><%= t('storefront.checkouts.show.table.product') %></th>
                   <th class="text-center"><%= t('storefront.checkouts.show.table.quantity') %></th>
-                  <th class="text-end"><%= t('storefront.checkouts.show.table.price') %></th>
-                  <th class="text-end"><%= t('storefront.checkouts.show.table.total') %></th>
+                  <% if show_prices? %>
+                    <th class="text-end"><%= t('storefront.checkouts.show.table.price') %></th>
+                    <th class="text-end"><%= t('storefront.checkouts.show.table.total') %></th>
+                  <% end %>
                 </tr>
               </thead>
               <tbody>
@@ -58,22 +60,24 @@
                       </div>
                     </td>
                     <td class="text-center"><%= item.quantity %></td>
-                    <td class="text-end">
-                      <% if item.discount_percentage && item.discount_percentage > 0 %>
-                        <span class="text-muted text-decoration-line-through small"><%= humanized_money_with_symbol(item.price) %></span>
-                        <span class="text-success"><%= humanized_money_with_symbol(item.price - (item.price * item.discount_percentage)) %></span>
-                      <% else %>
-                        <%= humanized_money_with_symbol(item.price) %>
-                      <% end %>
-                    </td>
-                    <td class="text-end fw-medium">
-                      <% if item.discount_percentage && item.discount_percentage > 0 %>
-                        <span class="text-muted text-decoration-line-through small"><%= humanized_money_with_symbol(item.price * item.quantity) %></span>
-                        <span class="text-success"><%= humanized_money_with_symbol(item.total_price) %></span>
-                      <% else %>
-                        <%= humanized_money_with_symbol(item.total_price) %>
-                      <% end %>
-                    </td>
+                    <% if show_prices? %>
+                      <td class="text-end">
+                        <% if item.discount_percentage && item.discount_percentage > 0 %>
+                          <span class="text-muted text-decoration-line-through small"><%= humanized_money_with_symbol(item.price) %></span>
+                          <span class="text-success"><%= humanized_money_with_symbol(item.price - (item.price * item.discount_percentage)) %></span>
+                        <% else %>
+                          <%= humanized_money_with_symbol(item.price) %>
+                        <% end %>
+                      </td>
+                      <td class="text-end fw-medium">
+                        <% if item.discount_percentage && item.discount_percentage > 0 %>
+                          <span class="text-muted text-decoration-line-through small"><%= humanized_money_with_symbol(item.price * item.quantity) %></span>
+                          <span class="text-success"><%= humanized_money_with_symbol(item.total_price) %></span>
+                        <% else %>
+                          <%= humanized_money_with_symbol(item.total_price) %>
+                        <% end %>
+                      </td>
+                    <% end %>
                   </tr>
                 <% end %>
               </tbody>
@@ -103,14 +107,16 @@
                       <span class="text-muted small">
                         <%= t('storefront.checkouts.show.table.quantity') %>: <strong><%= item.quantity %></strong>
                       </span>
-                      <div class="text-end">
-                        <% if item.discount_percentage && item.discount_percentage > 0 %>
-                          <span class="text-muted text-decoration-line-through small d-block"><%= humanized_money_with_symbol(item.price * item.quantity) %></span>
-                          <span class="text-success fw-bold"><%= humanized_money_with_symbol(item.total_price) %></span>
-                        <% else %>
-                          <span class="fw-bold"><%= humanized_money_with_symbol(item.total_price) %></span>
-                        <% end %>
-                      </div>
+                      <% if show_prices? %>
+                        <div class="text-end">
+                          <% if item.discount_percentage && item.discount_percentage > 0 %>
+                            <span class="text-muted text-decoration-line-through small d-block"><%= humanized_money_with_symbol(item.price * item.quantity) %></span>
+                            <span class="text-success fw-bold"><%= humanized_money_with_symbol(item.total_price) %></span>
+                          <% else %>
+                            <span class="fw-bold"><%= humanized_money_with_symbol(item.total_price) %></span>
+                          <% end %>
+                        </div>
+                      <% end %>
                     </div>
                   </div>
                 </div>
@@ -139,14 +145,16 @@
                   <strong><%= t('storefront.checkouts.show.delivery_method.delivery') %></strong>
                   <div class="text-muted small"><%= t('storefront.checkouts.show.delivery_method.delivery_hint') %></div>
                 </div>
-                <span data-checkout-target="deliveryShippingCost">
-                  <% if @order.qualifies_for_free_shipping? %>
-                    <span class="text-decoration-line-through text-muted small me-1"><%= humanized_money_with_symbol(@current_organisation.shipping_cost) %></span>
-                    <span class="fw-medium text-success"><%= t('storefront.checkouts.show.delivery_method.free') %></span>
-                  <% else %>
-                    <span class="fw-medium"><%= humanized_money_with_symbol(@current_organisation.shipping_cost) %></span>
-                  <% end %>
-                </span>
+                <% if show_prices? %>
+                  <span data-checkout-target="deliveryShippingCost">
+                    <% if @order.qualifies_for_free_shipping? %>
+                      <span class="text-decoration-line-through text-muted small me-1"><%= humanized_money_with_symbol(@current_organisation.shipping_cost) %></span>
+                      <span class="fw-medium text-success"><%= t('storefront.checkouts.show.delivery_method.free') %></span>
+                    <% else %>
+                      <span class="fw-medium"><%= humanized_money_with_symbol(@current_organisation.shipping_cost) %></span>
+                    <% end %>
+                  </span>
+                <% end %>
               </label>
             </div>
 
@@ -304,36 +312,42 @@
       <div class="card-body">
         <h5 class="card-title mb-3"><%= t('storefront.carts.show.order_summary') %></h5>
 
-        <div class="d-flex justify-content-between mb-2">
-          <span class="text-muted"><%= t('storefront.checkouts.show.summary.subtotal') %> (<%= t('storefront.common.items', count: @order.item_count) %>)</span>
-          <span><%= humanized_money_with_symbol(@order.total_amount) %></span>
-        </div>
+        <% if show_prices? %>
+          <div class="d-flex justify-content-between mb-2">
+            <span class="text-muted"><%= t('storefront.checkouts.show.summary.subtotal') %> (<%= t('storefront.common.items', count: @order.item_count) %>)</span>
+            <span><%= humanized_money_with_symbol(@order.total_amount) %></span>
+          </div>
 
-        <% if @order.best_order_discount.present? %>
-          <div class="d-flex justify-content-between mb-2 text-success">
-            <span><%= t('storefront.carts.show.order_discount') %> (<%= @order.best_order_discount.value_display %>)</span>
-            <span>-<%= humanized_money_with_symbol(@order.auto_order_discount_amount) %></span>
+          <% if @order.best_order_discount.present? %>
+            <div class="d-flex justify-content-between mb-2 text-success">
+              <span><%= t('storefront.carts.show.order_discount') %> (<%= @order.best_order_discount.value_display %>)</span>
+              <span>-<%= humanized_money_with_symbol(@order.auto_order_discount_amount) %></span>
+            </div>
+          <% end %>
+
+          <%= render 'storefront/checkouts/promo_code' %>
+
+          <div class="d-flex justify-content-between mb-2">
+            <span class="text-muted"><%= t('storefront.checkouts.show.summary.tax') %> (<%= (@current_organisation.tax_rate * 100).round(1) %>%)</span>
+            <span><%= humanized_money_with_symbol(@order.calculated_tax) %></span>
+          </div>
+
+          <div class="d-flex justify-content-between mb-2">
+            <span class="text-muted"><%= t('storefront.checkouts.show.summary.shipping') %></span>
+            <span data-checkout-target="shippingAmount"><%= humanized_money_with_symbol(@order.calculated_shipping) %></span>
+          </div>
+
+          <hr>
+
+          <div class="d-flex justify-content-between mb-4">
+            <span class="fw-bold"><%= t('storefront.checkouts.show.summary.total') %></span>
+            <span class="fw-bold fs-5" data-checkout-target="totalAmount"><%= humanized_money_with_symbol(@order.grand_total) %></span>
+          </div>
+        <% else %>
+          <div class="text-muted small mb-3">
+            <%= t('storefront.common.items', count: @order.item_count) %>
           </div>
         <% end %>
-
-        <%= render 'storefront/checkouts/promo_code' %>
-
-        <div class="d-flex justify-content-between mb-2">
-          <span class="text-muted"><%= t('storefront.checkouts.show.summary.tax') %> (<%= (@current_organisation.tax_rate * 100).round(1) %>%)</span>
-          <span><%= humanized_money_with_symbol(@order.calculated_tax) %></span>
-        </div>
-
-        <div class="d-flex justify-content-between mb-2">
-          <span class="text-muted"><%= t('storefront.checkouts.show.summary.shipping') %></span>
-          <span data-checkout-target="shippingAmount"><%= humanized_money_with_symbol(@order.calculated_shipping) %></span>
-        </div>
-
-        <hr>
-
-        <div class="d-flex justify-content-between mb-4">
-          <span class="fw-bold"><%= t('storefront.checkouts.show.summary.total') %></span>
-          <span class="fw-bold fs-5" data-checkout-target="totalAmount"><%= humanized_money_with_symbol(@order.grand_total) %></span>
-        </div>
 
         <button type="submit" form="checkout-form" class="btn btn-primary w-100 btn-lg">
           <i class="fa-solid fa-check me-2"></i><%= t('storefront.checkouts.show.place_order') %>

@@ -78,7 +78,9 @@ Rails.application.routes.draw do
       end
 
       # Customer account settings
-      resource :account, only: [:show, :update]
+      resource :account, only: [:show, :update] do
+        patch :toggle_hide_prices
+      end
     end
 
     # bo routes

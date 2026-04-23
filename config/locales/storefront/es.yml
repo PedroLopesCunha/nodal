@@ -29,6 +29,9 @@ es:
       sign_out: "Cerrar sesión"
       language: "Idioma"
       order_discounts_available: "¡Descuentos de pedido disponibles!"
+      show_prices: "Mostrar precios"
+      hide_prices: "Ocultar precios"
+      hide_prices_hint: "Modo presentación"
 
     # Página de inicio
     home:
