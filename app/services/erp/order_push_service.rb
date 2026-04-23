@@ -86,7 +86,7 @@ module Erp
 
     def serialize_item(item)
       discount = item.discount_percentage.to_f
-      gross_unit_price = item.unit_price_cents.to_f / 100.0
+      gross_unit_price = item.price.to_f
       net_unit_price = (gross_unit_price * (1.0 - discount)).round(4)
 
       {
