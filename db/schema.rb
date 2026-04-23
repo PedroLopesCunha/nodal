@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2026_04_16_114253) do
+ActiveRecord::Schema[7.1].define(version: 2026_04_21_155238) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_trgm"
   enable_extension "plpgsql"
@@ -203,6 +203,7 @@ ActiveRecord::Schema[7.1].define(version: 2026_04_16_114253) do
     t.datetime "last_sign_in_at"
     t.string "current_sign_in_ip"
     t.string "last_sign_in_ip"
+    t.boolean "hide_prices", default: false, null: false
     t.index ["customer_category_id"], name: "index_customers_on_customer_category_id"
     t.index ["email", "organisation_id"], name: "index_customers_on_email_and_organisation_id", unique: true
     t.index ["invitation_token"], name: "index_customers_on_invitation_token", unique: true

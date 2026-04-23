@@ -142,7 +142,7 @@
 </div>
 
 <%# Discount banner — shown when customer has any active discounts or free shipping %>
-<% if !browsing_as_member? && (@tier_discount || @special_prices_count > 0 || active_order_discounts.any? || @active_promo_codes&.any? || current_organisation.free_shipping_enabled?) %>
+<% if show_prices? && !browsing_as_member? && (@tier_discount || @special_prices_count > 0 || active_order_discounts.any? || @active_promo_codes&.any? || current_organisation.free_shipping_enabled?) %>
   <section class="home-section fade-in-up">
     <div class="card border-0 shadow-sm" style="border-radius: 12px; background: var(--org-secondary); color: #fff;">
       <div class="card-body py-3">
@@ -352,10 +352,12 @@
                 <div class="fw-bold"><%= @last_order.order_items.count %></div>
                 <div class="text-muted small"><%= t('storefront.home.last_order.items_label') %></div>
               </div>
+<% if show_prices? %>
               <div class="text-center">
                 <div class="fw-bold"><%= humanized_money_with_symbol(@last_order.grand_total) %></div>
                 <div class="text-muted small"><%= t('storefront.home.last_order.total_label') %></div>
               </div>
+              <% end %>
               <% if @last_order.delivery_method.present? %>
                 <div class="text-center">
                   <div><i class="fa-solid fa-<%= @last_order.delivery_method == 'delivery' ? 'truck' : 'store' %>"></i></div>

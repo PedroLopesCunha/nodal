@@ -31,8 +31,10 @@
             <tr>
               <th><%= t('storefront.orders.show.table.product') %></th>
               <th class="text-center"><%= t('storefront.orders.show.table.quantity') %></th>
-              <th class="text-end"><%= t('storefront.checkouts.show.table.price') %></th>
-              <th class="text-end"><%= t('storefront.orders.show.table.total') %></th>
+              <% if show_prices? %>
+                <th class="text-end"><%= t('storefront.checkouts.show.table.price') %></th>
+                <th class="text-end"><%= t('storefront.orders.show.table.total') %></th>
+              <% end %>
             </tr>
           </thead>
           <tbody>
@@ -57,28 +59,31 @@
                   </div>
                 </td>
                 <td class="text-center"><%= item.quantity %></td>
-                <td class="text-end">
-                  <% if item.discount_percentage && item.discount_percentage > 0 %>
-                    <span class="text-muted text-decoration-line-through small d-block"><%= humanized_money_with_symbol(item.price) %></span>
-                    <span class="text-success"><%= humanized_money_with_symbol(item.price - (item.price * item.discount_percentage)) %></span>
-                    <span class="badge bg-success-subtle text-success small">-<%= format_discount_percentage(item.discount_percentage) %></span>
-                  <% else %>
-                    <%= humanized_money_with_symbol(item.price) %>
-                  <% end %>
-                </td>
-                <td class="text-end fw-medium">
-                  <% if item.discount_percentage && item.discount_percentage > 0 %>
-                    <span class="text-muted text-decoration-line-through small d-block"><%= humanized_money_with_symbol(item.price * item.quantity) %></span>
-                    <span class="text-success"><%= humanized_money_with_symbol(item.total_price) %></span>
-                  <% else %>
-                    <%= humanized_money_with_symbol(item.total_price) %>
-                  <% end %>
-                </td>
+                <% if show_prices? %>
+                  <td class="text-end">
+                    <% if item.discount_percentage && item.discount_percentage > 0 %>
+                      <span class="text-muted text-decoration-line-through small d-block"><%= humanized_money_with_symbol(item.price) %></span>
+                      <span class="text-success"><%= humanized_money_with_symbol(item.price - (item.price * item.discount_percentage)) %></span>
+                      <span class="badge bg-success-subtle text-success small">-<%= format_discount_percentage(item.discount_percentage) %></span>
+                    <% else %>
+                      <%= humanized_money_with_symbol(item.price) %>
+                    <% end %>
+                  </td>
+                  <td class="text-end fw-medium">
+                    <% if item.discount_percentage && item.discount_percentage > 0 %>
+                      <span class="text-muted text-decoration-line-through small d-block"><%= humanized_money_with_symbol(item.price * item.quantity) %></span>
+                      <span class="text-success"><%= humanized_money_with_symbol(item.total_price) %></span>
+                    <% else %>
+                      <%= humanized_money_with_symbol(item.total_price) %>
+                    <% end %>
+                  </td>
+                <% end %>
               </tr>
             <% end %>
           </tbody>
         </table>
 
+        <% if show_prices? %>
         <hr>
 
         <div class="d-flex justify-content-end">
@@ -129,6 +134,7 @@
             </div>
           </div>
         </div>
+        <% end %>
       </div>
     </div>
 

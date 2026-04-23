@@ -22,7 +22,9 @@
           <tr>
             <th style="width: 50px;"></th>
             <th><%= t('storefront.shopping_lists.product_picker.product') %></th>
-            <th style="width: 120px;"><%= t('storefront.shopping_lists.product_picker.price') %></th>
+            <% if show_prices? %>
+              <th style="width: 120px;"><%= t('storefront.shopping_lists.product_picker.price') %></th>
+            <% end %>
             <th style="width: 200px;"></th>
           </tr>
         </thead>
@@ -44,13 +46,15 @@
                   <small class="text-muted">SKU: <%= product.sku %></small>
                 <% end %>
               </td>
-              <td>
-                <% if product.price_on_request? %>
-                  <small class="text-muted"><%= t('storefront.products.index.price_on_request') %></small>
-                <% else %>
-                  <small class="fw-medium"><%= product.display_price %></small>
-                <% end %>
-              </td>
+              <% if show_prices? %>
+                <td>
+                  <% if product.price_on_request? %>
+                    <small class="text-muted"><%= t('storefront.products.index.price_on_request') %></small>
+                  <% else %>
+                    <small class="fw-medium"><%= product.display_price %></small>
+                  <% end %>
+                </td>
+              <% end %>
               <td>
                 <%= form_with url: shopping_list_items_path(org_slug: params[:org_slug], shopping_list_id: shopping_list), method: :post, class: "d-flex align-items-center gap-1" do %>
                   <%= hidden_field_tag :product_id, product.id %>

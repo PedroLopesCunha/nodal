@@ -29,6 +29,9 @@ en:
       sign_out: "Sign out"
       language: "Language"
       order_discounts_available: "Order discounts available!"
+      show_prices: "Show prices"
+      hide_prices: "Hide prices"
+      hide_prices_hint: "Presentation mode"
 
     # Home page
     home:

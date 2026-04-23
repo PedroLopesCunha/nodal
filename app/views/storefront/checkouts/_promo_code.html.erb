@@ -8,7 +8,9 @@
       </span>
     </div>
     <div class="d-flex align-items-center gap-2">
-      <span class="text-success fw-medium">-<%= humanized_money_with_symbol(@order.promo_code_discount) %></span>
+      <% if show_prices? %>
+        <span class="text-success fw-medium">-<%= humanized_money_with_symbol(@order.promo_code_discount) %></span>
+      <% end %>
       <%= button_to remove_promo_code_path(org_slug: params[:org_slug]),
           method: :delete,
           class: "btn btn-link btn-sm text-danger p-0",

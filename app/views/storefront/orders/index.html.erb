@@ -29,7 +29,9 @@
             <th class="ps-4"><%= t('storefront.orders.index.table.order_number') %></th>
             <th><%= t('storefront.orders.index.table.date') %></th>
             <th><%= t('storefront.orders.index.table.items') %></th>
-            <th><%= t('storefront.orders.index.table.total') %></th>
+            <% if show_prices? %>
+              <th><%= t('storefront.orders.index.table.total') %></th>
+            <% end %>
             <th><%= t('storefront.orders.index.table.status') %></th>
             <th class="pe-4"></th>
           </tr>
@@ -40,7 +42,9 @@
               <td class="ps-4 fw-medium"><%= order.order_number %></td>
               <td><%= order.placed_at&.strftime("%B %d, %Y") %></td>
               <td><%= t('storefront.common.items', count: order.order_items.count) %></td>
-              <td><%= humanized_money_with_symbol(order.total_amount) %></td>
+              <% if show_prices? %>
+                <td><%= humanized_money_with_symbol(order.total_amount) %></td>
+              <% end %>
               <td>
                 <% status_class = case order.status
                    when 'completed' then 'bg-success'
@@ -88,7 +92,9 @@
           </div>
           <div class="d-flex justify-content-between align-items-center mb-3">
             <span class="text-muted small"><%= t('storefront.common.items', count: order.order_items.count) %></span>
-            <span class="fw-bold"><%= humanized_money_with_symbol(order.total_amount) %></span>
+            <% if show_prices? %>
+              <span class="fw-bold"><%= humanized_money_with_symbol(order.total_amount) %></span>
+            <% end %>
           </div>
           <div class="d-flex gap-2">
             <%= button_to reorder_order_path(org_slug: params[:org_slug], id: order), method: :post, class: "btn btn-sm btn-outline-secondary flex-fill" do %>
