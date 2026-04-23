@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2026_04_21_155238) do
+ActiveRecord::Schema[7.1].define(version: 2026_04_23_165516) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_trgm"
   enable_extension "plpgsql"
@@ -406,6 +406,9 @@ ActiveRecord::Schema[7.1].define(version: 2026_04_21_155238) do
     t.datetime "terms_accepted_at"
     t.bigint "promo_code_id"
     t.integer "promo_code_discount_amount_cents", default: 0
+    t.string "push_status", default: "pending", null: false
+    t.integer "push_attempts", default: 0, null: false
+    t.datetime "last_pushed_at"
     t.index ["applied_by_id"], name: "index_orders_on_applied_by_id"
     t.index ["billing_address_id"], name: "index_orders_on_billing_address_id"
     t.index ["customer_id"], name: "index_orders_on_customer_id"
@@ -414,6 +417,7 @@ ActiveRecord::Schema[7.1].define(version: 2026_04_21_155238) do
     t.index ["organisation_id", "customer_id"], name: "index_orders_on_organisation_id_and_customer_id"
     t.index ["organisation_id", "external_id", "external_source"], name: "index_orders_on_org_external_id_source", unique: true, where: "(external_id IS NOT NULL)"
     t.index ["organisation_id", "placed_at"], name: "index_orders_on_organisation_id_and_placed_at"
+    t.index ["organisation_id", "push_status"], name: "index_orders_on_organisation_id_and_push_status"
     t.index ["organisation_id"], name: "index_orders_on_organisation_id"
     t.index ["promo_code_id"], name: "index_orders_on_promo_code_id"
     t.index ["shipping_address_id"], name: "index_orders_on_shipping_address_id"

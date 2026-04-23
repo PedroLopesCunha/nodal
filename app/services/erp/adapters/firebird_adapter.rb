@@ -185,60 +185,122 @@ module Erp
         true
       end
 
+      # Pushes an order to the ERP using the configured field mappings and static values.
+      #
+      # Supports flat-schema ERPs (one table for header+lines, repeated header data per
+      # line row — e.g. PDA_PEDIDOS). The first line is inserted with the order_number
+      # column set to 0 so the ERP's trigger/generator assigns the real number; the
+      # assigned value is then captured via the idempotency key and reused for
+      # subsequent lines.
+      #
+      # Idempotency: if an idempotency_key mapping is configured and a row with the
+      # same key already exists, the insert is skipped and the existing external_id
+      # is returned.
       def push_order(order_data)
         return { success: false, error: 'Missing credentials' } unless valid_credentials?
 
+        order_data = order_data.with_indifferent_access
         mappings = order_field_mappings
-        item_mappings = order_item_field_mappings
+        statics = order_static_values
+        idempotency_col = mappings[:idempotency_key]
+        idempotency_key = order_data[:idempotency_key]
+        pedido_col = mappings[:order_number]
+        linha_col = mappings[:line_number]
+
+        items = Array(order_data[:items])
+        return { success: false, error: 'Order has no items' } if items.empty?
 
         with_connection do |db|
+          # Idempotency check
+          if idempotency_col.present? && idempotency_key.present? && pedido_col.present?
+            existing_pedido = find_existing_pedido(db, pedido_col, idempotency_col, idempotency_key)
+            return { success: true, external_id: existing_pedido.to_s, idempotent: true } if existing_pedido
+          end
+
+          assigned_pedido = nil
+
           db.transaction do
-            # Insert order header
-            order_columns = []
-            order_values = []
+            items.each_with_index do |item_data, index|
+              line_data = build_line_row(
+                order_data: order_data,
+                item_data: item_data.with_indifferent_access,
+                mappings: mappings,
+                statics: statics,
+                pedido_value: assigned_pedido || 0,
+                pedido_col: pedido_col,
+                linha_col: linha_col
+              )
 
-            mappings.each do |nodal_field, erp_column|
-              next if erp_column.blank?
-              next unless order_data.key?(nodal_field.to_s) || order_data.key?(nodal_field.to_sym)
+              cols = line_data.keys.map { |c| safe_column_name(c) }
+              placeholders = cols.map { '?' }.join(', ')
+              sql = "INSERT INTO #{safe_table_name(orders_table)} (#{cols.join(', ')}) VALUES (#{placeholders})"
+              db.execute(sql, *encode_values(line_data.values))
 
-              order_columns << safe_column_name(erp_column)
-              order_values << order_data[nodal_field.to_s] || order_data[nodal_field.to_sym]
-            end
-
-            if order_columns.any?
-              placeholders = order_columns.map { '?' }.join(', ')
-              sql = "INSERT INTO #{safe_table_name(orders_table)} (#{order_columns.join(', ')}) VALUES (#{placeholders})"
-              db.execute(sql, *encode_values(order_values))
-            end
-
-            # Insert order items
-            (order_data['items'] || order_data[:items] || []).each do |item_data|
-              item_columns = []
-              item_values = []
-
-              item_mappings.each do |nodal_field, erp_column|
-                next if erp_column.blank?
-                next unless item_data.key?(nodal_field.to_s) || item_data.key?(nodal_field.to_sym)
-
-                item_columns << safe_column_name(erp_column)
-                item_values << item_data[nodal_field.to_s] || item_data[nodal_field.to_sym]
-              end
-
-              if item_columns.any?
-                placeholders = item_columns.map { '?' }.join(', ')
-                sql = "INSERT INTO #{safe_table_name(order_items_table)} (#{item_columns.join(', ')}) VALUES (#{placeholders})"
-                db.execute(sql, *encode_values(item_values))
+              # After the first line, capture the PEDIDO the trigger assigned so
+              # subsequent lines attach to the same order.
+              if index.zero? && pedido_col.present? && idempotency_col.present? && idempotency_key.present?
+                assigned_pedido = find_existing_pedido(db, pedido_col, idempotency_col, idempotency_key)
+                raise Erp::ApiError, "Could not determine PEDIDO assigned by ERP after insert" if assigned_pedido.nil?
               end
             end
           end
-        end
 
-        { success: true }
+          { success: true, external_id: assigned_pedido&.to_s }
+        end
       rescue => e
         raise_erp_error(e)
       end
 
       private
+
+      # SELECT the order_number column by idempotency key. Returns nil if not found.
+      def find_existing_pedido(db, pedido_col, idempotency_col, idempotency_key)
+        sql = "SELECT #{safe_column_name(pedido_col)} FROM #{safe_table_name(orders_table)} " \
+              "WHERE #{safe_column_name(idempotency_col)} = ? " \
+              "ORDER BY #{safe_column_name(pedido_col)} DESC"
+        cursor = db.execute(sql, *encode_values([idempotency_key]))
+        row = cursor.fetch
+        row ? row[0] : nil
+      ensure
+        cursor&.close
+      end
+
+      # Builds a single row to insert: header fields (repeated on every line) +
+      # per-line fields + static values + auto-assigned PEDIDO/PEDIDO_LINHA overrides.
+      def build_line_row(order_data:, item_data:, mappings:, statics:, pedido_value:, pedido_col:, linha_col:)
+        row = {}
+
+        # Header-level Nodal concepts (same for every line of the same order)
+        %i[customer_external_id delivery_date notes idempotency_key location_id].each do |nodal_key|
+          erp_col = mappings[nodal_key]
+          next if erp_col.blank?
+          val = order_data[nodal_key]
+          row[erp_col] = val unless val.nil?
+        end
+
+        # Per-line Nodal concepts
+        %i[product_code quantity unit_price].each do |nodal_key|
+          erp_col = mappings[nodal_key]
+          next if erp_col.blank?
+          val = item_data[nodal_key]
+          row[erp_col] = val unless val.nil?
+        end
+
+        # Static values fill columns that don't come from order data. Don't override
+        # anything already set (derived fields take priority).
+        statics.each do |erp_col, val|
+          next if erp_col.blank?
+          row[erp_col] ||= val
+        end
+
+        # Auto-assigned: order_number and line_number go last so they always override
+        row[pedido_col] = pedido_value if pedido_col.present?
+        row[linha_col] = 0 if linha_col.present?
+
+        row
+      end
+
+      # --- existing helpers below ---
 
       # Connection management — opens and closes per operation to avoid stale connections
       def with_connection
@@ -408,17 +470,22 @@ module Erp
         mappings.transform_keys(&:to_sym)
       end
 
-      # Field mappings from credentials
+      # Unified mapping of Nodal order concepts → ERP column name. Covers both
+      # header-level concepts (customer_external_id, delivery_date, notes,
+      # idempotency_key, location_id) and per-line concepts (product_code,
+      # quantity, unit_price) plus auto-assigned ones (order_number, line_number).
       def order_field_mappings
         mappings = credentials.dig(:field_mappings, :orders) ||
                    credentials.dig('field_mappings', 'orders') || {}
         mappings.transform_keys(&:to_sym)
       end
 
-      def order_item_field_mappings
-        mappings = credentials.dig(:field_mappings, :order_items) ||
-                   credentials.dig('field_mappings', 'order_items') || {}
-        mappings.transform_keys(&:to_sym)
+      # ERP column → fixed value, for columns the Nodal order data doesn't
+      # populate (UTILIZADOR, VENDEDOR, ARMAZEM, ESTADO, BCI, etc.).
+      def order_static_values
+        statics = credentials[:order_static_values] ||
+                  credentials['order_static_values'] || {}
+        statics.transform_keys(&:to_s)
       end
 
       # Safety: only allow valid Firebird identifiers

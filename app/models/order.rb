@@ -6,6 +6,8 @@ class Order < ApplicationRecord
   PAYMENT_STATUSES = %w[pending paid failed refunded].freeze
   DELIVERY_METHODS = %w[pickup delivery].freeze
   DISCOUNT_TYPES = %w[percentage fixed].freeze
+  PUSH_STATUSES = %w[pending syncing synced failed].freeze
+  MAX_PUSH_ATTEMPTS = 5
 
   monetize :tax_amount_cents, allow_nil: true
   monetize :shipping_amount_cents, allow_nil: true
@@ -29,16 +31,31 @@ class Order < ApplicationRecord
   validates :payment_status, inclusion: { in: PAYMENT_STATUSES }
   validates :delivery_method, inclusion: { in: DELIVERY_METHODS }, allow_nil: true
   validates :discount_type, inclusion: { in: DISCOUNT_TYPES }, allow_nil: true
+  validates :push_status, inclusion: { in: PUSH_STATUSES }
   validates :discount_value, numericality: { greater_than: 0 }, allow_nil: true
   validate :discount_value_valid_for_type
 
   before_validation :generate_order_number, on: :create
   before_validation :update_tax, on: :update
 
+  after_commit :enqueue_erp_push, if: :should_enqueue_erp_push?
+
   # Scopes for cart functionality
   scope :draft, -> { where(placed_at: nil) }
   scope :placed, -> { where.not(placed_at: nil) }
   scope :unreviewed, -> { placed.where(viewed_at: nil) }
+
+  PUSH_RETRY_COOLDOWN = 10.minutes
+
+  scope :push_pending, -> { where(push_status: "pending") }
+  scope :push_synced, -> { where(push_status: "synced") }
+  scope :push_failed, -> { where(push_status: "failed") }
+  scope :pushable, -> {
+    placed
+      .where(push_status: %w[pending failed])
+      .where("push_attempts < ?", MAX_PUSH_ATTEMPTS)
+      .where("last_pushed_at IS NULL OR last_pushed_at < ?", PUSH_RETRY_COOLDOWN.ago)
+  }
 
   def self.exportable_columns
     [
@@ -93,6 +110,22 @@ class Order < ApplicationRecord
 
   def place!
     update!(placed_at: Time.current)
+  end
+
+  def push_synced?
+    push_status == "synced"
+  end
+
+  def push_failed?
+    push_status == "failed"
+  end
+
+  def push_pending?
+    push_status == "pending"
+  end
+
+  def push_exhausted?
+    push_attempts >= MAX_PUSH_ATTEMPTS
   end
 
   def finalize_checkout!(same_as_shipping: false)
@@ -273,6 +306,17 @@ class Order < ApplicationRecord
 
   def update_tax
     self.tax_amount = calculated_tax
+  end
+
+  # Fires an async push to the ERP when an order transitions into `placed`
+  # state. Idempotent — the service no-ops if the order is already synced
+  # or the org has ERP disabled.
+  def should_enqueue_erp_push?
+    saved_change_to_placed_at? && placed_at.present? && push_pending?
+  end
+
+  def enqueue_erp_push
+    OrderPushJob.perform_later(id)
   end
 
   def snapshot_auto_discount!
