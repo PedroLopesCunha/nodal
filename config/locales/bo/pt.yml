@@ -975,6 +975,7 @@ pt:
           all_statuses: "Todos os Estados"
           all_payments: "Todos os Pagamentos"
           all_customers: "Todos os Clientes"
+          all_push_statuses: "Todos os Estados ERP"
           active_filters: "Filtros ativos"
         table:
           order_id: "Nº Encomenda"
@@ -984,7 +985,16 @@ pt:
           total: "Total"
           status: "Estado"
           payment: "Pagamento"
+          erp: "ERP"
           actions: "Ações"
+      push_status:
+        pending: "Pendente"
+        syncing: "A sincronizar"
+        synced: "Sincronizada"
+        failed: "Falhou"
+      push_retry:
+        button: "Tentar de novo"
+        queued: "Push reenfileirado para a encomenda %{number}"
       show:
         title: "Encomenda"
         order_details: "Detalhes da Encomenda"

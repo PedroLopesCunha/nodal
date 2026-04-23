@@ -177,7 +177,33 @@ class Bo::ErpSettingsController < Bo::BaseController
       credentials['field_mappings'] = field_mappings if field_mappings.any?
     end
 
+    # Extract order_static_values: list of {column, value} pairs → hash
+    if credentials_params[:order_static_values].present?
+      statics = extract_order_static_values(credentials_params[:order_static_values])
+      credentials['order_static_values'] = statics if statics.any?
+    end
+
+    # Extract orders_table (used by both pull and push flows)
+    if credentials_params[:orders_table].present?
+      credentials['orders_table'] = credentials_params[:orders_table]
+    end
+
     credentials
+  end
+
+  # Accepts either a nested hash {"0" => {column: X, value: Y}, "1" => ...}
+  # or a flat hash {column => value}. Returns {COLUMN => VALUE} with blanks dropped.
+  def extract_order_static_values(raw)
+    rows = raw.respond_to?(:values) ? raw.values : raw
+    result = {}
+    Array(rows).each do |row|
+      next unless row.respond_to?(:[])
+      column = row[:column] || row['column']
+      value = row[:value] || row['value']
+      next if column.blank?
+      result[column.to_s.strip.upcase] = value.to_s
+    end
+    result
   end
 
   def extract_field_mapping(mapping_params)

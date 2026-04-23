@@ -92,6 +92,18 @@
             <%= date_field_tag :date_to, params[:date_to], class: "form-control form-control-sm", onchange: "this.form.submit()" %>
           </div>
         </div>
+        <% if @current_organisation.erp_configuration&.sync_orders? %>
+          <div class="row mt-2">
+            <div class="col-md-3">
+              <select name="push_status" class="form-select form-select-sm" onchange="this.form.submit()">
+                <option value=""><%= t('bo.orders.index.filters.all_push_statuses', default: 'All ERP statuses') %></option>
+                <% Order::PUSH_STATUSES.each do |s| %>
+                  <option value="<%= s %>" <%= 'selected' if params[:push_status] == s %>><%= t("bo.orders.push_status.#{s}", default: s.titleize) %></option>
+                <% end %>
+              </select>
+            </div>
+          </div>
+        <% end %>
       <% end %>
     </div>
   </div>
@@ -156,6 +168,9 @@
             <th><%= t('bo.common.total') %></th>
             <th><%= t('bo.common.tables.status') %></th>
             <th><%= t('bo.orders.index.table.payment') %></th>
+            <% if @current_organisation.erp_configuration&.sync_orders? %>
+              <th><%= t('bo.orders.index.table.erp', default: 'ERP') %></th>
+            <% end %>
             <th class="text-end"><%= t('bo.common.actions_column') %></th>
           </tr>
         </thead>
@@ -199,7 +214,28 @@
                   <%= order.payment_status.titleize %>
                 </span>
               </td>
+              <% if @current_organisation.erp_configuration&.sync_orders? %>
+                <td>
+                  <% push_badge = case order.push_status
+                     when 'synced' then { class: 'bg-success-subtle text-success', icon: 'fa-check' }
+                     when 'syncing' then { class: 'bg-info-subtle text-info', icon: 'fa-spinner fa-spin' }
+                     when 'failed' then { class: 'bg-danger-subtle text-danger', icon: 'fa-triangle-exclamation' }
+                     else { class: 'bg-secondary-subtle text-secondary', icon: 'fa-clock' }
+                     end %>
+                  <span class="badge <%= push_badge[:class] %>" title="<%= order.sync_error %>">
+                    <i class="fa-solid <%= push_badge[:icon] %> me-1"></i><%= t("bo.orders.push_status.#{order.push_status}", default: order.push_status.titleize) %>
+                  </span>
+                  <% if order.external_id.present? %>
+                    <small class="d-block text-muted">#<%= order.external_id %></small>
+                  <% end %>
+                </td>
+              <% end %>
               <td class="text-end order-actions" onclick="event.stopPropagation();">
+                <% if @current_organisation.erp_configuration&.sync_orders? && order.push_failed? %>
+                  <%= button_to retry_push_bo_order_path(org_slug: @current_organisation.slug, id: order.id, **filter_params_hash), method: :post, form: { class: "d-inline" }, class: "btn btn-sm btn-link text-warning", title: t('bo.orders.push_retry.button', default: 'Retry ERP push') do %>
+                    <i class="fa-solid fa-rotate-right"></i>
+                  <% end %>
+                <% end %>
                 <%= link_to bo_order_path(org_slug: @current_organisation.slug, id: order.id, **filter_params_hash), class: "btn btn-sm btn-link text-muted" do %>
                   <i class="fa-solid fa-eye"></i>
                 <% end %>
@@ -215,7 +251,7 @@
 
           <% if @orders.empty? %>
             <tr>
-              <td colspan="8" class="text-center py-4 text-muted">
+              <td colspan="<%= @current_organisation.erp_configuration&.sync_orders? ? 9 : 8 %>" class="text-center py-4 text-muted">
                 <%= t('bo.orders.index.no_orders') %>
               </td>
             </tr>

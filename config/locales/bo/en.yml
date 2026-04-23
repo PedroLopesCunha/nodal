@@ -993,6 +993,7 @@ en:
           all_statuses: "All Statuses"
           all_payments: "All Payments"
           all_customers: "All Customers"
+          all_push_statuses: "All ERP statuses"
           active_filters: "Active filters"
         table:
           order_id: "Order ID"
@@ -1002,7 +1003,16 @@ en:
           total: "Total"
           status: "Status"
           payment: "Payment"
+          erp: "ERP"
           actions: "Actions"
+      push_status:
+        pending: "Pending"
+        syncing: "Syncing"
+        synced: "Synced"
+        failed: "Failed"
+      push_retry:
+        button: "Retry push"
+        queued: "Push re-queued for order %{number}"
       show:
         title: "Order"
         order_details: "Order Details"

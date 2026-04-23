@@ -97,6 +97,7 @@ Rails.application.routes.draw do
           get :download_pdf
           patch :apply_discount
           delete :remove_discount
+          post :retry_push
         end
       end
       resources :customers do

@@ -18,12 +18,10 @@ export default class extends Controller {
     "customersMappingBody",
     "ordersMappingSection",
     "ordersMappingBody",
-    "orderItemsMappingSection",
-    "orderItemsMappingBody",
+    "orderStaticSection",
     "productMapping",
     "customerMapping",
     "orderMapping",
-    "orderItemMapping",
     "adapterCredentials",
     "productSyncMode",
     "filterInput",
@@ -52,30 +50,19 @@ export default class extends Controller {
   ]
 
   static orderFields = [
-    { key: 'order_number', label: 'Order Number', required: true, description: 'Nodal order number' },
-    { key: 'customer_external_id', label: 'Customer ID', required: true, description: "Customer's ERP ID" },
-    { key: 'placed_at', label: 'Placed At', required: false, description: 'Order date/time' },
-    { key: 'status', label: 'Status', required: false, description: 'Order status' },
-    { key: 'payment_status', label: 'Payment Status', required: false, description: 'Payment status' },
-    { key: 'delivery_method', label: 'Delivery Method', required: false, description: 'Pickup or delivery' },
-    { key: 'total_amount', label: 'Total Amount', required: false, description: 'Subtotal before tax/shipping' },
-    { key: 'tax_amount', label: 'Tax Amount', required: false, description: 'Tax amount' },
-    { key: 'shipping_amount', label: 'Shipping Amount', required: false, description: 'Shipping cost' },
-    { key: 'grand_total', label: 'Grand Total', required: false, description: 'Final total' },
-    { key: 'notes', label: 'Notes', required: false, description: 'Order notes' }
+    { key: 'order_number', label: 'Order Number', required: true, description: 'ERP-assigned order number column (auto-filled on insert)' },
+    { key: 'line_number', label: 'Line Number', required: false, description: 'Line number column within the order (auto-filled on insert)' },
+    { key: 'customer_external_id', label: 'Customer ID', required: true, description: "Customer's ERP ID column" },
+    { key: 'product_code', label: 'Product Code', required: true, description: 'Product/variant code column (per line)' },
+    { key: 'quantity', label: 'Quantity', required: true, description: 'Line quantity column' },
+    { key: 'unit_price', label: 'Unit Price', required: true, description: 'Line net unit price column' },
+    { key: 'delivery_date', label: 'Delivery Date', required: false, description: 'Expected delivery date column' },
+    { key: 'notes', label: 'Notes', required: false, description: 'Order notes column' },
+    { key: 'idempotency_key', label: 'Idempotency Key', required: true, description: 'Column that stores the Nodal reference (e.g. OBSERVACOES2) — used to avoid duplicate pushes' },
+    { key: 'location_id', label: 'Location', required: false, description: 'Delivery location/branch column (e.g. LOCAL_ID)' }
   ]
 
-  static orderItemFields = [
-    { key: 'product_external_id', label: 'Product ID', required: true, description: "Product's ERP ID" },
-    { key: 'product_sku', label: 'Product SKU', required: false, description: 'Product SKU code' },
-    { key: 'product_name', label: 'Product Name', required: false, description: 'Product name' },
-    { key: 'variant_external_id', label: 'Variant ID', required: false, description: "Variant's ERP ID" },
-    { key: 'variant_sku', label: 'Variant SKU', required: false, description: 'Variant SKU code' },
-    { key: 'quantity', label: 'Quantity', required: true, description: 'Ordered quantity' },
-    { key: 'unit_price', label: 'Unit Price', required: false, description: 'Price per unit' },
-    { key: 'discount_percentage', label: 'Discount %', required: false, description: 'Line discount percentage' },
-    { key: 'total_price', label: 'Total Price', required: false, description: 'Line total' }
-  ]
+  static orderItemFields = []
 
   connect() {
     this.erpProductFields = []
@@ -97,6 +84,15 @@ export default class extends Controller {
       this.settingsPanelTarget.classList.remove("d-none")
     } else {
       this.settingsPanelTarget.classList.add("d-none")
+    }
+  }
+
+  toggleOrderStatic(event) {
+    if (!this.hasOrderStaticSectionTarget) return
+    if (event.target.checked) {
+      this.orderStaticSectionTarget.classList.remove("d-none")
+    } else {
+      this.orderStaticSectionTarget.classList.add("d-none")
     }
   }
 
@@ -210,13 +206,6 @@ export default class extends Controller {
           result.innerHTML += `<br><span class="text-warning"><i class="fa-solid fa-exclamation-triangle"></i> Orders: ${data.orders_error}</span>`
         }
 
-        if (data.order_items && data.order_items.fields) {
-          this.erpOrderItemFields = data.order_items.fields
-          this.renderOrderItemMappingTable()
-          this.orderItemsMappingSectionTarget.classList.remove('d-none')
-        } else if (data.order_items_error) {
-          result.innerHTML += `<br><span class="text-warning"><i class="fa-solid fa-exclamation-triangle"></i> Order Items: ${data.order_items_error}</span>`
-        }
       } else {
         result.innerHTML = `<span class="text-danger"><i class="fa-solid fa-times-circle"></i> ${data.error || 'Failed to fetch sample data'}</span>`
       }
@@ -276,16 +265,6 @@ export default class extends Controller {
     })
   }
 
-  renderOrderItemMappingTable() {
-    const tbody = this.orderItemsMappingBodyTarget
-    tbody.innerHTML = ''
-
-    this.constructor.orderItemFields.forEach(field => {
-      const row = this.createMappingRow(field, this.erpOrderItemFields, 'order_items')
-      tbody.appendChild(row)
-    })
-  }
-
   createMappingRow(nodalField, erpFields, entityType) {
     const row = document.createElement('tr')
 
@@ -338,9 +317,6 @@ export default class extends Controller {
         break
       case 'orders':
         targets = this.orderMappingTargets
-        break
-      case 'order_items':
-        targets = this.orderItemMappingTargets
         break
       default:
         return null
