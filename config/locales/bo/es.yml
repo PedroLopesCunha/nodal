@@ -900,6 +900,7 @@ es:
           all_statuses: "Todos los Estados"
           all_payments: "Todos los Pagos"
           all_customers: "Todos los Clientes"
+          all_push_statuses: "Todos los Estados ERP"
           active_filters: "Filtros activos"
         table:
           order_id: "Nº Pedido"
@@ -909,7 +910,16 @@ es:
           total: "Total"
           status: "Estado"
           payment: "Pago"
+          erp: "ERP"
           actions: "Acciones"
+      push_status:
+        pending: "Pendiente"
+        syncing: "Sincronizando"
+        synced: "Sincronizado"
+        failed: "Falló"
+      push_retry:
+        button: "Reintentar push"
+        queued: "Push re-encolado para el pedido %{number}"
       show:
         title: "Pedido"
         order_details: "Detalles del Pedido"

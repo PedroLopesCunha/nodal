@@ -43,6 +43,10 @@ class OrderPolicy < ApplicationPolicy
     member_of_organisation?
   end
 
+  def retry_push?
+    member_of_organisation?
+  end
+
   # Customer storefront actions
   def place?
     customer_owner? && record.draft?

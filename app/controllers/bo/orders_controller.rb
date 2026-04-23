@@ -1,7 +1,7 @@
 class Bo::OrdersController < Bo::BaseController
   include Exportable
 
-  before_action :set_order, only: [:show, :edit, :update, :destroy, :apply_discount, :remove_discount, :download_pdf]
+  before_action :set_order, only: [:show, :edit, :update, :destroy, :apply_discount, :remove_discount, :download_pdf, :retry_push]
 
   def index
     @orders = apply_order_filters(policy_scope(current_organisation.orders.placed).includes(:customer, :order_items))
@@ -82,6 +82,14 @@ class Bo::OrdersController < Bo::BaseController
       disposition: "attachment"
   end
 
+  def retry_push
+    authorize @order
+    @order.update!(push_status: "pending", sync_error: nil)
+    OrderPushJob.perform_later(@order.id)
+    redirect_to bo_orders_path(org_slug: @current_organisation.slug, **filter_params_hash),
+                notice: t('bo.orders.push_retry.queued', number: @order.order_number, default: "Push queued for order %{number}")
+  end
+
   def export_items
     authorize Order, :export?
 
@@ -124,6 +132,7 @@ class Bo::OrdersController < Bo::BaseController
     { search: params[:search], status: params[:status],
       payment_status: params[:payment_status], customer_id: params[:customer_id],
       date_from: params[:date_from], date_to: params[:date_to],
+      push_status: params[:push_status],
       sort_dir: params[:sort_dir] }.compact_blank
   end
 
@@ -139,6 +148,7 @@ class Bo::OrdersController < Bo::BaseController
     scope = scope.where(status: params[:status]) if params[:status].present?
     scope = scope.where(payment_status: params[:payment_status]) if params[:payment_status].present?
     scope = scope.where(customer_id: params[:customer_id]) if params[:customer_id].present?
+    scope = scope.where(push_status: params[:push_status]) if params[:push_status].present? && Order::PUSH_STATUSES.include?(params[:push_status])
 
     if params[:date_from].present?
       scope = scope.where("COALESCE(orders.placed_at, orders.created_at) >= ?", params[:date_from].to_date.beginning_of_day)
