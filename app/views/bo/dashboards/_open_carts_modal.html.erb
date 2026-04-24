@@ -39,7 +39,8 @@
                   </td>
                   <td class="text-center"><%= cart.order_items.size %></td>
                   <td class="text-end fw-semibold"><%= humanized_money_with_symbol(cart.total_amount) %></td>
-                  <td class="text-muted"><%= time_ago_in_words(cart.updated_at) %></td>
+                  <% first_item_at = cart.order_items.map(&:created_at).min %>
+                  <td class="text-muted"><%= time_ago_in_words(first_item_at || cart.created_at) %></td>
                 </tr>
                 <tr class="open-cart-detail">
                   <td colspan="5" class="p-0">
