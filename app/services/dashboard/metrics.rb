@@ -233,6 +233,17 @@ module Dashboard
       { value: carts_with_items.count, top_carts: top_carts }
     end
 
+    # All open carts with full detail, ordered by value desc. Returns Order
+    # records eager-loaded with customer, items, products and variants so the
+    # view can render the list + per-cart expand without N+1.
+    def self.open_carts_detail(organisation)
+      organisation.orders.draft
+        .joins(:order_items)
+        .distinct
+        .includes(:customer, order_items: [:product, :product_variant])
+        .sort_by { |cart| -cart.total_amount.cents }
+    end
+
     # Orders per product: count of orders containing each product
     def orders_per_product(organisation:, from:, to:, client_id: nil, category_id: nil, limit: 20, **_filters)
       orders = placed_orders_in_range(organisation, from, to)

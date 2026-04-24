@@ -281,6 +281,21 @@ pt:
         orders: "Encomendas"
         avg_order_value: "Valor Médio"
         open_carts: "Carrinhos Abertos"
+      open_carts_modal:
+        title: "Carrinhos Abertos"
+        empty: "Sem carrinhos abertos."
+        columns:
+          customer: "Cliente"
+          items: "Itens"
+          value: "Valor"
+          age: "Aberto há"
+        items:
+          product: "Produto"
+          sku: "SKU"
+          variant: "Variante"
+          quantity: "Qtd"
+          unit_price: "Preço"
+          added: "Adicionado há"
       top_clients:
         title: "Melhores Clientes"
         subtitle: "Por receita"

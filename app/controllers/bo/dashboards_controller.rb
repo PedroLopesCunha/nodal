@@ -7,6 +7,7 @@ class Bo::DashboardsController < Bo::BaseController
   def index
     @organisation = current_organisation
     authorize :dashboard, :index?
+    @open_carts = Dashboard::Metrics.open_carts_detail(@organisation)
   end
 
   # GET /bo/dashboards/metrics
