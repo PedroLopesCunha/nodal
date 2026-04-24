@@ -117,6 +117,9 @@
     color: #9ca3af;
     font-size: 0.75rem;
     transition: color 0.2s ease;
+    background: transparent;
+    border: none;
+    padding: 0;
 
     &:hover {
       color: #4f46e5;

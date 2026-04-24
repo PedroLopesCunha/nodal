@@ -87,8 +87,11 @@
             title: t('bo.dashboards.kpi.open_carts'),
             icon: "fa-shopping-cart",
             format: "number",
-            drill_path: nil %>
+            drill_path: nil,
+            drill_modal_id: "openCartsModal" %>
       </div>
+
+      <%= render "bo/dashboards/open_carts_modal", carts: @open_carts %>
 
       <!-- Middle Section -->
       <div class="dashboard__grid dashboard__grid--middle mb-4">

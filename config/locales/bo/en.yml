@@ -284,6 +284,21 @@ en:
         orders: "Orders"
         avg_order_value: "Avg Order Value"
         open_carts: "Open Carts"
+      open_carts_modal:
+        title: "Open Carts"
+        empty: "No open carts."
+        columns:
+          customer: "Customer"
+          items: "Items"
+          value: "Value"
+          age: "Open for"
+        items:
+          product: "Product"
+          sku: "SKU"
+          variant: "Variant"
+          quantity: "Qty"
+          unit_price: "Price"
+          added: "Added"
       top_clients:
         title: "Top Clients"
         subtitle: "By revenue"
