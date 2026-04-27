@@ -289,7 +289,7 @@ en:
           city_placeholder: "Enter city"
           country: "Country"
           country_placeholder: "Enter country"
-        same_as_shipping: "Same as shipping address"
+        same_as_billing: "Ship to billing address"
         order_notes:
           title: "Order Notes"
           optional: "(optional)"

@@ -27,7 +27,7 @@ class Storefront::CheckoutsController < Storefront::BaseController
       @order.assign_attributes(order_params)
       handle_addresses
       @order.terms_accepted_at = Time.current if checkout_params[:terms_accepted] == "1"
-      @order.finalize_checkout!(same_as_shipping: checkout_params[:same_as_shipping] == "1")
+      @order.finalize_checkout!(same_as_billing: checkout_params[:same_as_billing] == "1")
 
       CustomerMailer.with(customer: current_customer, order: @order).confirm_order.deliver_later
       MemberMailer.with(customer: current_customer, order: @order, org_slug: params[:org_slug]).notificate_customer_order.deliver_later
@@ -74,13 +74,13 @@ class Storefront::CheckoutsController < Storefront::BaseController
 
   def order_params
     # Address IDs are handled separately in handle_addresses
-    checkout_params.except(:same_as_shipping, :new_shipping_address, :new_billing_address, :shipping_address_id, :billing_address_id, :terms_accepted)
+    checkout_params.except(:same_as_billing, :new_shipping_address, :new_billing_address, :shipping_address_id, :billing_address_id, :terms_accepted)
   end
 
   def checkout_params
     params.require(:order).permit(
       :delivery_method, :receive_on, :notes, :terms_accepted,
-      :shipping_address_id, :billing_address_id, :same_as_shipping,
+      :shipping_address_id, :billing_address_id, :same_as_billing,
       new_shipping_address: [:street_name, :postal_code, :city, :country],
       new_billing_address: [:street_name, :postal_code, :city, :country]
     )

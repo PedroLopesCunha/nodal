@@ -289,7 +289,7 @@ pt:
           city_placeholder: "Introduza a cidade"
           country: "País"
           country_placeholder: "Introduza o país"
-        same_as_shipping: "Igual à morada de envio"
+        same_as_billing: "Enviar para a morada de facturação"
         order_notes:
           title: "Notas da Encomenda"
           optional: "(opcional)"

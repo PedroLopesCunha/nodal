@@ -193,7 +193,58 @@
         </div>
       </div>
 
-      <!-- Shipping Address (only for delivery) -->
+      <!-- Billing Address (canonical, comes from ERP) -->
+      <div class="card border-0 shadow-sm mb-4" style="border-radius: 12px;">
+        <div class="card-body">
+          <h5 class="card-title mb-3">
+            <i class="fa-solid fa-file-invoice me-2"></i><%= t('storefront.checkouts.show.billing_address') %>
+          </h5>
+
+          <div>
+            <% if @billing_address.present? %>
+              <%= f.hidden_field :billing_address_id, value: @billing_address.id %>
+              <div class="p-3 border rounded bg-light">
+                <strong><%= @billing_address.street_name %></strong><br>
+                <span class="text-muted"><%= @billing_address.postal_code %> <%= @billing_address.city %>, <%= @billing_address.country %></span>
+              </div>
+            <% else %>
+              <%= f.fields_for :new_billing_address, Address.new do |af| %>
+                <div class="mb-3">
+                  <%= af.label :street_name, t('storefront.checkouts.show.form.street_address'), class: "form-label" %>
+                  <%= af.text_field :street_name, class: "form-control", placeholder: t('storefront.checkouts.show.form.street_address_placeholder') %>
+                </div>
+                <div class="row g-3">
+                  <div class="col-md-4">
+                    <%= af.label :postal_code, t('storefront.checkouts.show.form.postal_code'), class: "form-label" %>
+                    <%= af.text_field :postal_code, class: "form-control", placeholder: t('storefront.checkouts.show.form.postal_code_placeholder') %>
+                  </div>
+                  <div class="col-md-4">
+                    <%= af.label :city, t('storefront.checkouts.show.form.city'), class: "form-label" %>
+                    <%= af.text_field :city, class: "form-control", placeholder: t('storefront.checkouts.show.form.city_placeholder') %>
+                  </div>
+                  <div class="col-md-4">
+                    <%= af.label :country, t('storefront.checkouts.show.form.country'), class: "form-label" %>
+                    <%= af.text_field :country, class: "form-control", placeholder: t('storefront.checkouts.show.form.country_placeholder') %>
+                  </div>
+                </div>
+              <% end %>
+            <% end %>
+          </div>
+
+          <!-- Ship-to-billing checkbox (hidden when pickup is selected) -->
+          <div class="form-check mt-3" data-checkout-target="sameAsBillingOption">
+            <%= f.check_box :same_as_billing,
+                class: "form-check-input",
+                id: "same_as_billing",
+                data: { action: "checkout#toggleShippingAddress" } %>
+            <label class="form-check-label" for="same_as_billing">
+              <%= t('storefront.checkouts.show.same_as_billing') %>
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <!-- Shipping Address (only for delivery + when not shipping to billing) -->
       <div class="card border-0 shadow-sm mb-4" style="border-radius: 12px;" data-checkout-target="shippingAddressSection">
         <div class="card-body">
           <h5 class="card-title mb-3">
@@ -235,56 +286,6 @@
                 <% end %>
               </div>
             </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Billing Address -->
-      <div class="card border-0 shadow-sm mb-4" style="border-radius: 12px;">
-        <div class="card-body">
-          <h5 class="card-title mb-3">
-            <i class="fa-solid fa-file-invoice me-2"></i><%= t('storefront.checkouts.show.billing_address') %>
-          </h5>
-
-          <div class="form-check mb-3" data-checkout-target="sameAsShippingOption">
-            <%= f.check_box :same_as_shipping,
-                class: "form-check-input",
-                id: "same_as_shipping",
-                data: { action: "checkout#toggleBillingAddress" } %>
-            <label class="form-check-label" for="same_as_shipping">
-              <%= t('storefront.checkouts.show.same_as_shipping') %>
-            </label>
-          </div>
-
-          <div data-checkout-target="billingAddressFields">
-            <% if @billing_address.present? %>
-              <%= f.hidden_field :billing_address_id, value: @billing_address.id %>
-              <div class="p-3 border rounded bg-light">
-                <strong><%= @billing_address.street_name %></strong><br>
-                <span class="text-muted"><%= @billing_address.postal_code %> <%= @billing_address.city %>, <%= @billing_address.country %></span>
-              </div>
-            <% else %>
-              <%= f.fields_for :new_billing_address, Address.new do |af| %>
-                <div class="mb-3">
-                  <%= af.label :street_name, t('storefront.checkouts.show.form.street_address'), class: "form-label" %>
-                  <%= af.text_field :street_name, class: "form-control", placeholder: t('storefront.checkouts.show.form.street_address_placeholder') %>
-                </div>
-                <div class="row g-3">
-                  <div class="col-md-4">
-                    <%= af.label :postal_code, t('storefront.checkouts.show.form.postal_code'), class: "form-label" %>
-                    <%= af.text_field :postal_code, class: "form-control", placeholder: t('storefront.checkouts.show.form.postal_code_placeholder') %>
-                  </div>
-                  <div class="col-md-4">
-                    <%= af.label :city, t('storefront.checkouts.show.form.city'), class: "form-label" %>
-                    <%= af.text_field :city, class: "form-control", placeholder: t('storefront.checkouts.show.form.city_placeholder') %>
-                  </div>
-                  <div class="col-md-4">
-                    <%= af.label :country, t('storefront.checkouts.show.form.country'), class: "form-label" %>
-                    <%= af.text_field :country, class: "form-control", placeholder: t('storefront.checkouts.show.form.country_placeholder') %>
-                  </div>
-                </div>
-              <% end %>
-            <% end %>
           </div>
         </div>
       </div>
