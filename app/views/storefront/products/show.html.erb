@@ -90,7 +90,11 @@
         <h1 class="mb-2" style="font-size: 2rem; font-weight: 600;"><%= @product.name %></h1>
 
         <!-- Description -->
-        <p class="text-muted mb-4"><%= @product.description %></p>
+        <% if @product.rich_description.body.present? %>
+          <div class="text-muted mb-4"><%= @product.rich_description %></div>
+        <% else %>
+          <p class="text-muted mb-4"><%= @product.description %></p>
+        <% end %>
 
         <!-- Price -->
         <% if show_prices? %>

@@ -50,8 +50,8 @@
 
           <div class="row g-3 mt-1">
             <div class="col-md-12">
-              <label class="form-label"><%= t('bo.products.form.description') %> <span class="text-danger">*</span></label>
-              <%= f.text_area :description, class: "form-control", placeholder: t('bo.products.form.placeholders.description'), rows: 3, required: true %>
+              <label class="form-label"><%= t('bo.products.form.description') %></label>
+              <%= f.rich_text_area :rich_description, class: "form-control" %>
               <small class="text-muted"><%= t('bo.products.form.description_hint') %></small>
             </div>
           </div>
