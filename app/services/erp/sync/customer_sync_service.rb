@@ -92,8 +92,13 @@ module Erp
         billing = customer.billing_address_with_archived ||
                   customer.build_billing_address_with_archived(address_type: "billing")
 
+        # Reset every known address field before applying ERP values so
+        # unmapped fields don't keep stale data (e.g. a street_nr from a
+        # one-off CSV import when the ERP only exposes a combined street).
+        reset_attrs = { street_name: nil, street_nr: nil, postal_code: nil, city: nil, country: nil }
+
         billing.assign_attributes(
-          attrs.merge(
+          reset_attrs.merge(attrs).merge(
             address_type: "billing",
             external_source: external_source,
             last_synced_at: Time.current,
