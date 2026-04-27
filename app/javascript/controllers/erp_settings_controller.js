@@ -46,7 +46,17 @@ export default class extends Controller {
     { key: 'email', label: 'Email', required: true, description: 'Contact email address' },
     { key: 'contact_phone', label: 'Phone', required: false, description: 'Contact phone number' },
     { key: 'taxpayer_id', label: 'NIF', required: false, description: 'Tax identification number' },
-    { key: 'active', label: 'Active', required: false, description: 'Account status (boolean)' }
+    { key: 'active', label: 'Active', required: false, description: 'Account status (boolean)' },
+    { key: 'billing_street_name', label: 'Billing Street', required: false, description: 'Billing address — street name (overwrites on every sync)' },
+    { key: 'billing_street_nr', label: 'Billing Number', required: false, description: 'Billing address — street number' },
+    { key: 'billing_postal_code', label: 'Billing Postal Code', required: false, description: 'Billing address — postal code' },
+    { key: 'billing_city', label: 'Billing City', required: false, description: 'Billing address — city' },
+    { key: 'billing_country', label: 'Billing Country', required: false, description: 'Billing address — country' },
+    { key: 'shipping_street_name', label: 'Shipping Street', required: false, description: 'Shipping address — street name (sync only adds when the address differs from existing ones)' },
+    { key: 'shipping_street_nr', label: 'Shipping Number', required: false, description: 'Shipping address — street number' },
+    { key: 'shipping_postal_code', label: 'Shipping Postal Code', required: false, description: 'Shipping address — postal code' },
+    { key: 'shipping_city', label: 'Shipping City', required: false, description: 'Shipping address — city' },
+    { key: 'shipping_country', label: 'Shipping Country', required: false, description: 'Shipping address — country' }
   ]
 
   static orderFields = [
