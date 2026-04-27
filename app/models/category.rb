@@ -19,6 +19,7 @@ class Category < ApplicationRecord
   validates :name, presence: true
   validates :name, uniqueness: { case_sensitive: false, scope: [:organisation_id, :ancestry] }
   validates :slug, uniqueness: { scope: :organisation_id, allow_blank: true }
+  validates :default_product_sort, inclusion: { in: Product::SORT_OPTIONS }, allow_blank: true
   validate :prevent_self_ancestry
 
   scope :active, -> { kept }

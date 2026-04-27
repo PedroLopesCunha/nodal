@@ -285,7 +285,19 @@
               <%= t('bo.settings.edit.show_scroll_to_top') %>
             </label>
           </div>
-          <small class="text-muted"><%= t('bo.settings.edit.show_scroll_to_top_hint') %></small>
+          <small class="text-muted d-block mb-3"><%= t('bo.settings.edit.show_scroll_to_top_hint') %></small>
+
+          <div class="mt-3">
+            <label class="form-label"><%= t('bo.settings.edit.default_product_sort') %></label>
+            <%= f.select :default_product_sort,
+                         options_for_select(
+                           Product::SORT_OPTIONS.map { |k| [t("storefront.products.index.sort.#{k}"), k] },
+                           @organisation.default_product_sort
+                         ),
+                         {},
+                         class: "form-control" %>
+            <small class="text-muted"><%= t('bo.settings.edit.default_product_sort_hint') %></small>
+          </div>
         </div>
       </div>
 
