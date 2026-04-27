@@ -4,8 +4,8 @@ import { Controller } from "@hotwired/stimulus"
 export default class extends Controller {
     static targets = [
         "shippingAmount", "totalAmount", "shippingAddressSection",
-        "sameAsBillingOption", "dateLabel", "newShippingAddressForm",
-        "deliveryShippingCost", "dateField"
+        "shippingSelector", "sameAsBillingOption", "dateLabel",
+        "newShippingAddressForm", "deliveryShippingCost", "dateField"
     ]
     static values = {
         subtotal: Number,
@@ -45,15 +45,15 @@ export default class extends Controller {
         const sameAsBillingEl = document.getElementById("same_as_billing")
         const sameAsBilling = sameAsBillingEl ? sameAsBillingEl.checked : false
 
-        // Shipping section is hidden when pickup, or when the user chose to
-        // ship to the billing address.
+        // Whole shipping card hides only when pickup is selected.
         if (this.hasShippingAddressSectionTarget) {
-            this.shippingAddressSectionTarget.style.display = (isPickup || sameAsBilling) ? "none" : "block"
+            this.shippingAddressSectionTarget.style.display = isPickup ? "none" : "block"
         }
 
-        // The "ship to billing" checkbox is only meaningful for delivery.
-        if (this.hasSameAsBillingOptionTarget) {
-            this.sameAsBillingOptionTarget.style.display = isPickup ? "none" : "flex"
+        // Inner shipping selector hides when shipping to billing address —
+        // the checkbox stays visible so the customer can flip it back.
+        if (this.hasShippingSelectorTarget) {
+            this.shippingSelectorTarget.style.display = sameAsBilling ? "none" : "block"
         }
 
         if (this.hasDateLabelTarget) {

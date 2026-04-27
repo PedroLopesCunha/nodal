@@ -231,16 +231,6 @@
             <% end %>
           </div>
 
-          <!-- Ship-to-billing checkbox (hidden when pickup is selected) -->
-          <div class="form-check mt-3" data-checkout-target="sameAsBillingOption">
-            <%= f.check_box :same_as_billing,
-                class: "form-check-input",
-                id: "same_as_billing",
-                data: { action: "checkout#toggleShippingAddress" } %>
-            <label class="form-check-label" for="same_as_billing">
-              <%= t('storefront.checkouts.show.same_as_billing') %>
-            </label>
-          </div>
         </div>
       </div>
 
@@ -251,14 +241,25 @@
             <i class="fa-solid fa-location-dot me-2"></i><%= t('storefront.checkouts.show.shipping_address') %>
           </h5>
 
-          <%= f.select :shipping_address_id,
-              options_for_select(
-                @shipping_addresses.map { |a| ["#{a.street_name}, #{a.postal_code} #{a.city}", a.id] } + [[t('storefront.checkouts.show.add_new_address'), "new"]],
-                @order.shipping_address_id || @shipping_addresses.first&.id
-              ),
-              { include_blank: @shipping_addresses.empty? ? t('storefront.checkouts.show.select_address') : false },
-              class: "form-select mb-3",
-              data: { action: "checkout#toggleNewShippingAddress" } %>
+          <div class="form-check mb-3" data-checkout-target="sameAsBillingOption">
+            <%= f.check_box :same_as_billing,
+                class: "form-check-input",
+                id: "same_as_billing",
+                data: { action: "checkout#toggleShippingAddress" } %>
+            <label class="form-check-label" for="same_as_billing">
+              <%= t('storefront.checkouts.show.same_as_billing') %>
+            </label>
+          </div>
+
+          <div data-checkout-target="shippingSelector">
+            <%= f.select :shipping_address_id,
+                options_for_select(
+                  @shipping_addresses.map { |a| ["#{a.street_name}, #{a.postal_code} #{a.city}", a.id] } + [[t('storefront.checkouts.show.add_new_address'), "new"]],
+                  @order.shipping_address_id || @shipping_addresses.first&.id
+                ),
+                { include_blank: @shipping_addresses.empty? ? t('storefront.checkouts.show.select_address') : false },
+                class: "form-select mb-3",
+                data: { action: "checkout#toggleNewShippingAddress" } %>
 
           <!-- New Shipping Address Form (hidden by default) -->
           <div data-checkout-target="newShippingAddressForm" style="display: none;">
@@ -286,6 +287,7 @@
                 <% end %>
               </div>
             </div>
+          </div>
           </div>
         </div>
       </div>
