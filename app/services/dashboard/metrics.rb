@@ -88,7 +88,9 @@ module Dashboard
 
     def calculate_delta(current, previous)
       return 0.0 if previous.nil? || previous.zero?
-      ((current - previous) / previous.to_f * 100).round(2)
+      # Cast to Float so the JSON serializer emits a number, not a string
+      # (BigDecimal serializes as a string, which breaks the JS .toFixed call).
+      ((current.to_f - previous.to_f) / previous.to_f * 100).round(2).to_f
     end
 
     # Total sales (sum of all placed order totals) in CHF/EUR
