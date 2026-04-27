@@ -31,20 +31,19 @@ module Erp
         customer = find_or_initialize_customer(external_id, data[:email])
         was_new = customer.new_record?
 
-        # Skip update for customers that have been invited or are active
-        # to preserve manual edits made to their profiles
-        if !was_new && customer.invitation_status != :not_invited
-          sync_log.increment_processed!
-          return
-        end
+        # The identity guard preserves manual edits the merchant made to
+        # invited/active customers' contact_name/email/phone in Nodal.
+        # Addresses are NOT subject to this guard — billing is ERP-owned
+        # and shipping is add-only, so manual edits are preserved naturally.
+        identity_skipped = !was_new && customer.invitation_status != :not_invited
 
-        update_customer_attributes(customer, data, was_new)
+        unless identity_skipped
+          update_customer_attributes(customer, data, was_new)
+        end
 
         if was_new || customer.changed?
           if customer.save
             customer.mark_synced!(source: external_source)
-            sync_addresses(customer, data)
-
             if was_new
               sync_log.increment_created!
             else
@@ -52,11 +51,16 @@ module Erp
             end
           else
             sync_log.increment_failed!(external_id, customer.errors.full_messages.join(', '))
+            return
           end
         else
-          sync_addresses(customer, data)
           sync_log.increment_processed!
         end
+
+        # Always run for both new and existing customers, regardless of
+        # identity guard. Lenient: per-address failures are logged but
+        # don't fail the customer sync.
+        sync_addresses(customer, data)
       rescue StandardError => e
         sync_log.increment_failed!(data[:external_id], e.message)
       end
@@ -65,9 +69,23 @@ module Erp
       # Billing: ERP overwrites the existing record (or creates one).
       # Shipping: never replaces; only adds when the ERP-provided address
       # doesn't match any existing active shipping by content fingerprint.
+      # Failures on either side are logged but don't break customer sync.
       def sync_addresses(customer, data)
-        sync_billing_address(customer, data[:billing_address]) if data[:billing_address].present?
-        sync_shipping_address(customer, data[:shipping_address]) if data[:shipping_address].present?
+        if data[:billing_address].present?
+          begin
+            sync_billing_address(customer, data[:billing_address])
+          rescue StandardError => e
+            Rails.logger.warn("[ERP sync] billing address failed for customer external_id=#{customer.external_id}: #{e.message}")
+          end
+        end
+
+        if data[:shipping_address].present?
+          begin
+            sync_shipping_address(customer, data[:shipping_address])
+          rescue StandardError => e
+            Rails.logger.warn("[ERP sync] shipping address failed for customer external_id=#{customer.external_id}: #{e.message}")
+          end
+        end
       end
 
       def sync_billing_address(customer, attrs)
