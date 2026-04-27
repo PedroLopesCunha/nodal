@@ -418,8 +418,24 @@ module Erp
           phone: get_mapped_value(row, mappings, :contact_phone),
           taxpayer_id: get_mapped_value(row, mappings, :taxpayer_id),
           active: parse_boolean(get_mapped_value(row, mappings, :active)),
+          billing_address: extract_address(row, mappings, :billing),
+          shipping_address: extract_address(row, mappings, :shipping),
           raw_data: row
         }.compact
+      end
+
+      # Reads address fields for a given prefix (:billing or :shipping) from
+      # the row using the configured mappings. Returns nil if all source
+      # fields are blank — caller treats nil as "ERP did not provide this
+      # address, do not sync".
+      def extract_address(row, mappings, prefix)
+        keys = %i[street_name street_nr postal_code city country]
+        values = keys.each_with_object({}) do |key, acc|
+          mapped = get_mapped_value(row, mappings, :"#{prefix}_#{key}")
+          acc[key] = mapped.to_s.strip if mapped.present?
+        end
+        return nil if values.values.all?(&:blank?)
+        values
       end
 
       # Get a value from a row using the configured field mapping
