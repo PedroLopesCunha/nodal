@@ -27,13 +27,28 @@ module Erp
 
         if result.success?
           if result.idempotent
+            record_changes(order, 'updated')
             sync_log.increment_updated!
           else
+            record_changes(order, 'created')
             sync_log.increment_created!
           end
         else
           sync_log.increment_failed!(order.order_number, result.error)
         end
+      end
+
+      def record_changes(order, action)
+        sync_log.add_change(
+          order.order_number,
+          'Order',
+          action,
+          {
+            customer: order.customer&.company_name,
+            total: order.total_amount.format,
+            placed_at: order.placed_at&.iso8601
+          }
+        )
       end
     end
   end

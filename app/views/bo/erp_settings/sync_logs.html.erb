@@ -113,7 +113,7 @@
                             <strong><%= change['external_id'] %></strong>
                             (<%= change['record_type'] %>)
                             <% if change['changes'].present? %>
-                              — <%= change.dig('changes', 'name') || change.dig('changes', 'sku') %>
+                              — <%= change.dig('changes', 'name') || change.dig('changes', 'sku') || change.dig('changes', 'company_name') || change.dig('changes', 'customer') %>
                             <% end %>
                           </li>
                         <% end %>

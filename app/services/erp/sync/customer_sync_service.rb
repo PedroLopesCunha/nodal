@@ -42,11 +42,14 @@ module Erp
         end
 
         if was_new || customer.changed?
+          changes_snapshot = customer.changes
           if customer.save
             customer.mark_synced!(source: external_source)
             if was_new
+              record_changes(external_id, 'created', customer)
               sync_log.increment_created!
             else
+              record_changes(external_id, 'updated', customer, changes_snapshot)
               sync_log.increment_updated!
             end
           else
@@ -177,6 +180,20 @@ module Erp
         temp_password = SecureRandom.hex(12)
         customer.password = temp_password
         customer.password_confirmation = temp_password
+      end
+
+      def record_changes(external_id, action, customer, changes_snapshot = nil)
+        changes = if action == 'created'
+          {
+            company_name: customer.company_name,
+            contact_name: customer.contact_name,
+            email: customer.email
+          }
+        else
+          changes_snapshot || customer.changes
+        end
+
+        sync_log.add_change(external_id, 'Customer', action, changes)
       end
     end
   end
