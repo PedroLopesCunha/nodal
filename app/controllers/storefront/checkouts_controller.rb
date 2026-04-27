@@ -4,7 +4,7 @@ class Storefront::CheckoutsController < Storefront::BaseController
     authorize @order, :checkout?, policy_class: OrderPolicy
 
     if @order.order_items.empty?
-      redirect_to cart_path(org_slug: params[:org_slug]), alert: "Your cart is empty."
+      redirect_to cart_path(org_slug: params[:org_slug]), alert: t('storefront.carts.show.empty_cart')
       return
     end
 
@@ -19,7 +19,7 @@ class Storefront::CheckoutsController < Storefront::BaseController
     authorize @order, :checkout?, policy_class: OrderPolicy
 
     if @order.order_items.empty?
-      redirect_to cart_path(org_slug: params[:org_slug]), alert: "Your cart is empty."
+      redirect_to cart_path(org_slug: params[:org_slug]), alert: t('storefront.carts.show.empty_cart')
       return
     end
 
@@ -32,7 +32,7 @@ class Storefront::CheckoutsController < Storefront::BaseController
       CustomerMailer.with(customer: current_customer, order: @order).confirm_order.deliver_later
       MemberMailer.with(customer: current_customer, order: @order, org_slug: params[:org_slug]).notificate_customer_order.deliver_later
 
-      redirect_to order_path(org_slug: params[:org_slug], id: @order), notice: "Order placed successfully!"
+      redirect_to order_path(org_slug: params[:org_slug], id: @order), notice: t('storefront.flash.order_placed')
     rescue ActiveRecord::RecordInvalid => e
       @order_items = @order.order_items.includes(product: :category)
       @shipping_addresses = current_customer.shipping_addresses
