@@ -44,7 +44,11 @@
 
         <div class="mb-3">
           <small class="text-muted d-block"><%= t('bo.products.form.description') %></small>
-          <p class="mb-0"><%= @product.description %></p>
+          <% if @product.rich_description.body.present? %>
+            <div class="mb-0"><%= @product.rich_description %></div>
+          <% else %>
+            <p class="mb-0"><%= @product.description %></p>
+          <% end %>
         </div>
 
         <hr>
