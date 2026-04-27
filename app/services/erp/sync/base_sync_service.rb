@@ -17,6 +17,14 @@ module Erp
         return failure('ERP integration not enabled') unless erp_configuration.enabled?
         return failure('Invalid adapter configuration') unless adapter
 
+        # Clear zombie "running" logs from previously killed processes before
+        # checking for concurrency, so the guard doesn't trip on stale state.
+        cleanup_stale_logs
+
+        if sync_already_running?
+          return failure("A #{entity_type} sync is already running for this organisation")
+        end
+
         @sync_log = create_sync_log
 
         begin
@@ -31,10 +39,6 @@ module Erp
           Rails.logger.error "ERP Sync Error: #{e.message}\n#{e.backtrace.first(10).join("\n")}"
           sync_log.mark_failed!(e.message)
           failure(e.message)
-        ensure
-          # Safety net: if the process is killed (e.g. Heroku dyno restart)
-          # and the log is still "running", mark it as completed on next load
-          finalize_stale_logs
         end
       end
 
@@ -71,15 +75,28 @@ module Erp
         Result.new(success?: false, sync_log: sync_log, error: error_message)
       end
 
-      # Mark any stale "running" logs as completed (from killed processes)
-      def finalize_stale_logs
-        ErpSyncLog.where(organisation: organisation, status: 'running')
-                  .where(started_at: ..10.minutes.ago)
-                  .find_each do |stale_log|
+      # Mark zombie "running" logs (from killed processes) as completed.
+      # Scoped to the same entity_type so a kill on one sync doesn't taint
+      # logs of the others.
+      def cleanup_stale_logs
+        ErpSyncLog.where(
+          organisation: organisation,
+          entity_type: entity_type,
+          status: 'running'
+        ).where(started_at: ..10.minutes.ago)
+         .find_each do |stale_log|
           stale_log.update(status: 'completed', completed_at: stale_log.updated_at)
         end
       rescue StandardError
         # Don't let cleanup errors break anything
+      end
+
+      def sync_already_running?
+        ErpSyncLog.where(
+          organisation: organisation,
+          entity_type: entity_type,
+          status: 'running'
+        ).exists?
       end
     end
   end
