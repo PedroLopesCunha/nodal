@@ -4,8 +4,8 @@ import { Controller } from "@hotwired/stimulus"
 export default class extends Controller {
     static targets = [
         "shippingAmount", "totalAmount", "shippingAddressSection",
-        "sameAsShippingOption", "dateLabel", "newShippingAddressForm",
-        "billingAddressFields", "deliveryShippingCost", "dateField"
+        "shippingSelector", "sameAsBillingOption", "dateLabel",
+        "newShippingAddressForm", "deliveryShippingCost", "dateField"
     ]
     static values = {
         subtotal: Number,
@@ -22,7 +22,6 @@ export default class extends Controller {
 
     connect() {
         this.toggleShippingAddress()
-        this.toggleBillingAddress()
     }
 
     qualifiesForFreeShipping() {
@@ -43,13 +42,18 @@ export default class extends Controller {
 
     toggleShippingAddress() {
         const isPickup = document.getElementById("delivery_method_pickup").checked
+        const sameAsBillingEl = document.getElementById("same_as_billing")
+        const sameAsBilling = sameAsBillingEl ? sameAsBillingEl.checked : false
 
+        // Whole shipping card hides only when pickup is selected.
         if (this.hasShippingAddressSectionTarget) {
             this.shippingAddressSectionTarget.style.display = isPickup ? "none" : "block"
         }
 
-        if (this.hasSameAsShippingOptionTarget) {
-            this.sameAsShippingOptionTarget.style.display = isPickup ? "none" : "flex"
+        // Inner shipping selector hides when shipping to billing address —
+        // the checkbox stays visible so the customer can flip it back.
+        if (this.hasShippingSelectorTarget) {
+            this.shippingSelectorTarget.style.display = sameAsBilling ? "none" : "block"
         }
 
         if (this.hasDateLabelTarget) {
@@ -61,13 +65,6 @@ export default class extends Controller {
         if (this.hasNewShippingAddressFormTarget) {
             const isNew = event.target.value === "new"
             this.newShippingAddressFormTarget.style.display = isNew ? "block" : "none"
-        }
-    }
-
-    toggleBillingAddress() {
-        const sameAsShipping = document.getElementById("same_as_shipping")
-        if (sameAsShipping && this.hasBillingAddressFieldsTarget) {
-            this.billingAddressFieldsTarget.style.display = sameAsShipping.checked ? "none" : "block"
         }
     }
 

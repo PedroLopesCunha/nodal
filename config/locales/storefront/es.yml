@@ -279,7 +279,7 @@ es:
           city_placeholder: "Introduzca la ciudad"
           country: "País"
           country_placeholder: "Introduzca el país"
-        same_as_shipping: "Igual que la dirección de envío"
+        same_as_billing: "Enviar a la dirección de facturación"
         order_notes:
           title: "Notas del Pedido"
           optional: "(opcional)"

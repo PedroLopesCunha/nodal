@@ -13,6 +13,10 @@ class Order < ApplicationRecord
   monetize :shipping_amount_cents, allow_nil: true
   monetize :promo_code_discount_amount_cents, allow_nil: true
 
+  # Virtual attribute used by the checkout form: when true, the customer
+  # asked to ship to the billing address. Resolved in finalize_checkout!.
+  attr_accessor :same_as_billing
+
   belongs_to :customer
   belongs_to :organisation
   belongs_to :shipping_address, class_name: "Address", optional: true
@@ -128,8 +132,8 @@ class Order < ApplicationRecord
     push_attempts >= MAX_PUSH_ATTEMPTS
   end
 
-  def finalize_checkout!(same_as_shipping: false)
-    self.billing_address = shipping_address if same_as_shipping && shipping_address.present?
+  def finalize_checkout!(same_as_billing: false)
+    self.shipping_address = billing_address if same_as_billing && billing_address.present?
     self.tax_amount = calculated_tax
     self.shipping_amount = calculated_shipping
     snapshot_auto_discount!

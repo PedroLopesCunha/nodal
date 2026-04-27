@@ -193,70 +193,14 @@
         </div>
       </div>
 
-      <!-- Shipping Address (only for delivery) -->
-      <div class="card border-0 shadow-sm mb-4" style="border-radius: 12px;" data-checkout-target="shippingAddressSection">
-        <div class="card-body">
-          <h5 class="card-title mb-3">
-            <i class="fa-solid fa-location-dot me-2"></i><%= t('storefront.checkouts.show.shipping_address') %>
-          </h5>
-
-          <%= f.select :shipping_address_id,
-              options_for_select(
-                @shipping_addresses.map { |a| ["#{a.street_name}, #{a.postal_code} #{a.city}", a.id] } + [[t('storefront.checkouts.show.add_new_address'), "new"]],
-                @order.shipping_address_id || @shipping_addresses.first&.id
-              ),
-              { include_blank: @shipping_addresses.empty? ? t('storefront.checkouts.show.select_address') : false },
-              class: "form-select mb-3",
-              data: { action: "checkout#toggleNewShippingAddress" } %>
-
-          <!-- New Shipping Address Form (hidden by default) -->
-          <div data-checkout-target="newShippingAddressForm" style="display: none;">
-            <div class="row g-3">
-              <div class="col-12">
-                <%= f.fields_for :new_shipping_address, Address.new do |af| %>
-                  <div class="mb-3">
-                    <%= af.label :street_name, t('storefront.checkouts.show.form.street_address'), class: "form-label" %>
-                    <%= af.text_field :street_name, class: "form-control", placeholder: t('storefront.checkouts.show.form.street_address_placeholder') %>
-                  </div>
-                  <div class="row g-3">
-                    <div class="col-md-4">
-                      <%= af.label :postal_code, t('storefront.checkouts.show.form.postal_code'), class: "form-label" %>
-                      <%= af.text_field :postal_code, class: "form-control", placeholder: t('storefront.checkouts.show.form.postal_code_placeholder') %>
-                    </div>
-                    <div class="col-md-4">
-                      <%= af.label :city, t('storefront.checkouts.show.form.city'), class: "form-label" %>
-                      <%= af.text_field :city, class: "form-control", placeholder: t('storefront.checkouts.show.form.city_placeholder') %>
-                    </div>
-                    <div class="col-md-4">
-                      <%= af.label :country, t('storefront.checkouts.show.form.country'), class: "form-label" %>
-                      <%= af.text_field :country, class: "form-control", placeholder: t('storefront.checkouts.show.form.country_placeholder') %>
-                    </div>
-                  </div>
-                <% end %>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Billing Address -->
+      <!-- Billing Address (canonical, comes from ERP) -->
       <div class="card border-0 shadow-sm mb-4" style="border-radius: 12px;">
         <div class="card-body">
           <h5 class="card-title mb-3">
             <i class="fa-solid fa-file-invoice me-2"></i><%= t('storefront.checkouts.show.billing_address') %>
           </h5>
 
-          <div class="form-check mb-3" data-checkout-target="sameAsShippingOption">
-            <%= f.check_box :same_as_shipping,
-                class: "form-check-input",
-                id: "same_as_shipping",
-                data: { action: "checkout#toggleBillingAddress" } %>
-            <label class="form-check-label" for="same_as_shipping">
-              <%= t('storefront.checkouts.show.same_as_shipping') %>
-            </label>
-          </div>
-
-          <div data-checkout-target="billingAddressFields">
+          <div>
             <% if @billing_address.present? %>
               <%= f.hidden_field :billing_address_id, value: @billing_address.id %>
               <div class="p-3 border rounded bg-light">
@@ -285,6 +229,65 @@
                 </div>
               <% end %>
             <% end %>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Shipping Address (only for delivery + when not shipping to billing) -->
+      <div class="card border-0 shadow-sm mb-4" style="border-radius: 12px;" data-checkout-target="shippingAddressSection">
+        <div class="card-body">
+          <h5 class="card-title mb-3">
+            <i class="fa-solid fa-location-dot me-2"></i><%= t('storefront.checkouts.show.shipping_address') %>
+          </h5>
+
+          <div class="form-check mb-3" data-checkout-target="sameAsBillingOption">
+            <%= f.check_box :same_as_billing,
+                class: "form-check-input",
+                id: "same_as_billing",
+                data: { action: "checkout#toggleShippingAddress" } %>
+            <label class="form-check-label" for="same_as_billing">
+              <%= t('storefront.checkouts.show.same_as_billing') %>
+            </label>
+          </div>
+
+          <div data-checkout-target="shippingSelector">
+            <%= f.select :shipping_address_id,
+                options_for_select(
+                  @shipping_addresses.map { |a| ["#{a.street_name}, #{a.postal_code} #{a.city}", a.id] } + [[t('storefront.checkouts.show.add_new_address'), "new"]],
+                  @order.shipping_address_id || @shipping_addresses.first&.id
+                ),
+                { include_blank: @shipping_addresses.empty? ? t('storefront.checkouts.show.select_address') : false },
+                class: "form-select mb-3",
+                data: { action: "checkout#toggleNewShippingAddress" } %>
+
+          <!-- New Shipping Address Form (hidden by default) -->
+          <div data-checkout-target="newShippingAddressForm" style="display: none;">
+            <div class="row g-3">
+              <div class="col-12">
+                <%= f.fields_for :new_shipping_address, Address.new do |af| %>
+                  <div class="mb-3">
+                    <%= af.label :street_name, t('storefront.checkouts.show.form.street_address'), class: "form-label" %>
+                    <%= af.text_field :street_name, class: "form-control", placeholder: t('storefront.checkouts.show.form.street_address_placeholder') %>
+                  </div>
+                  <div class="row g-3">
+                    <div class="col-md-4">
+                      <%= af.label :postal_code, t('storefront.checkouts.show.form.postal_code'), class: "form-label" %>
+                      <%= af.text_field :postal_code, class: "form-control", placeholder: t('storefront.checkouts.show.form.postal_code_placeholder') %>
+                    </div>
+                    <div class="col-md-4">
+                      <%= af.label :city, t('storefront.checkouts.show.form.city'), class: "form-label" %>
+                      <%= af.text_field :city, class: "form-control", placeholder: t('storefront.checkouts.show.form.city_placeholder') %>
+                    </div>
+                    <div class="col-md-4">
+                      <%= af.label :country, t('storefront.checkouts.show.form.country'), class: "form-label" %>
+                      <%= af.text_field :country, class: "form-control", placeholder: t('storefront.checkouts.show.form.country_placeholder') %>
+                    </div>
+                  </div>
+                <% end %>
+              </div>
+            </div>
+          </div>
           </div>
         </div>
       </div>
