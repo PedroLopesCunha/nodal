@@ -55,6 +55,7 @@ class Organisation < ApplicationRecord
   validates :delivery_days, numericality: { greater_than: 0, only_integer: true }
   validates :order_cutoff_time, format: { with: CUTOFF_TIME_REGEX }, allow_blank: true
   validates :timezone, inclusion: { in: ActiveSupport::TimeZone::MAPPING.values.uniq }
+  validates :default_product_sort, inclusion: { in: Product::SORT_OPTIONS }
 
   before_validation :set_delivery_days_from_flags
   before_validation :normalize_cutoff_time

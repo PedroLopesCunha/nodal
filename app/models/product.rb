@@ -2,6 +2,10 @@ class Product < ApplicationRecord
   include Slugable
   include HasExportableColumns
 
+  # Storefront sort options exposed in the products listing dropdown.
+  # Reused by Organisation and Category to validate their default_product_sort.
+  SORT_OPTIONS = %w[name_asc name_desc price_asc price_desc newest].freeze
+
   slugify :name, secondary: :sku
 
   belongs_to :organisation

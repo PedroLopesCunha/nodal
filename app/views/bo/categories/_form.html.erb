@@ -50,6 +50,20 @@
               </div>
             </div>
           </div>
+
+          <div class="row g-3 mt-1">
+            <div class="col-md-12">
+              <label class="form-label"><%= t('bo.categories.form.default_product_sort') %></label>
+              <%= f.select :default_product_sort,
+                    options_for_select(
+                      Product::SORT_OPTIONS.map { |k| [t("storefront.products.index.sort.#{k}"), k] },
+                      category.default_product_sort
+                    ),
+                    { include_blank: t('bo.categories.form.use_org_default') },
+                    { class: "form-select" } %>
+              <small class="text-muted"><%= t('bo.categories.form.default_product_sort_hint') %></small>
+            </div>
+          </div>
         </div>
       </div>
     </div>

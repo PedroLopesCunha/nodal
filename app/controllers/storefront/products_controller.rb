@@ -103,8 +103,11 @@ class Storefront::ProductsController < Storefront::BaseController
     # (showing attributes across all categories is confusing — values from unrelated categories mix together)
     @available_attributes = @current_category ? build_available_attributes(products, @current_attrs) : []
 
-    # Sort
-    @current_sort = params[:sort].presence || "name_asc"
+    # Sort: explicit query param wins; otherwise fall back to the current
+    # category's default (if any), then the organisation's default.
+    @current_sort = params[:sort].presence ||
+                    @current_category&.default_product_sort.presence ||
+                    current_organisation.default_product_sort
     min_variant_price = "(SELECT MIN(pv.unit_price_cents) FROM product_variants pv WHERE pv.product_id = products.id AND pv.published = true)"
     sorted_products = case @current_sort
                       when "name_desc" then products.order(name: :desc)

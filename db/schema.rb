@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2026_04_27_074255) do
+ActiveRecord::Schema[7.1].define(version: 2026_04_27_092129) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_trgm"
   enable_extension "plpgsql"
@@ -101,6 +101,7 @@ ActiveRecord::Schema[7.1].define(version: 2026_04_27_074255) do
     t.string "color"
     t.jsonb "metadata", default: {}
     t.string "slug"
+    t.string "default_product_sort"
     t.index ["ancestry"], name: "index_categories_on_ancestry"
     t.index ["discarded_at"], name: "index_categories_on_discarded_at"
     t.index ["organisation_id", "ancestry", "position"], name: "index_categories_on_organisation_id_and_ancestry_and_position"
@@ -490,6 +491,7 @@ ActiveRecord::Schema[7.1].define(version: 2026_04_27_074255) do
     t.string "hero_subtitle"
     t.string "hero_link_url"
     t.string "hero_link_text"
+    t.string "default_product_sort", default: "name_asc", null: false
     t.index ["default_locale"], name: "index_organisations_on_default_locale"
     t.index ["slug"], name: "index_organisations_on_slug", unique: true
   end
