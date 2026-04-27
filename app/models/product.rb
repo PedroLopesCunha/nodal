@@ -33,6 +33,7 @@ class Product < ApplicationRecord
   has_many :available_attribute_values, through: :product_available_values, source: :product_attribute_value
 
   has_many_attached :photos
+  has_rich_text :rich_description
 
   # Returns the cover photo if set, otherwise falls back to first photo
   def photo
@@ -72,9 +73,9 @@ class Product < ApplicationRecord
 
   validates :slug, uniqueness: true
   validates :name, presence: true
-  validates :description, length: { maximum: 250 }, allow_blank: true
   monetize :unit_price, as: :price, allow_nil: true
 
+  before_save :sync_description_columns
   after_create :create_default_variant
   after_update :sync_default_variant, if: :should_sync_default_variant?
   after_update :clear_default_variant_for_variable, if: :became_variable?
@@ -89,7 +90,7 @@ class Product < ApplicationRecord
       { key: :sku, label: I18n.t("bo.export.columns.product.sku"), default: true,
         value: ->(r) { r.sku } },
       { key: :description, label: I18n.t("bo.export.columns.product.description"), default: false,
-        value: ->(r) { r.description } },
+        value: ->(r) { r.rich_description.body&.to_plain_text.presence || r.description } },
       { key: :unit_price, label: I18n.t("bo.export.columns.product.unit_price"), default: true,
         value: ->(r) { r.price&.format } },
       { key: :price_on_request, label: I18n.t("bo.export.columns.product.price_on_request"), default: false,
@@ -202,6 +203,19 @@ class Product < ApplicationRecord
   end
 
   private
+
+  # Mirrors content between rich_description (Trix-edited) and the legacy
+  # description column. When the form edits rich, description follows.
+  # When imports/ERP sync set description directly, rich gets backfilled.
+  # The body_changed? check distinguishes form path from import path so
+  # clearing the rich editor doesn't get reverted from a stale description.
+  def sync_description_columns
+    if rich_description.body_changed?
+      self.description = rich_description.body&.to_plain_text&.strip.presence
+    elsif description_changed? && description.present?
+      self.rich_description = description
+    end
+  end
 
   def create_default_variant
     return if product_variants.exists?

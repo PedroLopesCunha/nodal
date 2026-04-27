@@ -583,7 +583,7 @@ class Bo::ProductsController < Bo::BaseController
   end
 
   def product_params
-    params.require(:product).permit(:name, :slug, :sku, :description, :price, :unit_description, :min_quantity, :min_quantity_type, :published, :price_on_request, :category_id, category_ids: [], photos: [])
+    params.require(:product).permit(:name, :slug, :sku, :description, :rich_description, :price, :unit_description, :min_quantity, :min_quantity_type, :published, :price_on_request, :category_id, category_ids: [], photos: [])
   end
 
   def parse_uploaded_file(uploaded_file)
