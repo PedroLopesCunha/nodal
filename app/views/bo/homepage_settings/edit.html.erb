@@ -262,6 +262,94 @@
   </div>
 </div>
 
+<%# ==================== SPECIAL PRICE PRODUCTS ==================== %>
+<div class="card mb-4">
+  <div class="card-body">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <div>
+        <h5 class="card-title mb-1"><%= t('bo.homepage_settings.special_price_products.title') %></h5>
+        <p class="text-muted small mb-0"><%= t('bo.homepage_settings.special_price_products.subtitle') %></p>
+      </div>
+      <button type="button" class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#addSpecialPriceProductsModal">
+        <i class="fa-solid fa-plus me-1"></i><%= t('bo.homepage_settings.special_price_products.add') %>
+      </button>
+    </div>
+
+    <%# Card display toggles %>
+    <%= form_with url: bo_homepage_settings_path(params[:org_slug]), method: :patch, local: true, class: "mb-3" do %>
+      <div class="bg-light rounded p-3">
+        <p class="text-muted small mb-2 fw-semibold"><%= t('bo.homepage_settings.special_price_products.display_options') %></p>
+        <div class="d-flex flex-wrap gap-3 align-items-center">
+          <div class="form-check form-switch">
+            <input type="hidden" name="organisation[special_prices_show_price]" value="0">
+            <input class="form-check-input" type="checkbox"
+                   id="spp_show_price" name="organisation[special_prices_show_price]" value="1"
+                   <%= 'checked' if current_organisation.special_prices_show_price %>>
+            <label class="form-check-label small" for="spp_show_price"><%= t('bo.homepage_settings.special_price_products.show_price') %></label>
+          </div>
+          <div class="form-check form-switch">
+            <input type="hidden" name="organisation[special_prices_show_discount_badge]" value="0">
+            <input class="form-check-input" type="checkbox"
+                   id="spp_show_discount_badge" name="organisation[special_prices_show_discount_badge]" value="1"
+                   <%= 'checked' if current_organisation.special_prices_show_discount_badge %>>
+            <label class="form-check-label small" for="spp_show_discount_badge"><%= t('bo.homepage_settings.special_price_products.show_discount_badge') %></label>
+          </div>
+          <div class="form-check form-switch">
+            <input type="hidden" name="organisation[special_prices_show_sale_badge]" value="0">
+            <input class="form-check-input" type="checkbox"
+                   id="spp_show_sale_badge" name="organisation[special_prices_show_sale_badge]" value="1"
+                   <%= 'checked' if current_organisation.special_prices_show_sale_badge %>>
+            <label class="form-check-label small" for="spp_show_sale_badge"><%= t('bo.homepage_settings.special_price_products.show_sale_badge') %></label>
+          </div>
+          <button type="submit" class="btn btn-sm btn-outline-secondary ms-auto"><%= t('bo.common.actions.save') %></button>
+        </div>
+      </div>
+    <% end %>
+
+    <% if @special_price_products.any? %>
+      <div class="list-group">
+        <% @special_price_products.each do |sp| %>
+          <div class="list-group-item d-flex align-items-center justify-content-between">
+            <div class="d-flex align-items-center gap-2">
+              <% if sp.product.photo_attached? %>
+                <%= image_tag sp.product.photo, style: "width: 40px; height: 40px; object-fit: cover;", class: "rounded" %>
+              <% else %>
+                <div class="rounded d-flex align-items-center justify-content-center bg-light" style="width: 40px; height: 40px;">
+                  <i class="fa-solid fa-image text-muted" style="font-size: 0.8rem;"></i>
+                </div>
+              <% end %>
+              <div>
+                <div class="fw-semibold small"><%= sp.product.name %></div>
+                <div class="text-muted" style="font-size: 0.75rem;"><%= sp.product.sku %></div>
+              </div>
+            </div>
+            <div class="d-flex gap-1 align-items-center">
+              <% unless @discountable_product_ids.include?(sp.product_id) %>
+                <span class="badge bg-warning-subtle text-warning" title="<%= t('bo.homepage_settings.special_price_products.no_active_discount_hint') %>">
+                  <i class="fa-solid fa-triangle-exclamation me-1"></i><%= t('bo.homepage_settings.special_price_products.no_active_discount') %>
+                </span>
+              <% end %>
+              <%= link_to edit_bo_product_path(params[:org_slug], sp.product), class: "btn btn-outline-secondary btn-sm", title: t('bo.common.actions.edit') do %>
+                <i class="fa-solid fa-pen" style="font-size: 0.7rem;"></i>
+              <% end %>
+              <%= button_to remove_special_price_product_bo_homepage_settings_path(params[:org_slug], product_id: sp.product_id),
+                  method: :delete,
+                  class: "btn btn-outline-danger btn-sm" do %>
+                <i class="fa-solid fa-times"></i>
+              <% end %>
+            </div>
+          </div>
+        <% end %>
+      </div>
+    <% else %>
+      <div class="text-center py-4">
+        <i class="fa-solid fa-tags fa-2x text-muted mb-2"></i>
+        <p class="text-muted mb-0"><%= t('bo.homepage_settings.special_price_products.empty') %></p>
+      </div>
+    <% end %>
+  </div>
+</div>
+
 <%# ==================== MODALS ==================== %>
 
 <%# Add Categories Modal %>
@@ -357,6 +445,59 @@
           <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal"><%= t('bo.common.actions.cancel') %></button>
           <% if available_products.any? %>
             <button type="submit" class="btn btn-primary"><%= t('bo.homepage_settings.featured_products.add_selected') %></button>
+          <% end %>
+        </div>
+      <% end %>
+    </div>
+  </div>
+</div>
+
+<%# Add Special Price Products Modal %>
+<div class="modal fade" id="addSpecialPriceProductsModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <%= form_with url: add_special_price_products_bo_homepage_settings_path(params[:org_slug]), method: :post, local: true do %>
+        <div class="modal-header">
+          <h5 class="modal-title"><%= t('bo.homepage_settings.special_price_products.modal_title') %></h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <% existing_sp_ids = @special_price_products.map(&:product_id) %>
+          <% available_sp_products = current_organisation.products
+                                                          .where(id: @discountable_product_ids)
+                                                          .where.not(id: existing_sp_ids)
+                                                          .where(published: true)
+                                                          .order(:name) %>
+          <% if available_sp_products.any? %>
+            <div class="alert alert-info py-2 small mb-3">
+              <i class="fa-solid fa-info-circle me-1"></i><%= t('bo.homepage_settings.special_price_products.eligible_only_hint') %>
+            </div>
+            <div class="mb-3">
+              <input type="text" class="form-control" placeholder="<%= t('bo.homepage_settings.search') %>"
+                     oninput="var q=this.value.toLowerCase(); this.closest('.modal-body').querySelectorAll('.product-item').forEach(function(el){ var n=el.getAttribute('data-name')||''; var s=el.getAttribute('data-sku')||''; el.style.setProperty('display', (n.indexOf(q)>=0||s.indexOf(q)>=0)?'flex':'none', 'important'); })">
+            </div>
+            <div class="list-group" style="max-height: 400px; overflow-y: auto;">
+              <% available_sp_products.each do |product| %>
+                <label class="list-group-item list-group-item-action d-flex align-items-center product-item" data-name="<%= product.name.downcase %>" data-sku="<%= product.sku&.downcase %>">
+                  <input type="checkbox" name="product_ids[]" value="<%= product.id %>" class="form-check-input me-3">
+                  <div class="flex-grow-1">
+                    <div class="fw-semibold"><%= product.name %></div>
+                    <small class="text-muted"><%= product.sku %> &middot; <%= humanized_money_with_symbol(product.price) %></small>
+                  </div>
+                </label>
+              <% end %>
+            </div>
+          <% else %>
+            <div class="text-center py-4">
+              <i class="fa-solid fa-tags fa-2x text-muted mb-2"></i>
+              <p class="text-muted mb-0"><%= t('bo.homepage_settings.special_price_products.no_eligible') %></p>
+            </div>
+          <% end %>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal"><%= t('bo.common.actions.cancel') %></button>
+          <% if available_sp_products.any? %>
+            <button type="submit" class="btn btn-primary"><%= t('bo.homepage_settings.special_price_products.add_selected') %></button>
           <% end %>
         </div>
       <% end %>

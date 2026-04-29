@@ -1,6 +1,25 @@
 // Product Card Styles
 // Modern, subtle design following e-commerce best practices
 
+// Base price styling — declared globally so it also works inside the
+// home visual card (which doesn't share the .product-card ancestor).
+.product-card-price {
+  font-weight: 700;
+  color: var(--org-primary, #0d6efd);
+  margin: 0;
+}
+
+.product-card-price-discounted {
+  font-weight: 700;
+  color: #198754;
+  margin: 0;
+}
+
+.product-card-price-original {
+  color: #6c757d;
+  text-decoration: line-through;
+}
+
 .product-card {
   border: 1px solid rgba(0, 0, 0, 0.06);
   border-radius: 12px;
@@ -114,26 +133,13 @@
     padding: 0.75rem 1rem;
   }
 
-  // Price styling
-  .product-card-price {
-    font-size: 1rem;
-    font-weight: 700;
-    color: var(--org-primary, #0d6efd);
-    margin: 0;
-  }
-
-  // Discounted price
+  // Price size in product cards (specific to .product-card context)
+  .product-card-price,
   .product-card-price-discounted {
     font-size: 1rem;
-    font-weight: 700;
-    color: #198754;
-    margin: 0;
   }
-
   .product-card-price-original {
     font-size: 0.8rem;
-    color: #6c757d;
-    text-decoration: line-through;
   }
 
   // Badge stack overlaid on the image, top-right corner

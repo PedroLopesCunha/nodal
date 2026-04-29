@@ -226,6 +226,8 @@ Rails.application.routes.draw do
         delete :remove_featured_product
         post :add_featured_categories
         delete :remove_featured_category
+        post :add_special_price_products
+        delete :remove_special_price_product
       end
 
       # Email Settings

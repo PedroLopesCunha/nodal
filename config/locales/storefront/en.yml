@@ -45,6 +45,8 @@ en:
         title: "Featured Categories"
       featured_products:
         title: "Featured Products"
+      special_price_products:
+        title: "Products with Special Prices"
       good_morning: "Good morning, %{name}"
       good_afternoon: "Good afternoon, %{name}"
       good_evening: "Good evening, %{name}"
