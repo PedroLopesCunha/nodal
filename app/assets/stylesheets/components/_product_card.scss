@@ -1,6 +1,25 @@
 // Product Card Styles
 // Modern, subtle design following e-commerce best practices
 
+// Base price styling — declared globally so it also works inside the
+// home visual card (which doesn't share the .product-card ancestor).
+.product-card-price {
+  font-weight: 700;
+  color: var(--org-primary, #0d6efd);
+  margin: 0;
+}
+
+.product-card-price-discounted {
+  font-weight: 700;
+  color: #198754;
+  margin: 0;
+}
+
+.product-card-price-original {
+  color: #6c757d;
+  text-decoration: line-through;
+}
+
 .product-card {
   border: 1px solid rgba(0, 0, 0, 0.06);
   border-radius: 12px;
@@ -14,6 +33,7 @@
 
   // Image container — square ratio for consistent scaling
   .product-card-image {
+    position: relative;
     aspect-ratio: 1;
     background-color: #f8f9fa;
     display: flex;
@@ -32,6 +52,7 @@
       color: #adb5bd;
     }
   }
+
 
   // Card body
   .card-body {
@@ -112,26 +133,26 @@
     padding: 0.75rem 1rem;
   }
 
-  // Price styling
-  .product-card-price {
-    font-size: 1rem;
-    font-weight: 700;
-    color: var(--org-primary, #0d6efd);
-    margin: 0;
-  }
-
-  // Discounted price
+  // Price size in product cards (specific to .product-card context)
+  .product-card-price,
   .product-card-price-discounted {
     font-size: 1rem;
-    font-weight: 700;
-    color: #198754;
-    margin: 0;
   }
-
   .product-card-price-original {
     font-size: 0.8rem;
-    color: #6c757d;
-    text-decoration: line-through;
+  }
+
+  // Badge stack overlaid on the image, top-right corner
+  .product-card-badges {
+    position: absolute;
+    top: 0.5rem;
+    right: 0.5rem;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    align-items: flex-end;
+    pointer-events: none;
   }
 
   // Discount badge
@@ -141,7 +162,7 @@
     padding: 0.2rem 0.4rem;
   }
 
-  // Sale badge
+  // Sale (promotion) badge
   .product-card-sale-badge {
     font-size: 0.65rem;
     font-weight: 600;

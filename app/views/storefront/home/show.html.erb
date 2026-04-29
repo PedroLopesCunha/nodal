@@ -107,6 +107,40 @@
   </section>
 <% end %>
 
+<%# ==================== SPECIAL PRICE PRODUCTS ==================== %>
+<% if @special_price_products.any? %>
+  <section class="home-section fade-in-up" data-controller="horizontal-scroll">
+    <div class="home-section__header">
+      <h2 class="home-section__title"><%= t('storefront.home.special_price_products.title') %></h2>
+    </div>
+    <div class="home-carousel-wrapper">
+      <div data-horizontal-scroll-target="container" class="home-carousel">
+        <% @special_price_products.each do |product| %>
+          <div class="home-carousel__item">
+            <%= render "storefront/home/visual_card",
+                        link_path: product_path(org_slug: params[:org_slug], id: product),
+                        image: product.display_photo,
+                        name: product.name,
+                        product: product,
+                        discount_info: @product_discounts[product.id],
+                        show_price: show_prices? && current_organisation.special_prices_show_price,
+                        show_discount_badge: current_organisation.special_prices_show_discount_badge,
+                        show_sale_badge: current_organisation.special_prices_show_sale_badge %>
+          </div>
+        <% end %>
+      </div>
+      <button data-horizontal-scroll-target="leftBtn" data-action="click->horizontal-scroll#scrollLeft"
+              class="home-carousel__arrow home-carousel__arrow--left" style="display: none;">
+        <i class="fa-solid fa-chevron-left"></i>
+      </button>
+      <button data-horizontal-scroll-target="rightBtn" data-action="click->horizontal-scroll#scrollRight"
+              class="home-carousel__arrow home-carousel__arrow--right">
+        <i class="fa-solid fa-chevron-right"></i>
+      </button>
+    </div>
+  </section>
+<% end %>
+
 <%# ==================== FEATURED PRODUCTS ==================== %>
 <% if @featured_products.any? %>
   <section class="home-section fade-in-up" data-controller="horizontal-scroll">

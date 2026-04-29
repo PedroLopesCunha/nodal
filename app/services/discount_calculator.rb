@@ -9,7 +9,7 @@ class DiscountCalculator
     @customer = customer
     @quantity = quantity
     @for_display = for_display
-    @variant = variant || product.default_variant
+    @variant = variant || pick_reference_variant
   end
 
   # Returns all applicable discounts with metadata
@@ -75,6 +75,25 @@ class DiscountCalculator
   end
 
   private
+
+  # On variable products the default variant is a placeholder with no price,
+  # so for display we pick the cheapest visible non-default variant — that
+  # way base_price/final_price/percentage are meaningful on listings/cards.
+  # Visibility matches the storefront rule: hidden (out-of-stock + hide policy)
+  # variants are excluded so the displayed range/price reflects what the
+  # customer can actually see and buy.
+  def pick_reference_variant
+    default = product.default_variant
+    return default unless for_display && product.has_variants?
+
+    candidates = product.product_variants
+                        .where(is_default: false, published: true)
+                        .where.not(unit_price_cents: [nil, 0])
+                        .to_a
+                        .select { |v| v.available? || v.effective_stock_policy != 'hide' }
+    cheapest = candidates.min_by(&:unit_price_cents)
+    cheapest || default
+  end
 
   def collect_discounts
     discounts = []

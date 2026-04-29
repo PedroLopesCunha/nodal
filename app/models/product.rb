@@ -164,7 +164,9 @@ class Product < ApplicationRecord
     variants = product_variants.published
     # Exclude default base variant from range calculation for variable products
     variants = variants.where(is_default: false) if has_variants? && product_variants.where(is_default: false).exists?
-    prices = variants.pluck(:unit_price_cents).compact
+    # Exclude variants hidden in the storefront (out of stock + hide policy)
+    visible = variants.to_a.select { |v| v.available? || v.effective_stock_policy != 'hide' }
+    prices = visible.map(&:unit_price_cents).compact
     return nil if prices.empty?
 
     min_price = Money.new(prices.min, organisation.currency)

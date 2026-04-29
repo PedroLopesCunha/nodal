@@ -1505,6 +1505,10 @@ pt:
           one: "%{count} categoria adicionada aos destaques"
           other: "%{count} categorias adicionadas aos destaques"
         category_removed: "Categoria removida dos destaques"
+        special_price_products_added:
+          one: "%{count} produto adicionado aos preços especiais"
+          other: "%{count} produtos adicionados aos preços especiais"
+        special_price_product_removed: "Produto removido dos preços especiais"
       banners:
         title: "Banners"
         add: "Adicionar Banner"
@@ -1540,6 +1544,21 @@ pt:
         add_selected: "Adicionar Selecionados"
         all_added: "Todos os produtos já estão nos destaques"
         empty: "Nenhum produto em destaque. Adicione produtos para mostrar na homepage."
+      special_price_products:
+        title: "Produtos com Preços Especiais"
+        subtitle: "Carrossel na homepage com produtos em promoção. Apenas produtos com desconto ativo são elegíveis."
+        add: "Adicionar Produtos"
+        modal_title: "Selecionar Produtos com Desconto"
+        add_selected: "Adicionar Selecionados"
+        empty: "Nenhum produto com preço especial selecionado. Adicione produtos com desconto ativo para mostrar na homepage."
+        no_eligible: "Não há produtos com desconto ativo para adicionar. Cria primeiro um desconto e volta cá."
+        eligible_only_hint: "Só são listados produtos com desconto ativo (descontos por produto, categoria ou específicos de cliente)."
+        no_active_discount: "Sem desconto ativo"
+        no_active_discount_hint: "O desconto deste produto deixou de estar ativo — não vai aparecer na homepage até criares novo desconto ou removeres este item."
+        display_options: "O que mostrar nos cards desta secção"
+        show_price: "Preço"
+        show_discount_badge: "Badge -X%"
+        show_sale_badge: "Badge PROMOÇÃO"
       search: "Pesquisar..."
 
     # Secção Definições de Email

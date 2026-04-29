@@ -8,6 +8,7 @@ class Storefront::HomeController < Storefront::BaseController
                              .includes(category: { photo_attachment: :blob })
                              .map(&:category)
     @featured_products = load_featured_products
+    @special_price_products = load_special_price_products
     @frequent_products = load_frequent_products
     @new_products = load_new_products
 
@@ -37,8 +38,8 @@ class Storefront::HomeController < Storefront::BaseController
     @products_count = current_organisation.products.where(published: true).count
 
     # Build discount info for all displayed products
-    all_products = @featured_products + @frequent_products + @new_products
-    @product_discounts = all_products.each_with_object({}) do |product, hash|
+    all_products = @featured_products + @special_price_products + @frequent_products + @new_products
+    @product_discounts = all_products.uniq.each_with_object({}) do |product, hash|
       calculator = DiscountCalculator.new(product: product, customer: current_customer, for_display: true)
       hash[product.id] = calculator.discount_breakdown
     end
@@ -67,6 +68,55 @@ class Storefront::HomeController < Storefront::BaseController
     # Preserve position order
     products_by_id = products.index_by(&:id)
     featured_product_ids.filter_map { |id| products_by_id[id] }
+  end
+
+  # Curated "Special Prices" section. Same shape as featured products, but
+  # filtered to only products with an actually-applicable discount for the
+  # current viewer:
+  #   - logged-in customer: products where the customer has any active discount
+  #   - admin / anonymous: products with a public ProductDiscount (item or category)
+  def load_special_price_products
+    curated_ids = current_organisation.homepage_special_price_products
+                                       .order(:position)
+                                       .pluck(:product_id)
+    return [] if curated_ids.empty?
+
+    products = current_organisation.products
+                 .where(id: curated_ids, published: true)
+                 .includes(:categories, :product_discounts)
+
+    if current_organisation.hide_out_of_stock?
+      keep_visible_ids = current_organisation.product_variants
+                           .where.not(stock_policy: ['hide', 'inherit'])
+                           .select(:product_id)
+      products = products.where(available: true)
+                   .or(products.where(id: keep_visible_ids))
+    end
+
+    products = products.to_a
+
+    products = if browsing_as_member? || current_customer.nil?
+      products.select { |p| has_public_discount?(p) }
+    else
+      products.select do |p|
+        DiscountCalculator.new(product: p, customer: current_customer, for_display: true)
+                          .discount_breakdown[:has_discount]
+      end
+    end
+
+    by_id = products.index_by(&:id)
+    curated_ids.filter_map { |id| by_id[id] }
+  end
+
+  def has_public_discount?(product)
+    return true if product.product_discounts.active.exists?
+
+    category_path_ids = product.categories.flat_map(&:path_ids).uniq
+    return false if category_path_ids.empty?
+
+    ProductDiscount.active.for_category
+                   .where(organisation: product.organisation, category_id: category_path_ids)
+                   .exists?
   end
 
   def load_frequent_products

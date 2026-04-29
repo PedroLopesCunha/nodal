@@ -20,26 +20,23 @@ class DiscountEmailNotification < ApplicationRecord
   end
 
   def self.recipient_count_for(notifiable, organisation)
-    active_with_email = { active: true, email_notifications_enabled: true }
     case notifiable
     when ProductDiscount, OrderDiscount
-      organisation.customers.where(active_with_email).count
+      organisation.customers.mailable.count
     when CustomerDiscount, CustomerProductDiscount
       if notifiable.category_based?
-        notifiable.customer_category.customers.where(active_with_email).count
+        notifiable.customer_category.customers.mailable.count
       else
-        c = notifiable.customer
-        c.active? && c.email_notifications_enabled? ? 1 : 0
+        notifiable.customer&.mailable? ? 1 : 0
       end
     when PromoCode
       if notifiable.eligibility == 'all_customers'
-        organisation.customers.where(active_with_email).count
+        organisation.customers.mailable.count
       else
-        customer_count = notifiable.eligible_customers.where(active_with_email).count
+        customer_count = notifiable.eligible_customers.mailable.count
         if notifiable.eligible_customer_categories.any?
-          category_count = Customer.where(
-            customer_category_id: notifiable.eligible_customer_category_ids,
-            **active_with_email
+          category_count = Customer.mailable.where(
+            customer_category_id: notifiable.eligible_customer_category_ids
           ).where.not(id: notifiable.eligible_customer_ids).count
           customer_count + category_count
         else

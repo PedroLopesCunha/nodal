@@ -54,7 +54,7 @@ class CustomerMailer < ApplicationMailer
       return
     end
 
-    mailing_list = @organisation.customers.where(email_notifications_enabled: true).pluck(:email)
+    mailing_list = @organisation.customers.mailable.pluck(:email)
 
     I18n.with_locale(@organisation.default_locale) do
       if @discount.has_attribute?(:product_id) # ProductDiscount
@@ -75,14 +75,13 @@ class CustomerMailer < ApplicationMailer
     end
 
     mailing_list = if @promo_code.eligibility == "all_customers"
-      @organisation.customers.where(email_notifications_enabled: true).pluck(:email)
+      @organisation.customers.mailable.pluck(:email)
     else
-      emails = @promo_code.eligible_customers.where(email_notifications_enabled: true).pluck(:email)
+      emails = @promo_code.eligible_customers.mailable.pluck(:email)
       # Also include customers from eligible categories
       if @promo_code.eligible_customer_categories.any?
-        category_emails = Customer.where(
-          customer_category_id: @promo_code.eligible_customer_category_ids,
-          email_notifications_enabled: true
+        category_emails = Customer.mailable.where(
+          customer_category_id: @promo_code.eligible_customer_category_ids
         ).pluck(:email)
         emails = (emails + category_emails).uniq
       end
@@ -107,9 +106,7 @@ class CustomerMailer < ApplicationMailer
         return
       end
 
-      mailing_list = @discount.customer_category.customers
-        .where(active: true, email_notifications_enabled: true)
-        .pluck(:email)
+      mailing_list = @discount.customer_category.customers.mailable.pluck(:email)
       return if mailing_list.empty?
 
       # Templates reference @customer.contact_name — use nil for BCC emails (templates handle it)

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2026_04_27_145638) do
+ActiveRecord::Schema[7.1].define(version: 2026_04_29_142109) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_trgm"
   enable_extension "plpgsql"
@@ -327,6 +327,17 @@ ActiveRecord::Schema[7.1].define(version: 2026_04_27_145638) do
     t.index ["product_id"], name: "index_homepage_featured_products_on_product_id"
   end
 
+  create_table "homepage_special_price_products", force: :cascade do |t|
+    t.bigint "organisation_id", null: false
+    t.bigint "product_id", null: false
+    t.integer "position"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["organisation_id", "product_id"], name: "index_special_price_products_on_org_and_product", unique: true
+    t.index ["organisation_id"], name: "index_homepage_special_price_products_on_organisation_id"
+    t.index ["product_id"], name: "index_homepage_special_price_products_on_product_id"
+  end
+
   create_table "members", force: :cascade do |t|
     t.string "email", default: "", null: false
     t.string "encrypted_password", default: "", null: false
@@ -492,6 +503,9 @@ ActiveRecord::Schema[7.1].define(version: 2026_04_27_145638) do
     t.string "hero_link_url"
     t.string "hero_link_text"
     t.string "default_product_sort", default: "name_asc", null: false
+    t.boolean "special_prices_show_price", default: true, null: false
+    t.boolean "special_prices_show_discount_badge", default: true, null: false
+    t.boolean "special_prices_show_sale_badge", default: true, null: false
     t.index ["default_locale"], name: "index_organisations_on_default_locale"
     t.index ["slug"], name: "index_organisations_on_slug", unique: true
   end
@@ -882,6 +896,8 @@ ActiveRecord::Schema[7.1].define(version: 2026_04_27_145638) do
   add_foreign_key "homepage_featured_categories", "organisations"
   add_foreign_key "homepage_featured_products", "organisations"
   add_foreign_key "homepage_featured_products", "products"
+  add_foreign_key "homepage_special_price_products", "organisations"
+  add_foreign_key "homepage_special_price_products", "products"
   add_foreign_key "order_discounts", "organisations"
   add_foreign_key "order_items", "orders"
   add_foreign_key "order_items", "product_variants"

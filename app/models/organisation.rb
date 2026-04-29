@@ -41,6 +41,7 @@ class Organisation < ApplicationRecord
   has_many :homepage_banners, dependent: :destroy
   has_many :homepage_featured_products, dependent: :destroy
   has_many :homepage_featured_categories, dependent: :destroy
+  has_many :homepage_special_price_products, dependent: :destroy
 
   validates :name, presence: true
   validates :billing_email, format: { with: URI::MailTo::EMAIL_REGEXP }, allow_blank: true

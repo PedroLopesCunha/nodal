@@ -1515,6 +1515,10 @@ en:
           one: "%{count} category added to featured"
           other: "%{count} categories added to featured"
         category_removed: "Category removed from featured"
+        special_price_products_added:
+          one: "%{count} product added to special prices"
+          other: "%{count} products added to special prices"
+        special_price_product_removed: "Product removed from special prices"
       banners:
         title: "Banners"
         add: "Add Banner"
@@ -1550,6 +1554,21 @@ en:
         add_selected: "Add Selected"
         all_added: "All products are already featured"
         empty: "No featured products. Add products to display on the homepage."
+      special_price_products:
+        title: "Products with Special Prices"
+        subtitle: "Homepage carousel of discounted products. Only products with an active discount are eligible."
+        add: "Add Products"
+        modal_title: "Select Discounted Products"
+        add_selected: "Add Selected"
+        empty: "No special-price products selected yet. Add products with active discounts to surface them on the homepage."
+        no_eligible: "No eligible discounted products. Create a discount first and come back."
+        eligible_only_hint: "Only products with an active discount are listed (product, category or customer-specific discounts)."
+        no_active_discount: "No active discount"
+        no_active_discount_hint: "This product no longer has an active discount — it won't appear on the homepage until you create a new discount or remove this entry."
+        display_options: "What to show on the cards in this section"
+        show_price: "Price"
+        show_discount_badge: "-X% badge"
+        show_sale_badge: "PROMOÇÃO badge"
       search: "Search..."
 
     # Email Settings section

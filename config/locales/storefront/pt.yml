@@ -45,6 +45,8 @@ pt:
         title: "Categorias em Destaque"
       featured_products:
         title: "Produtos em Destaque"
+      special_price_products:
+        title: "Produtos com Preços Especiais"
       good_morning: "Bom dia, %{name}"
       good_afternoon: "Boa tarde, %{name}"
       good_evening: "Boa noite, %{name}"

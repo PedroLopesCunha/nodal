@@ -228,6 +228,51 @@
     z-index: 1;
   }
 
+  // Stack of corner badges (PROMOÇÃO + -X%) for cards with active discounts.
+  &__badges {
+    position: absolute;
+    top: 0.5rem;
+    right: 0.5rem;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+    align-items: flex-end;
+    pointer-events: none;
+  }
+
+  &__sale-badge,
+  &__discount-badge {
+    font-size: 0.6rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    padding: 0.2rem 0.45rem;
+    border-radius: 100px;
+    line-height: 1.1;
+    color: #fff;
+  }
+
+  &__sale-badge {
+    background: #dc3545;
+    text-transform: uppercase;
+  }
+
+  &__discount-badge {
+    background: #198754;
+  }
+
+  // Price block under the name. Uses .product-card-price-* classes that
+  // already exist for the bigger product cards.
+  &__price {
+    margin-top: 0.35rem;
+    font-size: 0.85rem;
+    line-height: 1.2;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem 0.4rem;
+    align-items: baseline;
+  }
+
   &:hover .home-visual-card__image {
     transform: scale(1.05);
   }
