@@ -70,7 +70,7 @@ class Bo::CustomersController < Bo::BaseController
 
   def invite
     @customer.invite!
-    redirect_to bo_customer_path(params[:org_slug], @customer),
+    redirect_to bo_customer_path(params[:org_slug], @customer, filter_params_hash),
                 notice: "Invitation sent to #{@customer.email}"
   end
 
@@ -92,12 +92,12 @@ class Bo::CustomersController < Bo::BaseController
 
   def filter_params_hash
     { query: params[:query], status: params[:status], category: params[:category],
-      sort: params[:sort], direction: params[:direction] }.compact_blank
+      sort: params[:sort], direction: params[:direction], page: params[:page] }.compact_blank
   end
 
   def sort_link_params(column)
     direction = (@sort_column == column && @sort_direction == "asc") ? "desc" : "asc"
-    filter_params_hash.merge(sort: column, direction: direction)
+    filter_params_hash.except(:page).merge(sort: column, direction: direction)
   end
 
   def customer_params

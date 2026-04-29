@@ -110,38 +110,38 @@
     <div class="mb-3 d-flex align-items-center gap-2 flex-wrap">
       <small class="text-muted"><%= t('bo.orders.index.filters.active_filters') %>:</small>
       <% if params[:search].present? %>
-        <%= link_to bo_orders_path(org_slug: @current_organisation.slug, **filter_params_hash.except(:search)), class: "badge bg-secondary text-decoration-none" do %>
+        <%= link_to bo_orders_path(org_slug: @current_organisation.slug, **filter_params_hash.except(:search, :page)), class: "badge bg-secondary text-decoration-none" do %>
           "<%= params[:search] %>" <i class="fa-solid fa-xmark ms-1"></i>
         <% end %>
       <% end %>
       <% if params[:status].present? %>
-        <%= link_to bo_orders_path(org_slug: @current_organisation.slug, **filter_params_hash.except(:status)), class: "badge bg-secondary text-decoration-none" do %>
+        <%= link_to bo_orders_path(org_slug: @current_organisation.slug, **filter_params_hash.except(:status, :page)), class: "badge bg-secondary text-decoration-none" do %>
           <%= t("bo.common.statuses.#{params[:status]}") %> <i class="fa-solid fa-xmark ms-1"></i>
         <% end %>
       <% end %>
       <% if params[:payment_status].present? %>
-        <%= link_to bo_orders_path(org_slug: @current_organisation.slug, **filter_params_hash.except(:payment_status)), class: "badge bg-secondary text-decoration-none" do %>
+        <%= link_to bo_orders_path(org_slug: @current_organisation.slug, **filter_params_hash.except(:payment_status, :page)), class: "badge bg-secondary text-decoration-none" do %>
           <%= t("bo.common.statuses.#{params[:payment_status]}") %> <i class="fa-solid fa-xmark ms-1"></i>
         <% end %>
       <% end %>
       <% if params[:customer_id].present? %>
         <% selected_customer = @customers.find { |c| c.id.to_s == params[:customer_id] } %>
-        <%= link_to bo_orders_path(org_slug: @current_organisation.slug, **filter_params_hash.except(:customer_id)), class: "badge bg-secondary text-decoration-none" do %>
+        <%= link_to bo_orders_path(org_slug: @current_organisation.slug, **filter_params_hash.except(:customer_id, :page)), class: "badge bg-secondary text-decoration-none" do %>
           <%= selected_customer&.company_name %> <i class="fa-solid fa-xmark ms-1"></i>
         <% end %>
       <% end %>
       <% if params[:date_from].present? %>
-        <%= link_to bo_orders_path(org_slug: @current_organisation.slug, **filter_params_hash.except(:date_from)), class: "badge bg-secondary text-decoration-none" do %>
+        <%= link_to bo_orders_path(org_slug: @current_organisation.slug, **filter_params_hash.except(:date_from, :page)), class: "badge bg-secondary text-decoration-none" do %>
           <%= t('bo.common.time.from') %>: <%= params[:date_from] %> <i class="fa-solid fa-xmark ms-1"></i>
         <% end %>
       <% end %>
       <% if params[:date_to].present? %>
-        <%= link_to bo_orders_path(org_slug: @current_organisation.slug, **filter_params_hash.except(:date_to)), class: "badge bg-secondary text-decoration-none" do %>
+        <%= link_to bo_orders_path(org_slug: @current_organisation.slug, **filter_params_hash.except(:date_to, :page)), class: "badge bg-secondary text-decoration-none" do %>
           <%= t('bo.common.time.to') %>: <%= params[:date_to] %> <i class="fa-solid fa-xmark ms-1"></i>
         <% end %>
       <% end %>
       <% if params[:push_status].present? %>
-        <%= link_to bo_orders_path(org_slug: @current_organisation.slug, **filter_params_hash.except(:push_status)), class: "badge bg-secondary text-decoration-none" do %>
+        <%= link_to bo_orders_path(org_slug: @current_organisation.slug, **filter_params_hash.except(:push_status, :page)), class: "badge bg-secondary text-decoration-none" do %>
           ERP: <%= t("bo.orders.push_status.#{params[:push_status]}", default: params[:push_status].titleize) %> <i class="fa-solid fa-xmark ms-1"></i>
         <% end %>
       <% end %>

@@ -136,18 +136,18 @@
       <div class="mb-3 d-flex align-items-center gap-2 flex-wrap">
         <small class="text-muted"><%= t('bo.customers.index.filters.active_filters') %>:</small>
         <% if params[:query].present? %>
-          <%= link_to bo_customers_path(params[:org_slug], filter_params_hash.except(:query)), class: "badge bg-secondary text-decoration-none" do %>
+          <%= link_to bo_customers_path(params[:org_slug], filter_params_hash.except(:query, :page)), class: "badge bg-secondary text-decoration-none" do %>
             "<%= params[:query] %>" <i class="fa-solid fa-xmark ms-1"></i>
           <% end %>
         <% end %>
         <% if params[:status].present? %>
-          <%= link_to bo_customers_path(params[:org_slug], filter_params_hash.except(:status)), class: "badge bg-secondary text-decoration-none" do %>
+          <%= link_to bo_customers_path(params[:org_slug], filter_params_hash.except(:status, :page)), class: "badge bg-secondary text-decoration-none" do %>
             <%= t("bo.common.statuses.#{params[:status]}") %> <i class="fa-solid fa-xmark ms-1"></i>
           <% end %>
         <% end %>
         <% if params[:category].present? %>
           <% cat = @customer_categories.find { |c| c.id.to_s == params[:category] } %>
-          <%= link_to bo_customers_path(params[:org_slug], filter_params_hash.except(:category)), class: "badge bg-secondary text-decoration-none" do %>
+          <%= link_to bo_customers_path(params[:org_slug], filter_params_hash.except(:category, :page)), class: "badge bg-secondary text-decoration-none" do %>
             <%= cat&.name %> <i class="fa-solid fa-xmark ms-1"></i>
           <% end %>
         <% end %>

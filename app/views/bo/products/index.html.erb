@@ -139,31 +139,31 @@
   <div class="mb-3 d-flex align-items-center gap-2 flex-wrap">
     <small class="text-muted"><%= t('bo.products.index.filters.active_filters') %>:</small>
     <% if params[:query].present? %>
-      <%= link_to bo_products_path(params[:org_slug], filter_params_hash.except(:query)), class: "badge bg-secondary text-decoration-none" do %>
+      <%= link_to bo_products_path(params[:org_slug], filter_params_hash.except(:query, :page)), class: "badge bg-secondary text-decoration-none" do %>
         "<%= params[:query] %>" <i class="fa-solid fa-xmark ms-1"></i>
       <% end %>
     <% end %>
     <% if params[:category_id] == 'none' %>
-      <%= link_to bo_products_path(params[:org_slug], filter_params_hash.except(:category_id)), class: "badge bg-secondary text-decoration-none" do %>
+      <%= link_to bo_products_path(params[:org_slug], filter_params_hash.except(:category_id, :page)), class: "badge bg-secondary text-decoration-none" do %>
         <%= t('bo.products.index.filters.no_category') %> <i class="fa-solid fa-xmark ms-1"></i>
       <% end %>
     <% elsif @current_category %>
-      <%= link_to bo_products_path(params[:org_slug], filter_params_hash.except(:category_id)), class: "badge bg-secondary text-decoration-none" do %>
+      <%= link_to bo_products_path(params[:org_slug], filter_params_hash.except(:category_id, :page)), class: "badge bg-secondary text-decoration-none" do %>
         <%= @current_category.name %> <i class="fa-solid fa-xmark ms-1"></i>
       <% end %>
     <% end %>
     <% if params[:product_type].present? %>
-      <%= link_to bo_products_path(params[:org_slug], filter_params_hash.except(:product_type)), class: "badge bg-secondary text-decoration-none" do %>
+      <%= link_to bo_products_path(params[:org_slug], filter_params_hash.except(:product_type, :page)), class: "badge bg-secondary text-decoration-none" do %>
         <%= params[:product_type] == 'simple' ? t('bo.products.index.table.simple') : t('bo.products.index.table.variable') %> <i class="fa-solid fa-xmark ms-1"></i>
       <% end %>
     <% end %>
     <% if params[:price_status].present? %>
-      <%= link_to bo_products_path(params[:org_slug], filter_params_hash.except(:price_status)), class: "badge bg-secondary text-decoration-none" do %>
+      <%= link_to bo_products_path(params[:org_slug], filter_params_hash.except(:price_status, :page)), class: "badge bg-secondary text-decoration-none" do %>
         <%= t("bo.products.index.filters.#{params[:price_status]}") %> <i class="fa-solid fa-xmark ms-1"></i>
       <% end %>
     <% end %>
     <% if params[:status].present? %>
-      <%= link_to bo_products_path(params[:org_slug], filter_params_hash.except(:status)), class: "badge bg-secondary text-decoration-none" do %>
+      <%= link_to bo_products_path(params[:org_slug], filter_params_hash.except(:status, :page)), class: "badge bg-secondary text-decoration-none" do %>
         <%= t("bo.products.index.filters.#{params[:status]}") %> <i class="fa-solid fa-xmark ms-1"></i>
       <% end %>
     <% end %>

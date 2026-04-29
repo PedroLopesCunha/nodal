@@ -133,7 +133,7 @@ class Bo::OrdersController < Bo::BaseController
       payment_status: params[:payment_status], customer_id: params[:customer_id],
       date_from: params[:date_from], date_to: params[:date_to],
       push_status: params[:push_status],
-      sort_dir: params[:sort_dir] }.compact_blank
+      sort_dir: params[:sort_dir], page: params[:page] }.compact_blank
   end
 
   def apply_order_filters(scope)

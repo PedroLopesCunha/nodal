@@ -498,12 +498,12 @@ class Bo::ProductsController < Bo::BaseController
   def filter_params_hash
     { query: params[:query], category_id: params[:category_id], product_type: params[:product_type],
       price_status: params[:price_status], status: params[:status], storefront: params[:storefront],
-      sort: params[:sort], direction: params[:direction] }.compact_blank
+      sort: params[:sort], direction: params[:direction], page: params[:page] }.compact_blank
   end
 
   def sort_link_params(column)
     direction = (@sort_column == column && @sort_direction == "asc") ? "desc" : "asc"
-    filter_params_hash.merge(sort: column, direction: direction)
+    filter_params_hash.except(:page).merge(sort: column, direction: direction)
   end
 
   def storefront_state(product)
