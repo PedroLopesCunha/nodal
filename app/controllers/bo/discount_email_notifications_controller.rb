@@ -26,22 +26,21 @@ class Bo::DiscountEmailNotificationsController < Bo::BaseController
 
   def recipients_for(notification)
     notifiable = notification.notifiable
-    active_with_email = { active: true, email_notifications_enabled: true }
     case notifiable
     when ProductDiscount, OrderDiscount
-      current_organisation.customers.where(active_with_email)
+      current_organisation.customers.mailable
         .order(:company_name).select(:company_name, :email)
     when CustomerDiscount, CustomerProductDiscount
       if notifiable.category_based?
-        notifiable.customer_category.customers.where(active_with_email)
+        notifiable.customer_category.customers.mailable
           .order(:company_name).select(:company_name, :email)
       else
         c = notifiable.customer
-        c.active? && c.email_notifications_enabled? ? [c] : []
+        c&.mailable? ? [c] : []
       end
     when PromoCode
       if notifiable.eligibility == 'all_customers'
-        current_organisation.customers.where(active_with_email)
+        current_organisation.customers.mailable
           .order(:company_name).select(:company_name, :email)
       else
         customer_ids = notifiable.eligible_customer_ids
@@ -51,7 +50,7 @@ class Bo::DiscountEmailNotificationsController < Bo::BaseController
             .pluck(:id)
           customer_ids = (customer_ids + category_customer_ids).uniq
         end
-        current_organisation.customers.where(id: customer_ids, **active_with_email)
+        current_organisation.customers.mailable.where(id: customer_ids)
           .order(:company_name).select(:company_name, :email)
       end
     else
