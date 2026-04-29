@@ -34,6 +34,17 @@ class Customer < ApplicationRecord
   validates :active, inclusion: { in: [true, false] }
   validates :locale, inclusion: { in: I18n.available_locales.map(&:to_s) }, allow_nil: true
 
+  # Customers eligible to receive transactional/marketing emails: active,
+  # accepted their invitation, and have notifications enabled. Auth emails
+  # (reset password, invitation itself) bypass this — see EmailDeliveryGuard.
+  scope :mailable, -> {
+    where(active: true, email_notifications_enabled: true).where.not(invitation_accepted_at: nil)
+  }
+
+  def mailable?
+    active? && email_notifications_enabled? && invitation_accepted_at.present?
+  end
+
   def self.exportable_columns
     [
       { key: :company_name, label: I18n.t("bo.export.columns.customer.company_name"), default: true,

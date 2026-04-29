@@ -14,7 +14,7 @@ class EmailDeliveryGuard
 
     return false unless organisation.public_send(toggle)
 
-    return false if customer.present? && !customer.email_notifications_enabled
+    return false if customer.present? && !customer.mailable?
 
     true
   end
