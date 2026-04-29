@@ -13,7 +13,8 @@ export default class extends Controller {
     defaultSku: String,
     inStockText: { type: String, default: "In Stock" },
     outOfStockText: { type: String, default: "Out of Stock" },
-    displayPrice: { type: String, default: "" }
+    displayPrice: { type: String, default: "" },
+    displayPriceOriginal: { type: String, default: "" }
   }
 
   connect() {
@@ -174,10 +175,15 @@ export default class extends Controller {
 
   updateTotal() {
     const quantity = this.hasQuantityTarget ? parseInt(this.quantityTarget.value) || this.minQuantityValue || 1 : this.minQuantityValue || 1
+    const isVariable = this.variantsValue && this.variantsValue.length > 0
 
     let priceCents
     if (this.selectedVariant) {
       priceCents = this.selectedVariant.has_discount ? this.selectedVariant.final_price_cents : this.selectedVariant.price_cents
+    } else if (isVariable) {
+      // Variable product, no variant selected — running total is meaningless yet.
+      if (this.hasPriceTarget) this.priceTarget.textContent = ""
+      return
     } else {
       priceCents = this.defaultHasDiscountValue ? this.defaultFinalPriceCentsValue : this.defaultPriceCentsValue
     }
@@ -236,16 +242,33 @@ export default class extends Controller {
   }
 
   showPriceRange() {
+    const hasBaseDiscount = this.defaultHasDiscountValue && this.displayPriceOriginalValue
+
     if (this.hasMainPriceTarget && this.displayPriceValue) {
       this.mainPriceTarget.textContent = this.displayPriceValue
-      this.mainPriceTarget.classList.remove("text-success")
-      this.mainPriceTarget.classList.add("text-primary")
+      if (hasBaseDiscount) {
+        this.mainPriceTarget.classList.remove("text-primary")
+        this.mainPriceTarget.classList.add("text-success")
+      } else {
+        this.mainPriceTarget.classList.remove("text-success")
+        this.mainPriceTarget.classList.add("text-primary")
+      }
     }
     if (this.hasOriginalPriceTarget) {
-      this.originalPriceTarget.classList.add("d-none")
+      if (hasBaseDiscount) {
+        this.originalPriceTarget.textContent = this.displayPriceOriginalValue
+        this.originalPriceTarget.classList.remove("d-none")
+      } else {
+        this.originalPriceTarget.classList.add("d-none")
+      }
     }
     if (this.hasDiscountBadgeTarget) {
-      this.discountBadgeTarget.classList.add("d-none")
+      if (hasBaseDiscount && this.defaultDiscountPercentageValue) {
+        this.discountBadgeTarget.textContent = `-${this.defaultDiscountPercentageValue}% OFF`
+        this.discountBadgeTarget.classList.remove("d-none")
+      } else {
+        this.discountBadgeTarget.classList.add("d-none")
+      }
     }
     if (this.hasPriceTarget) {
       this.priceTarget.textContent = ""

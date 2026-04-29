@@ -274,13 +274,41 @@ class Storefront::ProductsController < Storefront::BaseController
       end
     end
 
-    # for_display: true shows all available discounts (ignoring min_quantity) for display purposes
+    # for_display: true shows all available discounts (ignoring min_quantity) for display purposes.
+    # For variable products, leave variant: nil so the calculator picks the cheapest published
+    # variant as reference — base_price/final_price/percentage stay meaningful.
     @discount_calculator = DiscountCalculator.new(
       product: @product,
       customer: current_customer,
       for_display: true,
-      variant: @default_variant
+      variant: @product.has_variants? ? nil : @default_variant
     )
+
+    # Build the display strings used while no variant is selected.
+    # For variable products with a discount we want both a strikethrough
+    # original range and a discounted range; for everything else display_price
+    # and the regular discount UI cover the case.
+    breakdown = @discount_calculator.discount_breakdown
+    pct = breakdown[:effective_discount][:percentage].to_f
+    if @product.has_variants? && breakdown[:has_discount] && pct.finite? && pct > 0 && (range = @product.price_range)
+      original_string = range[:range] ? "#{range[:min].format} - #{range[:max].format}" : range[:min].format
+      min_final = range[:min] - (range[:min] * pct)
+      max_final = range[:max] - (range[:max] * pct)
+      discounted_string = range[:range] ? "#{min_final.format} - #{max_final.format}" : min_final.format
+      @display_price_original = original_string
+      @display_price = discounted_string
+      @display_savings = if range[:range]
+        savings_min = range[:min] - min_final
+        savings_max = range[:max] - max_final
+        "#{savings_min.format} – #{savings_max.format}"
+      else
+        (range[:min] - min_final).format
+      end
+    else
+      @display_price_original = nil
+      @display_price = @product.has_variants? ? @product.display_price : nil
+      @display_savings = nil
+    end
 
     # Fetch related products
     if @product.show_related_products?

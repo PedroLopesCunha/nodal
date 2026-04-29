@@ -1,0 +1,44 @@
+<%#
+  Renders the price section of a product card, handling:
+    - price on request
+    - simple product with discount
+    - variable product with discount (range strikethrough → discounted range)
+    - variable product without discount (range)
+    - simple product without discount
+
+  Discount/promotion badges live in storefront/shared/product_card_badges
+  and are overlaid on the image, not rendered here.
+
+  Locals:
+    product       — Product
+    discount_info — Hash from DiscountCalculator#discount_breakdown (or nil)
+%>
+<% if product.price_on_request? %>
+  <span class="product-card-price"><%= t('storefront.products.index.price_on_request') %></span>
+<% elsif discount_info && discount_info[:has_discount] && discount_info[:effective_discount][:percentage]&.finite? && (product.variable? || !discount_info[:base_price].zero?) %>
+  <% pct = discount_info[:effective_discount][:percentage].to_f %>
+  <% range = product.variable? ? product.price_range : nil %>
+  <div>
+    <% if range %>
+      <% min_final = range[:min] - (range[:min] * pct) %>
+      <% max_final = range[:max] - (range[:max] * pct) %>
+      <span class="product-card-price-original">
+        <%= range[:range] ? "#{range[:min].format} - #{range[:max].format}" : range[:min].format %>
+      </span>
+      <span class="product-card-price-discounted">
+        <%= range[:range] ? "#{min_final.format} - #{max_final.format}" : min_final.format %>
+      </span>
+    <% else %>
+      <span class="product-card-price-original">
+        <%= humanized_money_with_symbol(discount_info[:base_price]) %>
+      </span>
+      <span class="product-card-price-discounted">
+        <%= humanized_money_with_symbol(discount_info[:final_price]) %>
+      </span>
+    <% end %>
+  </div>
+<% elsif product.variable? %>
+  <span class="product-card-price"><%= product.display_price %></span>
+<% else %>
+  <span class="product-card-price"><%= humanized_money_with_symbol(product.price) %></span>
+<% end %>
