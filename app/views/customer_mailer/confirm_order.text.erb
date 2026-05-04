@@ -1,4 +1,4 @@
-Hello <%= @customer.contact_name %>
+Hello <%= @customer_user.contact_name.presence || @customer_user.email %>
 
 Your order is confirmed. You ordered:
 <% @order.order_items.each do |item| %>

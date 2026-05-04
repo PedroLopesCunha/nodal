@@ -29,7 +29,7 @@ class Storefront::CheckoutsController < Storefront::BaseController
       @order.terms_accepted_at = Time.current if checkout_params[:terms_accepted] == "1"
       @order.finalize_checkout!(same_as_billing: checkout_params[:same_as_billing] == "1")
 
-      CustomerMailer.with(customer: current_customer, order: @order).confirm_order.deliver_later
+      CustomerMailer.with(customer_user: current_customer_user, order: @order).confirm_order.deliver_later
       MemberMailer.with(customer: current_customer, order: @order, org_slug: params[:org_slug]).notificate_customer_order.deliver_later
 
       redirect_to order_path(org_slug: params[:org_slug], id: @order), notice: t('storefront.flash.order_placed')

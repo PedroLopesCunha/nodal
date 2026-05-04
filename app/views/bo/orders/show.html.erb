@@ -256,6 +256,17 @@
             </div>
           <% end %>
 
+          <% if @order.customer_user %>
+            <hr class="my-3">
+            <div class="mb-1">
+              <small class="text-muted"><%= t('bo.orders.show.placed_by') %></small>
+              <div><%= @order.customer_user.contact_name.presence || @order.customer_user.email %></div>
+              <% if @order.customer_user.contact_name.present? %>
+                <small class="text-muted"><%= @order.customer_user.email %></small>
+              <% end %>
+            </div>
+          <% end %>
+
           <div class="d-grid mt-3">
             <%= link_to bo_customer_path(org_slug: @current_organisation.slug, id: @order.customer.id), class: "btn btn-outline-secondary btn-sm" do %>
               <%= t('bo.orders.show.view_client_profile') %>
