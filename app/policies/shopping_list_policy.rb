@@ -8,7 +8,7 @@ class ShoppingListPolicy < ApplicationPolicy
   end
 
   def create?
-    user.is_a?(Customer)
+    user.is_a?(CustomerUser)
   end
 
   def update?
@@ -29,8 +29,8 @@ class ShoppingListPolicy < ApplicationPolicy
 
   class Scope < ApplicationPolicy::Scope
     def resolve
-      if user.is_a?(Customer)
-        scope.where(customer: user)
+      if user.is_a?(CustomerUser)
+        scope.where(customer_id: user.customer_id)
       else
         scope.none
       end
@@ -40,6 +40,6 @@ class ShoppingListPolicy < ApplicationPolicy
   private
 
   def customer_owner?
-    user.is_a?(Customer) && record.customer == user
+    user.is_a?(CustomerUser) && record.customer_id == user.customer_id
   end
 end

@@ -12,7 +12,7 @@ class ApplicationController < ActionController::Base
 
   include Pundit::Authorization
 
-  helper_method :current_organisation
+  helper_method :current_organisation, :current_customer
 
   # Pundit: allow-list approach
   after_action :verify_authorized, unless: :skip_authorization?
@@ -37,9 +37,9 @@ class ApplicationController < ActionController::Base
     # URL parameter takes precedence (for switching)
     return params[:locale] if params[:locale].present?
 
-    # User preference (Member or Customer)
-    current_user = current_member || current_customer
-    return current_user.locale if current_user&.locale.present?
+    # User preference (Member or CustomerUser)
+    current_user = current_member || current_customer_user
+    return current_user.locale if current_user.respond_to?(:locale) && current_user.locale.present?
 
     # Organisation default
     return current_organisation.default_locale if current_organisation&.default_locale.present?
@@ -69,7 +69,15 @@ class ApplicationController < ActionController::Base
   end
 
   def pundit_user
-    PunditContext.new(current_member || current_customer, current_organisation)
+    PunditContext.new(current_member || current_customer_user, current_organisation)
+  end
+
+  # Compatibility helper: returns the empresa (Customer) for a logged-in
+  # CustomerUser. Code that asks for "the company the logged-in user
+  # belongs to" should use this; code that needs the login itself should
+  # use current_customer_user (provided by Devise).
+  def current_customer
+    current_customer_user&.customer
   end
 
   # accessable form every where, done before everything
@@ -82,7 +90,7 @@ class ApplicationController < ActionController::Base
   end
 
   def authenticate_user!
-    return current_member || current_customer
+    return current_member || current_customer_user
   end
 
   def check_customership
@@ -100,8 +108,8 @@ class ApplicationController < ActionController::Base
   end
 
   def inject_into_slug
-    if params[:customer]
-      params[:customer][:org_slug] = params[:org_slug]
+    if params[:customer_user]
+      params[:customer_user][:org_slug] = params[:org_slug]
     end
   end
 

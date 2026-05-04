@@ -70,8 +70,8 @@ class OrderPolicy < ApplicationPolicy
 
   class Scope < ApplicationPolicy::Scope
     def resolve
-      if user.is_a?(Customer)
-        scope.where(customer: user)
+      if user.is_a?(CustomerUser)
+        scope.where(customer_id: user.customer_id)
       elsif user.is_a?(Member)
         scope.joins(:organisation).where(organisations: { id: user.organisation_ids })
       else
@@ -87,6 +87,6 @@ class OrderPolicy < ApplicationPolicy
   end
 
   def customer_owner?
-    user.is_a?(Customer) && record.customer == user
+    user.is_a?(CustomerUser) && record.customer_id == user.customer_id
   end
 end

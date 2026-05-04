@@ -2,17 +2,11 @@ class Customer < ApplicationRecord
   include ErpSyncable
   include HasExportableColumns
 
-  # Include default devise modules. Others available are:
-  # :confirmable, :lockable, :timeoutable, :trackable and :omniauthable
-  # Note: :registerable is excluded - Members create customer accounts
-  # Note: :validatable is excluded - email uniqueness is scoped to organisation
-  devise :database_authenticatable,
-         :recoverable, :rememberable, :invitable, :trackable,
-         authentication_keys: [:email, :organisation_id]
-
-  def devise_mailer
-    CustomerMailer
-  end
+  # Auth lives on CustomerUser, not on Customer. Customer is the empresa.
+  # Auth-related columns (encrypted_password, reset_password_*, invitation_*,
+  # remember_created_at, sign_in tracking) still exist on this table but are
+  # orphan after the split — they get dropped in a follow-up migration so
+  # rollback of this PR stays trivial.
 
   belongs_to :organisation
   belongs_to :customer_category, optional: true
@@ -71,17 +65,10 @@ class Customer < ApplicationRecord
     ]
   end
 
-  # Email validations (from Devise::Models::Validatable, with scoped uniqueness)
-  validates :email, presence: true, if: :email_required?
-  validates :email, uniqueness: { scope: :organisation_id, case_sensitive: true, allow_blank: true },
+  # Email column is now an orphan ERP-mirror field (the login email lives
+  # on CustomerUser). Format validated only when present.
+  validates :email, format: { with: URI::MailTo::EMAIL_REGEXP, allow_blank: true },
                     if: :will_save_change_to_email?
-  validates :email, format: {with: Devise.email_regexp, allow_blank: true },
-                    if: :will_save_change_to_email?
-
-  # Password validations (from Devise::Models::Validatable)
-  validates :password, presence: true, if: :password_required?
-  validates :password, confirmation: true, if: :password_required?
-  validates :password, length: { within: Devise.password_length, allow_blank: true }
 
   # Addresses validation (PEDRO)
   #accepts_nested_attributes_for :billing_address, update_only: true
@@ -90,12 +77,6 @@ class Customer < ApplicationRecord
   accepts_nested_attributes_for :billing_address_with_archived, update_only: true, reject_if: :address_blank?
   accepts_nested_attributes_for :shipping_addresses_with_archived, reject_if: :address_blank?
 
-
-  def self.find_for_database_authentication(warden_conditions)
-     raise
-     org = Organisation.find_by(slug: params[:org_slug])
-     where(organisation: org, email: warden_conditions[:email]).first
-  end
 
   def current_cart(organisation)
     orders.draft.find_or_create_by!(organisation: organisation)
@@ -155,13 +136,5 @@ class Customer < ApplicationRecord
 
   def address_blank?(attributes)
     attributes.except('id', 'address_type', 'active', '_destroy').values.all?(&:blank?)
-  end
-
-  def password_required?
-    !persisted? || !password.nil? || !password_confirmation.nil?
-  end
-
-  def email_required?
-    true
   end
 end

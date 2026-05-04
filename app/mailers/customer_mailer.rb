@@ -5,28 +5,8 @@ class CustomerMailer < ApplicationMailer
   layout 'customer_mailer'
   default template_path: 'customer_mailer'
 
-  def invitation_instructions(record, token, opts = {})
-    @organisation = record.organisation
-    opts[:org_slug] ||= @organisation.slug
-    @token = token
-    @resource = record
-
-    I18n.with_locale(@organisation.default_locale) do
-      subject = t('mailers.customer_mailer.invitation_instructions.subject')
-      mail_with_org_defaults(@organisation, to: record.email, subject: subject)
-    end
-  end
-
-  def reset_password_instructions(record, token, opts = {})
-    @organisation = record.organisation
-    @token = token
-    @resource = record
-
-    I18n.with_locale(@organisation.default_locale) do
-      subject = t('mailers.customer_mailer.reset_password_instructions.subject')
-      mail_with_org_defaults(@organisation, to: record.email, subject: subject)
-    end
-  end
+  # Auth-related mails (invitation_instructions, reset_password_instructions)
+  # moved to CustomerUserMailer when auth migrated from Customer to CustomerUser.
 
   def confirm_order
     @customer = params[:customer]

@@ -1,9 +1,9 @@
-<%= render "customers/shared/auth_logo" %>
+<%= render "customer_users/shared/auth_logo" %>
 
 <h1 class="auth-title"><%= t('auth.forgot_password.title') %></h1>
 <p class="auth-subtitle"><%= t('auth.forgot_password.subtitle') %></p>
 
-<%= simple_form_for(resource, as: resource_name, url: customer_password_path(org_slug: @organisation.slug), html: { method: :post, class: "auth-form" }) do |f| %>
+<%= simple_form_for(resource, as: resource_name, url: customer_user_password_path(org_slug: @organisation.slug), html: { method: :post, class: "auth-form" }) do |f| %>
   <%= f.error_notification %>
 
   <div class="auth-field">
@@ -25,7 +25,7 @@
 </div>
 
 <div class="auth-footer">
-  <p><%= t('auth.forgot_password.remember_password') %> <%= link_to t('auth.forgot_password.sign_in'), new_customer_session_path(org_slug: @organisation.slug), class: "auth-link" %></p>
+  <p><%= t('auth.forgot_password.remember_password') %> <%= link_to t('auth.forgot_password.sign_in'), new_customer_user_session_path(org_slug: @organisation.slug), class: "auth-link" %></p>
 </div>
 
 <div class="auth-powered-by">
