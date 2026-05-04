@@ -35,7 +35,12 @@
                   </td>
                   <td>
                     <div class="fw-medium"><%= cart.customer&.company_name || t('bo.common.unknown', default: 'Unknown') %></div>
-                    <small class="text-muted"><%= cart.customer&.contact_name %></small>
+                    <% if cart.customer_user %>
+                      <small class="text-muted">
+                        <i class="fa-solid fa-user fa-xs me-1"></i>
+                        <%= cart.customer_user.contact_name.presence || cart.customer_user.email %>
+                      </small>
+                    <% end %>
                   </td>
                   <td class="text-center"><%= cart.order_items.size %></td>
                   <td class="text-end fw-semibold"><%= humanized_money_with_symbol(cart.total_amount) %></td>

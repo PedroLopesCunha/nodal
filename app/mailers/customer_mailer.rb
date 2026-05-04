@@ -9,19 +9,20 @@ class CustomerMailer < ApplicationMailer
   # moved to CustomerUserMailer when auth migrated from Customer to CustomerUser.
 
   def confirm_order
-    @customer = params[:customer]
+    @customer_user = params[:customer_user]
     @order = params[:order]
     @organisation = @order.organisation
+    @customer = @order.customer
 
-    unless EmailDeliveryGuard.should_send?(organisation: @organisation, email_type: "order_confirmation", customer: @customer)
-      log_skipped(@organisation, "order_confirmation", @customer.email)
+    unless EmailDeliveryGuard.should_send?(organisation: @organisation, email_type: "order_confirmation", customer: @customer_user)
+      log_skipped(@organisation, "order_confirmation", @customer_user.email)
       return
     end
 
     I18n.with_locale(@organisation.default_locale) do
       subject = t('mailers.customer_mailer.confirm_order.subject',
                   order_number: @order.order_number)
-      mail_with_org_defaults(@organisation, to: @customer.email, subject: subject)
+      mail_with_org_defaults(@organisation, to: @customer_user.email, subject: subject)
     end
   end
 

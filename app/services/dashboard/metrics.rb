@@ -242,7 +242,7 @@ module Dashboard
       organisation.orders.draft
         .joins(:order_items)
         .distinct
-        .includes(:customer, order_items: [:product, :product_variant])
+        .includes(:customer, :customer_user, order_items: [:product, :product_variant])
         .sort_by { |cart| -cart.total_amount.cents }
     end
 

@@ -156,6 +156,7 @@
           <tr>
             <th><%= t('bo.orders.index.table.order_id') %></th>
             <th><%= t('bo.orders.index.table.client') %></th>
+            <th><%= t('bo.orders.index.table.placed_by') %></th>
             <th>
               <% next_dir = params[:sort_dir] == "asc" ? "desc" : "asc" %>
               <%= link_to bo_orders_path(org_slug: @current_organisation.slug, search: params[:search], status: params[:status], payment_status: params[:payment_status], sort_dir: next_dir), class: "text-decoration-none text-dark" do %>
@@ -189,7 +190,13 @@
               </td>
               <td>
                 <div><%= order.customer.company_name %></div>
-                <small class="text-muted"><%= order.customer.contact_name %></small>
+              </td>
+              <td>
+                <% if order.customer_user %>
+                  <%= order.customer_user.contact_name.presence || order.customer_user.email %>
+                <% else %>
+                  <span class="text-muted">—</span>
+                <% end %>
               </td>
               <td><%= order.placed_at&.strftime("%m/%d/%Y") || order.created_at.strftime("%m/%d/%Y") %></td>
               <td><%= order.order_items.size %></td>

@@ -16,7 +16,7 @@
   </tr>
 </table>
 
-<p style="margin: 0 0 8px 0; font-size: 16px;"><%= t('mailers.customer_mailer.confirm_order.greeting', name: @customer.contact_name).html_safe %></p>
+<p style="margin: 0 0 8px 0; font-size: 16px;"><%= t('mailers.customer_mailer.confirm_order.greeting', name: @customer_user.contact_name.presence || @customer_user.email).html_safe %></p>
 
 <p style="margin: 0 0 32px 0; color: #4b5563;">
   <%= t('mailers.customer_mailer.confirm_order.intro') %>

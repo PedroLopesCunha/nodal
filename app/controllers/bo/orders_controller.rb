@@ -4,7 +4,7 @@ class Bo::OrdersController < Bo::BaseController
   before_action :set_order, only: [:show, :edit, :update, :destroy, :apply_discount, :remove_discount, :download_pdf, :retry_push]
 
   def index
-    @orders = apply_order_filters(policy_scope(current_organisation.orders.placed).includes(:customer, :order_items))
+    @orders = apply_order_filters(policy_scope(current_organisation.orders.placed).includes(:customer, :customer_user, :order_items))
 
     sort_direction = %w[asc desc].include?(params[:sort_dir]) ? params[:sort_dir] : "desc"
     @orders = @orders.order(Arel.sql("COALESCE(orders.placed_at, orders.created_at) #{sort_direction}"))
@@ -121,7 +121,7 @@ class Bo::OrdersController < Bo::BaseController
   end
 
   def exportable_base_scope
-    policy_scope(current_organisation.orders.placed).includes(:customer, :order_items)
+    policy_scope(current_organisation.orders.placed).includes(:customer, :customer_user, :order_items)
   end
 
   def apply_export_filters(scope)
