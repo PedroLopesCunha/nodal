@@ -13,6 +13,16 @@ class CustomerUser < ApplicationRecord
   belongs_to :organisation
   has_many :orders, dependent: :nullify
 
+  # Each login has its own cart, isolated from other CustomerUsers of the
+  # same Customer (empresa). Returns the draft order for this user in the
+  # given organisation, creating one if it doesn't exist.
+  def current_cart(organisation)
+    orders.draft.find_or_create_by!(
+      organisation: organisation,
+      customer_id: customer_id
+    )
+  end
+
   validates :active, inclusion: { in: [true, false] }
   validates :locale, inclusion: { in: I18n.available_locales.map(&:to_s) }, allow_nil: true
 

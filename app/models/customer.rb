@@ -78,10 +78,6 @@ class Customer < ApplicationRecord
   accepts_nested_attributes_for :shipping_addresses_with_archived, reject_if: :address_blank?
 
 
-  def current_cart(organisation)
-    orders.draft.find_or_create_by!(organisation: organisation)
-  end
-
   def active_discounts_for_products(product_ids)
     # Direct customer discounts take precedence
     direct = customer_product_discounts
