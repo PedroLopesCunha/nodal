@@ -15,7 +15,7 @@ class Storefront::AccountsController < Storefront::BaseController
   end
 
   def toggle_hide_prices
-    current_customer.update!(hide_prices: !current_customer.hide_prices?)
+    current_customer_user.update!(hide_prices: !current_customer_user.hide_prices?)
     redirect_back(fallback_location: home_path(org_slug: params[:org_slug]))
   end
 

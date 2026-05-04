@@ -1386,6 +1386,48 @@ en:
         admin: "Admin"
         member: "Member"
 
+    customer_users:
+      section:
+        title: "Logins"
+        subtitle: "Logins for this customer"
+        add: "Add login"
+        empty: "No logins created for this customer yet."
+      table:
+        name: "Name"
+        email: "Email"
+        status: "Status"
+        last_sign_in: "Last sign-in"
+        actions: "Actions"
+        never: "Never"
+      new:
+        title: "Add login"
+        subtitle: "Invite a new login for %{company}"
+        email_hint: "An invitation will be sent to this email"
+        submit: "Send invitation"
+      edit:
+        title: "Edit login"
+        subtitle: "Update %{name}"
+        submit: "Update"
+      form:
+        email: "Email"
+        contact_name: "Name"
+        contact_phone: "Phone"
+        locale: "Language"
+        email_notifications_enabled: "Receive emails"
+        hide_prices: "Hide prices"
+        active: "Active"
+      actions:
+        edit: "Edit"
+        resend_invite: "Resend invitation"
+        activate: "Activate"
+        deactivate: "Deactivate"
+      flash:
+        invited: "Invitation sent to %{email}."
+        invitation_resent: "Invitation resent to %{email}."
+        updated: "Login updated successfully."
+        activated: "Login %{email} activated."
+        deactivated: "Login %{email} deactivated."
+
     # Settings section
     settings:
       tabs:

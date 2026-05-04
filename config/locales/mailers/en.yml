@@ -129,6 +129,7 @@ en:
         contact_name: "Contact Name"
         company: "Company"
         email: "Email"
+        placed_by: "Placed by"
         customer_notes: "Customer Notes"
         view_order_button: "View Order in Dashboard"
         action_required_title: "Action Required"
