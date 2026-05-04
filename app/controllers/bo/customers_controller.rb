@@ -39,6 +39,7 @@ class Bo::CustomersController < Bo::BaseController
     @customer.organisation = current_organisation
     authorize @customer
     if @customer.save
+      ensure_customer_user_for(@customer)
       redirect_to bo_customer_path(params[:org_slug], @customer), notice: "Customer created successfully."
     else
       @customer_categories = current_organisation.customer_categories.ordered
@@ -69,9 +70,10 @@ class Bo::CustomersController < Bo::BaseController
   end
 
   def invite
-    @customer.invite!
+    customer_user = ensure_customer_user_for(@customer)
+    customer_user.invite!
     redirect_to bo_customer_path(params[:org_slug], @customer, filter_params_hash),
-                notice: "Invitation sent to #{@customer.email}"
+                notice: "Invitation sent to #{customer_user.email}"
   end
 
   helper_method :filter_params_hash, :sort_link_params
@@ -101,7 +103,23 @@ class Bo::CustomersController < Bo::BaseController
   end
 
   def customer_params
-    params.require(:customer).permit(:company_name, :contact_name, :email, :contact_phone, :active, :password, :password_confirmation, :taxpayer_id, :email_notifications_enabled, :customer_category_id, billing_address_with_archived_attributes: [:id, :street_name, :street_nr, :postal_code, :city, :country, :address_type, :active], shipping_addresses_with_archived_attributes: [:id, :street_name, :street_nr, :postal_code, :city, :country, :address_type, :_destroy, :active])
+    params.require(:customer).permit(:company_name, :contact_name, :email, :contact_phone, :active, :taxpayer_id, :email_notifications_enabled, :customer_category_id, billing_address_with_archived_attributes: [:id, :street_name, :street_nr, :postal_code, :city, :country, :address_type, :active], shipping_addresses_with_archived_attributes: [:id, :street_name, :street_nr, :postal_code, :city, :country, :address_type, :_destroy, :active])
+  end
+
+  # Customers created via BO get a paired CustomerUser stub (no password,
+  # not yet invited) that mirrors the empresa's contact fields. The login
+  # is activated when the merchant clicks "Invite".
+  def ensure_customer_user_for(customer)
+    customer.customer_users.first || customer.customer_users.create!(
+      organisation: customer.organisation,
+      email: customer.email,
+      contact_name: customer.contact_name,
+      contact_phone: customer.contact_phone,
+      locale: customer.locale,
+      email_notifications_enabled: customer.email_notifications_enabled?,
+      hide_prices: customer.hide_prices?,
+      active: customer.active?
+    )
   end
 
   def load_customers

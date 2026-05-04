@@ -13,8 +13,8 @@ class OrderItemPolicy < ApplicationPolicy
 
   class Scope < ApplicationPolicy::Scope
     def resolve
-      if user.is_a?(Customer)
-        scope.joins(:order).where(orders: { customer_id: user.id })
+      if user.is_a?(CustomerUser)
+        scope.joins(:order).where(orders: { customer_id: user.customer_id })
       elsif user.is_a?(Member)
         scope.joins(order: :organisation).where(organisations: { id: user.organisation_ids })
       else
@@ -26,8 +26,8 @@ class OrderItemPolicy < ApplicationPolicy
   private
 
   def order_owner_and_draft?
-    user.is_a?(Customer) &&
-      record.order.customer == user &&
+    user.is_a?(CustomerUser) &&
+      record.order.customer_id == user.customer_id &&
       record.order.draft?
   end
 end

@@ -31,8 +31,8 @@ class Storefront::AccountsController < Storefront::BaseController
   end
 
   def update_password
-    if current_customer.update_with_password(password_params)
-      bypass_sign_in(current_customer, scope: :customer)
+    if current_customer_user.update_with_password(password_params)
+      bypass_sign_in(current_customer_user, scope: :customer_user)
       redirect_to account_path, notice: t("storefront.account.flash.password_updated")
     else
       build_missing_addresses

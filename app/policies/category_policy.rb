@@ -54,7 +54,7 @@ class CategoryPolicy < ApplicationPolicy
 
     if user.is_a?(Member)
       user.organisations.include?(record.organisation)
-    elsif user.is_a?(Customer)
+    elsif user.is_a?(CustomerUser)
       user.organisation == record.organisation
     else
       false

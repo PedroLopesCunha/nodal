@@ -13,8 +13,8 @@ class ShoppingListItemPolicy < ApplicationPolicy
 
   class Scope < ApplicationPolicy::Scope
     def resolve
-      if user.is_a?(Customer)
-        scope.joins(:shopping_list).where(shopping_lists: { customer_id: user.id })
+      if user.is_a?(CustomerUser)
+        scope.joins(:shopping_list).where(shopping_lists: { customer_id: user.customer_id })
       else
         scope.none
       end
@@ -24,6 +24,6 @@ class ShoppingListItemPolicy < ApplicationPolicy
   private
 
   def list_owner?
-    user.is_a?(Customer) && record.shopping_list.customer == user
+    user.is_a?(CustomerUser) && record.shopping_list.customer_id == user.customer_id
   end
 end

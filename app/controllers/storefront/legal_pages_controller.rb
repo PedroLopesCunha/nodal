@@ -1,5 +1,5 @@
 class Storefront::LegalPagesController < Storefront::BaseController
-  skip_before_action :authenticate_customer!
+  skip_before_action :authenticate_customer_user!
   skip_after_action :verify_authorized
 
   def terms

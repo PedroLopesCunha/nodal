@@ -16,12 +16,15 @@ Rails.application.routes.draw do
     # Locale switching
     patch 'locale', to: 'locales#update', as: :update_locale
 
-    # customer routes
-    devise_for :customers, skip: [:registrations],
+    # customer routes (auth lives on CustomerUser; the empresa is Customer).
+    # path: "customers" preserves public URLs so existing bookmarks and
+    # already-sent invitation/reset_password links keep working.
+    devise_for :customer_users, skip: [:registrations],
+                path: "customers",
                 controllers: {
-                  sessions: 'customers/sessions',
-                  invitations: 'customers/invitations',
-                  passwords: 'customers/passwords'
+                  sessions: 'customer_users/sessions',
+                  invitations: 'customer_users/invitations',
+                  passwords: 'customer_users/passwords'
                 }
 
     # Legal pages (public, no auth required)

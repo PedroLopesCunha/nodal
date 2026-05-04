@@ -31,15 +31,10 @@ module Erp
         customer = find_or_initialize_customer(external_id, data[:email])
         was_new = customer.new_record?
 
-        # The identity guard preserves manual edits the merchant made to
-        # invited/active customers' contact_name/email/phone in Nodal.
-        # Addresses are NOT subject to this guard — billing is ERP-owned
-        # and shipping is add-only, so manual edits are preserved naturally.
-        identity_skipped = !was_new && customer.invitation_status != :not_invited
-
-        unless identity_skipped
-          update_customer_attributes(customer, data, was_new)
-        end
+        # Customer holds only ERP-owned fields after the customer/login split
+        # (auth + personal preferences live on CustomerUser, which is never
+        # synced from ERP). So ERP wins, always — no identity guard.
+        update_customer_attributes(customer, data, was_new)
 
         if was_new || customer.changed?
           changes_snapshot = customer.changes
@@ -161,7 +156,7 @@ module Erp
         )
       end
 
-      def update_customer_attributes(customer, data, is_new)
+      def update_customer_attributes(customer, data, _is_new)
         customer.assign_attributes(
           company_name: data[:company_name],
           contact_name: data[:contact_name],
@@ -170,16 +165,6 @@ module Erp
           taxpayer_id: data[:taxpayer_id],
           active: data[:active]
         )
-
-        if is_new
-          set_temporary_password(customer)
-        end
-      end
-
-      def set_temporary_password(customer)
-        temp_password = SecureRandom.hex(12)
-        customer.password = temp_password
-        customer.password_confirmation = temp_password
       end
 
       def record_changes(external_id, action, customer, changes_snapshot = nil)

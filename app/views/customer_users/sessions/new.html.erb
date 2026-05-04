@@ -1,9 +1,9 @@
-<%= render "customers/shared/auth_logo" %>
+<%= render "customer_users/shared/auth_logo" %>
 
 <h1 class="auth-title"><%= t('auth.sign_in.welcome_back') %></h1>
 <p class="auth-subtitle"><%= t('auth.sign_in.subtitle') %></p>
 
-<%= simple_form_for(resource, as: resource_name, url: customer_session_path(org_slug: @organisation.slug), html: { class: "auth-form", data: { turbo: false } }) do |f| %>
+<%= simple_form_for(resource, as: resource_name, url: customer_user_session_path(org_slug: @organisation.slug), html: { class: "auth-form", data: { turbo: false } }) do |f| %>
   <div class="auth-field">
     <%= f.input :email,
                 required: false,
@@ -16,7 +16,7 @@
   <div class="auth-field">
     <div class="auth-label-row">
       <label class="auth-label"><%= t('auth.sign_in.password') %></label>
-      <%= link_to t('auth.sign_in.forgot_password'), new_customer_password_path(org_slug: @organisation.slug), class: "auth-forgot-link" %>
+      <%= link_to t('auth.sign_in.forgot_password'), new_customer_user_password_path(org_slug: @organisation.slug), class: "auth-forgot-link" %>
     </div>
     <div class="auth-password-wrapper" data-controller="password-visibility">
       <%= f.input :password,

@@ -1,7 +1,7 @@
 class Storefront::BaseController < ApplicationController
   layout "customer"
 
-  before_action :authenticate_customer!
+  before_action :authenticate_customer_user!
 
   helper_method :current_cart, :cart_item_count, :cart_line_item_count, :active_order_discounts,
                 :has_order_discounts?, :browsing_as_member?, :current_storefront_user
@@ -38,15 +38,15 @@ class Storefront::BaseController < ApplicationController
 
   private
 
-  def authenticate_customer!
-    # Allow customers
+  def authenticate_customer_user!
+    # Allow CustomerUsers whose Customer (empresa) belongs to this org
     return if current_customer.present? && current_customer.organisation == current_organisation
 
     # Allow members who belong to this organisation (browse-only)
     return if current_member.present? && current_member.organisations.exists?(current_organisation&.id)
 
     flash[:alert] = "Please sign in to continue."
-    redirect_to new_customer_session_path(org_slug: params[:org_slug])
+    redirect_to new_customer_user_session_path(org_slug: params[:org_slug])
   end
 
   # Use in controllers that should be customer-only (cart, checkout)
