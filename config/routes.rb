@@ -107,8 +107,11 @@ Rails.application.routes.draw do
         collection do
           get :export
         end
-        member do
-          post :invite
+        resources :customer_users, only: [:new, :create, :edit, :update] do
+          member do
+            post :resend_invitation
+            patch :toggle_active
+          end
         end
       end
       resources :customer_categories, except: [:index, :show] do

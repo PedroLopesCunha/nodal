@@ -40,4 +40,29 @@ class CustomerUser < ApplicationRecord
       invitation_accepted_at.present? &&
       customer&.active?
   end
+
+  def invitation_status
+    return :inactive unless active?
+    return :active if invitation_accepted_at.present?
+    return :pending if invitation_sent_at.present?
+    :not_invited
+  end
+
+  def pending_invitation?
+    invitation_status == :pending
+  end
+
+  # Devise hook: blocks both new sign-in attempts AND existing sessions.
+  # Warden re-checks this on every authenticated request, so deactivating a
+  # login (or its empresa) takes effect immediately on whatever browser
+  # session that user already had open.
+  def active_for_authentication?
+    super && active? && customer&.active?
+  end
+
+  def inactive_message
+    return :customer_user_inactive unless active?
+    return :customer_inactive unless customer&.active?
+    super
+  end
 end

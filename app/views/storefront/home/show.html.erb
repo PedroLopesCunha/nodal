@@ -1,7 +1,7 @@
 <%# ==================== GREETING ==================== %>
 <section class="home-section fade-in-up" style="margin-bottom: 1.5rem; margin-top: 1.5rem;">
   <h2 style="font-size: 1.5rem; font-weight: 700;" class="mb-0">
-    <% name = browsing_as_member? ? current_member.first_name : current_customer.contact_name %>
+    <% name = browsing_as_member? ? current_member.first_name : (current_customer_user.contact_name.presence || current_customer_user.email) %>
     <% greeting_key = case Time.current.hour
        when 5..11 then 'good_morning'
        when 12..17 then 'good_afternoon'
