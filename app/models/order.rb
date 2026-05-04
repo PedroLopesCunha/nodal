@@ -18,6 +18,7 @@ class Order < ApplicationRecord
   attr_accessor :same_as_billing
 
   belongs_to :customer
+  belongs_to :customer_user, optional: true
   belongs_to :organisation
   belongs_to :shipping_address, class_name: "Address", optional: true
   belongs_to :billing_address, class_name: "Address", optional: true
