@@ -2,18 +2,18 @@ class Storefront::OrdersController < Storefront::BaseController
   before_action :require_customer!
 
   def index
-    @orders = policy_scope(current_customer.orders.placed, policy_scope_class: OrderPolicy::Scope)
+    @orders = policy_scope(current_customer_user.orders.placed, policy_scope_class: OrderPolicy::Scope)
                 .includes(:order_items, :products)
                 .order(placed_at: :desc)
   end
 
   def show
-    @order = current_customer.orders.find(params[:id])
+    @order = current_customer_user.orders.find(params[:id])
     authorize @order
   end
 
   def download_pdf
-    @order = current_customer.orders.placed.find(params[:id])
+    @order = current_customer_user.orders.placed.find(params[:id])
     authorize @order
 
     html = render_to_string(template: "shared/orders/pdf", layout: false)
@@ -27,7 +27,7 @@ class Storefront::OrdersController < Storefront::BaseController
 
   def export
     authorize Order, :index?
-    orders = current_customer.orders.placed.includes(:order_items, :organisation)
+    orders = current_customer_user.orders.placed.includes(:order_items, :organisation)
     columns = Order.exportable_columns_for(params[:columns])
     format = params[:format_type] || "csv"
     extension = format == "xlsx" ? "xlsx" : "csv"
@@ -39,7 +39,7 @@ class Storefront::OrdersController < Storefront::BaseController
 
   def export_items
     authorize Order, :index?
-    order_ids = current_customer.orders.placed.select(:id)
+    order_ids = current_customer_user.orders.placed.select(:id)
     records = OrderItem.where(order_id: order_ids).includes(:order, :product, :product_variant, order: :customer)
 
     columns = OrderItem.exportable_columns_for(params[:columns])
@@ -52,7 +52,7 @@ class Storefront::OrdersController < Storefront::BaseController
   end
 
   def reorder
-    original_order = current_customer.orders.placed.find(params[:id])
+    original_order = current_customer_user.orders.placed.find(params[:id])
     authorize original_order
 
     # If cart has items and no confirmation, redirect back with warning
@@ -118,7 +118,7 @@ class Storefront::OrdersController < Storefront::BaseController
   end
 
   def add_to_cart
-    original_order = current_customer.orders.placed.find(params[:id])
+    original_order = current_customer_user.orders.placed.find(params[:id])
     authorize original_order
 
     cart = current_cart

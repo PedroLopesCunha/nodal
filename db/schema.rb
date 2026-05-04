@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2026_05_04_120002) do
+ActiveRecord::Schema[7.1].define(version: 2026_05_04_130000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_trgm"
   enable_extension "plpgsql"
@@ -460,7 +460,7 @@ ActiveRecord::Schema[7.1].define(version: 2026_05_04_120002) do
     t.string "push_status", default: "pending", null: false
     t.integer "push_attempts", default: 0, null: false
     t.datetime "last_pushed_at"
-    t.bigint "customer_user_id"
+    t.bigint "customer_user_id", null: false
     t.index ["applied_by_id"], name: "index_orders_on_applied_by_id"
     t.index ["billing_address_id"], name: "index_orders_on_billing_address_id"
     t.index ["customer_id"], name: "index_orders_on_customer_id"

@@ -13,7 +13,7 @@ class Storefront::HomeController < Storefront::BaseController
     @new_products = load_new_products
 
     unless browsing_as_member?
-      @last_order = current_customer.orders.placed
+      @last_order = current_customer_user.orders.placed
                       .includes(:order_items)
                       .order(placed_at: :desc)
                       .first
@@ -25,7 +25,7 @@ class Storefront::HomeController < Storefront::BaseController
 
       @tier_discount = current_customer.active_customer_discount
       @special_prices_count = current_customer.customer_product_discounts.active.count
-      @total_orders_count = current_customer.orders.placed.count
+      @total_orders_count = current_customer_user.orders.placed.count
       @active_promo_codes = current_organisation.promo_codes.active
         .left_joins(:promo_code_customers)
         .where(eligibility: 'all_customers')
@@ -125,7 +125,7 @@ class Storefront::HomeController < Storefront::BaseController
     # Top 8 most-ordered products by this customer
     frequent_product_ids = OrderItem
       .joins(:order)
-      .where(orders: { customer_id: current_customer.id, organisation_id: current_organisation.id })
+      .where(orders: { customer_user_id: current_customer_user.id, organisation_id: current_organisation.id })
       .where.not(orders: { placed_at: nil })
       .group(:product_id)
       .order(Arel.sql("COUNT(*) DESC"))
@@ -143,8 +143,8 @@ class Storefront::HomeController < Storefront::BaseController
   end
 
   def load_new_products
-    cutoff = if !browsing_as_member? && current_customer.orders.placed.exists?
-               current_customer.orders.placed.order(placed_at: :desc).pick(:placed_at)
+    cutoff = if !browsing_as_member? && current_customer_user.orders.placed.exists?
+               current_customer_user.orders.placed.order(placed_at: :desc).pick(:placed_at)
              else
                30.days.ago
              end

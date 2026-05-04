@@ -7,7 +7,7 @@ class Storefront::BaseController < ApplicationController
                 :has_order_discounts?, :browsing_as_member?, :current_storefront_user
 
   def current_cart
-    @current_cart ||= current_customer&.current_cart(current_organisation)
+    @current_cart ||= current_customer_user&.current_cart(current_organisation)
   end
 
   def cart_item_count
