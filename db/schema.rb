@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2026_04_29_142109) do
+ActiveRecord::Schema[7.1].define(version: 2026_05_04_120002) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_trgm"
   enable_extension "plpgsql"
@@ -168,6 +168,45 @@ ActiveRecord::Schema[7.1].define(version: 2026_04_29_142109) do
     t.index ["customer_id"], name: "index_customer_product_discounts_on_customer_id"
     t.index ["organisation_id"], name: "index_customer_product_discounts_on_organisation_id"
     t.index ["product_id"], name: "index_customer_product_discounts_on_product_id"
+  end
+
+  create_table "customer_users", force: :cascade do |t|
+    t.bigint "customer_id", null: false
+    t.bigint "organisation_id", null: false
+    t.string "email", default: "", null: false
+    t.string "encrypted_password", default: "", null: false
+    t.string "reset_password_token"
+    t.datetime "reset_password_sent_at"
+    t.datetime "remember_created_at"
+    t.string "invitation_token"
+    t.datetime "invitation_created_at"
+    t.datetime "invitation_sent_at"
+    t.datetime "invitation_accepted_at"
+    t.integer "invitation_limit"
+    t.string "invited_by_type"
+    t.bigint "invited_by_id"
+    t.integer "invitations_count", default: 0
+    t.integer "sign_in_count", default: 0
+    t.datetime "current_sign_in_at"
+    t.datetime "last_sign_in_at"
+    t.string "current_sign_in_ip"
+    t.string "last_sign_in_ip"
+    t.string "contact_name"
+    t.string "contact_phone"
+    t.string "locale"
+    t.boolean "email_notifications_enabled", default: true, null: false
+    t.boolean "hide_prices", default: false, null: false
+    t.boolean "active", default: true, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["customer_id"], name: "index_customer_users_on_customer_id"
+    t.index ["email", "organisation_id"], name: "index_customer_users_on_email_and_organisation_id", unique: true
+    t.index ["invitation_token"], name: "index_customer_users_on_invitation_token", unique: true
+    t.index ["invited_by_id"], name: "index_customer_users_on_invited_by_id"
+    t.index ["invited_by_type", "invited_by_id"], name: "index_customer_users_on_invited_by_type_and_invited_by_id"
+    t.index ["locale"], name: "index_customer_users_on_locale"
+    t.index ["organisation_id"], name: "index_customer_users_on_organisation_id"
+    t.index ["reset_password_token"], name: "index_customer_users_on_reset_password_token", unique: true
   end
 
   create_table "customers", force: :cascade do |t|
@@ -421,9 +460,11 @@ ActiveRecord::Schema[7.1].define(version: 2026_04_29_142109) do
     t.string "push_status", default: "pending", null: false
     t.integer "push_attempts", default: 0, null: false
     t.datetime "last_pushed_at"
+    t.bigint "customer_user_id"
     t.index ["applied_by_id"], name: "index_orders_on_applied_by_id"
     t.index ["billing_address_id"], name: "index_orders_on_billing_address_id"
     t.index ["customer_id"], name: "index_orders_on_customer_id"
+    t.index ["customer_user_id"], name: "index_orders_on_customer_user_id"
     t.index ["order_discount_id"], name: "index_orders_on_order_discount_id"
     t.index ["order_number"], name: "index_orders_on_order_number", unique: true
     t.index ["organisation_id", "customer_id"], name: "index_orders_on_organisation_id_and_customer_id"
@@ -881,6 +922,8 @@ ActiveRecord::Schema[7.1].define(version: 2026_04_29_142109) do
   add_foreign_key "customer_product_discounts", "customers"
   add_foreign_key "customer_product_discounts", "organisations"
   add_foreign_key "customer_product_discounts", "products"
+  add_foreign_key "customer_users", "customers"
+  add_foreign_key "customer_users", "organisations"
   add_foreign_key "customers", "customer_categories"
   add_foreign_key "customers", "organisations"
   add_foreign_key "discount_email_notifications", "members", column: "sent_by_id"
@@ -904,6 +947,7 @@ ActiveRecord::Schema[7.1].define(version: 2026_04_29_142109) do
   add_foreign_key "order_items", "products"
   add_foreign_key "orders", "addresses", column: "billing_address_id"
   add_foreign_key "orders", "addresses", column: "shipping_address_id"
+  add_foreign_key "orders", "customer_users"
   add_foreign_key "orders", "customers"
   add_foreign_key "orders", "members", column: "applied_by_id"
   add_foreign_key "orders", "order_discounts"
