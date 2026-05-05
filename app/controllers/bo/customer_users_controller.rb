@@ -48,18 +48,22 @@ class Bo::CustomerUsersController < Bo::BaseController
 
   def resend_invitation
     authorize @customer_user
+    # Capture status BEFORE invite! so we can pick the right flash key —
+    # first send vs. resend.
+    was_pending = @customer_user.invitation_status == :pending
     @customer_user.invited_by = current_member
     @customer_user.invite!
-    redirect_to bo_customer_path(params[:org_slug], @customer),
-                notice: t("bo.customer_users.flash.invitation_resent", email: @customer_user.email)
+    flash_key = was_pending ? "invitation_resent" : "invited"
+    redirect_back fallback_location: bo_customer_path(params[:org_slug], @customer),
+                  notice: t("bo.customer_users.flash.#{flash_key}", email: @customer_user.email)
   end
 
   def toggle_active
     authorize @customer_user
     @customer_user.update(active: !@customer_user.active?)
     key = @customer_user.active? ? "activated" : "deactivated"
-    redirect_to bo_customer_path(params[:org_slug], @customer),
-                notice: t("bo.customer_users.flash.#{key}", email: @customer_user.email)
+    redirect_back fallback_location: bo_customer_path(params[:org_slug], @customer),
+                  notice: t("bo.customer_users.flash.#{key}", email: @customer_user.email)
   end
 
   private
