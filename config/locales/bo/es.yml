@@ -1325,6 +1325,7 @@ es:
         active: "Activo"
       actions:
         edit: "Editar"
+        invite: "Enviar invitación"
         resend_invite: "Reenviar invitación"
         activate: "Activar"
         deactivate: "Desactivar"
