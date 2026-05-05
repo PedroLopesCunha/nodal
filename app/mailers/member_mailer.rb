@@ -23,6 +23,7 @@ class MemberMailer < ApplicationMailer
   def notificate_customer_order
     @order = params[:order]
     @customer = params[:customer]
+    @customer_user = @order.customer_user
     org_slug = params[:org_slug]
     @organisation = Organisation.find_by(slug: org_slug)
 

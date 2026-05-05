@@ -1376,6 +1376,48 @@ pt:
         admin: "Administrador"
         member: "Membro"
 
+    customer_users:
+      section:
+        title: "Logins"
+        subtitle: "Logins desta empresa"
+        add: "Adicionar login"
+        empty: "Sem logins criados para este cliente."
+      table:
+        name: "Nome"
+        email: "Email"
+        status: "Estado"
+        last_sign_in: "Último Acesso"
+        actions: "Ações"
+        never: "Nunca"
+      new:
+        title: "Adicionar login"
+        subtitle: "Convidar um novo login para %{company}"
+        email_hint: "Um convite será enviado para este email"
+        submit: "Enviar Convite"
+      edit:
+        title: "Editar login"
+        subtitle: "Atualizar %{name}"
+        submit: "Atualizar"
+      form:
+        email: "Email"
+        contact_name: "Nome"
+        contact_phone: "Telefone"
+        locale: "Idioma"
+        email_notifications_enabled: "Receber emails"
+        hide_prices: "Esconder preços"
+        active: "Ativo"
+      actions:
+        edit: "Editar"
+        resend_invite: "Reenviar convite"
+        activate: "Ativar"
+        deactivate: "Desativar"
+      flash:
+        invited: "Convite enviado para %{email}."
+        invitation_resent: "Convite reenviado para %{email}."
+        updated: "Login atualizado com sucesso."
+        activated: "Login %{email} ativado."
+        deactivated: "Login %{email} desativado."
+
     # Secção Definições
     settings:
       tabs:

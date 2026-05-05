@@ -129,6 +129,7 @@ pt:
         contact_name: "Nome de Contacto"
         company: "Empresa"
         email: "Email"
+        placed_by: "Colocada por"
         customer_notes: "Notas do Cliente"
         view_order_button: "Ver Encomenda no Painel"
         action_required_title: "Ação Necessária"

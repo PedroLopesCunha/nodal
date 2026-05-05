@@ -1293,6 +1293,48 @@ es:
         admin: "Administrador"
         member: "Miembro"
 
+    customer_users:
+      section:
+        title: "Logins"
+        subtitle: "Logins de esta empresa"
+        add: "Añadir login"
+        empty: "Sin logins creados para este cliente."
+      table:
+        name: "Nombre"
+        email: "Email"
+        status: "Estado"
+        last_sign_in: "Último Acceso"
+        actions: "Acciones"
+        never: "Nunca"
+      new:
+        title: "Añadir login"
+        subtitle: "Invitar un nuevo login para %{company}"
+        email_hint: "Se enviará una invitación a este email"
+        submit: "Enviar Invitación"
+      edit:
+        title: "Editar login"
+        subtitle: "Actualizar %{name}"
+        submit: "Actualizar"
+      form:
+        email: "Email"
+        contact_name: "Nombre"
+        contact_phone: "Teléfono"
+        locale: "Idioma"
+        email_notifications_enabled: "Recibir emails"
+        hide_prices: "Ocultar precios"
+        active: "Activo"
+      actions:
+        edit: "Editar"
+        resend_invite: "Reenviar invitación"
+        activate: "Activar"
+        deactivate: "Desactivar"
+      flash:
+        invited: "Invitación enviada a %{email}."
+        invitation_resent: "Invitación reenviada a %{email}."
+        updated: "Login actualizado con éxito."
+        activated: "Login %{email} activado."
+        deactivated: "Login %{email} desactivado."
+
     # Sección Configuración
     settings:
       edit:

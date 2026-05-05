@@ -59,8 +59,49 @@ module Erp
         # identity guard. Lenient: per-address failures are logged but
         # don't fail the customer sync.
         sync_addresses(customer, data)
+
+        # Mirror the empresa's contact fields into a stub CustomerUser so
+        # that ERP-supplied identity has somewhere usable to land. Once a
+        # login has been invited it leaves ERP control and is no longer
+        # touched here — see #mirror_customer_user_stub for the rule.
+        mirror_customer_user_stub(customer)
       rescue StandardError => e
         sync_log.increment_failed!(data[:external_id], e.message)
+      end
+
+      # Keeps a single non-invited "stub" CustomerUser in sync with the
+      # Customer (empresa) record. The stub is the seed login the BO can
+      # invite later. Rule: ERP only touches logins that have NOT been
+      # invited yet — once invitation_sent_at is set on any login, the
+      # whole set is human-managed and we leave it alone.
+      def mirror_customer_user_stub(customer)
+        # If any login has already been invited, hands off entirely.
+        return if customer.customer_users.where.not(invitation_sent_at: nil).exists?
+
+        attrs = {
+          email: customer.email,
+          contact_name: customer.contact_name,
+          contact_phone: customer.contact_phone,
+          active: customer.active?
+        }
+
+        # Skip if we have nothing useful to mirror — an empty stub with
+        # no email can't be invited by the BO anyway.
+        return if attrs[:email].blank?
+
+        stub = customer.customer_users.first
+        if stub
+          stub.update(attrs)
+        else
+          customer.customer_users.create!(
+            attrs.merge(organisation_id: customer.organisation_id)
+          )
+        end
+      rescue StandardError => e
+        Rails.logger.warn(
+          "[ERP sync] customer_user stub mirror failed for " \
+          "customer external_id=#{customer.external_id}: #{e.message}"
+        )
       end
 
       # Syncs billing + shipping addresses for a customer.

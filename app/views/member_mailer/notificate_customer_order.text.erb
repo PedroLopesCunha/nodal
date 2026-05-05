@@ -13,6 +13,12 @@ CUSTOMER
 <%= @customer.contact_name %>
 <%= @customer.company_name %>
 <%= @order.customer.email %>
+<% if @customer_user %>
+
+PLACED BY
+---------
+<%= @customer_user.contact_name.presence || @customer_user.email %><% if @customer_user.contact_name.present? %> (<%= @customer_user.email %>)<% end %>
+<% end %>
 
 ITEMS
 -----

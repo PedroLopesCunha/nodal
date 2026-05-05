@@ -1,7 +1,7 @@
 class Bo::CustomersController < Bo::BaseController
   include Exportable
 
-  before_action :set_and_authorize_customer, only: [:show, :edit, :update, :destroy, :invite]
+  before_action :set_and_authorize_customer, only: [:show, :edit, :update, :destroy]
 
   def index
     @tab = params[:tab] || 'customers'
@@ -39,7 +39,6 @@ class Bo::CustomersController < Bo::BaseController
     @customer.organisation = current_organisation
     authorize @customer
     if @customer.save
-      ensure_customer_user_for(@customer)
       redirect_to bo_customer_path(params[:org_slug], @customer), notice: "Customer created successfully."
     else
       @customer_categories = current_organisation.customer_categories.ordered
@@ -67,13 +66,6 @@ class Bo::CustomersController < Bo::BaseController
   def destroy
     @customer.destroy
     redirect_to bo_customers_path(params[:org_slug], filter_params_hash), status: :see_other, notice: "Customer deleted successfully."
-  end
-
-  def invite
-    customer_user = ensure_customer_user_for(@customer)
-    customer_user.invite!
-    redirect_to bo_customer_path(params[:org_slug], @customer, filter_params_hash),
-                notice: "Invitation sent to #{customer_user.email}"
   end
 
   helper_method :filter_params_hash, :sort_link_params
@@ -106,24 +98,8 @@ class Bo::CustomersController < Bo::BaseController
     params.require(:customer).permit(:company_name, :contact_name, :email, :contact_phone, :active, :taxpayer_id, :email_notifications_enabled, :customer_category_id, billing_address_with_archived_attributes: [:id, :street_name, :street_nr, :postal_code, :city, :country, :address_type, :active], shipping_addresses_with_archived_attributes: [:id, :street_name, :street_nr, :postal_code, :city, :country, :address_type, :_destroy, :active])
   end
 
-  # Customers created via BO get a paired CustomerUser stub (no password,
-  # not yet invited) that mirrors the empresa's contact fields. The login
-  # is activated when the merchant clicks "Invite".
-  def ensure_customer_user_for(customer)
-    customer.customer_users.first || customer.customer_users.create!(
-      organisation: customer.organisation,
-      email: customer.email,
-      contact_name: customer.contact_name,
-      contact_phone: customer.contact_phone,
-      locale: customer.locale,
-      email_notifications_enabled: customer.email_notifications_enabled?,
-      hide_prices: customer.hide_prices?,
-      active: customer.active?
-    )
-  end
-
   def load_customers
-    @customers = apply_customer_filters(policy_scope(current_organisation.customers).includes(:customer_category))
+    @customers = apply_customer_filters(policy_scope(current_organisation.customers).includes(:customer_category, :customer_users))
 
     @sort_column = %w[company_name contact_name email active].include?(params[:sort]) ? params[:sort] : "company_name"
     @sort_direction = %w[asc desc].include?(params[:direction]) ? params[:direction] : "asc"
@@ -142,10 +118,39 @@ class Bo::CustomersController < Bo::BaseController
     end
 
     case params[:status]
-    when "active" then scope = scope.where(active: true).where.not(invitation_accepted_at: nil)
-    when "inactive" then scope = scope.where(active: false)
-    when "not_invited" then scope = scope.where(active: true, invitation_sent_at: nil)
-    when "pending" then scope = scope.where(active: true, invitation_accepted_at: nil).where.not(invitation_sent_at: nil)
+    when "active"
+      # Has at least one active login that has accepted its invitation.
+      scope = scope.where(active: true)
+                   .joins(:customer_users)
+                   .where(customer_users: { active: true })
+                   .where.not(customer_users: { invitation_accepted_at: nil })
+                   .distinct
+    when "inactive"
+      # Customer.active = false OR has logins but all are deactivated.
+      scope = scope.where(<<~SQL.squish)
+        customers.active = FALSE
+        OR (
+          customers.active = TRUE
+          AND EXISTS (SELECT 1 FROM customer_users cu WHERE cu.customer_id = customers.id)
+          AND NOT EXISTS (SELECT 1 FROM customer_users cu WHERE cu.customer_id = customers.id AND cu.active = TRUE)
+        )
+      SQL
+    when "pending"
+      # At least one login invited but none accepted yet.
+      accepted_ids = Customer.joins(:customer_users)
+                             .where.not(customer_users: { invitation_accepted_at: nil })
+                             .select(:id)
+      scope = scope.where(active: true)
+                   .joins(:customer_users)
+                   .where.not(customer_users: { invitation_sent_at: nil })
+                   .where.not(id: accepted_ids)
+                   .distinct
+    when "not_invited"
+      # No logins yet, or none have been invited.
+      invited_ids = Customer.joins(:customer_users)
+                            .where.not(customer_users: { invitation_sent_at: nil })
+                            .select(:id)
+      scope = scope.where(active: true).where.not(id: invited_ids)
     end
 
     scope = scope.where(customer_category_id: params[:category]) if params[:category].present?

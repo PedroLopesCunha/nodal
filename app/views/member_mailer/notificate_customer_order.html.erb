@@ -46,6 +46,19 @@
             <p style="margin: 4px 0 0 0; font-size: 15px; font-weight: 500; color: #1a1a1a;"><%= @customer.email %></p>
           </td>
         </tr>
+        <% if @customer_user %>
+          <tr>
+            <td colspan="3" style="padding-top: 12px; border-top: 1px solid #f3f4f6;">
+              <span style="font-size: 12px; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.5px;"><%= t('mailers.member_mailer.notificate_customer_order.placed_by') %></span>
+              <p style="margin: 4px 0 0 0; font-size: 15px; font-weight: 500; color: #1a1a1a;">
+                <%= @customer_user.contact_name.presence || @customer_user.email %>
+                <% if @customer_user.contact_name.present? %>
+                  <span style="color: #6b7177; font-weight: 400;">&middot; <%= @customer_user.email %></span>
+                <% end %>
+              </p>
+            </td>
+          </tr>
+        <% end %>
       </table>
     </td>
   </tr>

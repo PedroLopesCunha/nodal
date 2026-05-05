@@ -116,16 +116,30 @@ class Customer < ApplicationRecord
     active_customer_discount.present?
   end
 
+  # Aggregate status derived from this customer's logins (CustomerUsers).
+  # The login itself owns the granular invitation state — this method just
+  # rolls it up into a single per-empresa badge for the BO listing/header.
+  #   :inactive     — empresa is inactive (Customer.active = false)
+  #   :active       — at least one active login has accepted its invite
+  #   :pending      — at least one login has been invited but none accepted
+  #   :not_invited  — no logins yet, or none have been invited
   def invitation_status
-    if !active?
-      :inactive
-    elsif invitation_accepted_at.present?
-      :active
-    elsif invitation_sent_at.present?
-      :pending
-    else
-      :not_invited
-    end
+    return :inactive unless active?
+
+    # Uses Enumerable so the BO listing benefits from `includes(:customer_users)`
+    # without triggering N+1 queries — querying via where(...) here would
+    # ignore the cached association and hit the DB once per row.
+    cus = customer_users.load
+
+    # If there are logins and none of them are active, the empresa is
+    # functionally locked out of the storefront — surface that as :inactive
+    # too, since the per-login granular state already shows in the BO.
+    return :inactive if cus.any? && cus.none?(&:active?)
+
+    return :active if cus.any? { |cu| cu.active? && cu.invitation_accepted_at.present? }
+    return :pending if cus.any? { |cu| cu.invitation_sent_at.present? && cu.invitation_accepted_at.nil? }
+
+    :not_invited
   end
 
   private
