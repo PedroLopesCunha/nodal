@@ -1,6 +1,12 @@
 class QuickAccessToken < ApplicationRecord
+  PDF_FORMATS = %i[card sheet digital].freeze
+
   belongs_to :customer_user
   belongs_to :created_by_member, class_name: "Member", optional: true
+
+  has_one_attached :pdf_card,    dependent: :purge_later
+  has_one_attached :pdf_sheet,   dependent: :purge_later
+  has_one_attached :pdf_digital, dependent: :purge_later
 
   validates :token, presence: true, uniqueness: true
   validates :expires_at, presence: true
@@ -11,11 +17,29 @@ class QuickAccessToken < ApplicationRecord
   before_validation :generate_token, on: :create
   before_validation :default_expires_at, on: :create
 
+  # Pre-render the 3 PDFs in background as soon as the token is born.
+  # Doing this once here means each download is just a redirect to a
+  # ready blob — Chrome doesn't get spawned in the request path. Keeps
+  # the web dyno calm and the merchant's clicks instant.
+  after_create_commit :enqueue_pdf_generation
+
   def self.generate_for(customer_user, created_by:)
     transaction do
       customer_user.quick_access_tokens.active.update_all(revoked_at: Time.current)
       customer_user.quick_access_tokens.create!(created_by_member: created_by)
     end
+  end
+
+  def attached_pdf(format)
+    public_send("pdf_#{format}")
+  end
+
+  def all_pdfs_ready?
+    PDF_FORMATS.all? { |fmt| attached_pdf(fmt).attached? }
+  end
+
+  def any_pdf_pending?
+    !all_pdfs_ready?
   end
 
   def active?
@@ -60,5 +84,9 @@ class QuickAccessToken < ApplicationRecord
 
     days = customer_user&.organisation&.quick_access_token_ttl_days
     self.expires_at = days ? days.days.from_now : NON_EXPIRING_HORIZON.from_now
+  end
+
+  def enqueue_pdf_generation
+    GenerateQuickAccessPdfsJob.perform_later(id)
   end
 end
