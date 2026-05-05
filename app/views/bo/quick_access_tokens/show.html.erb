@@ -1,0 +1,120 @@
+<% content_for :bo_main_content do %>
+
+<% qr_url = quick_access_url(org_slug: @customer.organisation.slug, token: @token&.token || "TOKEN") %>
+<% qr_svg = @token ? RQRCode::QRCode.new(qr_url, level: :m).as_svg(offset: 0, color: "000", shape_rendering: "crispEdges", module_size: 6, standalone: true, use_path: true).html_safe : nil %>
+
+<div class="bo-page-header">
+  <div class="d-flex justify-content-between align-items-center">
+    <div class="d-flex align-items-center gap-3">
+      <%= link_to bo_customer_path(params[:org_slug], @customer), class: "text-muted text-decoration-none" do %>
+        <i class="fa-solid fa-arrow-left fa-lg"></i>
+      <% end %>
+
+      <div class="rounded-circle bg-primary d-flex align-items-center justify-content-center text-white fw-bold" style="width: 60px; height: 60px; font-size: 1.25rem;">
+        <i class="fa-solid fa-qrcode"></i>
+      </div>
+
+      <div>
+        <h1><%= t("bo.quick_access_tokens.show.title") %></h1>
+        <span class="text-muted"><%= @customer_user.contact_name.presence || @customer_user.email %> · <%= @customer.company_name %></span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="bo-page-body">
+  <div class="row g-3">
+    <div class="col-md-6">
+      <div class="card">
+        <div class="card-body text-center">
+          <% if @token %>
+            <div class="d-inline-block p-3 border rounded mb-3" style="background:#fff;">
+              <%= qr_svg %>
+            </div>
+            <p class="small text-muted mb-1">
+              <%= t("bo.quick_access_tokens.show.expires_at", date: l(@token.expires_at, format: :short)) %>
+            </p>
+            <% if @token.last_used_at %>
+              <p class="small text-muted mb-0">
+                <%= t("bo.quick_access_tokens.show.last_used_at", time: time_ago_in_words(@token.last_used_at)) %>
+              </p>
+            <% end %>
+          <% else %>
+            <div class="py-5">
+              <i class="fa-solid fa-qrcode fa-3x text-muted mb-3 opacity-50"></i>
+              <p class="mb-3"><%= t("bo.quick_access_tokens.show.empty") %></p>
+              <%= button_to bo_customer_customer_user_quick_access_token_path(org_slug: params[:org_slug], customer_id: @customer.id, customer_user_id: @customer_user.id),
+                            method: :post,
+                            class: "btn btn-primary" do %>
+                <i class="fa-solid fa-plus me-1"></i><%= t("bo.quick_access_tokens.show.generate") %>
+              <% end %>
+            </div>
+          <% end %>
+        </div>
+      </div>
+    </div>
+
+    <% if @token %>
+      <div class="col-md-6">
+        <div class="card mb-3">
+          <div class="card-body">
+            <h5 class="card-title mb-3"><%= t("bo.quick_access_tokens.show.download_title") %></h5>
+            <p class="text-muted small mb-3"><%= t("bo.quick_access_tokens.show.download_hint") %></p>
+
+            <div class="d-grid gap-2">
+              <%= link_to download_bo_customer_customer_user_quick_access_token_path(org_slug: params[:org_slug], customer_id: @customer.id, customer_user_id: @customer_user.id, layout: "card"),
+                          class: "btn btn-outline-primary text-start" do %>
+                <i class="fa-solid fa-id-card me-2"></i>
+                <strong><%= t("bo.quick_access_tokens.formats.card") %></strong>
+                <small class="text-muted d-block ms-4"><%= t("bo.quick_access_tokens.formats.card_hint") %></small>
+              <% end %>
+
+              <%= link_to download_bo_customer_customer_user_quick_access_token_path(org_slug: params[:org_slug], customer_id: @customer.id, customer_user_id: @customer_user.id, layout: "sheet"),
+                          class: "btn btn-outline-primary text-start" do %>
+                <i class="fa-solid fa-table-cells me-2"></i>
+                <strong><%= t("bo.quick_access_tokens.formats.sheet") %></strong>
+                <small class="text-muted d-block ms-4"><%= t("bo.quick_access_tokens.formats.sheet_hint") %></small>
+              <% end %>
+
+              <%= link_to download_bo_customer_customer_user_quick_access_token_path(org_slug: params[:org_slug], customer_id: @customer.id, customer_user_id: @customer_user.id, layout: "stickers"),
+                          class: "btn btn-outline-primary text-start" do %>
+                <i class="fa-solid fa-circle-dot me-2"></i>
+                <strong><%= t("bo.quick_access_tokens.formats.stickers") %></strong>
+                <small class="text-muted d-block ms-4"><%= t("bo.quick_access_tokens.formats.stickers_hint") %></small>
+              <% end %>
+
+              <%= link_to download_bo_customer_customer_user_quick_access_token_path(org_slug: params[:org_slug], customer_id: @customer.id, customer_user_id: @customer_user.id, layout: "digital"),
+                          class: "btn btn-outline-primary text-start" do %>
+                <i class="fa-solid fa-image me-2"></i>
+                <strong><%= t("bo.quick_access_tokens.formats.digital") %></strong>
+                <small class="text-muted d-block ms-4"><%= t("bo.quick_access_tokens.formats.digital_hint") %></small>
+              <% end %>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-body">
+            <h5 class="card-title mb-3"><%= t("bo.quick_access_tokens.show.actions_title") %></h5>
+
+            <%= button_to bo_customer_customer_user_quick_access_token_path(org_slug: params[:org_slug], customer_id: @customer.id, customer_user_id: @customer_user.id),
+                          method: :post,
+                          class: "btn btn-outline-secondary w-100 mb-2",
+                          data: { turbo_confirm: t("bo.quick_access_tokens.show.regenerate_confirm") } do %>
+              <i class="fa-solid fa-rotate me-1"></i><%= t("bo.quick_access_tokens.show.regenerate") %>
+            <% end %>
+
+            <%= button_to bo_customer_customer_user_quick_access_token_path(org_slug: params[:org_slug], customer_id: @customer.id, customer_user_id: @customer_user.id),
+                          method: :delete,
+                          class: "btn btn-outline-danger w-100",
+                          data: { turbo_confirm: t("bo.quick_access_tokens.show.revoke_confirm") } do %>
+              <i class="fa-solid fa-ban me-1"></i><%= t("bo.quick_access_tokens.show.revoke") %>
+            <% end %>
+          </div>
+        </div>
+      </div>
+    <% end %>
+  </div>
+</div>
+
+<% end %>

@@ -104,6 +104,9 @@ gem 'caxlsx', '~> 4.1'
 # PDF generation from HTML (uses Chrome headless)
 gem 'grover', '~> 1.1'
 
+# QR code generation (used for storefront quick-access tokens)
+gem 'rqrcode', '~> 2.2'
+
 # PDF merging for chunked catalog generation
 gem 'combine_pdf', '~> 1.0'
 

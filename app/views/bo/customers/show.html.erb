@@ -251,6 +251,11 @@
                                       title: cu.active? ? t('bo.customer_users.actions.deactivate') : t('bo.customer_users.actions.activate') do %>
                           <i class="fa-solid <%= cu.active? ? 'fa-pause' : 'fa-play' %>"></i>
                         <% end %>
+                        <%= link_to bo_customer_customer_user_quick_access_token_path(org_slug: @current_organisation.slug, customer_id: @customer.id, customer_user_id: cu.id),
+                                    class: "btn btn-sm btn-link text-muted",
+                                    title: t('bo.customer_users.actions.quick_access') do %>
+                          <i class="fa-solid fa-qrcode"></i>
+                        <% end %>
                         <%= link_to edit_bo_customer_customer_user_path(org_slug: @current_organisation.slug, customer_id: @customer.id, id: cu.id),
                                     class: "btn btn-sm btn-link text-muted",
                                     title: t('bo.customer_users.actions.edit') do %>

@@ -1337,12 +1337,43 @@ es:
         resend_invite: "Reenviar invitación"
         activate: "Activar"
         deactivate: "Desactivar"
+        quick_access: "Acceso rápido (QR)"
       flash:
         invited: "Invitación enviada a %{email}."
         invitation_resent: "Invitación reenviada a %{email}."
         updated: "Login actualizado con éxito."
         activated: "Login %{email} activado."
         deactivated: "Login %{email} desactivado."
+
+    quick_access_tokens:
+      show:
+        title: "Acceso Rápido (QR)"
+        expires_at: "Expira el %{date}"
+        last_used_at: "Último uso hace %{time}"
+        empty: "Aún no se ha generado QR para este login."
+        generate: "Generar QR"
+        download_title: "Descargar"
+        download_hint: "Elige el formato según lo que entregarás al cliente."
+        actions_title: "Acciones"
+        regenerate: "Regenerar"
+        regenerate_confirm: "Esto invalidará el QR actual y creará uno nuevo. ¿Continuar?"
+        revoke: "Revocar"
+        revoke_confirm: "¿Seguro? El QR dejará de funcionar inmediatamente."
+      formats:
+        card: "Tarjeta de visita (PDF)"
+        card_hint: "1 tarjeta 85×55 mm. Ideal para entregar en mano."
+        sheet: "Hoja A4 con 8 tarjetas (PDF)"
+        sheet_hint: "Imprimir y cortar por las guías."
+        stickers: "Hoja de pegatinas (PDF)"
+        stickers_hint: "Compatible con Avery L7163 (8 etiquetas 99×67 mm)."
+        digital: "Imagen digital (SVG)"
+        digital_hint: "Para compartir por WhatsApp, email, etc."
+      pdf:
+        cta: "Apunta la cámara aquí"
+      flash:
+        generated: "QR generado con éxito."
+        revoked: "QR revocado."
+        not_active: "No hay QR activo para este login."
 
     # Sección Configuración
     settings:

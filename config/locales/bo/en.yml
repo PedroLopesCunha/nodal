@@ -1430,12 +1430,43 @@ en:
         resend_invite: "Resend invitation"
         activate: "Activate"
         deactivate: "Deactivate"
+        quick_access: "Quick access (QR)"
       flash:
         invited: "Invitation sent to %{email}."
         invitation_resent: "Invitation resent to %{email}."
         updated: "Login updated successfully."
         activated: "Login %{email} activated."
         deactivated: "Login %{email} deactivated."
+
+    quick_access_tokens:
+      show:
+        title: "Quick Access (QR)"
+        expires_at: "Expires on %{date}"
+        last_used_at: "Last used %{time} ago"
+        empty: "No QR generated for this login yet."
+        generate: "Generate QR"
+        download_title: "Download"
+        download_hint: "Pick a format depending on how you'll hand it to the customer."
+        actions_title: "Actions"
+        regenerate: "Regenerate"
+        regenerate_confirm: "This will invalidate the current QR and create a new one. Continue?"
+        revoke: "Revoke"
+        revoke_confirm: "Are you sure? The QR will stop working immediately."
+      formats:
+        card: "Business card (PDF)"
+        card_hint: "1 card 85×55 mm. Ideal to hand to a customer."
+        sheet: "A4 sheet with 8 cards (PDF)"
+        sheet_hint: "Print and cut along the dashed guides."
+        stickers: "Sticker sheet (PDF)"
+        stickers_hint: "Avery L7163 compatible (8 labels 99×67 mm)."
+        digital: "Digital image (SVG)"
+        digital_hint: "Share via WhatsApp, email, etc."
+      pdf:
+        cta: "Point your camera here"
+      flash:
+        generated: "QR generated successfully."
+        revoked: "QR revoked."
+        not_active: "No active QR for this login."
 
     # Settings section
     settings:

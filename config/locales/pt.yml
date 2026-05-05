@@ -288,6 +288,8 @@ pt:
     sign_in:
       welcome_back: "Bem-vindo de volta"
       subtitle: "Inicia sessão na tua conta para continuar"
+      from_qr_welcome: "Estás quase lá!"
+      from_qr_subtitle: "Confirma a tua palavra-passe para entrares na tua conta."
       email: "Email"
       email_placeholder: "Introduz o teu email"
       password: "Palavra-passe"
