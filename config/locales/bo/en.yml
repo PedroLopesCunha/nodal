@@ -202,6 +202,12 @@ en:
           invitation_status: "Invitation Status"
           last_sign_in_at: "Last Sign In"
           created_at: "Created"
+          billing_street: "Billing Street"
+          billing_street_nr: "Billing Number"
+          billing_postal_code: "Billing Postal Code"
+          billing_city: "Billing City"
+          billing_country: "Billing Country"
+          shipping_addresses: "Shipping Addresses"
         order_item:
           order_number: "Order Number"
           placed_at: "Date"

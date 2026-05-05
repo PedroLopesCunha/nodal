@@ -64,7 +64,23 @@ class Customer < ApplicationRecord
       { key: :last_sign_in_at, label: I18n.t("bo.export.columns.customer.last_sign_in_at"), default: false,
         value: ->(r) { r.last_sign_in_at&.strftime("%Y-%m-%d %H:%M") } },
       { key: :created_at, label: I18n.t("bo.export.columns.customer.created_at"), default: false,
-        value: ->(r) { I18n.l(r.created_at, format: :short) } }
+        value: ->(r) { I18n.l(r.created_at, format: :short) } },
+      { key: :billing_street, label: I18n.t("bo.export.columns.customer.billing_street"), default: false,
+        value: ->(r) { r.billing_address&.street_name } },
+      { key: :billing_street_nr, label: I18n.t("bo.export.columns.customer.billing_street_nr"), default: false,
+        value: ->(r) { r.billing_address&.street_nr } },
+      { key: :billing_postal_code, label: I18n.t("bo.export.columns.customer.billing_postal_code"), default: false,
+        value: ->(r) { r.billing_address&.postal_code } },
+      { key: :billing_city, label: I18n.t("bo.export.columns.customer.billing_city"), default: false,
+        value: ->(r) { r.billing_address&.city } },
+      { key: :billing_country, label: I18n.t("bo.export.columns.customer.billing_country"), default: false,
+        value: ->(r) { r.billing_address&.country } },
+      { key: :shipping_addresses, label: I18n.t("bo.export.columns.customer.shipping_addresses"), default: false,
+        value: ->(r) {
+          r.shipping_addresses.map do |a|
+            [a.street_name, a.street_nr, a.postal_code, a.city, a.country].compact_blank.join(", ")
+          end.compact_blank.join("; ").presence
+        } }
     ]
   end
 
