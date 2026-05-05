@@ -1442,6 +1442,7 @@ en:
       show:
         title: "Quick Access (QR)"
         expires_at: "Expires on %{date}"
+        never_expires: "Never expires"
         last_used_at: "Last used %{time} ago"
         empty: "No QR generated for this login yet."
         generate: "Generate QR"
@@ -1463,10 +1464,14 @@ en:
         digital_hint: "Share via WhatsApp, email, etc."
       pdf:
         cta: "Point your camera here"
+        cta_label: "Access your account"
+        cta_sub: "Scan to enter the portal"
+        footer: "This QR is personal. Do not share."
       flash:
         generated: "QR generated successfully."
         revoked: "QR revoked."
         not_active: "No active QR for this login."
+        user_inactive: "Can't generate a QR for a deactivated login. Activate the login first."
 
     # Settings section
     settings:
@@ -1527,7 +1532,8 @@ en:
         free_shipping_threshold_hint: "Orders above this amount qualify for free shipping. Leave empty to disable."
         customer_access: "Quick Access (QR)"
         quick_access_token_ttl_days: "QR validity (days)"
-        quick_access_token_ttl_days_hint: "How many days quick-access QR codes stay valid before expiring. Default 90."
+        quick_access_token_ttl_days_placeholder: "Empty = never expires"
+        quick_access_token_ttl_days_hint: "How many days quick-access QR codes stay valid before expiring. Leave empty for no expiration. Default 90."
         storefront_features: "Storefront Features"
         show_related_products: "Show related products"
         show_related_products_hint: "Display related products on product pages"

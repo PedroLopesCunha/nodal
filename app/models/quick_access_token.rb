@@ -38,6 +38,17 @@ class QuickAccessToken < ApplicationRecord
     update_column(:last_used_at, Time.current)
   end
 
+  # When the organisation's TTL is nil, the token is effectively
+  # non-expiring. We still store a concrete expires_at (100 years out)
+  # so all the existing scopes and queries keep working without a
+  # special case. The display layer detects the sentinel via this
+  # predicate and shows "Sem expiração" instead of a date.
+  def non_expiring?
+    expires_at.present? && expires_at > 50.years.from_now
+  end
+
+  NON_EXPIRING_HORIZON = 100.years
+
   private
 
   def generate_token
@@ -47,7 +58,7 @@ class QuickAccessToken < ApplicationRecord
   def default_expires_at
     return if expires_at.present?
 
-    days = customer_user&.organisation&.quick_access_token_ttl_days || 90
-    self.expires_at = days.days.from_now
+    days = customer_user&.organisation&.quick_access_token_ttl_days
+    self.expires_at = days ? days.days.from_now : NON_EXPIRING_HORIZON.from_now
   end
 end

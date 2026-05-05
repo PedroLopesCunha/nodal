@@ -32,7 +32,11 @@
               <%= qr_svg %>
             </div>
             <p class="small text-muted mb-1">
-              <%= t("bo.quick_access_tokens.show.expires_at", date: l(@token.expires_at, format: :short)) %>
+              <% if @token.non_expiring? %>
+                <i class="fa-solid fa-infinity me-1"></i><%= t("bo.quick_access_tokens.show.never_expires") %>
+              <% else %>
+                <%= t("bo.quick_access_tokens.show.expires_at", date: l(@token.expires_at, format: :short)) %>
+              <% end %>
             </p>
             <% if @token.last_used_at %>
               <p class="small text-muted mb-0">
@@ -43,10 +47,17 @@
             <div class="py-5">
               <i class="fa-solid fa-qrcode fa-3x text-muted mb-3 opacity-50"></i>
               <p class="mb-3"><%= t("bo.quick_access_tokens.show.empty") %></p>
-              <%= button_to bo_customer_customer_user_quick_access_token_path(org_slug: params[:org_slug], customer_id: @customer.id, customer_user_id: @customer_user.id),
-                            method: :post,
-                            class: "btn btn-primary" do %>
-                <i class="fa-solid fa-plus me-1"></i><%= t("bo.quick_access_tokens.show.generate") %>
+              <% if @customer_user.active? %>
+                <%= button_to bo_customer_customer_user_quick_access_token_path(org_slug: params[:org_slug], customer_id: @customer.id, customer_user_id: @customer_user.id),
+                              method: :post,
+                              class: "btn btn-primary" do %>
+                  <i class="fa-solid fa-plus me-1"></i><%= t("bo.quick_access_tokens.show.generate") %>
+                <% end %>
+              <% else %>
+                <div class="alert alert-warning mb-0 mx-auto" style="max-width: 400px;">
+                  <i class="fa-solid fa-triangle-exclamation me-1"></i>
+                  <%= t("bo.quick_access_tokens.flash.user_inactive") %>
+                </div>
               <% end %>
             </div>
           <% end %>

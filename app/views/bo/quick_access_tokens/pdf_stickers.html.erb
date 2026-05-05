@@ -1,57 +1,45 @@
 <!DOCTYPE html>
-<html>
+<html lang="<%= I18n.locale %>">
 <head>
   <meta charset="utf-8">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <style>
+    <%= render "bo/quick_access_tokens/pdf_styles", primary_color: @customer.organisation.effective_primary_color || "#111" %>
     /*
-      Avery L7163 layout: A4 (210×297 mm), 8 labels per sheet,
-      label size 99.1×67.7 mm, 2 columns × 4 rows.
-      Margins to align with the L7163 die-cut: top 8.5mm, side 4.5mm,
-      column gap 2.5mm, row gap 0mm (stacked).
+      Avery L7163: A4 sheet, 8 labels (2 cols × 4 rows), 99.1×67.7 mm each.
+      Top margin 8.5mm, side margin 4.5mm, gap 2.5mm column / 0 row.
     */
     @page { size: A4; margin: 0; }
-    html, body { margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; color: #1a1a1a; }
-    .sheet { padding: 8.5mm 4.5mm; }
+    html, body { width: 210mm; height: 297mm; margin: 0; padding: 0; }
+    .sheet {
+      width: 210mm; height: 297mm;
+      padding: 8.5mm 4.5mm;
+      box-sizing: border-box;
+    }
     .grid {
       display: grid;
       grid-template-columns: 99.1mm 99.1mm;
-      grid-template-rows: 67.7mm 67.7mm 67.7mm 67.7mm;
+      grid-template-rows: repeat(4, 67.7mm);
       column-gap: 2.5mm;
       row-gap: 0;
     }
-    .label {
-      box-sizing: border-box;
+    /* Stickers are larger than cards — let the card block fill the label
+       and bump the QR + name a touch via the sticker-specific class. */
+    .card.sticker {
       width: 99.1mm; height: 67.7mm;
-      padding: 6mm 7mm;
-      display: flex;
-      flex-direction: row;
-      align-items: center;
-      gap: 5mm;
     }
-    .qr { flex: 0 0 auto; width: 50mm; height: 50mm; }
-    .qr svg { width: 100%; height: 100%; display: block; }
-    .info { flex: 1 1 auto; min-width: 0; }
-    .org { font-size: 11pt; font-weight: 700; color: <%= @customer.organisation.effective_primary_color || "#000" %>; margin: 0 0 2mm 0; line-height: 1.1; }
-    .company { font-size: 10pt; font-weight: 600; margin: 0 0 1.5mm 0; line-height: 1.15; }
-    .contact { font-size: 8pt; color: #6b7280; margin: 0 0 2.5mm 0; line-height: 1.15; }
-    .cta { font-size: 7pt; color: #9ca3af; margin: 0; line-height: 1.2; }
   </style>
 </head>
 <body>
   <div class="sheet">
     <div class="grid">
       <% 8.times do %>
-        <div class="label">
-          <div class="qr"><%= @qr_svg.html_safe %></div>
-          <div class="info">
-            <p class="org"><%= @customer.organisation.name %></p>
-            <p class="company"><%= @customer.company_name %></p>
-            <% if @customer_user.contact_name.present? %>
-              <p class="contact"><%= @customer_user.contact_name %></p>
-            <% end %>
-            <p class="cta"><%= t("bo.quick_access_tokens.pdf.cta") %></p>
-          </div>
-        </div>
+        <%= render "bo/quick_access_tokens/pdf_card_block",
+                   customer: @customer,
+                   customer_user: @customer_user,
+                   qr_svg: @qr_svg,
+                   organisation: @customer.organisation,
+                   variant: "sticker" %>
       <% end %>
     </div>
   </div>

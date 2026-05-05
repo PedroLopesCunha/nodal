@@ -1,45 +1,60 @@
 <!DOCTYPE html>
-<html>
+<html lang="<%= I18n.locale %>">
 <head>
   <meta charset="utf-8">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <style>
-    @page { size: A4; margin: 10mm; }
-    html, body { margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; color: #1a1a1a; }
-    .grid { display: grid; grid-template-columns: 85mm 85mm; grid-template-rows: 55mm 55mm 55mm 55mm; gap: 5mm 10mm; }
-    .card {
+    <%= render "bo/quick_access_tokens/pdf_styles", primary_color: @customer.organisation.effective_primary_color || "#111" %>
+    @page { size: A4; margin: 0; }
+    html, body { width: 210mm; height: 297mm; margin: 0; padding: 0; }
+    .sheet {
+      width: 210mm; height: 297mm;
+      padding: 16mm 17.5mm;
       box-sizing: border-box;
-      width: 85mm; height: 55mm;
-      padding: 4mm 4mm;
-      display: flex;
-      flex-direction: row;
-      align-items: center;
-      gap: 4mm;
-      border: 1px dashed #c0c0c0;
+      position: relative;
     }
-    .qr { flex: 0 0 auto; width: 38mm; height: 38mm; }
-    .qr svg { width: 100%; height: 100%; display: block; }
-    .info { flex: 1 1 auto; min-width: 0; }
-    .org { font-size: 9pt; font-weight: 700; color: <%= @customer.organisation.effective_primary_color || "#000" %>; margin: 0 0 1.5mm 0; line-height: 1.1; }
-    .company { font-size: 8pt; font-weight: 600; margin: 0 0 1mm 0; line-height: 1.15; }
-    .contact { font-size: 7pt; color: #6b7280; margin: 0 0 2mm 0; line-height: 1.15; }
-    .cta { font-size: 6pt; color: #9ca3af; margin: 0; line-height: 1.2; }
+    .grid {
+      display: grid;
+      grid-template-columns: 85mm 85mm;
+      grid-template-rows: repeat(4, 55mm);
+      gap: 6mm 5mm;
+    }
+    /* Cut guides — long dashed lines spanning the page where we want the
+       merchant to cut between cards. Drawn under the grid via absolute
+       positioning so they don't push layout. */
+    .guide-h, .guide-v {
+      position: absolute;
+      background: repeating-linear-gradient(
+        to right, #c0c0c0 0 2mm, transparent 2mm 4mm
+      );
+    }
+    .guide-h { left: 0; right: 0; height: 0.2mm; }
+    .guide-v {
+      top: 0; bottom: 0; width: 0.2mm;
+      background: repeating-linear-gradient(
+        to bottom, #c0c0c0 0 2mm, transparent 2mm 4mm
+      );
+    }
   </style>
 </head>
 <body>
-  <div class="grid">
-    <% 8.times do %>
-      <div class="card">
-        <div class="qr"><%= @qr_svg.html_safe %></div>
-        <div class="info">
-          <p class="org"><%= @customer.organisation.name %></p>
-          <p class="company"><%= @customer.company_name %></p>
-          <% if @customer_user.contact_name.present? %>
-            <p class="contact"><%= @customer_user.contact_name %></p>
-          <% end %>
-          <p class="cta"><%= t("bo.quick_access_tokens.pdf.cta") %></p>
-        </div>
-      </div>
+  <div class="sheet">
+    <%# horizontal cut guides between rows (3 guides for 4 rows) %>
+    <% [16+55+3, 16+55*2+9, 16+55*3+15].each do |y| %>
+      <div class="guide-h" style="top: <%= y %>mm;"></div>
     <% end %>
+    <%# vertical cut guide between the two columns %>
+    <div class="guide-v" style="left: <%= 17.5 + 85 + 2.5 %>mm;"></div>
+
+    <div class="grid">
+      <% 8.times do %>
+        <%= render "bo/quick_access_tokens/pdf_card_block",
+                   customer: @customer,
+                   customer_user: @customer_user,
+                   qr_svg: @qr_svg,
+                   organisation: @customer.organisation %>
+      <% end %>
+    </div>
   </div>
 </body>
 </html>

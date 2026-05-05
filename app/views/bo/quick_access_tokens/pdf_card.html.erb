@@ -1,43 +1,20 @@
 <!DOCTYPE html>
-<html>
+<html lang="<%= I18n.locale %>">
 <head>
   <meta charset="utf-8">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <style>
+    <%= render "bo/quick_access_tokens/pdf_styles", primary_color: @customer.organisation.effective_primary_color || "#111" %>
     @page { size: 85mm 55mm; margin: 0; }
-    html, body {
-      width: 85mm; height: 55mm; margin: 0; padding: 0;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      color: #1a1a1a;
-    }
-    .card {
-      box-sizing: border-box;
-      width: 85mm; height: 55mm;
-      padding: 4mm 4mm;
-      display: flex;
-      flex-direction: row;
-      align-items: center;
-      gap: 4mm;
-    }
-    .qr { flex: 0 0 auto; width: 38mm; height: 38mm; }
-    .qr svg { width: 100%; height: 100%; display: block; }
-    .info { flex: 1 1 auto; min-width: 0; }
-    .org { font-size: 9pt; font-weight: 700; color: <%= @customer.organisation.effective_primary_color || "#000" %>; margin: 0 0 1.5mm 0; line-height: 1.1; }
-    .company { font-size: 8pt; font-weight: 600; margin: 0 0 1mm 0; line-height: 1.15; }
-    .contact { font-size: 7pt; color: #6b7280; margin: 0 0 2mm 0; line-height: 1.15; }
-    .cta { font-size: 6pt; color: #9ca3af; margin: 0; line-height: 1.2; }
+    html, body { width: 85mm; height: 55mm; margin: 0; padding: 0; }
+    .card { width: 85mm; height: 55mm; }
   </style>
 </head>
 <body>
-  <div class="card">
-    <div class="qr"><%= @qr_svg.html_safe %></div>
-    <div class="info">
-      <p class="org"><%= @customer.organisation.name %></p>
-      <p class="company"><%= @customer.company_name %></p>
-      <% if @customer_user.contact_name.present? %>
-        <p class="contact"><%= @customer_user.contact_name %></p>
-      <% end %>
-      <p class="cta"><%= t("bo.quick_access_tokens.pdf.cta") %></p>
-    </div>
-  </div>
+  <%= render "bo/quick_access_tokens/pdf_card_block",
+             customer: @customer,
+             customer_user: @customer_user,
+             qr_svg: @qr_svg,
+             organisation: @customer.organisation %>
 </body>
 </html>

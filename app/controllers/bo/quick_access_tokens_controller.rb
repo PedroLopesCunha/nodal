@@ -13,6 +13,16 @@ class Bo::QuickAccessTokensController < Bo::BaseController
 
   def create
     authorize @customer_user, :edit?, policy_class: CustomerUserPolicy
+
+    unless @customer_user.active?
+      redirect_to bo_customer_customer_user_quick_access_token_path(
+                    org_slug: params[:org_slug],
+                    customer_id: @customer.id,
+                    customer_user_id: @customer_user.id
+                  ),
+                  alert: t("bo.quick_access_tokens.flash.user_inactive") and return
+    end
+
     @token = QuickAccessToken.generate_for(@customer_user, created_by: current_member)
     redirect_to bo_customer_customer_user_quick_access_token_path(
                   org_slug: params[:org_slug],
@@ -42,18 +52,16 @@ class Bo::QuickAccessTokensController < Bo::BaseController
     @qr_url = quick_access_url(org_slug: @customer.organisation.slug, token: @token.token)
     @qr_svg = qr_svg(@qr_url)
 
-    case fmt
-    when "digital"
-      send_data @qr_svg, type: "image/svg+xml", disposition: "attachment",
-                          filename: pdf_filename("digital", "svg")
+    html = render_to_string(template: "bo/quick_access_tokens/pdf_#{fmt}", layout: false)
+
+    if fmt == "digital"
+      png = Grover.new(html, **grover_options(fmt)).to_png
+      send_data png, type: "image/png", disposition: "attachment",
+                     filename: pdf_filename("digital", "png")
     else
-      html = render_to_string(
-        template: "bo/quick_access_tokens/pdf_#{fmt}",
-        layout: false
-      )
       pdf = Grover.new(html, **grover_options(fmt)).to_pdf
       send_data pdf, type: "application/pdf", disposition: "attachment",
-                      filename: pdf_filename(fmt, "pdf")
+                     filename: pdf_filename(fmt, "pdf")
     end
   end
 
@@ -79,19 +87,23 @@ class Bo::QuickAccessTokensController < Bo::BaseController
       shape_rendering: "crispEdges",
       module_size: 4,
       standalone: true,
-      use_path: true
+      use_path: true,
+      viewbox: true # outputs <svg viewBox="..."> with no fixed width/height so CSS can scale it
     )
   end
 
   def grover_options(format)
     case format
     when "card"
-      { format: nil, width: "85mm", height: "55mm", margin: { top: "0", bottom: "0", left: "0", right: "0" } }
+      { format: nil, width: "85mm", height: "55mm", margin: { top: "0", bottom: "0", left: "0", right: "0" }, prefer_css_page_size: true }
     when "sheet"
-      { format: "A4", margin: { top: "10mm", bottom: "10mm", left: "10mm", right: "10mm" } }
+      { format: "A4", margin: { top: "0", bottom: "0", left: "0", right: "0" }, prefer_css_page_size: true }
     when "stickers"
       # Avery L7163: A4, 8 labels (2 cols × 4 rows), 99.1×67.7mm each.
-      { format: "A4", margin: { top: "8.5mm", bottom: "8.5mm", left: "4.5mm", right: "4.5mm" } }
+      { format: "A4", margin: { top: "0", bottom: "0", left: "0", right: "0" }, prefer_css_page_size: true }
+    when "digital"
+      # Square PNG, instagram / WhatsApp friendly.
+      { width: "1080px", height: "1080px", margin: { top: "0", bottom: "0", left: "0", right: "0" }, viewport: { width: 1080, height: 1080 }, full_page: false, omit_background: false }
     else
       { format: "A4" }
     end

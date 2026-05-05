@@ -1432,6 +1432,7 @@ pt:
       show:
         title: "Acesso Rápido (QR)"
         expires_at: "Expira a %{date}"
+        never_expires: "Sem expiração"
         last_used_at: "Última utilização há %{time}"
         empty: "Ainda não foi gerado QR para este login."
         generate: "Gerar QR"
@@ -1453,10 +1454,14 @@ pt:
         digital_hint: "Para partilhar por WhatsApp, email, etc."
       pdf:
         cta: "Aponta a câmara aqui"
+        cta_label: "Aceda à sua conta"
+        cta_sub: "Scan para entrar no portal"
+        footer: "Este QR é pessoal. Não partilhe."
       flash:
         generated: "QR gerado com sucesso."
         revoked: "QR revogado."
         not_active: "Não há QR ativo neste login."
+        user_inactive: "Não é possível gerar QR para um login desativado. Ativa o login primeiro."
 
     # Secção Definições
     settings:
@@ -1517,7 +1522,8 @@ pt:
         free_shipping_threshold_hint: "Encomendas acima deste valor têm envio grátis. Deixe vazio para desativar."
         customer_access: "Acesso Rápido (QR)"
         quick_access_token_ttl_days: "Validade do QR (dias)"
-        quick_access_token_ttl_days_hint: "Há quantos dias os QR de acesso rápido se mantêm válidos antes de caducarem. Default 90."
+        quick_access_token_ttl_days_placeholder: "Vazio = sem expiração"
+        quick_access_token_ttl_days_hint: "Há quantos dias os QR de acesso rápido se mantêm válidos antes de caducarem. Deixar vazio = sem expiração. Default 90."
         storefront_features: "Funcionalidades da Loja"
         show_related_products: "Mostrar produtos relacionados"
         show_related_products_hint: "Apresentar produtos relacionados nas páginas de produto"
