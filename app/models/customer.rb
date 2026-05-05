@@ -10,8 +10,11 @@ class Customer < ApplicationRecord
 
   belongs_to :organisation
   belongs_to :customer_category, optional: true
-  has_many :customer_users, dependent: :destroy
+  # Order matters: orders must be destroyed BEFORE customer_users, otherwise
+  # CustomerUser#dependent: :nullify tries to set orders.customer_user_id =
+  # NULL on the cascade and hits the NOT NULL constraint added in PR #113.
   has_many :orders, dependent: :destroy
+  has_many :customer_users, dependent: :destroy
   has_one :billing_address, -> { billing.active }, class_name: "Address", as: :addressable, dependent: :destroy
   has_many :shipping_addresses, -> { shipping.active }, class_name: "Address", as: :addressable, dependent: :destroy
   has_one :billing_address_with_archived, -> { billing }, class_name: "Address", as: :addressable, dependent: :destroy
