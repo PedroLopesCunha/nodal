@@ -47,16 +47,16 @@
             <div class="py-5">
               <i class="fa-solid fa-qrcode fa-3x text-muted mb-3 opacity-50"></i>
               <p class="mb-3"><%= t("bo.quick_access_tokens.show.empty") %></p>
-              <% if @customer_user.active? %>
+              <% if @customer_user.invitation_status == :active %>
                 <%= button_to bo_customer_customer_user_quick_access_token_path(org_slug: params[:org_slug], customer_id: @customer.id, customer_user_id: @customer_user.id),
                               method: :post,
                               class: "btn btn-primary" do %>
                   <i class="fa-solid fa-plus me-1"></i><%= t("bo.quick_access_tokens.show.generate") %>
                 <% end %>
               <% else %>
-                <div class="alert alert-warning mb-0 mx-auto" style="max-width: 400px;">
+                <div class="alert alert-warning mb-0 mx-auto" style="max-width: 460px;">
                   <i class="fa-solid fa-triangle-exclamation me-1"></i>
-                  <%= t("bo.quick_access_tokens.flash.user_inactive") %>
+                  <%= t("bo.quick_access_tokens.unavailable.#{@customer_user.invitation_status}") %>
                 </div>
               <% end %>
             </div>

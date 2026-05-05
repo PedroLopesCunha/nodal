@@ -14,13 +14,13 @@ class Bo::QuickAccessTokensController < Bo::BaseController
   def create
     authorize @customer_user, :edit?, policy_class: CustomerUserPolicy
 
-    unless @customer_user.active?
+    unless @customer_user.invitation_status == :active
       redirect_to bo_customer_customer_user_quick_access_token_path(
                     org_slug: params[:org_slug],
                     customer_id: @customer.id,
                     customer_user_id: @customer_user.id
                   ),
-                  alert: t("bo.quick_access_tokens.flash.user_inactive") and return
+                  alert: t("bo.quick_access_tokens.flash.user_not_ready") and return
     end
 
     @token = QuickAccessToken.generate_for(@customer_user, created_by: current_member)

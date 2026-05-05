@@ -1431,6 +1431,10 @@ en:
         activate: "Activate"
         deactivate: "Deactivate"
         quick_access: "Quick access (QR)"
+        quick_access_active_token: "Active QR — manage / download"
+        quick_access_revoked_or_expired: "QR invalid — generate a new one"
+        quick_access_no_token: "Generate quick-access QR"
+        quick_access_unavailable: "Available only once the login is active"
       flash:
         invited: "Invitation sent to %{email}."
         invitation_resent: "Invitation resent to %{email}."
@@ -1472,6 +1476,11 @@ en:
         revoked: "QR revoked."
         not_active: "No active QR for this login."
         user_inactive: "Can't generate a QR for a deactivated login. Activate the login first."
+        user_not_ready: "You can only generate a QR once the login is active (invitation accepted and not deactivated)."
+      unavailable:
+        pending: "This login has been invited but hasn't accepted yet. Once the customer accepts and sets a password, you can generate the QR here."
+        not_invited: "This login hasn't been invited yet. Invite the login first — once it's accepted, you can generate a QR."
+        inactive: "This login is deactivated. Reactivate it to generate a QR."
 
     # Settings section
     settings:
