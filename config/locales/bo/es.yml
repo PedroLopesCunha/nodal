@@ -1306,6 +1306,8 @@ es:
         last_sign_in: "Último Acceso"
         actions: "Acciones"
         never: "Nunca"
+        invited_at: "Invitado %{date}"
+        accepted_at: "Aceptado %{date}"
       new:
         title: "Añadir login"
         subtitle: "Invitar un nuevo login para %{company}"
