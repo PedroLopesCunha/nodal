@@ -285,11 +285,12 @@
                       </td>
                       <td class="text-end text-nowrap">
                         <% if cu.invitation_status == :pending || cu.invitation_status == :not_invited %>
+                          <% invite_label = cu.invitation_status == :pending ? t('bo.customer_users.actions.resend_invite') : t('bo.customer_users.actions.invite') %>
                           <%= button_to resend_invitation_bo_customer_customer_user_path(org_slug: @current_organisation.slug, customer_id: @customer.id, id: cu.id),
                                         method: :post,
                                         form: { class: "d-inline" },
                                         class: "btn btn-sm btn-link text-muted",
-                                        title: t('bo.customer_users.actions.resend_invite') do %>
+                                        title: invite_label do %>
                             <i class="fa-solid fa-paper-plane"></i>
                           <% end %>
                         <% end %>

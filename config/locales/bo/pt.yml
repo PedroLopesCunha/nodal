@@ -1408,6 +1408,7 @@ pt:
         active: "Ativo"
       actions:
         edit: "Editar"
+        invite: "Enviar convite"
         resend_invite: "Reenviar convite"
         activate: "Ativar"
         deactivate: "Desativar"

@@ -1418,6 +1418,7 @@ en:
         active: "Active"
       actions:
         edit: "Edit"
+        invite: "Send invitation"
         resend_invite: "Resend invitation"
         activate: "Activate"
         deactivate: "Deactivate"
