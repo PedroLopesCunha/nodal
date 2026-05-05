@@ -199,6 +199,12 @@ pt:
           invitation_status: "Estado do Convite"
           last_sign_in_at: "Último Acesso"
           created_at: "Criado"
+          billing_street: "Morada Faturação - Rua"
+          billing_street_nr: "Morada Faturação - Nº"
+          billing_postal_code: "Morada Faturação - Código Postal"
+          billing_city: "Morada Faturação - Localidade"
+          billing_country: "Morada Faturação - País"
+          shipping_addresses: "Moradas de Envio"
         order_item:
           order_number: "Nº Encomenda"
           placed_at: "Data"

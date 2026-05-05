@@ -194,6 +194,12 @@ es:
           invitation_status: "Estado de Invitación"
           last_sign_in_at: "Último Acceso"
           created_at: "Creado"
+          billing_street: "Dirección Facturación - Calle"
+          billing_street_nr: "Dirección Facturación - Nº"
+          billing_postal_code: "Dirección Facturación - Código Postal"
+          billing_city: "Dirección Facturación - Ciudad"
+          billing_country: "Dirección Facturación - País"
+          shipping_addresses: "Direcciones de Envío"
         order_item:
           order_number: "Nº Pedido"
           placed_at: "Fecha"
