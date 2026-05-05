@@ -1399,6 +1399,8 @@ en:
         last_sign_in: "Last sign-in"
         actions: "Actions"
         never: "Never"
+        invited_at: "Invited %{date}"
+        accepted_at: "Accepted %{date}"
       new:
         title: "Add login"
         subtitle: "Invite a new login for %{company}"
