@@ -12,6 +12,7 @@
 </head>
 <body>
   <%= render "bo/quick_access_tokens/pdf_card_block",
+             token: @token,
              customer: @customer,
              customer_user: @customer_user,
              qr_svg: @qr_svg,
