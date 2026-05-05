@@ -31,7 +31,7 @@ class Bo::SettingsController < Bo::BaseController
       :show_product_sku, :show_product_min_quantity, :show_product_category, :show_product_availability, :show_scroll_to_top,
       :default_product_sort,
       :terms_and_conditions, :privacy_policy,
-      :order_cutoff_time, :lead_time_days, :timezone, delivery_day_flags: [],
+      :order_cutoff_time, :lead_time_days, :timezone, :quick_access_token_ttl_days, delivery_day_flags: [],
       contact_address_attributes: [:id, :street_name, :street_nr, :postal_code, :city, :country, :_destroy],
       billing_address_attributes: [:id, :street_name, :street_nr, :postal_code, :city, :country, :_destroy]
     )

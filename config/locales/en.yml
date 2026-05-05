@@ -281,6 +281,8 @@ en:
     sign_in:
       welcome_back: "Welcome back"
       subtitle: "Sign in to your account to continue"
+      from_qr_welcome: "Almost there!"
+      from_qr_subtitle: "Confirm your password to access your account."
       email: "Email"
       email_placeholder: "Enter your email"
       password: "Password"

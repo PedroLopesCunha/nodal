@@ -288,6 +288,8 @@ es:
     sign_in:
       welcome_back: "Bienvenido de nuevo"
       subtitle: "Inicia sesión en tu cuenta para continuar"
+      from_qr_welcome: "¡Casi listo!"
+      from_qr_subtitle: "Confirma tu contraseña para acceder a tu cuenta."
       email: "Email"
       email_placeholder: "Introduce tu email"
       password: "Contraseña"

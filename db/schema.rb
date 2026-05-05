@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2026_05_04_130000) do
+ActiveRecord::Schema[7.1].define(version: 2026_05_05_160000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_trgm"
   enable_extension "plpgsql"
@@ -168,6 +168,22 @@ ActiveRecord::Schema[7.1].define(version: 2026_05_04_130000) do
     t.index ["customer_id"], name: "index_customer_product_discounts_on_customer_id"
     t.index ["organisation_id"], name: "index_customer_product_discounts_on_organisation_id"
     t.index ["product_id"], name: "index_customer_product_discounts_on_product_id"
+  end
+
+  create_table "customer_user_login_events", force: :cascade do |t|
+    t.bigint "customer_user_id"
+    t.bigint "organisation_id", null: false
+    t.string "method", null: false
+    t.boolean "success", null: false
+    t.string "ip_address"
+    t.string "user_agent"
+    t.string "failure_reason"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["customer_user_id", "created_at"], name: "idx_on_customer_user_id_created_at_d938badb1a"
+    t.index ["customer_user_id"], name: "index_customer_user_login_events_on_customer_user_id"
+    t.index ["organisation_id", "created_at"], name: "idx_on_organisation_id_created_at_def3a1a86e"
+    t.index ["organisation_id"], name: "index_customer_user_login_events_on_organisation_id"
   end
 
   create_table "customer_users", force: :cascade do |t|
@@ -547,6 +563,7 @@ ActiveRecord::Schema[7.1].define(version: 2026_05_04_130000) do
     t.boolean "special_prices_show_price", default: true, null: false
     t.boolean "special_prices_show_discount_badge", default: true, null: false
     t.boolean "special_prices_show_sale_badge", default: true, null: false
+    t.integer "quick_access_token_ttl_days", default: 90
     t.index ["default_locale"], name: "index_organisations_on_default_locale"
     t.index ["slug"], name: "index_organisations_on_slug", unique: true
   end
@@ -740,6 +757,21 @@ ActiveRecord::Schema[7.1].define(version: 2026_05_04_130000) do
     t.index ["organisation_id"], name: "index_promo_codes_on_organisation_id"
   end
 
+  create_table "quick_access_tokens", force: :cascade do |t|
+    t.bigint "customer_user_id", null: false
+    t.string "token", null: false
+    t.datetime "expires_at", null: false
+    t.datetime "last_used_at"
+    t.datetime "revoked_at"
+    t.bigint "created_by_member_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["created_by_member_id"], name: "index_quick_access_tokens_on_created_by_member_id"
+    t.index ["customer_user_id", "revoked_at"], name: "index_quick_access_tokens_on_customer_user_id_and_revoked_at"
+    t.index ["customer_user_id"], name: "index_quick_access_tokens_on_customer_user_id"
+    t.index ["token"], name: "index_quick_access_tokens_on_token", unique: true
+  end
+
   create_table "related_products", force: :cascade do |t|
     t.bigint "product_id", null: false
     t.bigint "related_product_id", null: false
@@ -922,6 +954,8 @@ ActiveRecord::Schema[7.1].define(version: 2026_05_04_130000) do
   add_foreign_key "customer_product_discounts", "customers"
   add_foreign_key "customer_product_discounts", "organisations"
   add_foreign_key "customer_product_discounts", "products"
+  add_foreign_key "customer_user_login_events", "customer_users"
+  add_foreign_key "customer_user_login_events", "organisations"
   add_foreign_key "customer_users", "customers"
   add_foreign_key "customer_users", "organisations"
   add_foreign_key "customers", "customer_categories"
@@ -976,6 +1010,8 @@ ActiveRecord::Schema[7.1].define(version: 2026_05_04_130000) do
   add_foreign_key "promo_code_redemptions", "orders"
   add_foreign_key "promo_code_redemptions", "promo_codes"
   add_foreign_key "promo_codes", "organisations"
+  add_foreign_key "quick_access_tokens", "customer_users"
+  add_foreign_key "quick_access_tokens", "members", column: "created_by_member_id"
   add_foreign_key "related_products", "products"
   add_foreign_key "related_products", "products", column: "related_product_id", name: "fk_rails_related_product_id"
   add_foreign_key "shopping_list_items", "product_variants"

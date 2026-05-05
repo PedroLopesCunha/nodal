@@ -12,6 +12,8 @@ class CustomerUser < ApplicationRecord
   belongs_to :customer
   belongs_to :organisation
   has_many :orders, dependent: :nullify
+  has_many :quick_access_tokens, dependent: :destroy
+  has_many :login_events, class_name: "CustomerUserLoginEvent", dependent: :nullify
 
   # Each login has its own cart, isolated from other CustomerUsers of the
   # same Customer (empresa). Returns the draft order for this user in the

@@ -1,13 +1,14 @@
 <%= render "customer_users/shared/auth_logo" %>
 
-<h1 class="auth-title"><%= t('auth.sign_in.welcome_back') %></h1>
-<p class="auth-subtitle"><%= t('auth.sign_in.subtitle') %></p>
+<% from_qr = session[:from_qr].present? %>
+<h1 class="auth-title"><%= from_qr ? t('auth.sign_in.from_qr_welcome') : t('auth.sign_in.welcome_back') %></h1>
+<p class="auth-subtitle"><%= from_qr ? t('auth.sign_in.from_qr_subtitle') : t('auth.sign_in.subtitle') %></p>
 
 <%= simple_form_for(resource, as: resource_name, url: customer_user_session_path(org_slug: @organisation.slug), html: { class: "auth-form", data: { turbo: false } }) do |f| %>
   <div class="auth-field">
     <%= f.input :email,
                 required: false,
-                autofocus: true,
+                autofocus: !from_qr,
                 placeholder: t('auth.sign_in.email_placeholder'),
                 label: t('auth.sign_in.email'),
                 input_html: { autocomplete: "email" } %>
@@ -23,7 +24,7 @@
                   required: false,
                   placeholder: t('auth.sign_in.password_placeholder'),
                   label: false,
-                  input_html: { autocomplete: "current-password", data: { password_visibility_target: "input" } } %>
+                  input_html: { autocomplete: "current-password", autofocus: from_qr, data: { password_visibility_target: "input" } } %>
       <button type="button" class="auth-password-toggle" data-action="password-visibility#toggle" aria-label="Toggle password visibility">
         <i class="fas fa-eye" data-password-visibility-target="icon"></i>
       </button>

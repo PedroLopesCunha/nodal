@@ -35,6 +35,11 @@ Rails.application.routes.draw do
 
     # storefront (customer-facing)
     scope module: :storefront do
+      # Quick-access landing — scans of QR cards / stickers land here.
+      # Validates the token, audits the scan, then redirects to the
+      # CustomerUser sign-in page with the email pre-filled.
+      get 'quick/:token', to: 'quick_access#show', as: :quick_access
+
       get 'home', to: 'home#show', as: :home
       resource :contact, only: [:show]
       resources :products, only: [:index, :show] do
@@ -111,6 +116,9 @@ Rails.application.routes.draw do
           member do
             post :resend_invitation
             patch :toggle_active
+          end
+          resource :quick_access_token, only: [:show, :create, :destroy] do
+            get :download
           end
         end
       end

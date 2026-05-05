@@ -197,7 +197,7 @@
             <% end %>
           </div>
 
-          <% logins = @customer.customer_users.order(:created_at) %>
+          <% logins = @customer.customer_users.includes(:quick_access_tokens).order(:created_at) %>
           <% if logins.any? %>
             <div class="table-responsive">
               <table class="table table-hover align-middle mb-0">
@@ -250,6 +250,20 @@
                                       class: "btn btn-sm btn-link #{cu.active? ? 'text-muted' : 'text-success'}",
                                       title: cu.active? ? t('bo.customer_users.actions.deactivate') : t('bo.customer_users.actions.activate') do %>
                           <i class="fa-solid <%= cu.active? ? 'fa-pause' : 'fa-play' %>"></i>
+                        <% end %>
+                        <% qa_state = quick_access_state(cu) %>
+                        <% qa_class = { active_token: "text-success", revoked_or_expired: "text-warning", no_token: "text-muted", unavailable: "text-muted opacity-25" }[qa_state] %>
+                        <% qa_title = t("bo.customer_users.actions.quick_access_#{qa_state}") %>
+                        <% if qa_state == :unavailable %>
+                          <span class="btn btn-sm btn-link <%= qa_class %>" title="<%= qa_title %>" style="cursor: not-allowed;">
+                            <i class="fa-solid fa-qrcode"></i>
+                          </span>
+                        <% else %>
+                          <%= link_to bo_customer_customer_user_quick_access_token_path(org_slug: @current_organisation.slug, customer_id: @customer.id, customer_user_id: cu.id),
+                                      class: "btn btn-sm btn-link #{qa_class}",
+                                      title: qa_title do %>
+                            <i class="fa-solid fa-qrcode"></i>
+                          <% end %>
                         <% end %>
                         <%= link_to edit_bo_customer_customer_user_path(org_slug: @current_organisation.slug, customer_id: @customer.id, id: cu.id),
                                     class: "btn btn-sm btn-link text-muted",

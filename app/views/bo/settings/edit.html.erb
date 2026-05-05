@@ -237,6 +237,20 @@
 
       <div class="card mb-3">
         <div class="card-body">
+          <h5 class="card-title mb-4"><i class="fa-solid fa-qrcode me-2"></i><%= t('bo.settings.edit.customer_access') %></h5>
+
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label class="form-label"><%= t('bo.settings.edit.quick_access_token_ttl_days') %></label>
+              <%= f.number_field :quick_access_token_ttl_days, class: "form-control", min: 1, max: 3650, step: 1, placeholder: t('bo.settings.edit.quick_access_token_ttl_days_placeholder') %>
+              <small class="text-muted"><%= t('bo.settings.edit.quick_access_token_ttl_days_hint') %></small>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card mb-3">
+        <div class="card-body">
           <h5 class="card-title mb-4"><%= t('bo.settings.edit.storefront_features') %></h5>
 
           <div class="form-check form-switch">

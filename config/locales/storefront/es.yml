@@ -1,5 +1,8 @@
 es:
   storefront:
+    quick_access:
+      invalid: "Enlace de acceso inválido o expirado. Inicia sesión normalmente."
+
     # Modo de visualización para miembros del equipo
     member_browse:
       preview_banner: "Está viendo la tienda como miembro del equipo."

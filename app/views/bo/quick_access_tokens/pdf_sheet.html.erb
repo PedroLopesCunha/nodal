@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="<%= I18n.locale %>">
+<head>
+  <meta charset="utf-8">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    <%= render "bo/quick_access_tokens/pdf_styles", primary_color: @customer.organisation.effective_primary_color || "#111" %>
+    @page { size: A4; margin: 0; }
+    html, body { width: 210mm; height: 297mm; margin: 0; padding: 0; }
+    .sheet {
+      width: 210mm; height: 297mm;
+      padding: 16mm 17.5mm;
+      box-sizing: border-box;
+      position: relative;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: 85mm 85mm;
+      grid-template-rows: repeat(4, 55mm);
+      gap: 6mm 5mm;
+    }
+    /* Cut guides — long dashed lines spanning the page where we want the
+       merchant to cut between cards. Drawn under the grid via absolute
+       positioning so they don't push layout. */
+    .guide-h, .guide-v {
+      position: absolute;
+      background: repeating-linear-gradient(
+        to right, #c0c0c0 0 2mm, transparent 2mm 4mm
+      );
+    }
+    .guide-h { left: 0; right: 0; height: 0.2mm; }
+    .guide-v {
+      top: 0; bottom: 0; width: 0.2mm;
+      background: repeating-linear-gradient(
+        to bottom, #c0c0c0 0 2mm, transparent 2mm 4mm
+      );
+    }
+  </style>
+</head>
+<body>
+  <div class="sheet">
+    <%# horizontal cut guides between rows (3 guides for 4 rows) %>
+    <% [16+55+3, 16+55*2+9, 16+55*3+15].each do |y| %>
+      <div class="guide-h" style="top: <%= y %>mm;"></div>
+    <% end %>
+    <%# vertical cut guide between the two columns %>
+    <div class="guide-v" style="left: <%= 17.5 + 85 + 2.5 %>mm;"></div>
+
+    <div class="grid">
+      <% 8.times do %>
+        <%= render "bo/quick_access_tokens/pdf_card_block",
+                   customer: @customer,
+                   customer_user: @customer_user,
+                   qr_svg: @qr_svg,
+                   organisation: @customer.organisation %>
+      <% end %>
+    </div>
+  </div>
+</body>
+</html>
