@@ -30,6 +30,8 @@ class Bo::CustomersController < Bo::BaseController
 
   def new
     @customer = Customer.new
+    @customer.build_billing_address_with_archived(address_type: "billing")
+    @customer.shipping_addresses_with_archived.build(address_type: "shipping")
     @customer_categories = current_organisation.customer_categories.ordered
     authorize @customer
   end
@@ -41,6 +43,8 @@ class Bo::CustomersController < Bo::BaseController
     if @customer.save
       redirect_to bo_customer_path(params[:org_slug], @customer), notice: "Customer created successfully."
     else
+      @customer.build_billing_address_with_archived(address_type: "billing") if @customer.billing_address_with_archived.nil?
+      @customer.shipping_addresses_with_archived.build(address_type: "shipping") if @customer.shipping_addresses_with_archived.empty?
       @customer_categories = current_organisation.customer_categories.ordered
       render :new, status: :unprocessable_entity
     end

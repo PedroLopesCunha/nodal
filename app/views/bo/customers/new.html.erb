@@ -74,6 +74,71 @@
               <%= f.text_field :taxpayer_id, class: "form-control", placeholder: t('bo.customers.form.taxpayer_id_placeholder') %>
               <small class="text-muted"><%= t('bo.customers.form.taxpayer_id_hint') %></small>
             </div>
+
+            <hr class="my-4">
+
+            <h6 class="mb-3"><%= t('bo.customers.form.billing_address') %></h6>
+
+            <%= f.fields_for :billing_address_with_archived do |ba| %>
+              <%= ba.hidden_field :address_type, value: "billing" %>
+
+              <div class="row g-3">
+                <div class="col-md-8">
+                  <label class="form-label"><%= t('bo.customers.form.address.street') %></label>
+                  <%= ba.text_field :street_name, class: "form-control" %>
+                </div>
+
+                <div class="col-md-4">
+                  <label class="form-label"><%= t('bo.customers.form.address.number') %></label>
+                  <%= ba.text_field :street_nr, class: "form-control" %>
+                </div>
+
+                <div class="col-md-4">
+                  <label class="form-label"><%= t('bo.customers.form.address.postal_code') %></label>
+                  <%= ba.text_field :postal_code, class: "form-control" %>
+                </div>
+
+                <div class="col-md-4">
+                  <label class="form-label"><%= t('bo.customers.form.address.city') %></label>
+                  <%= ba.text_field :city, class: "form-control" %>
+                </div>
+
+                <div class="col-md-4">
+                  <label class="form-label"><%= t('bo.customers.form.address.country') %></label>
+                  <%= ba.text_field :country, class: "form-control" %>
+                </div>
+              </div>
+            <% end %>
+
+            <hr class="my-4">
+
+            <h6 class="mb-3"><%= t('bo.customers.form.shipping_addresses') %></h6>
+
+            <div data-controller="nested-addresses">
+              <div data-nested-addresses-target="container">
+                <%= f.fields_for :shipping_addresses_with_archived do |sa| %>
+                  <%= render "shipping_address_fields", f: sa %>
+                <% end %>
+              </div>
+
+              <template data-nested-addresses-target="template">
+                <%= f.fields_for(
+                  :shipping_addresses_with_archived,
+                  Address.new(address_type: "shipping", active: true),
+                  child_index: "NEW_RECORD"
+                ) do |sa| %>
+                  <%= render "shipping_address_fields", f: sa %>
+                <% end %>
+              </template>
+
+              <button
+                type="button"
+                class="btn btn-sm btn-outline-primary mt-2"
+                data-action="nested-addresses#add"
+              >
+                <i class="fa-solid fa-plus"></i> <%= t('bo.customers.form.add_shipping_address') %>
+              </button>
+            </div>
           </div>
         </div>
       </div>
