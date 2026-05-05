@@ -28,4 +28,28 @@ module QuickAccessHelper
 
     :no_token
   end
+
+  # WhatsApp / SMS / mailto deep links for the share buttons. wa.me and
+  # sms: both want a digits-only phone (no +, spaces or punctuation),
+  # so we normalise here. Returns nil when there isn't enough info to
+  # build a usable link, so the view can disable the button cleanly.
+  def whatsapp_share_url(phone, text)
+    digits = phone.to_s.gsub(/\D/, "")
+    return nil if digits.empty?
+
+    "https://wa.me/#{digits}?text=#{CGI.escape(text)}"
+  end
+
+  def sms_share_url(phone, text)
+    digits = phone.to_s.gsub(/\D/, "")
+    return nil if digits.empty?
+
+    "sms:#{digits}?body=#{CGI.escape(text)}"
+  end
+
+  def email_share_url(email, subject, body)
+    return nil if email.blank?
+
+    "mailto:#{email}?subject=#{CGI.escape(subject)}&body=#{CGI.escape(body)}"
+  end
 end

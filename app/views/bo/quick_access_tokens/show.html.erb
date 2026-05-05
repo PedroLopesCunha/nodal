@@ -104,6 +104,70 @@
           </div>
         </div>
 
+        <% share_phone = @customer_user.contact_phone.presence || @customer.contact_phone %>
+        <% share_email = @customer_user.email %>
+        <% share_msg = t("bo.quick_access_tokens.share.message_body",
+                        company: @customer.organisation.name,
+                        url: qr_url) %>
+        <% share_subject = t("bo.quick_access_tokens.share.email_subject",
+                            company: @customer.organisation.name) %>
+
+        <div class="card mb-3">
+          <div class="card-body">
+            <h5 class="card-title mb-3"><%= t("bo.quick_access_tokens.show.share_title") %></h5>
+            <p class="text-muted small mb-3"><%= t("bo.quick_access_tokens.show.share_hint") %></p>
+
+            <div class="d-grid gap-2">
+              <% if (wa_url = whatsapp_share_url(share_phone, share_msg)) %>
+                <%= link_to wa_url, target: "_blank", rel: "noopener", class: "btn btn-outline-success text-start" do %>
+                  <i class="fa-brands fa-whatsapp me-2"></i>
+                  <strong><%= t("bo.quick_access_tokens.share.whatsapp") %></strong>
+                  <small class="text-muted d-block ms-4"><%= t("bo.quick_access_tokens.share.whatsapp_hint", phone: share_phone) %></small>
+                <% end %>
+              <% else %>
+                <button type="button" class="btn btn-outline-secondary text-start" disabled>
+                  <i class="fa-brands fa-whatsapp me-2"></i>
+                  <strong><%= t("bo.quick_access_tokens.share.whatsapp") %></strong>
+                  <small class="text-muted d-block ms-4"><%= t("bo.quick_access_tokens.share.no_phone") %></small>
+                </button>
+              <% end %>
+
+              <% if (sms_url = sms_share_url(share_phone, share_msg)) %>
+                <%= link_to sms_url, class: "btn btn-outline-primary text-start" do %>
+                  <i class="fa-solid fa-comment-sms me-2"></i>
+                  <strong><%= t("bo.quick_access_tokens.share.sms") %></strong>
+                  <small class="text-muted d-block ms-4"><%= t("bo.quick_access_tokens.share.sms_hint", phone: share_phone) %></small>
+                <% end %>
+              <% else %>
+                <button type="button" class="btn btn-outline-secondary text-start" disabled>
+                  <i class="fa-solid fa-comment-sms me-2"></i>
+                  <strong><%= t("bo.quick_access_tokens.share.sms") %></strong>
+                  <small class="text-muted d-block ms-4"><%= t("bo.quick_access_tokens.share.no_phone") %></small>
+                </button>
+              <% end %>
+
+              <% if (email_url = email_share_url(share_email, share_subject, share_msg)) %>
+                <%= link_to email_url, class: "btn btn-outline-primary text-start" do %>
+                  <i class="fa-solid fa-envelope me-2"></i>
+                  <strong><%= t("bo.quick_access_tokens.share.email") %></strong>
+                  <small class="text-muted d-block ms-4"><%= t("bo.quick_access_tokens.share.email_hint", email: share_email) %></small>
+                <% end %>
+              <% end %>
+
+              <button type="button"
+                      class="btn btn-outline-secondary text-start"
+                      data-controller="copy-to-clipboard"
+                      data-copy-to-clipboard-text-value="<%= qr_url %>"
+                      data-copy-to-clipboard-copied-label-value="<%= t('bo.quick_access_tokens.share.copied') %>"
+                      data-action="click->copy-to-clipboard#copy">
+                <i class="fa-solid fa-link me-2"></i>
+                <strong data-copy-to-clipboard-target="label"><%= t("bo.quick_access_tokens.share.copy") %></strong>
+                <small class="text-muted d-block ms-4 font-monospace text-truncate"><%= qr_url %></small>
+              </button>
+            </div>
+          </div>
+        </div>
+
         <div class="card">
           <div class="card-body">
             <h5 class="card-title mb-3"><%= t("bo.quick_access_tokens.show.actions_title") %></h5>
