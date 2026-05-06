@@ -22,9 +22,14 @@ class QuickAccessToken < ApplicationRecord
   # the web dyno calm and the merchant's clicks instant.
   after_create_commit :enqueue_pdf_generation
 
+  # Each CustomerUser has at most one token at a time. Regenerating
+  # destroys the previous token (which cascades dependent: :purge_later
+  # to its PDF blobs, freeing Cloudinary storage) before creating the
+  # new one. We don't keep a "revoked" trail in the tokens table —
+  # CustomerUserLoginEvent already records every QR-derived sign-in.
   def self.generate_for(customer_user, created_by:)
     transaction do
-      customer_user.quick_access_tokens.active.update_all(revoked_at: Time.current)
+      customer_user.quick_access_tokens.find_each(&:destroy!)
       customer_user.quick_access_tokens.create!(created_by_member: created_by)
     end
   end
@@ -53,8 +58,12 @@ class QuickAccessToken < ApplicationRecord
     revoked_at.present?
   end
 
+  # Revoking destroys the row. We previously kept a `revoked_at` flag
+  # so the token survived for audit, but the audit story already lives
+  # in CustomerUserLoginEvent and the leftover rows held onto Cloudinary
+  # blobs forever (dependent: :purge_later only fires on destroy).
   def revoke!
-    update!(revoked_at: Time.current)
+    destroy!
   end
 
   def mark_used!
