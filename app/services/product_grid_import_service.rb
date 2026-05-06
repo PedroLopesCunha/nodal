@@ -1,5 +1,3 @@
-require "zip"
-
 class ProductGridImportService
   NUM_ATTRS = 3
 
@@ -384,6 +382,7 @@ class ProductGridImportService
     @extracted_dir = Rails.root.join("tmp", "imports", "images_#{SecureRandom.uuid}").to_s
     FileUtils.mkdir_p(@extracted_dir)
 
+    require "zip" # gem is require:false; only loaded during ZIP imports
     Zip::File.open(@zip_path) do |zip|
       zip.each do |entry|
         next if entry.directory?

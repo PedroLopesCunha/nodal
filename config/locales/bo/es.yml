@@ -1384,8 +1384,6 @@ es:
       formats:
         card: "Tarjeta de visita (PDF)"
         card_hint: "1 tarjeta 85×55 mm. Ideal para entregar en mano."
-        sheet: "Hoja A4 con 8 tarjetas (PDF)"
-        sheet_hint: "Imprimir en papel normal o adhesivo y cortar por las guías."
         digital: "Tarjeta digital (PDF)"
         digital_hint: "Formato A6 vertical. Compartir por WhatsApp, email, etc."
       pdf:

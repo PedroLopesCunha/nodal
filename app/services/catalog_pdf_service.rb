@@ -1,4 +1,3 @@
-require "combine_pdf"
 require "base64"
 
 class CatalogPdfService
@@ -153,6 +152,7 @@ class CatalogPdfService
   end
 
   def merge_pdfs(pdf_binaries)
+    require "combine_pdf" # gem is require:false; only loaded during catalog generation
     combined = CombinePDF.new
     pdf_binaries.each do |pdf_data|
       next if pdf_data.nil?

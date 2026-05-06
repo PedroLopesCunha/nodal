@@ -3,7 +3,7 @@ class Bo::QuickAccessTokensController < Bo::BaseController
   before_action :set_customer_user
   before_action :load_token, only: [:show, :destroy, :download]
 
-  FORMATS = %w[card sheet digital].freeze
+  FORMATS = %w[card digital].freeze
 
   def show
     authorize @customer_user, :edit?, policy_class: CustomerUserPolicy
@@ -59,8 +59,13 @@ class Bo::QuickAccessTokensController < Bo::BaseController
                   alert: t("bo.quick_access_tokens.flash.still_generating") and return
     end
 
-    redirect_to rails_blob_url(attachment, disposition: "attachment"),
-                allow_other_host: true
+    # rails_storage_proxy serves the bytes through Rails so we control
+    # the Content-Disposition header. Cloudinary signed URLs ignore the
+    # disposition param ActiveStorage tries to pass through, so a direct
+    # redirect would open the PDF inline in the browser instead of
+    # downloading it. The bandwidth cost is trivial for the rare merchant
+    # click and the UX is predictable.
+    redirect_to rails_storage_proxy_path(attachment, disposition: "attachment")
   end
 
   private

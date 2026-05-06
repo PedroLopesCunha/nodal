@@ -1,11 +1,10 @@
 class QuickAccessToken < ApplicationRecord
-  PDF_FORMATS = %i[card sheet digital].freeze
+  PDF_FORMATS = %i[card digital].freeze
 
   belongs_to :customer_user
   belongs_to :created_by_member, class_name: "Member", optional: true
 
   has_one_attached :pdf_card,    dependent: :purge_later
-  has_one_attached :pdf_sheet,   dependent: :purge_later
   has_one_attached :pdf_digital, dependent: :purge_later
 
   validates :token, presence: true, uniqueness: true
