@@ -1,5 +1,4 @@
 require "csv"
-require "roo"
 
 class Bo::ProductsController < Bo::BaseController
   include Exportable
@@ -598,6 +597,7 @@ class Bo::ProductsController < Bo::BaseController
   end
 
   def convert_excel_to_csv(uploaded_file)
+    require "roo" # gem is require:false; only paid for during XLSX uploads
     spreadsheet = Roo::Spreadsheet.open(uploaded_file.path || uploaded_file.tempfile.path)
     sheet = spreadsheet.sheet(0)
 

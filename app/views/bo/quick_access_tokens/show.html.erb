@@ -95,7 +95,6 @@
             <div class="d-grid gap-2">
               <% [
                 ["card",    "fa-id-card"],
-                ["sheet",   "fa-table-cells"],
                 ["digital", "fa-image"]
               ].each do |fmt, icon| %>
                 <% ready = @token.attached_pdf(fmt).attached? %>

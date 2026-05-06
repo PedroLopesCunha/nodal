@@ -8,9 +8,10 @@ class GenerateQuickAccessPdfsJob < ApplicationJob
   retry_on Grover::JavaScript::TimeoutError, wait: :polynomially_longer, attempts: 5
 
   def perform(token_id)
+    # Token might have been destroyed between enqueue and execution
+    # (e.g. revoke / regenerate landed first). find_by handles that.
     token = QuickAccessToken.find_by(id: token_id)
     return unless token
-    return if token.revoked?
 
     QuickAccessToken::PDF_FORMATS.each do |format|
       attachment = token.attached_pdf(format)

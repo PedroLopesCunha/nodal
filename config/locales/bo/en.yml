@@ -1477,8 +1477,6 @@ en:
       formats:
         card: "Business card (PDF)"
         card_hint: "1 card 85×55 mm. Ideal to hand to a customer."
-        sheet: "A4 sheet with 8 cards (PDF)"
-        sheet_hint: "Print on plain or sticker paper and cut along the guides."
         digital: "Digital card (PDF)"
         digital_hint: "A6 portrait. Share via WhatsApp, email, etc."
       pdf:

@@ -3,7 +3,6 @@ class QuickAccessPdfRenderer
 
   GROVER_OPTIONS = {
     card:    { format: nil, width: "85mm",  height: "55mm",  margin: { top: "0", bottom: "0", left: "0", right: "0" }, prefer_css_page_size: true }.freeze,
-    sheet:   { format: "A4",                                margin: { top: "0", bottom: "0", left: "0", right: "0" }, prefer_css_page_size: true }.freeze,
     digital: { format: nil, width: "105mm", height: "148mm", margin: { top: "0", bottom: "0", left: "0", right: "0" }, prefer_css_page_size: true }.freeze
   }.freeze
 
@@ -42,6 +41,7 @@ class QuickAccessPdfRenderer
   end
 
   def build_qr_svg(data)
+    require "rqrcode" # gem is require:false; only loaded when generating tokens
     qr = RQRCode::QRCode.new(data, level: :m)
     qr.as_svg(
       offset: 0,

@@ -1467,8 +1467,6 @@ pt:
       formats:
         card: "Cartão de visita (PDF)"
         card_hint: "1 cartão 85×55 mm. Ideal para entregar em mão."
-        sheet: "Folha A4 com 8 cartões (PDF)"
-        sheet_hint: "Para imprimir em papel normal ou autocolante e cortar pelas guias."
         digital: "Cartão digital (PDF)"
         digital_hint: "Formato A6 vertical. Para partilhar por WhatsApp, email, etc."
       pdf:

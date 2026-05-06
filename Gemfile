@@ -92,23 +92,26 @@ gem 'solid_queue', '~> 1.1'
 # HTTP client for ERP integrations
 gem 'faraday', '~> 2.0'
 
-# ZIP file handling for product image import
-gem 'rubyzip', '~> 2.3'
+# ZIP file handling for product image import — only loaded by the
+# image import service / rake task, kept out of the boot path.
+gem 'rubyzip', '~> 2.3', require: false
 
-# Excel file parsing for product import
-gem 'roo', '~> 2.10'
+# Excel file parsing for product import — only loaded by import jobs.
+gem 'roo', '~> 2.10', require: false
 
-# Excel file generation for exports
-gem 'caxlsx', '~> 4.1'
+# Excel file generation for exports — only loaded by ExportService.
+gem 'caxlsx', '~> 4.1', require: false
 
-# PDF generation from HTML (uses Chrome headless)
+# PDF generation from HTML (uses Chrome headless). Referenced at
+# class-load time by GenerateQuickAccessPdfsJob#retry_on, so eager
+# loading would pull it in anyway — keep it required at boot.
 gem 'grover', '~> 1.1'
 
-# QR code generation (used for storefront quick-access tokens)
-gem 'rqrcode', '~> 2.2'
+# QR code generation (used only by QuickAccessPdfRenderer).
+gem 'rqrcode', '~> 2.2', require: false
 
-# PDF merging for chunked catalog generation
-gem 'combine_pdf', '~> 1.0'
+# PDF merging for chunked catalog generation — only by CatalogPdfService.
+gem 'combine_pdf', '~> 1.0', require: false
 
 # Firebird database client for direct ERP connections
 # Requires libfbclient native library (installed on Heroku via Aptfile)
