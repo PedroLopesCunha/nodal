@@ -35,7 +35,7 @@
                     <i class="fa-solid fa-grip-vertical text-muted handle" style="cursor: grab;"></i>
                     <input type="hidden" name="related_product_ids[]" value="<%= product.id %>">
                     <% if product.photo_attached? %>
-                      <%= image_tag product.photo, style: "width: 40px; height: 40px; object-fit: cover; border-radius: 4px;" %>
+                      <%= image_tag product.photo, style: "width: 40px; height: 40px; object-fit: cover; border-radius: 4px;", loading: "lazy" %>
                     <% else %>
                       <div class="bg-secondary d-flex align-items-center justify-content-center" style="width: 40px; height: 40px; border-radius: 4px;">
                         <i class="fa-solid fa-image text-white"></i>

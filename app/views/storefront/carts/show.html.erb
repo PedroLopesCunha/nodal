@@ -70,7 +70,7 @@
                     <div class="d-flex align-items-center">
                       <% photo = item.effective_photo %>
                       <% if photo.present? %>
-                        <%= image_tag photo, class: "me-3", style: "width: 60px; height: 60px; object-fit: cover; border-radius: 8px;" %>
+                        <%= image_tag photo, class: "me-3", style: "width: 60px; height: 60px; object-fit: cover; border-radius: 8px;", loading: "lazy" %>
                       <% else %>
                         <div class="me-3 bg-light d-flex align-items-center justify-content-center" style="width: 60px; height: 60px; border-radius: 8px;">
                           <i class="fa-solid fa-image text-muted"></i>
@@ -137,7 +137,7 @@
                 <div class="d-flex align-items-center mb-2">
                   <% photo = item.effective_photo %>
                   <% if photo.present? %>
-                    <%= image_tag photo, class: "me-2 flex-shrink-0 cart-item-compact-img", style: "width: 48px; height: 48px; object-fit: cover; border-radius: 6px;" %>
+                    <%= image_tag photo, class: "me-2 flex-shrink-0 cart-item-compact-img", style: "width: 48px; height: 48px; object-fit: cover; border-radius: 6px;", loading: "lazy" %>
                   <% else %>
                     <div class="me-2 flex-shrink-0 bg-light d-flex align-items-center justify-content-center" style="width: 48px; height: 48px; border-radius: 6px;">
                       <i class="fa-solid fa-image text-muted small"></i>

@@ -43,7 +43,7 @@
                 <td>
                   <div class="d-flex align-items-center">
                     <% if item.effective_photo.present? %>
-                      <%= image_tag item.effective_photo, style: "width: 50px; height: 50px; object-fit: cover; border-radius: 6px;", class: "me-3" %>
+                      <%= image_tag item.effective_photo, style: "width: 50px; height: 50px; object-fit: cover; border-radius: 6px;", class: "me-3", loading: "lazy" %>
                     <% else %>
                       <div class="me-3 bg-light d-flex align-items-center justify-content-center" style="width: 50px; height: 50px; border-radius: 6px;">
                         <i class="fa-solid fa-image text-muted"></i>

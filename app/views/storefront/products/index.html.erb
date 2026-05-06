@@ -286,7 +286,7 @@
                 <div class="product-card-image">
                   <%= render "storefront/shared/product_card_badges", discount_info: discount_info %>
                   <% if (display = product.display_photo) %>
-                    <%= image_tag display, alt: product.name %>
+                    <%= image_tag display, alt: product.name, loading: "lazy" %>
                   <% else %>
                     <i class="fa-solid fa-image placeholder-icon"></i>
                   <% end %>

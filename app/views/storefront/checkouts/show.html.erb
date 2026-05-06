@@ -44,7 +44,7 @@
                     <td>
                       <div class="d-flex align-items-center">
                         <% if item.effective_photo.present? %>
-                          <%= image_tag item.effective_photo, style: "width: 50px; height: 50px; object-fit: cover; border-radius: 6px;", class: "me-3" %>
+                          <%= image_tag item.effective_photo, style: "width: 50px; height: 50px; object-fit: cover; border-radius: 6px;", class: "me-3", loading: "lazy" %>
                         <% else %>
                           <div class="me-3 bg-light d-flex align-items-center justify-content-center" style="width: 50px; height: 50px; border-radius: 6px;">
                             <i class="fa-solid fa-image text-muted"></i>
@@ -90,7 +90,7 @@
               <div class="checkout-item-card <%= 'border-bottom pb-3 mb-3' unless index == @order_items.length - 1 %>">
                 <div class="d-flex align-items-start">
                   <% if item.effective_photo.present? %>
-                    <%= image_tag item.effective_photo, class: "me-3 flex-shrink-0", style: "width: 60px; height: 60px; object-fit: cover; border-radius: 8px;" %>
+                    <%= image_tag item.effective_photo, class: "me-3 flex-shrink-0", style: "width: 60px; height: 60px; object-fit: cover; border-radius: 8px;", loading: "lazy" %>
                   <% else %>
                     <div class="me-3 flex-shrink-0 bg-light d-flex align-items-center justify-content-center" style="width: 60px; height: 60px; border-radius: 8px;">
                       <i class="fa-solid fa-image text-muted"></i>
