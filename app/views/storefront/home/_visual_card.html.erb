@@ -36,7 +36,7 @@
     <% end %>
     <% if defined?(image) && image %>
       <div class="home-visual-card__image-wrapper">
-        <%= image_tag image, class: "home-visual-card__image", alt: name %>
+        <%= image_tag image, class: "home-visual-card__image", alt: name, loading: "lazy" %>
       </div>
     <% elsif defined?(fallback_color) && fallback_color %>
       <div class="home-visual-card__image-wrapper" style="background: <%= fallback_color %>;">

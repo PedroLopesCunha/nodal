@@ -76,7 +76,7 @@
                data-image-gallery-target="thumbnail"
                data-image-url="<%= url_for(photo) %>"
                data-action="click->image-gallery#select">
-            <%= image_tag photo, class: "img-fluid h-100 w-100", style: "object-fit: cover; border-radius: 4px;" %>
+            <%= image_tag photo, class: "img-fluid h-100 w-100", style: "object-fit: cover; border-radius: 4px;", loading: "lazy" %>
           </div>
         <% end %>
       </div>
@@ -506,6 +506,7 @@
                data-action="wheel->image-zoom#wheel mousedown->image-zoom#mousedown mousemove->image-zoom#mousemove mouseup->image-zoom#mouseup mouseleave->image-zoom#mouseleave dblclick->image-zoom#dblclick touchstart->image-zoom#touchstart touchmove->image-zoom#touchmove touchend->image-zoom#touchend">
             <%= image_tag all_photos.first, id: "zoomModalImage",
                 style: "max-height: 90vh; max-width: 100%; object-fit: contain; cursor: zoom-in; transition: opacity 0.15s;",
+                loading: "lazy",
                 data: { image_zoom_target: "image", variant_selector_target: "zoomImage", modal_gallery_target: "image" } %>
 
             <% if all_photos.size > 1 %>
@@ -548,7 +549,7 @@
                        data-modal-gallery-target="thumbnail"
                        data-action="click->modal-gallery#goTo"
                        data-index="<%= i %>">
-                    <%= image_tag photo, style: "width: 100%; height: 100%; object-fit: cover;" %>
+                    <%= image_tag photo, style: "width: 100%; height: 100%; object-fit: cover;", loading: "lazy" %>
                   </div>
                 <% end %>
               </div>

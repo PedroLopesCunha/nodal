@@ -157,7 +157,7 @@
                 <% @product.photos.each do |photo| %>
                   <div class="position-relative border rounded p-1" style="width: 120px;">
                     <a href="#" data-action="lightbox#open" data-lightbox-url="<%= url_for(photo) %>" style="cursor: zoom-in;">
-                      <%= image_tag photo, style: "width: 100%; height: 100px; object-fit: cover; border-radius: 4px;" %>
+                      <%= image_tag photo, style: "width: 100%; height: 100px; object-fit: cover; border-radius: 4px;", loading: "lazy" %>
                     </a>
                     <% if photo.blob_id == main_blob_id %>
                       <span class="position-absolute badge bg-primary" style="bottom: 4px; left: 50%; transform: translateX(-50%); font-size: 10px;">

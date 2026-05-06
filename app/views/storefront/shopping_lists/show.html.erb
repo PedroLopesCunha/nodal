@@ -67,7 +67,7 @@
                   <td>
                     <% photo = item.effective_photo %>
                     <% if photo %>
-                      <%= image_tag photo.variant(resize_to_limit: [50, 50]), class: "rounded", style: "width: 40px; height: 40px; object-fit: cover;" %>
+                      <%= image_tag photo.variant(resize_to_limit: [50, 50]), class: "rounded", style: "width: 40px; height: 40px; object-fit: cover;", loading: "lazy" %>
                     <% else %>
                       <div class="rounded d-flex align-items-center justify-content-center" style="width: 40px; height: 40px; background: #f1f5f9;">
                         <i class="fa-solid fa-image text-muted" style="font-size: 0.8rem;"></i>

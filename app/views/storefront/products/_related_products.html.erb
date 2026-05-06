@@ -8,7 +8,7 @@
             <% discount_info = @related_product_discounts[product.id] %>
             <div class="product-card-image">
               <% if (display = product.display_photo) %>
-                <%= image_tag display, alt: product.name %>
+                <%= image_tag display, alt: product.name, loading: "lazy" %>
               <% else %>
                 <i class="fa-solid fa-image placeholder-icon"></i>
               <% end %>

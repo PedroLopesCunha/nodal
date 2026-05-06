@@ -225,7 +225,7 @@
           <td>
             <div class="d-flex align-items-center gap-2">
               <% if product.photo.present? %>
-                <%= image_tag product.photo.variant(resize_to_fill: [40, 40]), width: 40, height: 40, class: "rounded", style: "object-fit: cover;" %>
+                <%= image_tag product.photo.variant(resize_to_fill: [40, 40]), width: 40, height: 40, class: "rounded", style: "object-fit: cover;", loading: "lazy" %>
               <% else %>
                 <div class="rounded bg-light d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
                   <i class="fa-solid fa-image text-muted"></i>
