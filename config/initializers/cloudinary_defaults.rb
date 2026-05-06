@@ -9,24 +9,32 @@
 
 return unless Rails.application.config.active_storage.service == :cloudinary
 
-require "active_storage/service/cloudinary_service"
+# Defer the patch to after the app is initialized. At initializer load
+# time, ActiveStorage::Blob is not yet autoloaded, and the cloudinary
+# gem's adapter file references it at the top level — requiring it here
+# blows up `assets:precompile` with NameError. By after_initialize the
+# adapter has been required by ActiveStorage during service registration,
+# so the constant is defined and we can safely prepend.
+Rails.application.config.after_initialize do
+  next unless defined?(ActiveStorage::Service::CloudinaryService)
 
-module CloudinaryServiceAutoFormat
-  def url(key, filename: nil, content_type: "", **options)
-    if image_content?(key, content_type)
-      options[:fetch_format] = :auto unless options.key?(:fetch_format)
-      options[:quality] = :auto unless options.key?(:quality)
+  module CloudinaryServiceAutoFormat
+    def url(key, filename: nil, content_type: "", **options)
+      if image_content?(key, content_type)
+        options[:fetch_format] = :auto unless options.key?(:fetch_format)
+        options[:quality] = :auto unless options.key?(:quality)
+      end
+      super(key, filename: filename, content_type: content_type, **options)
     end
-    super(key, filename: filename, content_type: content_type, **options)
+
+    private
+
+    def image_content?(key, content_type)
+      ct = content_type.presence
+      ct ||= key.respond_to?(:attributes) ? key.attributes[:content_type] : nil
+      ct.to_s.start_with?("image/")
+    end
   end
 
-  private
-
-  def image_content?(key, content_type)
-    ct = content_type.presence
-    ct ||= key.respond_to?(:attributes) ? key.attributes[:content_type] : nil
-    ct.to_s.start_with?("image/")
-  end
+  ActiveStorage::Service::CloudinaryService.prepend(CloudinaryServiceAutoFormat)
 end
-
-ActiveStorage::Service::CloudinaryService.prepend(CloudinaryServiceAutoFormat)
