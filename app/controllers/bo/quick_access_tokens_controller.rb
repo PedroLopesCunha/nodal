@@ -7,8 +7,9 @@ class Bo::QuickAccessTokensController < Bo::BaseController
 
   def show
     authorize @customer_user, :edit?, policy_class: CustomerUserPolicy
-    # Renders the modal contents (or full page) showing the active token,
-    # its QR preview, and the download/regenerate/revoke actions.
+    # rqrcode is gem'd as require:false to keep boot light; the view
+    # renders an inline QR SVG via RQRCode::QRCode, so load it here.
+    require "rqrcode"
   end
 
   def create
