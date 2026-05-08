@@ -1,6 +1,7 @@
 require_relative "boot"
 
 require "rails/all"
+require_relative "../app/middleware/block_bot_user_agents"
 
 # Require the gems listed in Gemfile, including any gems
 # you've limited to :test, :development, or :production.
@@ -39,5 +40,7 @@ module Nodal
 
     # Use Solid Queue for background jobs (PostgreSQL-backed, no Redis needed)
     config.active_job.queue_adapter = :solid_queue
+
+    config.middleware.insert_before Rack::Runtime, BlockBotUserAgents
   end
 end
