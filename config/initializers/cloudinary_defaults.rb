@@ -4,8 +4,14 @@
 # content types where these transformations would corrupt delivery
 # (Cloudinary would rasterize a PDF if served with f_auto).
 #
-# Result: 30-60% bandwidth reduction on image delivery, zero code changes
-# in views, no visual impact.
+# Critical: when the gem's `download`/`download_chunk` methods call
+# `url(key)` internally to fetch the original for variant processing,
+# we MUST skip the transforms — otherwise Cloudinary returns the
+# transformed bytes (e.g. WebP), the MD5 doesn't match the stored
+# checksum of the original PNG/JPEG, and ActiveStorage raises
+# IntegrityError. That breaks every variant URL (BO thumbnails, etc.)
+# and re-downloads the full original from Cloudinary on every failed
+# attempt, burning bandwidth.
 
 return unless Rails.application.config.active_storage.service == :cloudinary
 
@@ -19,15 +25,33 @@ Rails.application.config.after_initialize do
   next unless defined?(ActiveStorage::Service::CloudinaryService)
 
   module CloudinaryServiceAutoFormat
+    SKIP_KEY = :cloudinary_skip_auto_transforms
+
     def url(key, filename: nil, content_type: "", **options)
-      if image_content?(key, content_type)
+      if image_content?(key, content_type) && !Thread.current[SKIP_KEY]
         options[:fetch_format] = :auto unless options.key?(:fetch_format)
         options[:quality] = :auto unless options.key?(:quality)
       end
       super(key, filename: filename, content_type: content_type, **options)
     end
 
+    def download(key, &block)
+      with_skipped_transforms { super }
+    end
+
+    def download_chunk(key, range)
+      with_skipped_transforms { super }
+    end
+
     private
+
+    def with_skipped_transforms
+      previous = Thread.current[SKIP_KEY]
+      Thread.current[SKIP_KEY] = true
+      yield
+    ensure
+      Thread.current[SKIP_KEY] = previous
+    end
 
     def image_content?(key, content_type)
       ct = content_type.presence
