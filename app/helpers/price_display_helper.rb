@@ -4,6 +4,6 @@ module PriceDisplayHelper
   end
 
   def show_prices?
-    !current_customer&.hide_prices?
+    !current_customer_user&.hide_prices?
   end
 end
