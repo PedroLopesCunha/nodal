@@ -388,6 +388,7 @@ es:
       new:
         title: "Nuevo Cliente"
         subtitle: "Añadir un nuevo cliente a su organización"
+        create_customer: "Crear cliente"
       edit:
         title: "Editar Cliente"
         subtitle: "Actualizar información del cliente"

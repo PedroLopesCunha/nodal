@@ -53,6 +53,9 @@
               <span class="badge <%= org_member.role == 'owner' ? 'bg-danger' : org_member.role == 'admin' ? 'bg-warning text-dark' : 'bg-secondary' %>">
                 <%= t("bo.team_members.roles.#{org_member.role}") %>
               </span>
+              <% if org_member.is_sales_rep? %>
+                <span class="badge bg-info ms-1">Vendedor</span>
+              <% end %>
             </td>
             <td>
               <% if org_member.pending_invitation? %>

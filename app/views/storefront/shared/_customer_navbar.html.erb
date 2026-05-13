@@ -80,6 +80,7 @@
               <i class="fa-regular fa-building me-1"></i>
               <%= current_customer.company_name %>
             </span>
+            <% if current_customer_user %>
             <div class="dropdown">
               <button class="btn btn-sm dropdown-toggle user-dropdown-btn text-muted" type="button" data-bs-toggle="dropdown">
                 <i class="fa-regular fa-user me-1"></i>
@@ -111,6 +112,7 @@
                 </li>
               </ul>
             </div>
+            <% end %>
           <% elsif browsing_as_member? %>
             <!-- Member browsing info (no cart) -->
             <span class="badge bg-info me-2">

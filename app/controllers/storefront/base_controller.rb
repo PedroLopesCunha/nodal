@@ -4,10 +4,36 @@ class Storefront::BaseController < ApplicationController
   before_action :authenticate_customer_user!
 
   helper_method :current_cart, :cart_item_count, :cart_line_item_count, :active_order_discounts,
-                :has_order_discounts?, :browsing_as_member?, :current_storefront_user
+                :has_order_discounts?, :browsing_as_member?, :current_storefront_user,
+                :impersonation_cart_user, :visible_orders_scope
+
+  # The Order relation to display in storefront views. During impersonation,
+  # the rep doesn't have their own CustomerUser session — orders are viewed
+  # at empresa level. For normal customer logins, scoped to the logged-in
+  # CustomerUser's personal order history.
+  def visible_orders_scope
+    if impersonating?
+      current_customer.orders
+    else
+      current_customer_user&.orders || Order.none
+    end
+  end
 
   def current_cart
-    @current_cart ||= current_customer_user&.current_cart(current_organisation)
+    @current_cart ||=
+      if impersonating?
+        impersonation_cart_user&.current_cart(current_organisation)
+      else
+        current_customer_user&.current_cart(current_organisation)
+      end
+  end
+
+  # The CustomerUser whose cart we use while a rep is impersonating an empresa.
+  # Falls back to the empresa's first existing CustomerUser (typically the
+  # ERP-mirrored or rep-seeded stub). Memoised per-request.
+  def impersonation_cart_user
+    return nil unless impersonating?
+    @impersonation_cart_user ||= impersonated_customer.customer_users.order(:id).first
   end
 
   def cart_item_count
@@ -26,9 +52,11 @@ class Storefront::BaseController < ApplicationController
     active_order_discounts.any?
   end
 
-  # Returns true when a member is browsing the storefront (not a customer)
+  # Returns true when a member is browsing the storefront WITHOUT an active
+  # impersonation. When impersonating, the rep effectively IS the customer
+  # for cart/checkout purposes — current_customer returns the empresa.
   def browsing_as_member?
-    current_customer.nil? && current_member.present?
+    !impersonating? && current_customer_user.nil? && current_member.present?
   end
 
   # Returns the current user (customer or member) browsing the storefront
@@ -40,7 +68,10 @@ class Storefront::BaseController < ApplicationController
 
   def authenticate_customer_user!
     # Allow CustomerUsers whose Customer (empresa) belongs to this org
-    return if current_customer.present? && current_customer.organisation == current_organisation
+    return if current_customer_user.present? && current_customer_user.customer&.organisation == current_organisation
+
+    # Allow members impersonating an empresa in this org (sales-rep flow)
+    return if impersonating?
 
     # Allow members who belong to this organisation (browse-only)
     return if current_member.present? && current_member.organisations.exists?(current_organisation&.id)
@@ -49,7 +80,9 @@ class Storefront::BaseController < ApplicationController
     redirect_to new_customer_user_session_path(org_slug: params[:org_slug])
   end
 
-  # Use in controllers that should be customer-only (cart, checkout)
+  # Use in controllers that should be customer-only (cart, checkout).
+  # An impersonating rep IS effectively the customer for that empresa, so
+  # they pass this gate just like a logged-in CustomerUser would.
   def require_customer!
     if browsing_as_member?
       flash[:alert] = t("storefront.member_browse.cart_not_available")

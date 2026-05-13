@@ -8,24 +8,33 @@ class CustomerUserPolicy < ApplicationPolicy
   end
 
   def create?
-    member_working_for_organisation?
+    return false unless member_working_for_organisation?
+    return true unless pure_sales_rep?
+    # Pure rep: invite CustomerUser only for assigned customers
+    customer_in_carteira?(record.customer)
   end
 
   def edit?
-    record_belongs_to_user_organisation?
+    return false unless record_belongs_to_user_organisation?
+    return true unless pure_sales_rep?
+    customer_in_carteira?(record.customer)
   end
 
   def update?
-    record_belongs_to_user_organisation?
+    edit?
   end
 
   def toggle_active?
-    record_belongs_to_user_organisation?
+    return false unless record_belongs_to_user_organisation?
+    return true unless pure_sales_rep?
+    customer_in_carteira?(record.customer)
   end
 
   # Resending an invitation only makes sense before the user accepts it.
   def resend_invitation?
-    record_belongs_to_user_organisation? && record.invitation_status != :active
+    return false unless record_belongs_to_user_organisation? && record.invitation_status != :active
+    return true unless pure_sales_rep?
+    customer_in_carteira?(record.customer)
   end
 
   class Scope < ApplicationPolicy::Scope

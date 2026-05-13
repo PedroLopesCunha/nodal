@@ -28,6 +28,15 @@
       <% when :active %>
         <span class="badge bg-primary rounded-pill px-3 py-2"><%= t('bo.common.statuses.active') %></span>
       <% end %>
+      <% if sales_rep_capability? && (current_org_member.role.in?(%w[owner admin]) || current_org_member.customer_assignments.exists?(customer_id: @customer.id)) %>
+        <%= button_to bo_impersonation_path(org_slug: current_organisation.slug, customer_id: @customer.id),
+                      method: :post,
+                      form: { class: "d-inline" },
+                      class: "btn btn-success",
+                      data: { turbo_confirm: "Vais entrar no storefront a operar como #{@customer.company_name}. Confirmas?" } do %>
+          <i class="fa-solid fa-cart-shopping me-1"></i> Encomendar para este cliente
+        <% end %>
+      <% end %>
       <%= link_to edit_bo_customer_path(params[:org_slug], @customer, filter_params_hash), class: "btn btn-outline-primary" do %>
         <i class="fa-solid fa-pen-to-square me-1"></i> <%= t('bo.common.actions.edit') %>
       <% end %>
@@ -39,6 +48,16 @@
 </div>
 
 <div class="bo-page-body">
+
+  <% if @customer.external_id.blank? && @customer.created_by_member_id.present? %>
+    <div class="alert alert-warning d-flex align-items-start gap-2 mb-3" role="alert">
+      <i class="fa-solid fa-rotate fa-lg mt-1"></i>
+      <div>
+        <strong>Cliente pendente validação ERP</strong>
+        <div class="small">A fatura será emitida assim que um admin criar este cliente no ERP e a próxima sincronização correr. As encomendas ficam guardadas em Nodal até lá.</div>
+      </div>
+    </div>
+  <% end %>
 
   <%# === Row 1: Contact Info + Account Details === %>
   <div class="row g-3 mb-4">
@@ -176,6 +195,33 @@
             <small class="text-muted d-block"><%= t('bo.customers.show.member_since') %></small>
             <span><%= @customer.created_at.strftime("%-m/%-d/%Y") %></span>
           </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <%# === Vendedor atribuído (read-only — edita no formulário do cliente) === %>
+  <div class="row g-3 mb-4">
+    <div class="col-12">
+      <div class="card">
+        <div class="card-body d-flex align-items-center gap-3">
+          <i class="fa-solid fa-user-tie text-muted"></i>
+          <div class="flex-grow-1">
+            <small class="text-muted d-block">Vendedor atribuído</small>
+            <% if @customer.sales_rep %>
+              <strong><%= @customer.sales_rep.display_name %></strong>
+              <% if (assigned = @customer.customer_assignment&.assigned_at) %>
+                <small class="text-muted">(desde <%= l(assigned.to_date, format: :short) %>)</small>
+              <% end %>
+            <% else %>
+              <span class="text-muted">Nenhum vendedor atribuído</span>
+            <% end %>
+          </div>
+          <% if current_org_member&.role&.in?(%w[owner admin]) %>
+            <%= link_to edit_bo_customer_path(params[:org_slug], @customer, filter_params_hash), class: "btn btn-sm btn-outline-secondary" do %>
+              <i class="fa-solid fa-pen me-1"></i> Alterar
+            <% end %>
+          <% end %>
         </div>
       </div>
     </div>

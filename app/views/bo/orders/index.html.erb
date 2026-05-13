@@ -192,7 +192,13 @@
                 <div><%= order.customer.company_name %></div>
               </td>
               <td>
-                <% if order.customer_user %>
+                <% pb = order.placed_by %>
+                <% if pb.is_a?(Member) %>
+                  <%= "#{pb.first_name} #{pb.last_name}".strip.presence || pb.email %>
+                  <span class="badge bg-info ms-1" title="Colocada por vendedor"><i class="fa-solid fa-user-tie"></i></span>
+                <% elsif pb.is_a?(CustomerUser) %>
+                  <%= pb.contact_name.presence || pb.email %>
+                <% elsif order.customer_user %>
                   <%= order.customer_user.contact_name.presence || order.customer_user.email %>
                 <% else %>
                   <span class="text-muted">—</span>

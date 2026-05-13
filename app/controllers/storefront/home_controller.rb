@@ -13,10 +13,14 @@ class Storefront::HomeController < Storefront::BaseController
     @new_products = load_new_products
 
     unless browsing_as_member?
-      @last_order = current_customer_user.orders.placed
-                      .includes(:order_items)
-                      .order(placed_at: :desc)
-                      .first
+      # During impersonation we don't have a logged-in CustomerUser — fall
+      # back to the empresa-level views (which the rep is acting as).
+      user_for_orders = current_customer_user || current_customer.customer_users.order(:id).first
+
+      @last_order = user_for_orders&.orders&.placed
+                      &.includes(:order_items)
+                      &.order(placed_at: :desc)
+                      &.first
 
       @shopping_lists = current_customer.shopping_lists
                           .ordered
@@ -25,7 +29,7 @@ class Storefront::HomeController < Storefront::BaseController
 
       @tier_discount = current_customer.active_customer_discount
       @special_prices_count = current_customer.customer_product_discounts.active.count
-      @total_orders_count = current_customer_user.orders.placed.count
+      @total_orders_count = user_for_orders&.orders&.placed&.count || 0
       @active_promo_codes = current_organisation.promo_codes.active
         .left_joins(:promo_code_customers)
         .where(eligibility: 'all_customers')

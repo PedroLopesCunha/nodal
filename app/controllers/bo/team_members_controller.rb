@@ -73,17 +73,34 @@ class Bo::TeamMembersController < Bo::BaseController
     @editing_self = editing_self?
 
     if @editing_self
-      @member = @org_member.member
-      filtered_params = member_params
-      if filtered_params[:password].blank?
-        filtered_params = filtered_params.except(:password, :password_confirmation)
-      end
+      # Two possible submissions from the self-edit page:
+      # - Personal info / password (main form, `member` params)
+      # - Sales-rep capability toggle (separate form, `org_member` params)
+      if params[:member].present?
+        @member = @org_member.member
+        filtered_params = member_params
+        if filtered_params[:password].blank?
+          filtered_params = filtered_params.except(:password, :password_confirmation)
+        end
 
-      if @member.update(filtered_params)
-        bypass_sign_in(@member) if member_params[:password].present?
-        redirect_to bo_team_members_path(params[:org_slug]), notice: "Profile updated successfully."
+        if @member.update(filtered_params)
+          bypass_sign_in(@member) if member_params[:password].present?
+          redirect_to bo_team_members_path(params[:org_slug]), notice: "Profile updated successfully."
+        else
+          render :edit, status: :unprocessable_entity
+        end
+      elsif params[:org_member].present?
+        # Self-toggle of is_sales_rep only. Role/active stay admin-only and
+        # are filtered out by org_member_self_params.
+        if @org_member.update(org_member_self_params)
+          flash_msg = @org_member.is_sales_rep? ? "Estás agora marcado como vendedor." : "Capacidade de vendedor removida."
+          redirect_to edit_bo_team_member_path(params[:org_slug], @org_member), notice: flash_msg
+        else
+          @member = @org_member.member
+          render :edit, status: :unprocessable_entity
+        end
       else
-        render :edit, status: :unprocessable_entity
+        redirect_to bo_team_members_path(params[:org_slug])
       end
     else
       if @org_member.update(org_member_update_params)
@@ -124,11 +141,17 @@ class Bo::TeamMembersController < Bo::BaseController
   end
 
   def org_member_params
-    params.require(:org_member).permit(:role, :invited_email)
+    params.require(:org_member).permit(:role, :invited_email, :is_sales_rep)
   end
 
   def org_member_update_params
-    params.require(:org_member).permit(:role, :active)
+    params.require(:org_member).permit(:role, :active, :is_sales_rep)
+  end
+
+  # Self-edit can only toggle the sales-rep capability — role/active stay
+  # gated to admins/owners managing other members.
+  def org_member_self_params
+    params.require(:org_member).permit(:is_sales_rep)
   end
 
   def member_params

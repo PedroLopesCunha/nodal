@@ -18,8 +18,19 @@
       <%= link_to bo_customers_path do %>
         <i class="fa-solid fa-users"></i>
         <span><%= t('bo.sidebar.customers') %></span>
+        <% if @pending_erp_sync_count && @pending_erp_sync_count > 0 %>
+          <span class="badge rounded-pill bg-danger ms-auto" title="Clientes por sincronizar com ERP"><%= @pending_erp_sync_count %></span>
+        <% end %>
       <% end %>
     </li>
+    <% if sales_rep_capability? %>
+      <li class="bo-sidebar-item <%= 'active' if controller_name == 'carteira' %>">
+        <%= link_to bo_sales_rep_carteira_path do %>
+          <i class="fa-solid fa-briefcase"></i>
+          <span>A minha carteira</span>
+        <% end %>
+      </li>
+    <% end %>
     <li class="bo-sidebar-item <%= 'active' if controller_name == 'products' %>">
       <%= link_to bo_products_path do %>
         <i class="fa-solid fa-box"></i>

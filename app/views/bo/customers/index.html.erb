@@ -115,6 +115,8 @@
                 <option value="inactive" <%= 'selected' if params[:status] == 'inactive' %>><%= t('bo.common.statuses.inactive') %></option>
                 <option value="not_invited" <%= 'selected' if params[:status] == 'not_invited' %>><%= t('bo.common.statuses.not_invited') %></option>
                 <option value="pending" <%= 'selected' if params[:status] == 'pending' %>><%= t('bo.common.statuses.pending') %></option>
+                <option value="pending_erp_sync" <%= 'selected' if params[:status] == 'pending_erp_sync' %>>Por sincronizar com ERP</option>
+                <option value="no_rep" <%= 'selected' if params[:status] == 'no_rep' %>>Sem vendedor atribuído</option>
               </select>
             </div>
             <% if @customer_categories.any? %>
@@ -142,7 +144,15 @@
         <% end %>
         <% if params[:status].present? %>
           <%= link_to bo_customers_path(params[:org_slug], filter_params_hash.except(:status, :page)), class: "badge bg-secondary text-decoration-none" do %>
-            <%= t("bo.common.statuses.#{params[:status]}") %> <i class="fa-solid fa-xmark ms-1"></i>
+            <%
+              status_label =
+                case params[:status]
+                when 'pending_erp_sync' then 'Por sincronizar com ERP'
+                when 'no_rep' then 'Sem vendedor'
+                else t("bo.common.statuses.#{params[:status]}")
+                end
+            %>
+            <%= status_label %> <i class="fa-solid fa-xmark ms-1"></i>
           <% end %>
         <% end %>
         <% if params[:category].present? %>
@@ -199,7 +209,14 @@
           <% @customers.each do |customer| %>
             <tr class="customer-row" data-href="<%= bo_customer_path(params[:org_slug], customer, filter_params_hash) %>" style="cursor: pointer;">
               <td>
-                <div class="fw-semibold"><%= customer.contact_name %></div>
+                <div class="fw-semibold">
+                  <%= customer.contact_name %>
+                  <% if customer.external_id.blank? && customer.created_by_member_id.present? %>
+                    <span class="badge bg-warning text-dark ms-1" title="Aguarda criação no ERP por um admin">
+                      <i class="fa-solid fa-rotate"></i> Por sincronizar
+                    </span>
+                  <% end %>
+                </div>
               </td>
               <td><%= customer.company_name %></td>
               <td>

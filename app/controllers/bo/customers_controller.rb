@@ -39,8 +39,20 @@ class Bo::CustomersController < Bo::BaseController
   def create
     @customer = Customer.new(customer_params)
     @customer.organisation = current_organisation
+    @customer.created_by_member = current_org_member
+    # Pure reps don't see the "active" toggle (it's locked to org default), so
+    # the field is stripped from params — backfill the boolean here to satisfy
+    # the model validation (inclusion: in [true, false]).
+    @customer.active = true if @customer.active.nil?
     authorize @customer
     if @customer.save
+      # Sales reps creating a customer auto-claim it for their carteira.
+      # Owners/admins who are also reps can self-assign explicitly via the
+      # assignment UX — we don't auto-grab on their behalf here, since they
+      # may be creating on behalf of a different rep.
+      if pure_sales_rep?
+        CustomerAssignment.create!(org_member: current_org_member, customer: @customer)
+      end
       redirect_to bo_customer_path(params[:org_slug], @customer), notice: "Customer created successfully."
     else
       @customer.build_billing_address_with_archived(address_type: "billing") if @customer.billing_address_with_archived.nil?
@@ -99,11 +111,31 @@ class Bo::CustomersController < Bo::BaseController
   end
 
   def customer_params
-    params.require(:customer).permit(:company_name, :contact_name, :email, :contact_phone, :active, :taxpayer_id, :email_notifications_enabled, :customer_category_id, billing_address_with_archived_attributes: [:id, :street_name, :street_nr, :postal_code, :city, :country, :address_type, :active], shipping_addresses_with_archived_attributes: [:id, :street_name, :street_nr, :postal_code, :city, :country, :address_type, :_destroy, :active])
+    raw = params.require(:customer).permit(
+      :company_name, :contact_name, :email, :contact_phone, :active,
+      :taxpayer_id, :email_notifications_enabled, :customer_category_id,
+      billing_address_with_archived_attributes: [:id, :street_name, :street_nr, :postal_code, :city, :country, :address_type, :active],
+      shipping_addresses_with_archived_attributes: [:id, :street_name, :street_nr, :postal_code, :city, :country, :address_type, :_destroy, :active]
+    )
+
+    return raw unless pure_sales_rep?
+
+    # Pure reps can't set pricing tier (customer_category) or toggle active state.
+    # On update they also can't touch billing/shipping addresses — morada is
+    # locked after creation to block delivery-redirection fraud. NIF stays
+    # editable on create but locked on update (immutable identity).
+    restricted = raw.except(:customer_category_id, :active)
+    if action_name == "update"
+      restricted = restricted.except(:taxpayer_id, :billing_address_with_archived_attributes, :shipping_addresses_with_archived_attributes)
+    end
+    restricted
   end
 
   def load_customers
-    @customers = apply_customer_filters(policy_scope(current_organisation.customers).includes(:customer_category, :customer_users))
+    @customers = apply_customer_filters(
+      policy_scope(current_organisation.customers)
+        .includes(:customer_category, :customer_users, customer_assignment: { org_member: :member })
+    )
 
     @sort_column = %w[company_name contact_name email active].include?(params[:sort]) ? params[:sort] : "company_name"
     @sort_direction = %w[asc desc].include?(params[:direction]) ? params[:direction] : "asc"
@@ -122,6 +154,10 @@ class Bo::CustomersController < Bo::BaseController
     end
 
     case params[:status]
+    when "pending_erp_sync"
+      scope = scope.pending_erp_sync
+    when "no_rep"
+      scope = scope.left_joins(:customer_assignment).where(customer_assignments: { id: nil })
     when "active"
       # Has at least one active login that has accepted its invitation.
       scope = scope.where(active: true)

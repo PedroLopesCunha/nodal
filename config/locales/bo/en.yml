@@ -397,6 +397,7 @@ en:
       new:
         title: "New Customer"
         subtitle: "Add a new customer to your organisation"
+        create_customer: "Create customer"
       edit:
         title: "Edit Customer"
         subtitle: "Update customer information"

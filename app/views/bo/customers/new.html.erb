@@ -30,6 +30,17 @@
 
 <div class="bo-page-body">
 
+<% if @customer.errors.any? %>
+  <div class="alert alert-danger mb-3">
+    <strong>Não foi possível guardar o cliente:</strong>
+    <ul class="mb-0 mt-2">
+      <% @customer.errors.full_messages.each do |msg| %>
+        <li><%= msg %></li>
+      <% end %>
+    </ul>
+  </div>
+<% end %>
+
 <%= form_with model: @customer, url: bo_customers_path(params[:org_slug]), method: :post, id: "customer-form" do |f| %>
   <div class="row g-3">
     <div class="col-md-8">
@@ -146,27 +157,42 @@
     </div>
 
     <div class="col-md-4">
-      <div class="card mb-3">
-        <div class="card-body">
-          <h5 class="card-title mb-4"><%= t('bo.customers.form.account_status') %></h5>
+      <% unless pure_sales_rep? %>
+        <div class="card mb-3">
+          <div class="card-body">
+            <h5 class="card-title mb-4"><%= t('bo.customers.form.account_status') %></h5>
 
-          <div class="form-check form-switch">
-            <%= f.check_box :active, class: "form-check-input", role: "switch", id: "activeSwitch", checked: true %>
-            <label class="form-check-label" for="activeSwitch"><%= t('bo.customers.form.active_customer') %></label>
+            <div class="form-check form-switch">
+              <%= f.check_box :active, class: "form-check-input", role: "switch", id: "activeSwitch", checked: true %>
+              <label class="form-check-label" for="activeSwitch"><%= t('bo.customers.form.active_customer') %></label>
+            </div>
+            <small class="text-muted"><%= t('bo.customers.form.inactive_hint') %></small>
           </div>
-          <small class="text-muted"><%= t('bo.customers.form.inactive_hint') %></small>
         </div>
-      </div>
 
-      <div class="card">
-        <div class="card-body">
-          <h5 class="card-title mb-4"><%= t('bo.customers.form.category') %></h5>
-          <%= f.select :customer_category_id,
-              options_from_collection_for_select(@customer_categories, :id, :name),
-              { include_blank: t('bo.customers.form.no_category') },
-              class: "form-select" %>
+        <div class="card">
+          <div class="card-body">
+            <h5 class="card-title mb-4"><%= t('bo.customers.form.category') %></h5>
+            <%= f.select :customer_category_id,
+                options_from_collection_for_select(@customer_categories, :id, :name),
+                { include_blank: t('bo.customers.form.no_category') },
+                class: "form-select" %>
+          </div>
         </div>
-      </div>
+      <% else %>
+        <div class="card mb-3 border-info">
+          <div class="card-body">
+            <h5 class="card-title mb-3"><i class="fa-solid fa-info-circle text-info me-2"></i>Cliente novo</h5>
+            <p class="small text-muted mb-2">
+              Este cliente será automaticamente atribuído à tua carteira e ficará pendente de sincronização com o ERP.
+              Um admin precisa de criá-lo no sistema central antes da primeira fatura ser emitida.
+            </p>
+            <p class="small text-muted mb-0">
+              A categoria/tier de preço será definida pelo admin após a sincronização.
+            </p>
+          </div>
+        </div>
+      <% end %>
     </div>
   </div>
 <% end %>

@@ -18,10 +18,11 @@ class ProductPolicy < ApplicationPolicy
   end
 
   def new?
-    true
+    !pure_sales_rep?
   end
 
   def create?
+    return false if pure_sales_rep?
     # When authorizing class-level actions (like import), record is the class itself
     return true if record == Product
 
@@ -30,6 +31,7 @@ class ProductPolicy < ApplicationPolicy
 
   def import?
     return false unless user.is_a?(Member) && organisation.present?
+    return false if pure_sales_rep?
 
     user.org_members.find_by(organisation: organisation)&.role&.in?(%w[admin owner])
   end
@@ -55,43 +57,43 @@ class ProductPolicy < ApplicationPolicy
   end
 
   def edit?
-    belongs_to_organisation?
+    !pure_sales_rep? && belongs_to_organisation?
   end
 
   def update?
-    belongs_to_organisation?
+    edit?
   end
 
   def destroy?
-    belongs_to_organisation?
+    !pure_sales_rep? && belongs_to_organisation?
   end
 
   def delete_photo?
-    belongs_to_organisation?
+    !pure_sales_rep? && belongs_to_organisation?
   end
 
   def set_main_photo?
-    belongs_to_organisation?
+    !pure_sales_rep? && belongs_to_organisation?
   end
 
   def configure_variants?
-    belongs_to_organisation?
+    !pure_sales_rep? && belongs_to_organisation?
   end
 
   def update_variant_configuration?
-    belongs_to_organisation?
+    !pure_sales_rep? && belongs_to_organisation?
   end
 
   def related_products?
-    belongs_to_organisation?
+    !pure_sales_rep? && belongs_to_organisation?
   end
 
   def update_related_products?
-    belongs_to_organisation?
+    !pure_sales_rep? && belongs_to_organisation?
   end
 
   def reorder_related_products?
-    belongs_to_organisation?
+    !pure_sales_rep? && belongs_to_organisation?
   end
 
   private

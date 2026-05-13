@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2026_05_05_160000) do
+ActiveRecord::Schema[7.1].define(version: 2026_05_12_100005) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_trgm"
   enable_extension "plpgsql"
@@ -118,6 +118,16 @@ ActiveRecord::Schema[7.1].define(version: 2026_05_05_160000) do
     t.index ["category_id", "product_id"], name: "index_category_products_on_category_id_and_product_id", unique: true
     t.index ["category_id"], name: "index_category_products_on_category_id"
     t.index ["product_id"], name: "index_category_products_on_product_id"
+  end
+
+  create_table "customer_assignments", force: :cascade do |t|
+    t.bigint "org_member_id", null: false
+    t.bigint "customer_id", null: false
+    t.datetime "assigned_at", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["customer_id"], name: "index_customer_assignments_on_customer_id", unique: true
+    t.index ["org_member_id"], name: "index_customer_assignments_on_org_member_id"
   end
 
   create_table "customer_categories", force: :cascade do |t|
@@ -260,6 +270,8 @@ ActiveRecord::Schema[7.1].define(version: 2026_05_05_160000) do
     t.string "current_sign_in_ip"
     t.string "last_sign_in_ip"
     t.boolean "hide_prices", default: false, null: false
+    t.bigint "created_by_member_id"
+    t.index ["created_by_member_id"], name: "index_customers_on_created_by_member_id"
     t.index ["customer_category_id"], name: "index_customers_on_customer_category_id"
     t.index ["email", "organisation_id"], name: "index_customers_on_email_and_organisation_id", unique: true
     t.index ["invitation_token"], name: "index_customers_on_invitation_token", unique: true
@@ -267,6 +279,7 @@ ActiveRecord::Schema[7.1].define(version: 2026_05_05_160000) do
     t.index ["invited_by_type", "invited_by_id"], name: "index_customers_on_invited_by"
     t.index ["locale"], name: "index_customers_on_locale"
     t.index ["organisation_id", "external_id", "external_source"], name: "index_customers_on_org_external_id_source", unique: true, where: "(external_id IS NOT NULL)"
+    t.index ["organisation_id", "taxpayer_id"], name: "index_customers_on_org_id_taxpayer_id_unique", unique: true, where: "((taxpayer_id IS NOT NULL) AND ((taxpayer_id)::text <> ''::text))"
     t.index ["organisation_id"], name: "index_customers_on_organisation_id"
     t.index ["reset_password_token"], name: "index_customers_on_reset_password_token", unique: true
   end
@@ -477,6 +490,9 @@ ActiveRecord::Schema[7.1].define(version: 2026_05_05_160000) do
     t.integer "push_attempts", default: 0, null: false
     t.datetime "last_pushed_at"
     t.bigint "customer_user_id", null: false
+    t.string "placed_by_type"
+    t.bigint "placed_by_id"
+    t.bigint "sales_rep_id"
     t.index ["applied_by_id"], name: "index_orders_on_applied_by_id"
     t.index ["billing_address_id"], name: "index_orders_on_billing_address_id"
     t.index ["customer_id"], name: "index_orders_on_customer_id"
@@ -488,7 +504,9 @@ ActiveRecord::Schema[7.1].define(version: 2026_05_05_160000) do
     t.index ["organisation_id", "placed_at"], name: "index_orders_on_organisation_id_and_placed_at"
     t.index ["organisation_id", "push_status"], name: "index_orders_on_organisation_id_and_push_status"
     t.index ["organisation_id"], name: "index_orders_on_organisation_id"
+    t.index ["placed_by_type", "placed_by_id"], name: "index_orders_on_placed_by"
     t.index ["promo_code_id"], name: "index_orders_on_promo_code_id"
+    t.index ["sales_rep_id"], name: "index_orders_on_sales_rep_id"
     t.index ["shipping_address_id"], name: "index_orders_on_shipping_address_id"
   end
 
@@ -506,8 +524,10 @@ ActiveRecord::Schema[7.1].define(version: 2026_05_05_160000) do
     t.datetime "invitation_accepted_at"
     t.string "invited_email"
     t.boolean "receive_order_notifications"
+    t.boolean "is_sales_rep", default: false, null: false
     t.index ["invitation_token"], name: "index_org_members_on_invitation_token", unique: true
     t.index ["member_id"], name: "index_org_members_on_member_id"
+    t.index ["organisation_id", "is_sales_rep"], name: "index_org_members_on_org_id_sales_reps", where: "(is_sales_rep = true)"
     t.index ["organisation_id"], name: "index_org_members_on_organisation_id"
   end
 
@@ -945,6 +965,8 @@ ActiveRecord::Schema[7.1].define(version: 2026_05_05_160000) do
   add_foreign_key "categories", "organisations"
   add_foreign_key "category_products", "categories"
   add_foreign_key "category_products", "products"
+  add_foreign_key "customer_assignments", "customers"
+  add_foreign_key "customer_assignments", "org_members"
   add_foreign_key "customer_categories", "organisations"
   add_foreign_key "customer_discounts", "customer_categories"
   add_foreign_key "customer_discounts", "customers"
@@ -959,6 +981,7 @@ ActiveRecord::Schema[7.1].define(version: 2026_05_05_160000) do
   add_foreign_key "customer_users", "customers"
   add_foreign_key "customer_users", "organisations"
   add_foreign_key "customers", "customer_categories"
+  add_foreign_key "customers", "org_members", column: "created_by_member_id"
   add_foreign_key "customers", "organisations"
   add_foreign_key "discount_email_notifications", "members", column: "sent_by_id"
   add_foreign_key "discount_email_notifications", "organisations"
@@ -985,6 +1008,7 @@ ActiveRecord::Schema[7.1].define(version: 2026_05_05_160000) do
   add_foreign_key "orders", "customers"
   add_foreign_key "orders", "members", column: "applied_by_id"
   add_foreign_key "orders", "order_discounts"
+  add_foreign_key "orders", "org_members", column: "sales_rep_id"
   add_foreign_key "orders", "organisations"
   add_foreign_key "orders", "promo_codes"
   add_foreign_key "org_members", "members"

@@ -1,0 +1,19 @@
+<div class="impersonation-banner py-2 px-3 d-flex align-items-center gap-3 sticky-top"
+     style="background: #b91c1c; color: white; z-index: 1050; box-shadow: 0 2px 8px rgba(0,0,0,0.15); font-size: 0.9rem;">
+  <i class="fa-solid fa-user-secret fa-lg"></i>
+  <div class="flex-grow-1">
+    <strong>A operar como: <%= impersonated_customer.company_name %></strong>
+    <% if current_member %>
+      <span class="opacity-75 small ms-2">— Tu (<%= current_member.first_name %>) estás a colocar encomenda em nome desta empresa</span>
+    <% end %>
+  </div>
+  <%= link_to bo_path(org_slug: current_organisation.slug), class: "btn btn-sm btn-light" do %>
+    <i class="fa-solid fa-arrow-left me-1"></i> Voltar ao BO
+  <% end %>
+  <%= button_to bo_impersonation_path(org_slug: current_organisation.slug),
+                method: :delete,
+                form: { class: "d-inline" },
+                class: "btn btn-sm btn-outline-light" do %>
+    <i class="fa-solid fa-xmark me-1"></i> Sair
+  <% end %>
+</div>

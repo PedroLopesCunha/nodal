@@ -56,6 +56,7 @@
         </div>
       </div>
 
+      <% unless pure_sales_rep? %>
       <div class="card">
         <div class="card-body">
           <h5 class="card-title mb-4"><%= t('bo.customers.form.company_details') %></h5>
@@ -141,9 +142,11 @@
           </div>
         </div>
       </div>
+      <% end %>
     </div>
 
     <div class="col-md-4">
+      <% unless pure_sales_rep? %>
       <div class="card mb-3">
         <div class="card-body">
           <h5 class="card-title mb-4"><%= t('bo.customers.form.account_status') %></h5>
@@ -187,6 +190,48 @@
             <small class="text-muted d-block"><%= t('bo.customers.form.last_updated') %></small>
             <span><%= @customer.updated_at.strftime("%-m/%-d/%Y") %></span>
           </div>
+        </div>
+      </div>
+      <% else %>
+      <div class="card border-info">
+        <div class="card-body">
+          <h5 class="card-title mb-3"><i class="fa-solid fa-info-circle text-info me-2"></i>Edição limitada</h5>
+          <p class="small text-muted mb-0">
+            Como vendedor, podes atualizar dados de contacto (nome, email, telefone) mas não a empresa, NIF ou moradas — essas alterações requerem um admin.
+          </p>
+        </div>
+      </div>
+      <% end %>
+    </div>
+  </div>
+<% end %>
+
+<%# Separate form (outside the main customer form) for vendedor atribuído.
+    Only admins/owners can change it — pure reps don't see this card. %>
+<% if current_org_member&.role&.in?(%w[owner admin]) %>
+  <div class="row g-3 mt-3">
+    <div class="col-md-8 offset-md-0">
+      <div class="card">
+        <div class="card-body">
+          <h5 class="card-title mb-3"><i class="fa-solid fa-user-tie me-2"></i>Vendedor atribuído</h5>
+          <%= form_with url: bo_customer_customer_assignment_path(org_slug: current_organisation.slug, customer_id: @customer.id), method: :post, local: true, class: "d-flex gap-2 align-items-center flex-wrap" do %>
+            <% rep_options = current_organisation.org_members.where(is_sales_rep: true).joins(:member).includes(:member).map { |om| [om.display_name, om.id] } %>
+            <%= select_tag :org_member_id,
+                  options_for_select([["Nenhum (sem vendedor)", nil]] + rep_options, @customer.sales_rep&.id),
+                  class: "form-select",
+                  style: "max-width: 360px;" %>
+            <button type="submit" class="btn btn-primary">
+              <i class="fa-solid fa-check me-1"></i> Atualizar vendedor
+            </button>
+            <% if @customer.sales_rep %>
+              <small class="text-muted ms-2">
+                Atual: <strong><%= @customer.sales_rep.display_name %></strong>
+                <% if (assigned = @customer.customer_assignment&.assigned_at) %>
+                  (desde <%= l(assigned.to_date, format: :short) %>)
+                <% end %>
+              </small>
+            <% end %>
+          <% end %>
         </div>
       </div>
     </div>

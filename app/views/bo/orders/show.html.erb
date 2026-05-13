@@ -256,7 +256,33 @@
             </div>
           <% end %>
 
-          <% if @order.customer_user %>
+          <% placed_by = @order.placed_by %>
+          <% if placed_by.is_a?(Member) %>
+            <hr class="my-3">
+            <div class="mb-1">
+              <small class="text-muted"><%= t('bo.orders.show.placed_by') %></small>
+              <div>
+                <%= "#{placed_by.first_name} #{placed_by.last_name}".strip.presence || placed_by.email %>
+                <span class="badge bg-info ms-1" title="Encomenda colocada por um membro da equipa em nome do cliente">
+                  <i class="fa-solid fa-user-tie"></i> Vendedor
+                </span>
+              </div>
+              <small class="text-muted"><%= placed_by.email %></small>
+              <% if @order.sales_rep && @order.sales_rep.member_id != placed_by.id %>
+                <small class="text-muted d-block mt-1">Vendedor atribuído: <%= @order.sales_rep.display_name %></small>
+              <% end %>
+            </div>
+          <% elsif placed_by.is_a?(CustomerUser) %>
+            <hr class="my-3">
+            <div class="mb-1">
+              <small class="text-muted"><%= t('bo.orders.show.placed_by') %></small>
+              <div><%= placed_by.contact_name.presence || placed_by.email %></div>
+              <% if placed_by.contact_name.present? %>
+                <small class="text-muted"><%= placed_by.email %></small>
+              <% end %>
+            </div>
+          <% elsif @order.customer_user %>
+            <%# Fallback for legacy orders without placed_by set %>
             <hr class="my-3">
             <div class="mb-1">
               <small class="text-muted"><%= t('bo.orders.show.placed_by') %></small>

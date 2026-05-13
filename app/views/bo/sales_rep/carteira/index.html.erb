@@ -1,0 +1,118 @@
+<% content_for :bo_main_content do %>
+
+<div class="bo-page-header">
+  <div class="d-flex justify-content-between align-items-start">
+    <div>
+      <h1>A minha carteira</h1>
+      <p>Clientes atribuídos a ti como vendedor.</p>
+    </div>
+  </div>
+</div>
+
+<div class="bo-page-body">
+
+  <%# === Meus números (this month vs last) === %>
+  <div class="row g-3 mb-4">
+    <div class="col-md-4">
+      <div class="card">
+        <div class="card-body">
+          <small class="text-muted d-block">Encomendas este mês</small>
+          <h3 class="mb-0 mt-1"><%= @kpi_orders_this_month %></h3>
+          <small class="text-muted">vs <%= @kpi_orders_last_month %> no mês anterior</small>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="card">
+        <div class="card-body">
+          <small class="text-muted d-block">Volume este mês</small>
+          <h3 class="mb-0 mt-1"><%= humanized_money_with_symbol(@kpi_revenue_this_month) %></h3>
+          <small class="text-muted">vs <%= humanized_money_with_symbol(@kpi_revenue_last_month) %> no mês anterior</small>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="card">
+        <div class="card-body">
+          <small class="text-muted d-block">Encomenda média</small>
+          <h3 class="mb-0 mt-1"><%= humanized_money_with_symbol(@kpi_aov_this_month) %></h3>
+          <small class="text-muted">vs <%= humanized_money_with_symbol(@kpi_aov_last_month) %> no mês anterior</small>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <% if @customers.empty? %>
+    <div class="card">
+      <div class="card-body text-center py-5">
+        <i class="fa-solid fa-folder-open fa-3x text-muted mb-3"></i>
+        <h5>Sem clientes atribuídos</h5>
+        <p class="text-muted mb-3">
+          Ainda não tens nenhum cliente na tua carteira. Podes criar um novo cliente diretamente
+          ou pedir a um admin para te atribuir clientes existentes.
+        </p>
+        <%= link_to new_bo_customer_path(org_slug: current_organisation.slug), class: "btn btn-primary" do %>
+          <i class="fa-solid fa-plus me-1"></i> Criar novo cliente
+        <% end %>
+      </div>
+    </div>
+  <% else %>
+    <div class="card">
+      <div class="table-responsive">
+        <table class="table table-hover mb-0">
+          <thead class="table-light">
+            <tr>
+              <th>Cliente</th>
+              <th>Empresa</th>
+              <th>Última encomenda</th>
+              <th>Estado ERP</th>
+              <th class="text-end">Ações</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% @customers.each do |customer| %>
+              <tr>
+                <td>
+                  <div class="fw-semibold"><%= customer.contact_name %></div>
+                  <small class="text-muted"><%= customer.email %></small>
+                </td>
+                <td><%= customer.company_name %></td>
+                <td>
+                  <% if (date = @last_order_at[customer.id]) %>
+                    <%= l(date, format: :short) %>
+                    <small class="text-muted d-block"><%= time_ago_in_words(date) %> atrás</small>
+                  <% else %>
+                    <span class="text-muted">—</span>
+                  <% end %>
+                </td>
+                <td>
+                  <% if customer.external_id.present? %>
+                    <span class="badge bg-success-subtle text-success">Sincronizado</span>
+                  <% else %>
+                    <span class="badge bg-warning text-dark">
+                      <i class="fa-solid fa-rotate"></i> Por sincronizar
+                    </span>
+                  <% end %>
+                </td>
+                <td class="text-end" style="white-space: nowrap;">
+                  <%= button_to bo_impersonation_path(org_slug: current_organisation.slug, customer_id: customer.id),
+                                method: :post,
+                                form: { class: "d-inline" },
+                                class: "btn btn-sm btn-success",
+                                data: { turbo_confirm: "Entrar no storefront como #{customer.company_name}?" } do %>
+                    <i class="fa-solid fa-cart-shopping me-1"></i> Encomendar
+                  <% end %>
+                  <%= link_to bo_customer_path(org_slug: current_organisation.slug, id: customer.id), class: "btn btn-sm btn-outline-secondary" do %>
+                    <i class="fa-solid fa-eye"></i>
+                  <% end %>
+                </td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  <% end %>
+</div>
+
+<% end %>
