@@ -24,6 +24,8 @@ class MemberMailer < ApplicationMailer
     @order = params[:order]
     @customer = params[:customer]
     @customer_user = @order.customer_user
+    @placed_by = @order.placed_by
+    @sales_rep = @order.sales_rep
     org_slug = params[:org_slug]
     @organisation = Organisation.find_by(slug: org_slug)
 

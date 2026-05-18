@@ -193,6 +193,44 @@
         </div>
       </div>
 
+      <% if impersonating? %>
+        <!-- Notify customer logins (only shown when a sales rep is impersonating) -->
+        <% notify_candidates = current_customer.customer_users.where(active: true).where.not(email: [nil, ""]).order(:email) %>
+        <div class="card border-0 shadow-sm mb-4" style="border-radius: 12px;">
+          <div class="card-body">
+            <h5 class="card-title mb-3">
+              <i class="fa-solid fa-envelope me-2"></i>Notificar cliente por email
+            </h5>
+            <p class="small text-muted mb-3">
+              Escolhe a quem deve ir o email de confirmação desta encomenda. O cliente receberá uma mensagem a indicar que tu (<%= current_member.first_name %>) colocaste a encomenda em nome de <strong><%= current_customer.company_name %></strong>.
+            </p>
+            <% if notify_candidates.any? %>
+              <% notify_candidates.each do |cu| %>
+                <div class="form-check">
+                  <input type="checkbox"
+                         name="order[notify_customer_user_ids][]"
+                         value="<%= cu.id %>"
+                         id="notify_cu_<%= cu.id %>"
+                         class="form-check-input"
+                         form="checkout-form">
+                  <label class="form-check-label" for="notify_cu_<%= cu.id %>">
+                    <strong><%= cu.contact_name.presence || cu.email %></strong>
+                    <% if cu.contact_name.present? %>
+                      <span class="text-muted small">&middot; <%= cu.email %></span>
+                    <% end %>
+                  </label>
+                </div>
+              <% end %>
+              <small class="text-muted d-block mt-2">Deixa todos desselecionados para não enviar email ao cliente.</small>
+            <% else %>
+              <div class="alert alert-info small mb-0">
+                Esta empresa ainda não tem logins ativos com email — não há quem notificar. Convida um login depois para futuras encomendas.
+              </div>
+            <% end %>
+          </div>
+        </div>
+      <% end %>
+
       <!-- Billing Address (canonical, comes from ERP) -->
       <div class="card border-0 shadow-sm mb-4" style="border-radius: 12px;">
         <div class="card-body">

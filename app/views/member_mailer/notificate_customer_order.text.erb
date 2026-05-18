@@ -13,7 +13,17 @@ CUSTOMER
 <%= @customer.contact_name %>
 <%= @customer.company_name %>
 <%= @order.customer.email %>
-<% if @customer_user %>
+<% if @placed_by.is_a?(Member) %>
+
+PLACED BY (SALES REP)
+---------------------
+<%= "#{@placed_by.first_name} #{@placed_by.last_name}".strip.presence || @placed_by.email %> (<%= @placed_by.email %>)
+<% elsif @placed_by.is_a?(CustomerUser) %>
+
+PLACED BY
+---------
+<%= @placed_by.contact_name.presence || @placed_by.email %><% if @placed_by.contact_name.present? %> (<%= @placed_by.email %>)<% end %>
+<% elsif @customer_user %>
 
 PLACED BY
 ---------

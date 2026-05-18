@@ -35,10 +35,19 @@ class Storefront::CheckoutsController < Storefront::BaseController
       end
       @order.finalize_checkout!(same_as_billing: checkout_params[:same_as_billing] == "1")
 
-      # During impersonation, suppress the customer-facing confirmation email
-      # to avoid emailing the empresa about an order their rep just placed
-      # for them. The team notification still fires.
-      unless impersonating?
+      # Customer-facing confirmation email:
+      # - Self-service: send to the CustomerUser that just placed the order.
+      # - Impersonation: rep explicitly picks recipients on the checkout form
+      #   (notify_customer_user_ids). If none chosen, no customer email goes out.
+      if impersonating?
+        recipient_ids = Array(params.dig(:order, :notify_customer_user_ids)).reject(&:blank?)
+        if recipient_ids.any?
+          current_customer.customer_users.where(id: recipient_ids).find_each do |cu|
+            CustomerMailer.with(customer_user: cu, order: @order, placed_by_rep: current_member)
+                          .confirm_order.deliver_later
+          end
+        end
+      else
         CustomerMailer.with(customer_user: current_customer_user, order: @order).confirm_order.deliver_later
       end
       MemberMailer.with(customer: current_customer, order: @order, org_slug: params[:org_slug]).notificate_customer_order.deliver_later

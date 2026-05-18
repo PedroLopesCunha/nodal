@@ -18,9 +18,19 @@
 
 <p style="margin: 0 0 8px 0; font-size: 16px;"><%= t('mailers.customer_mailer.confirm_order.greeting', name: @customer_user.contact_name.presence || @customer_user.email).html_safe %></p>
 
-<p style="margin: 0 0 32px 0; color: #4b5563;">
-  <%= t('mailers.customer_mailer.confirm_order.intro') %>
-</p>
+<% if @placed_by_rep %>
+  <div style="margin: 0 0 24px 0; padding: 16px; background-color: #eff6ff; border-left: 4px solid #2563eb; border-radius: 6px;">
+    <p style="margin: 0; color: #1e3a8a; font-size: 14px;">
+      <strong><%= "#{@placed_by_rep.first_name} #{@placed_by_rep.last_name}".strip.presence || @placed_by_rep.email %></strong>,
+      do <%= @organisation.name %>, colocou esta encomenda em nome da <strong><%= @customer.company_name %></strong>.
+      Em caso de dúvida ou alteração, contacte directamente <%= @placed_by_rep.email %>.
+    </p>
+  </div>
+<% else %>
+  <p style="margin: 0 0 32px 0; color: #4b5563;">
+    <%= t('mailers.customer_mailer.confirm_order.intro') %>
+  </p>
+<% end %>
 
 <!-- Order items card -->
 <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="margin: 0 0 32px 0; border: 1px solid #e5e5e5; border-radius: 12px; overflow: hidden;">
