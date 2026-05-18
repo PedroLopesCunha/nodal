@@ -31,7 +31,7 @@ $bo-sidebar-border: #334155;
     width: $bo-sidebar-collapsed-width;
 
     .bo-logo-text,
-    .bo-sidebar-item span {
+    .bo-sidebar-item span:not(.badge) {
       opacity: 0;
       width: 0;
       overflow: hidden;
@@ -40,6 +40,20 @@ $bo-sidebar-border: #334155;
     .bo-sidebar-item a {
       justify-content: center;
       padding: 12px;
+    }
+
+    // Notification badges collapse to a compact dot on top-right of the icon
+    // so the rep still sees "there's something pending" without the count.
+    .bo-sidebar-item a .badge {
+      position: absolute;
+      top: 6px;
+      right: 6px;
+      min-width: 10px;
+      height: 10px;
+      padding: 0;
+      font-size: 0;
+      line-height: 1;
+      margin: 0 !important;
     }
 
     .bo-sidebar-header {
@@ -146,6 +160,7 @@ $bo-sidebar-border: #334155;
     font-weight: 500;
     transition: all 0.2s ease;
     border-radius: 10px;
+    position: relative; // anchor for absolute-positioned notification badge
 
     i {
       font-size: 1.125rem;
@@ -155,9 +170,23 @@ $bo-sidebar-border: #334155;
       transition: color 0.2s ease;
     }
 
-    span {
+    span:not(.badge) {
       transition: all 0.3s ease;
       white-space: nowrap;
+      flex: 1 1 auto;
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    // Expanded state: badge sits at the right edge of the link with safe
+    // padding instead of being pushed out by `ms-auto` + long labels.
+    .badge {
+      margin-left: auto;
+      flex-shrink: 0;
+      font-size: 0.75rem;
+      line-height: 1;
+      padding: 0.25rem 0.5rem;
     }
 
     &:hover {
