@@ -10,8 +10,20 @@ class Bo::BaseController < ApplicationController
   # customers and unblocks order push. If the org doesn't have it configured,
   # the whole "pending ERP sync" UI (badges, row tags, alert banners) is
   # meaningless and should be hidden.
+  #
+  # `can_sync_customers?` reaches into the adapter, which decrypts stored
+  # credentials. In dev, missing/mismatched keys raise — treat any failure
+  # as "not configured" so the BO keeps loading.
   def erp_customer_sync_enabled?
-    !!current_organisation&.erp_configuration&.can_sync_customers?
+    return @erp_customer_sync_enabled if defined?(@erp_customer_sync_enabled)
+
+    @erp_customer_sync_enabled =
+      begin
+        !!current_organisation&.erp_configuration&.can_sync_customers?
+      rescue StandardError => e
+        Rails.logger.warn("[Bo::BaseController] ERP sync check failed: #{e.class}: #{e.message}")
+        false
+      end
   end
 
   # Controllers a pure rep should never see in the BO (catalog admin,
