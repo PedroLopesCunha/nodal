@@ -191,6 +191,20 @@
       </div>
 
       <div class="col-md-4">
+        <% if @org_member.is_sales_rep? %>
+          <div class="card mb-3 border-info">
+            <div class="card-body">
+              <h6 class="card-title mb-2"><i class="fa-solid fa-briefcase me-2"></i>Carteira</h6>
+              <p class="small text-muted mb-3">
+                <%= @org_member.assigned_customers.count %> cliente(s) atribuído(s) a este vendedor.
+              </p>
+              <%= link_to carteira_bo_team_member_path(params[:org_slug], @org_member), class: "btn btn-sm btn-outline-primary w-100" do %>
+                <i class="fa-solid fa-up-right-from-square me-1"></i> Gerir carteira
+              <% end %>
+            </div>
+          </div>
+        <% end %>
+
         <div class="card">
           <div class="card-body">
             <h5 class="card-title mb-4"><%= t('bo.team_members.edit.member_details') %></h5>

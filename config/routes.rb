@@ -282,6 +282,11 @@ Rails.application.routes.draw do
         member do
           post :resend_invitation
           patch :toggle_active
+          # Admin-only carteira management for a sales rep:
+          # GET shows the two-panel UI; POST bulk-applies add/remove based on
+          # params[:action_type] ("add" or "remove") and customer_ids[].
+          get :carteira
+          post :update_carteira
         end
       end
     end
