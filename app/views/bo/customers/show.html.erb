@@ -38,7 +38,7 @@
         <% end %>
       <% end %>
       <%= link_to edit_bo_customer_path(params[:org_slug], @customer, filter_params_hash), class: "btn btn-outline-primary" do %>
-        <i class="fa-solid fa-pen-to-square me-1"></i> <%= t('bo.common.actions.edit') %>
+        <i class="fa-solid fa-pen-to-square me-1"></i> Editar empresa
       <% end %>
       <% unless pure_sales_rep? %>
         <%= link_to bo_customer_path(params[:org_slug], @customer, filter_params_hash), class: "btn btn-outline-danger", data: { turbo_method: :delete, turbo_confirm: t('bo.common.confirm.delete_customer') } do %>
@@ -80,20 +80,21 @@
     </div>
   <% end %>
 
-  <%# === Row 1: Contact Info + Account Details === %>
+  <%# === Empresa (dados fiscais + de contacto, e info admin como categoria/created_at) === %>
   <div class="row g-3 mb-4">
-    <div class="col-md-8">
+    <div class="<%= @customer.synced_from_erp? ? 'col-md-8' : 'col-12' %>">
       <div class="card h-100">
         <div class="card-body">
-          <h5 class="card-title mb-4"><%= t('bo.customers.show.contact_information') %></h5>
+          <h5 class="card-title mb-1">Empresa</h5>
+          <p class="text-muted small mb-4">Dados fiscais e de contacto desta empresa. As pessoas que aqui trabalham aparecem em baixo, na secção <em>Logins</em>.</p>
 
           <div class="row mb-4">
             <div class="col-md-6">
               <div class="d-flex align-items-start gap-3">
                 <i class="fa-solid fa-envelope text-muted mt-1"></i>
                 <div>
-                  <small class="text-muted d-block"><%= t('bo.customers.form.email') %></small>
-                  <span><%= @customer.email %></span>
+                  <small class="text-muted d-block">Email da empresa</small>
+                  <span><%= @customer.email.presence || t('bo.common.not_provided') %></span>
                 </div>
               </div>
             </div>
@@ -101,7 +102,7 @@
               <div class="d-flex align-items-start gap-3">
                 <i class="fa-solid fa-phone text-muted mt-1"></i>
                 <div>
-                  <small class="text-muted d-block"><%= t('bo.customers.form.phone') %></small>
+                  <small class="text-muted d-block">Telefone da empresa</small>
                   <span><%= @customer.contact_phone || t('bo.common.not_provided') %></span>
                 </div>
               </div>
@@ -149,13 +150,36 @@
             </div>
           </div>
 
+          <%# Admin info (categoria + cliente desde) que estava no antigo card "Detalhes da Conta" %>
+          <hr class="my-3">
+          <div class="row">
+            <div class="col-md-6">
+              <small class="text-muted d-block"><%= t('bo.customers.show.category') %></small>
+              <% if @customer.customer_category.present? %>
+                <span class="badge bg-light text-dark border"><%= @customer.customer_category.name %></span>
+              <% else %>
+                <span class="text-muted"><%= t('bo.customers.form.no_category') %></span>
+              <% end %>
+            </div>
+            <div class="col-md-6">
+              <small class="text-muted d-block"><%= t('bo.customers.show.member_since') %></small>
+              <span><%= l(@customer.created_at.to_date, format: :short) %></span>
+            </div>
+            <% if @customer.external_id.present? && !@customer.synced_from_erp? %>
+              <div class="col-md-6 mt-3">
+                <small class="text-muted d-block"><%= t('bo.erp_sync.external_id') %></small>
+                <span class="font-monospace"><%= @customer.external_id %></span>
+              </div>
+            <% end %>
+          </div>
+
         </div>
       </div>
     </div>
 
-    <div class="col-md-4">
-      <% if @customer.synced_from_erp? %>
-        <div class="card mb-3">
+    <% if @customer.synced_from_erp? %>
+      <div class="col-md-4">
+        <div class="card h-100">
           <div class="card-body">
             <h6 class="card-title mb-3"><i class="fa-solid fa-rotate me-1"></i> <%= t('bo.erp_sync.title') %></h6>
 
@@ -190,35 +214,8 @@
             <% end %>
           </div>
         </div>
-      <% end %>
-
-      <div class="card">
-        <div class="card-body">
-          <h5 class="card-title mb-4"><%= t('bo.customers.show.account_details') %></h5>
-
-          <% if @customer.external_id.present? && !@customer.synced_from_erp? %>
-          <div class="border-bottom pb-3 mb-3">
-            <small class="text-muted d-block"><%= t('bo.erp_sync.external_id') %></small>
-            <span class="font-monospace"><%= @customer.external_id %></span>
-          </div>
-          <% end %>
-
-          <div class="border-bottom pb-3 mb-3">
-            <small class="text-muted d-block"><%= t('bo.customers.show.category') %></small>
-            <% if @customer.customer_category.present? %>
-              <span class="badge bg-light text-dark border"><%= @customer.customer_category.name %></span>
-            <% else %>
-              <span class="text-muted"><%= t('bo.customers.form.no_category') %></span>
-            <% end %>
-          </div>
-
-          <div>
-            <small class="text-muted d-block"><%= t('bo.customers.show.member_since') %></small>
-            <span><%= @customer.created_at.strftime("%-m/%-d/%Y") %></span>
-          </div>
-        </div>
       </div>
-    </div>
+    <% end %>
   </div>
 
   <%# === Vendedor atribuído (read-only — edita no formulário do cliente) === %>
