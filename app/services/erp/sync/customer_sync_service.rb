@@ -29,6 +29,20 @@ module Erp
         end
 
         customer = find_or_initialize_customer(external_id, data[:taxpayer_id], data[:email])
+
+        # Returned nil means we deliberately skipped — another already-synced
+        # customer in this org has the same NIF, and re-importing would
+        # recreate a duplicate that an admin had previously cleaned up.
+        if customer.nil?
+          sync_log.increment_processed!
+          Rails.logger.info(
+            "[ERP sync] Skipped duplicate NIF for external_id=#{external_id} " \
+            "(taxpayer_id=#{data[:taxpayer_id]}) — another synced customer in " \
+            "org #{organisation.id} already holds this NIF."
+          )
+          return
+        end
+
         was_new = customer.new_record?
 
         # Customer holds only ERP-owned fields after the customer/login split
@@ -204,7 +218,20 @@ module Erp
           end
         end
 
-        # 4. Create new customer
+        # 4. Before creating a brand-new customer, guard against re-introducing
+        # duplicates that an admin previously cleaned up in Nodal. If another
+        # customer in this org is ALREADY synced with the same NIF, the PHC is
+        # carrying two records for the same fiscal entity — we keep the one
+        # Nodal already has and skip this import. Caller treats nil as skip.
+        if taxpayer_id.present?
+          existing_synced = organisation.customers
+                                        .where.not(external_id: nil)
+                                        .where("LOWER(taxpayer_id) = ?", taxpayer_id.downcase)
+                                        .exists?
+          return nil if existing_synced
+        end
+
+        # 5. Create new customer
         organisation.customers.new(
           external_id: external_id,
           external_source: external_source
