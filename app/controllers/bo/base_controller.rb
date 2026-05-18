@@ -4,7 +4,15 @@ class Bo::BaseController < ApplicationController
   before_action :redirect_pure_rep_from_admin_only_pages
   before_action :set_sidebar_counts
 
-  helper_method :pure_sales_rep?, :sales_rep_capability?
+  helper_method :pure_sales_rep?, :sales_rep_capability?, :erp_customer_sync_enabled?
+
+  # ERP customer sync is the integration that fills external_id on rep-created
+  # customers and unblocks order push. If the org doesn't have it configured,
+  # the whole "pending ERP sync" UI (badges, row tags, alert banners) is
+  # meaningless and should be hidden.
+  def erp_customer_sync_enabled?
+    !!current_organisation&.erp_configuration&.can_sync_customers?
+  end
 
   # Controllers a pure rep should never see in the BO (catalog admin,
   # discount rules, team management, org settings, etc.). Action-level
@@ -69,7 +77,9 @@ class Bo::BaseController < ApplicationController
 
   def set_sidebar_counts
     @unreviewed_orders_count = current_organisation.orders.unreviewed.count
-    @pending_erp_sync_count = current_organisation.customers.pending_erp_sync.count
+    # Only count "pending ERP sync" customers when the org actually uses ERP
+    # customer sync — otherwise the badge would never go away.
+    @pending_erp_sync_count = erp_customer_sync_enabled? ? current_organisation.customers.pending_erp_sync.count : 0
     @unseen_tasks_count = current_organisation.background_tasks
       .where(member: current_member)
       .where(status: [:pending, :running])

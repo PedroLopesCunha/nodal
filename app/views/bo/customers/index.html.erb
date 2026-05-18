@@ -115,7 +115,9 @@
                 <option value="inactive" <%= 'selected' if params[:status] == 'inactive' %>><%= t('bo.common.statuses.inactive') %></option>
                 <option value="not_invited" <%= 'selected' if params[:status] == 'not_invited' %>><%= t('bo.common.statuses.not_invited') %></option>
                 <option value="pending" <%= 'selected' if params[:status] == 'pending' %>><%= t('bo.common.statuses.pending') %></option>
-                <option value="pending_erp_sync" <%= 'selected' if params[:status] == 'pending_erp_sync' %>>Por sincronizar com ERP</option>
+                <% if erp_customer_sync_enabled? %>
+                  <option value="pending_erp_sync" <%= 'selected' if params[:status] == 'pending_erp_sync' %>>Por sincronizar com ERP</option>
+                <% end %>
                 <option value="no_rep" <%= 'selected' if params[:status] == 'no_rep' %>>Sem vendedor atribuído</option>
               </select>
             </div>
@@ -211,7 +213,7 @@
               <td>
                 <div class="fw-semibold">
                   <%= customer.contact_name %>
-                  <% if customer.external_id.blank? && customer.created_by_member_id.present? %>
+                  <% if erp_customer_sync_enabled? && customer.external_id.blank? && customer.created_by_member_id.present? %>
                     <span class="badge bg-warning text-dark ms-1" title="Aguarda criação no ERP por um admin">
                       <i class="fa-solid fa-rotate"></i> Por sincronizar
                     </span>

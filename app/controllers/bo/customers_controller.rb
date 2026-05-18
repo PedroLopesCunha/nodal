@@ -70,9 +70,22 @@ class Bo::CustomersController < Bo::BaseController
   end
 
   def update
-    if @customer.update(customer_params)
+    attrs = customer_params.to_h
+    # When an admin manually fills external_id (the "Marcar sincronizado"
+    # flow), tag the source so future ERP syncs treat the row consistently
+    # with auto-imported customers.
+    if attrs["external_id"].present? && @customer.external_id.blank?
+      attrs["external_source"] = current_organisation.erp_configuration&.adapter_type.presence || "manual"
+      attrs["last_synced_at"] = Time.current
+    end
+    if @customer.update(attrs)
       @customer.reload
-      redirect_to bo_customer_path(params[:org_slug], @customer, filter_params_hash), notice: "Customer updated successfully."
+      msg = if attrs["external_id"].present? && attrs["external_source"].present?
+              "Cliente marcado como sincronizado. Encomendas pendentes vão ser enviadas para o ERP."
+            else
+              "Customer updated successfully."
+            end
+      redirect_to bo_customer_path(params[:org_slug], @customer, filter_params_hash), notice: msg
     else
       @customer_categories = current_organisation.customer_categories.ordered
       render :edit, status: :unprocessable_entity
@@ -114,9 +127,14 @@ class Bo::CustomersController < Bo::BaseController
     raw = params.require(:customer).permit(
       :company_name, :contact_name, :email, :contact_phone, :active,
       :taxpayer_id, :email_notifications_enabled, :customer_category_id,
+      :external_id,
       billing_address_with_archived_attributes: [:id, :street_name, :street_nr, :postal_code, :city, :country, :address_type, :active],
       shipping_addresses_with_archived_attributes: [:id, :street_name, :street_nr, :postal_code, :city, :country, :address_type, :_destroy, :active]
     )
+
+    # external_id is the ERP id — never settable by reps; only admins/owners
+    # can mark a customer as synced manually (or it's filled by ERP sync).
+    raw = raw.except(:external_id) unless current_org_member&.role&.in?(%w[owner admin])
 
     return raw unless pure_sales_rep?
 
@@ -155,7 +173,7 @@ class Bo::CustomersController < Bo::BaseController
 
     case params[:status]
     when "pending_erp_sync"
-      scope = scope.pending_erp_sync
+      scope = scope.pending_erp_sync if erp_customer_sync_enabled?
     when "no_rep"
       scope = scope.left_joins(:customer_assignment).where(customer_assignments: { id: nil })
     when "active"
