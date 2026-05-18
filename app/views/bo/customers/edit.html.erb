@@ -36,7 +36,7 @@
         <div class="card-body">
           <% if pure_sales_rep? %>
             <h5 class="card-title mb-1">Empresa</h5>
-            <p class="text-muted small mb-4">Dados fiscais e de contacto desta empresa. As pessoas que aqui trabalham geres na página do cliente, na secção <em>Logins</em>.</p>
+            <p class="text-muted small mb-4">Dados fiscais e de contacto desta empresa.</p>
           <% else %>
             <h5 class="card-title mb-4"><%= t('bo.customers.form.contact_information') %></h5>
           <% end %>
@@ -62,17 +62,20 @@
           <% if pure_sales_rep? %>
             <hr class="my-4">
 
-            <%# Read-only fiscal/billing data — admin-only to change %>
+            <%# Read-only fiscal/billing data — admin-only to change.
+                Rendered as plain text (no inputs) to avoid suggesting editability. %>
             <div class="row g-3">
               <div class="col-md-6">
-                <label class="form-label">NIF</label>
-                <input type="text" class="form-control bg-light" value="<%= @customer.taxpayer_id %>" readonly>
-                <small class="text-muted">Para alterar, pede a um admin.</small>
+                <label class="form-label mb-1">NIF</label>
+                <div class="text-muted small py-1">
+                  <i class="fa-solid fa-building me-1"></i> <%= @customer.taxpayer_id.presence || "—" %>
+                </div>
               </div>
               <div class="col-md-6">
-                <label class="form-label">Morada de Faturação</label>
-                <input type="text" class="form-control bg-light" value="<%= @customer.billing_address&.full_address %>" readonly>
-                <small class="text-muted">Para alterar, pede a um admin.</small>
+                <label class="form-label mb-1">Morada de Faturação</label>
+                <div class="text-muted small py-1">
+                  <i class="fa-solid fa-location-dot me-1"></i> <%= @customer.billing_address&.full_address || "—" %>
+                </div>
               </div>
             </div>
 
