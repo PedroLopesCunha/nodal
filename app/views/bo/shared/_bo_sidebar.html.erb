@@ -57,7 +57,7 @@
     <li class="bo-sidebar-item <%= 'active' if controller_name == 'orders' %>">
       <%= link_to bo_orders_path do %>
         <i class="fa-solid fa-clipboard-list"></i>
-        <span><%= pure_sales_rep? ? 'Minhas encomendas' : t('bo.sidebar.orders') %></span>
+        <span><%= t('bo.sidebar.orders') %></span>
         <% if @unreviewed_orders_count && @unreviewed_orders_count > 0 %>
           <span class="badge rounded-pill bg-danger ms-auto"><%= @unreviewed_orders_count %></span>
         <% end %>
