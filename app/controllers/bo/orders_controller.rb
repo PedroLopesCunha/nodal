@@ -21,7 +21,9 @@ class Bo::OrdersController < Bo::BaseController
   end
 
   def show
-    @order.mark_as_reviewed!
+    # Pure reps viewing an order should NOT clear the BO unreviewed badge —
+    # the admin team still needs to know there's a new order to process.
+    @order.mark_as_reviewed! unless pure_sales_rep?
   end
 
   def edit
