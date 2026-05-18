@@ -28,7 +28,7 @@
 
   <%# === Meus números (this month vs last) === %>
   <div class="row g-3 mb-4">
-    <div class="col-md-3">
+    <div class="col-6 col-md-3">
       <div class="card h-100">
         <div class="card-body">
           <small class="text-muted d-block">Encomendas este mês</small>
@@ -37,7 +37,7 @@
         </div>
       </div>
     </div>
-    <div class="col-md-3">
+    <div class="col-6 col-md-3">
       <div class="card h-100">
         <div class="card-body">
           <small class="text-muted d-block">Volume este mês</small>
@@ -46,7 +46,7 @@
         </div>
       </div>
     </div>
-    <div class="col-md-3">
+    <div class="col-6 col-md-3">
       <div class="card h-100">
         <div class="card-body">
           <small class="text-muted d-block">Encomenda média</small>
@@ -55,7 +55,7 @@
         </div>
       </div>
     </div>
-    <div class="col-md-3">
+    <div class="col-6 col-md-3">
       <div class="card h-100 <%= 'border-info' if @kpi_open_carts > 0 %>"
            <% if @kpi_open_carts > 0 %>style="cursor: pointer;" data-bs-toggle="modal" data-bs-target="#openCartsModal"<% end %>>
         <div class="card-body">
