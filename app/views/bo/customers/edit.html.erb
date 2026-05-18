@@ -34,7 +34,12 @@
     <div class="col-md-8">
       <div class="card mb-3">
         <div class="card-body">
-          <h5 class="card-title mb-4"><%= t('bo.customers.form.contact_information') %></h5>
+          <% if pure_sales_rep? %>
+            <h5 class="card-title mb-1">Empresa</h5>
+            <p class="text-muted small mb-4">Dados fiscais e de contacto desta empresa. As pessoas que aqui trabalham geres na página do cliente, na secção <em>Logins</em>.</p>
+          <% else %>
+            <h5 class="card-title mb-4"><%= t('bo.customers.form.contact_information') %></h5>
+          <% end %>
 
           <div class="row g-3">
             <div class="col-md-6">
@@ -42,17 +47,70 @@
               <%= f.text_field :contact_name, class: "form-control", placeholder: t('bo.customers.form.contact_name_placeholder') %>
             </div>
             <div class="col-md-6">
-              <label class="form-label"><%= t('bo.customers.form.email') %></label>
+              <label class="form-label"><%= pure_sales_rep? ? "Email da empresa" : t('bo.customers.form.email') %></label>
               <%= f.email_field :email, class: "form-control", placeholder: t('bo.customers.form.email_placeholder') %>
             </div>
           </div>
 
           <div class="row g-3 mt-1">
             <div class="col-md-6">
-              <label class="form-label"><%= t('bo.customers.form.phone') %></label>
+              <label class="form-label"><%= pure_sales_rep? ? "Telefone da empresa" : t('bo.customers.form.phone') %></label>
               <%= f.text_field :contact_phone, class: "form-control", placeholder: t('bo.customers.form.phone_placeholder') %>
             </div>
           </div>
+
+          <% if pure_sales_rep? %>
+            <hr class="my-4">
+
+            <%# Read-only fiscal/billing data — admin-only to change %>
+            <div class="row g-3">
+              <div class="col-md-6">
+                <label class="form-label">NIF</label>
+                <input type="text" class="form-control bg-light" value="<%= @customer.taxpayer_id %>" readonly>
+                <small class="text-muted">Para alterar, pede a um admin.</small>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">Morada de Faturação</label>
+                <input type="text" class="form-control bg-light" value="<%= @customer.billing_address&.full_address %>" readonly>
+                <small class="text-muted">Para alterar, pede a um admin.</small>
+              </div>
+            </div>
+
+            <hr class="my-4">
+
+            <%# Shipping addresses — existing are read-only, new ones can be added %>
+            <h6 class="mb-3">Moradas de Envio</h6>
+            <% if @customer.shipping_addresses.any? %>
+              <ul class="list-unstyled small mb-3">
+                <% @customer.shipping_addresses.each do |addr| %>
+                  <li class="text-muted py-1">
+                    <i class="fa-solid fa-truck me-1"></i> <%= addr.full_address %>
+                  </li>
+                <% end %>
+              </ul>
+            <% end %>
+
+            <div data-controller="nested-addresses">
+              <div data-nested-addresses-target="container">
+                <%# Only renders NEW shipping address inputs (no fields_for over existing,
+                    so the existing records aren't touched on submit). %>
+              </div>
+
+              <template data-nested-addresses-target="template">
+                <%= f.fields_for(
+                  :shipping_addresses_with_archived,
+                  Address.new(address_type: "shipping", active: true),
+                  child_index: "NEW_RECORD"
+                ) do |sa| %>
+                  <%= render "shipping_address_fields", f: sa %>
+                <% end %>
+              </template>
+
+              <button type="button" class="btn btn-sm btn-outline-primary mt-2" data-action="nested-addresses#add">
+                <i class="fa-solid fa-plus"></i> Adicionar morada de envio
+              </button>
+            </div>
+          <% end %>
         </div>
       </div>
 

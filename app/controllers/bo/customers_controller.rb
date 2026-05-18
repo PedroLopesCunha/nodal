@@ -139,14 +139,32 @@ class Bo::CustomersController < Bo::BaseController
     return raw unless pure_sales_rep?
 
     # Pure reps can't set pricing tier (customer_category) or toggle active state.
-    # On update they also can't touch billing/shipping addresses — morada is
-    # locked after creation to block delivery-redirection fraud. NIF stays
-    # editable on create but locked on update (immutable identity).
+    # On update: NIF + billing address are locked (immutable identity / anti-fraud).
+    # Shipping addresses can have NEW entries appended, but existing ones can't
+    # be edited or deleted — strip any sub-hash carrying an :id from the
+    # nested-attributes payload so only fresh additions go through.
     restricted = raw.except(:customer_category_id, :active)
     if action_name == "update"
-      restricted = restricted.except(:taxpayer_id, :billing_address_with_archived_attributes, :shipping_addresses_with_archived_attributes)
+      restricted = restricted.except(:taxpayer_id, :billing_address_with_archived_attributes)
+
+      ship_attrs = restricted[:shipping_addresses_with_archived_attributes]
+      restricted[:shipping_addresses_with_archived_attributes] = strip_existing_address_attrs(ship_attrs) if ship_attrs.present?
     end
     restricted
+  end
+
+  # Filters a nested-attributes payload (array or hash form) down to entries
+  # that are new records (no :id). Protects pure-rep updates from sneaking in
+  # edits or destroys against existing shipping address rows.
+  def strip_existing_address_attrs(attrs)
+    case attrs
+    when Array
+      attrs.reject { |a| a[:id].present? || a["id"].present? }
+    when ActionController::Parameters, Hash
+      attrs.reject { |_, a| (a[:id].presence || a["id"].presence).present? }
+    else
+      attrs
+    end
   end
 
   def load_customers
