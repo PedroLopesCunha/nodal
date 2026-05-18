@@ -43,9 +43,8 @@ module Bo
         # Pre-load per-customer aggregates to avoid N+1 in the view.
         customer_ids = @customers.map(&:id)
         @last_order_at = current_organisation.orders.placed.where(customer_id: customer_ids).group(:customer_id).maximum(:placed_at)
-        @open_carts_by_customer = current_organisation.orders.draft.where(customer_id: customer_ids).group(:customer_id).count
 
-        load_kpis
+        load_kpis_and_open_carts
       end
 
       helper_method :carteira_filter_params_hash, :carteira_sort_link_params
@@ -116,7 +115,7 @@ module Bo
         scope
       end
 
-      def load_kpis
+      def load_kpis_and_open_carts
         # "Meus números": all placed orders from customers in this rep's
         # carteira plus any orders this rep personally placed.
         carteira_customer_ids = current_org_member.customer_assignments.pluck(:customer_id)
@@ -142,14 +141,28 @@ module Bo
         @kpi_aov_this_month = @kpi_orders_this_month > 0 ? Money.new(this_month_total_cents / @kpi_orders_this_month, currency) : Money.new(0, currency)
         @kpi_aov_last_month = @kpi_orders_last_month > 0 ? Money.new(last_month_total_cents / @kpi_orders_last_month, currency) : Money.new(0, currency)
 
-        # Open carts: draft orders with at least one item, scoped to this
-        # rep's carteira customers. Mirrors Dashboard::Metrics#open_carts but
-        # filtered to carteira_customer_ids.
-        @kpi_open_carts = current_organisation.orders.draft
-                            .where(customer_id: carteira_customer_ids)
-                            .joins(:order_items)
-                            .distinct
-                            .count
+        # Open carts: draft orders WITH AT LEAST ONE ITEM, scoped to this
+        # rep's carteira customers. Same logic as Dashboard::Metrics open_carts
+        # but filtered to the carteira. Loaded with the same eager-loads as
+        # Dashboard::Metrics.open_carts_detail so the shared modal partial
+        # (bo/dashboards/_open_carts_modal) renders without N+1.
+        @open_carts = current_organisation.orders.draft
+                        .where(customer_id: carteira_customer_ids)
+                        .joins(:order_items)
+                        .distinct
+                        .includes(:customer, :customer_user, order_items: [:product, :product_variant])
+                        .order(created_at: :desc)
+                        .to_a
+
+        @kpi_open_carts = @open_carts.size
+        open_carts_total_cents = @open_carts.sum do |cart|
+          cart.order_items.sum { |item| item.total_price.cents }
+        end
+        @kpi_open_carts_total = Money.new(open_carts_total_cents, currency)
+
+        # For the row badge: which customers in the (paginated) listing
+        # currently have at least one open cart with items.
+        @customer_ids_with_open_carts = @open_carts.map(&:customer_id).to_set
       end
     end
   end

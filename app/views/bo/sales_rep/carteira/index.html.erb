@@ -56,11 +56,21 @@
       </div>
     </div>
     <div class="col-md-3">
-      <div class="card h-100">
+      <div class="card h-100 <%= 'border-info' if @kpi_open_carts > 0 %>"
+           <% if @kpi_open_carts > 0 %>style="cursor: pointer;" data-bs-toggle="modal" data-bs-target="#openCartsModal"<% end %>>
         <div class="card-body">
           <small class="text-muted d-block">Carrinhos abertos</small>
-          <h3 class="mb-0 mt-1"><%= @kpi_open_carts %></h3>
-          <small class="text-muted">clientes com cart por finalizar</small>
+          <div class="d-flex justify-content-between align-items-baseline mt-1">
+            <h3 class="mb-0"><%= @kpi_open_carts %></h3>
+            <span class="text-muted small"><%= humanized_money_with_symbol(@kpi_open_carts_total) %></span>
+          </div>
+          <small class="text-muted">
+            <% if @kpi_open_carts > 0 %>
+              <i class="fa-solid fa-arrow-up-right-from-square fa-xs me-1"></i>clica para ver detalhe
+            <% else %>
+              sem carrinhos pendentes
+            <% end %>
+          </small>
         </div>
       </div>
     </div>
@@ -208,7 +218,7 @@
                 <td>
                   <div class="fw-semibold">
                     <%= customer.contact_name %>
-                    <% if @open_carts_by_customer[customer.id].to_i > 0 %>
+                    <% if @customer_ids_with_open_carts.include?(customer.id) %>
                       <span class="badge bg-info-subtle text-info ms-1" title="Tem um carrinho com itens por finalizar">
                         <i class="fa-solid fa-cart-shopping"></i> Carrinho aberto
                       </span>
@@ -263,5 +273,8 @@
     </div>
   <% end %>
 </div>
+
+<%# Reused from BO dashboard — same expandable detail UX, same eager-loads. %>
+<%= render "bo/dashboards/open_carts_modal", carts: @open_carts %>
 
 <% end %>
