@@ -43,6 +43,15 @@ class OrgMemberPolicy < ApplicationPolicy
     admin_or_owner? && record.pending_invitation?
   end
 
+  # Admin/owner-only: manage the rep's customer carteira (bulk add/remove).
+  def carteira?
+    admin_or_owner?
+  end
+
+  def update_carteira?
+    admin_or_owner?
+  end
+
   class Scope < ApplicationPolicy::Scope
     def resolve
       scope.all

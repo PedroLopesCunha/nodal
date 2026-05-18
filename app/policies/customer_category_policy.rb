@@ -8,19 +8,19 @@ class CustomerCategoryPolicy < ApplicationPolicy
   end
 
   def create?
-    member_working_for_organisation?
+    !pure_sales_rep? && member_working_for_organisation?
   end
 
   def new?
-    member_working_for_organisation?
+    !pure_sales_rep? && member_working_for_organisation?
   end
 
   def update?
-    member_working_for_organisation? && record_belongs_to_user_organisation?
+    !pure_sales_rep? && member_working_for_organisation? && record_belongs_to_user_organisation?
   end
 
   def destroy?
-    member_working_for_organisation? && record_belongs_to_user_organisation?
+    !pure_sales_rep? && member_working_for_organisation? && record_belongs_to_user_organisation?
   end
 
   def add_customers?

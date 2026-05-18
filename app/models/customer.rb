@@ -10,11 +10,14 @@ class Customer < ApplicationRecord
 
   belongs_to :organisation
   belongs_to :customer_category, optional: true
+  belongs_to :created_by_member, class_name: "OrgMember", optional: true
   # Order matters: orders must be destroyed BEFORE customer_users, otherwise
   # CustomerUser#dependent: :nullify tries to set orders.customer_user_id =
   # NULL on the cascade and hits the NOT NULL constraint added in PR #113.
   has_many :orders, dependent: :destroy
   has_many :customer_users, dependent: :destroy
+  has_one :customer_assignment, dependent: :destroy
+  has_one :sales_rep, through: :customer_assignment, source: :org_member
   has_one :billing_address, -> { billing.active }, class_name: "Address", as: :addressable, dependent: :destroy
   has_many :shipping_addresses, -> { shipping.active }, class_name: "Address", as: :addressable, dependent: :destroy
   has_one :billing_address_with_archived, -> { billing }, class_name: "Address", as: :addressable, dependent: :destroy
@@ -31,6 +34,9 @@ class Customer < ApplicationRecord
   validates :contact_name, presence: true
   validates :active, inclusion: { in: [true, false] }
   validates :locale, inclusion: { in: I18n.available_locales.map(&:to_s) }, allow_nil: true
+  validates :taxpayer_id,
+            uniqueness: { scope: :organisation_id, case_sensitive: false },
+            allow_blank: true
 
   # Customers eligible to receive transactional/marketing emails: active,
   # accepted their invitation, and have notifications enabled. Auth emails
@@ -38,6 +44,47 @@ class Customer < ApplicationRecord
   scope :mailable, -> {
     where(active: true, email_notifications_enabled: true).where.not(invitation_accepted_at: nil)
   }
+
+  # Rep-created customers without an ERP id yet. Orders for these are held
+  # locally until admin reconciles via PHC (then ERP sync fills in
+  # `external_id` and ErpRetryPendingOrdersJob retries the push).
+  scope :pending_erp_sync, -> { where(external_id: nil).where.not(created_by_member_id: nil) }
+
+  # When a customer transitions from "no ERP id" to "has ERP id" — typically
+  # because ERP sync just reconciled a rep-created empresa — kick off the
+  # retry job so any orders that were held back (push_status: pending due to
+  # OrderPushService skipping on blank external_id) get another shot.
+  after_update_commit :retry_pending_orders_after_erp_sync, if: :saved_change_to_external_id?
+
+  # When a Member creates a customer in the BO (rep prospecting, or admin
+  # bulk entry), seed a stub CustomerUser so impersonation has a login to
+  # hang the cart and order on. Mirrors the ERP-sync `mirror_customer_user_stub`
+  # pattern; skipped when there's no usable email since CustomerUser requires
+  # one. ERP-imported customers are handled separately by the sync service.
+  after_create :seed_stub_customer_user, if: -> { created_by_member_id.present? && email.present? }
+
+  def retry_pending_orders_after_erp_sync
+    previous, current = saved_change_to_external_id
+    return unless previous.blank? && current.present?
+
+    ErpRetryPendingOrdersJob.perform_later(id)
+  end
+
+  def seed_stub_customer_user
+    return if customer_users.exists?
+
+    customer_users.create!(
+      organisation_id: organisation_id,
+      email: email,
+      contact_name: contact_name,
+      contact_phone: contact_phone,
+      active: true
+    )
+  rescue ActiveRecord::RecordInvalid => e
+    Rails.logger.warn(
+      "[Customer ##{id}] stub CustomerUser creation skipped: #{e.message}"
+    )
+  end
 
   def mailable?
     active? && email_notifications_enabled? && invitation_accepted_at.present?

@@ -397,6 +397,7 @@ en:
       new:
         title: "New Customer"
         subtitle: "Add a new customer to your organisation"
+        create_customer: "Create customer"
       edit:
         title: "Edit Customer"
         subtitle: "Update customer information"
@@ -408,6 +409,7 @@ en:
         email_placeholder: "Enter email address"
         phone: "Phone"
         phone_placeholder: "Enter phone number"
+        company_details: "Company Details"
         company_name: "Company Name"
         company_name_placeholder: "Enter company name"
         category: "Category"
@@ -416,6 +418,8 @@ en:
         active: "Active"
         inactive: "Inactive"
         inactive_hint: "Inactive customers cannot place orders"
+        account_status: "Account Status"
+        active_customer: "Active Customer"
         email_notifications: "Email Notifications"
         email_notifications_hint: "When disabled, this customer will not receive promotional or transactional emails"
         taxpayer_id: "Taxpayer ID"
@@ -425,6 +429,7 @@ en:
         confirm_password_placeholder: "Confirm password"
         billing_address: "Billing Address"
         shipping_address: "Shipping Address"
+        shipping_addresses: "Shipping Addresses"
         add_shipping_address: "Add Shipping Address"
         street: "Street Address"
         street_placeholder: "Enter street address"
@@ -434,6 +439,12 @@ en:
         city_placeholder: "Enter city"
         country: "Country"
         country_placeholder: "Enter country"
+        address:
+          street: "Street"
+          number: "Number"
+          postal_code: "Postal Code"
+          city: "City"
+          country: "Country"
       invite:
         title: "Invite to Customer Portal"
         description: "Send an invitation email to allow this customer to access the storefront."

@@ -53,6 +53,9 @@
               <span class="badge <%= org_member.role == 'owner' ? 'bg-danger' : org_member.role == 'admin' ? 'bg-warning text-dark' : 'bg-secondary' %>">
                 <%= t("bo.team_members.roles.#{org_member.role}") %>
               </span>
+              <% if org_member.is_sales_rep? %>
+                <span class="badge bg-info ms-1">Vendedor</span>
+              <% end %>
             </td>
             <td>
               <% if org_member.pending_invitation? %>
@@ -86,6 +89,12 @@
               <% if !org_member.pending_invitation? && policy(org_member).toggle_active? %>
                 <%= button_to toggle_active_bo_team_member_path(params[:org_slug], org_member), method: :patch, form: { class: "d-inline" }, class: "btn btn-sm btn-link text-muted", title: org_member.active? ? t('bo.common.actions.deactivate') : t('bo.common.actions.activate') do %>
                   <i class="fa-solid fa-<%= org_member.active? ? 'user-slash' : 'user-check' %>"></i>
+                <% end %>
+              <% end %>
+
+              <% if org_member.is_sales_rep? && current_org_member&.role&.in?(%w[owner admin]) %>
+                <%= link_to carteira_bo_team_member_path(params[:org_slug], org_member), class: "btn btn-sm btn-link text-muted", title: "Gerir carteira" do %>
+                  <i class="fa-solid fa-briefcase"></i>
                 <% end %>
               <% end %>
 

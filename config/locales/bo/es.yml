@@ -388,6 +388,7 @@ es:
       new:
         title: "Nuevo Cliente"
         subtitle: "Añadir un nuevo cliente a su organización"
+        create_customer: "Crear cliente"
       edit:
         title: "Editar Cliente"
         subtitle: "Actualizar información del cliente"
@@ -399,6 +400,7 @@ es:
         email_placeholder: "Introduzca el correo electrónico"
         phone: "Teléfono"
         phone_placeholder: "Introduzca el número de teléfono"
+        company_details: "Datos de la Empresa"
         company_name: "Nombre de la Empresa"
         company_name_placeholder: "Introduzca el nombre de la empresa"
         category: "Categoría"
@@ -407,6 +409,8 @@ es:
         active: "Activo"
         inactive: "Inactivo"
         inactive_hint: "Los clientes inactivos no pueden realizar pedidos"
+        account_status: "Estado de la Cuenta"
+        active_customer: "Cliente Activo"
         email_notifications: "Notificaciones por Email"
         email_notifications_hint: "Cuando está desactivado, este cliente no recibirá emails promocionales o transaccionales"
         taxpayer_id: "NIF/CIF"
@@ -416,6 +420,7 @@ es:
         confirm_password_placeholder: "Confirme la contraseña"
         billing_address: "Dirección de Facturación"
         shipping_address: "Dirección de Envío"
+        shipping_addresses: "Direcciones de Envío"
         add_shipping_address: "Añadir Dirección de Envío"
         street: "Dirección"
         street_placeholder: "Introduzca la dirección"
@@ -425,6 +430,12 @@ es:
         city_placeholder: "Introduzca la ciudad"
         country: "País"
         country_placeholder: "Introduzca el país"
+        address:
+          street: "Calle"
+          number: "Número"
+          postal_code: "Código Postal"
+          city: "Ciudad"
+          country: "País"
       invite:
         title: "Invitar al Portal del Cliente"
         description: "Enviar un correo de invitación para permitir que este cliente acceda a la tienda."

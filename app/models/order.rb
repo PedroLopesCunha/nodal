@@ -23,6 +23,8 @@ class Order < ApplicationRecord
   belongs_to :shipping_address, class_name: "Address", optional: true
   belongs_to :billing_address, class_name: "Address", optional: true
   belongs_to :applied_by, class_name: "Member", optional: true
+  belongs_to :placed_by, polymorphic: true, optional: true
+  belongs_to :sales_rep, class_name: "OrgMember", optional: true
   belongs_to :order_discount, optional: true
   belongs_to :promo_code, optional: true
   has_many :order_items, dependent: :destroy

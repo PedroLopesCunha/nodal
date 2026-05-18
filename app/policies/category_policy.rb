@@ -8,43 +8,43 @@ class CategoryPolicy < ApplicationPolicy
   end
 
   def new?
-    member_working_for_organisation?
+    !pure_sales_rep? && member_working_for_organisation?
   end
 
   def create?
-    member_working_for_organisation?
+    !pure_sales_rep? && member_working_for_organisation?
   end
 
   def edit?
-    belongs_to_organisation?
+    !pure_sales_rep? && belongs_to_organisation?
   end
 
   def update?
-    belongs_to_organisation?
+    edit?
   end
 
   def destroy?
-    belongs_to_organisation? && record.deletable?
+    !pure_sales_rep? && belongs_to_organisation? && record.deletable?
   end
 
   def move?
-    belongs_to_organisation?
+    !pure_sales_rep? && belongs_to_organisation?
   end
 
   def restore?
-    belongs_to_organisation?
+    !pure_sales_rep? && belongs_to_organisation?
   end
 
   def reorder?
-    member_working_for_organisation?
+    !pure_sales_rep? && member_working_for_organisation?
   end
 
   def add_products?
-    belongs_to_organisation?
+    !pure_sales_rep? && belongs_to_organisation?
   end
 
   def remove_product?
-    belongs_to_organisation?
+    !pure_sales_rep? && belongs_to_organisation?
   end
 
   private

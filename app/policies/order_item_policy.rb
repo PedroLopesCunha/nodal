@@ -1,14 +1,14 @@
 class OrderItemPolicy < ApplicationPolicy
   def create?
-    order_owner_and_draft?
+    order_owner_and_draft? || member_impersonating_order_customer?
   end
 
   def update?
-    order_owner_and_draft?
+    create?
   end
 
   def destroy?
-    order_owner_and_draft?
+    create?
   end
 
   class Scope < ApplicationPolicy::Scope
@@ -29,5 +29,14 @@ class OrderItemPolicy < ApplicationPolicy
     user.is_a?(CustomerUser) &&
       record.order.customer_user_id == user.id &&
       record.order.draft?
+  end
+
+  # Sales reps act as the empresa during impersonation; they're allowed to
+  # manage line items on the draft cart of the empresa they're impersonating.
+  def member_impersonating_order_customer?
+    return false unless user.is_a?(Member)
+    return false unless context.is_a?(PunditContext) && context.impersonating?
+
+    context.impersonated_customer_id.to_i == record.order.customer_id && record.order.draft?
   end
 end

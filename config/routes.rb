@@ -121,6 +121,17 @@ Rails.application.routes.draw do
             get :download
           end
         end
+        resource :customer_assignment, only: [:create]
+      end
+
+      # Sales rep impersonation — Member becomes the "current_customer" for a
+      # specific empresa to place orders via storefront. See
+      # Bo::ImpersonationsController and Storefront::BaseController.
+      resource :impersonation, only: [:create, :destroy]
+
+      # Personal carteira page for OrgMembers with is_sales_rep: true.
+      namespace :sales_rep do
+        get :carteira, to: "carteira#index"
       end
       resources :customer_categories, except: [:index, :show] do
         member do
@@ -271,6 +282,11 @@ Rails.application.routes.draw do
         member do
           post :resend_invitation
           patch :toggle_active
+          # Admin-only carteira management for a sales rep:
+          # GET shows the two-panel UI; POST bulk-applies add/remove based on
+          # params[:action_type] ("add" or "remove") and customer_ids[].
+          get :carteira
+          post :update_carteira
         end
       end
     end

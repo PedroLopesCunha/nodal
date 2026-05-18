@@ -27,12 +27,33 @@ class Storefront::CheckoutsController < Storefront::BaseController
       @order.assign_attributes(order_params)
       handle_addresses
       @order.terms_accepted_at = Time.current if checkout_params[:terms_accepted] == "1"
+      if impersonating?
+        @order.placed_by = current_member
+        @order.sales_rep = current_org_member if current_org_member&.is_sales_rep?
+      else
+        @order.placed_by = current_customer_user
+      end
       @order.finalize_checkout!(same_as_billing: checkout_params[:same_as_billing] == "1")
 
-      CustomerMailer.with(customer_user: current_customer_user, order: @order).confirm_order.deliver_later
+      # Customer-facing confirmation email:
+      # - Self-service: send to the CustomerUser that just placed the order.
+      # - Impersonation: rep explicitly picks recipients on the checkout form
+      #   (notify_customer_user_ids). If none chosen, no customer email goes out.
+      if impersonating?
+        recipient_ids = Array(params.dig(:order, :notify_customer_user_ids)).reject(&:blank?)
+        if recipient_ids.any?
+          current_customer.customer_users.where(id: recipient_ids).find_each do |cu|
+            CustomerMailer.with(customer_user: cu, order: @order, placed_by_rep: current_member)
+                          .confirm_order.deliver_later
+          end
+        end
+      else
+        CustomerMailer.with(customer_user: current_customer_user, order: @order).confirm_order.deliver_later
+      end
       MemberMailer.with(customer: current_customer, order: @order, org_slug: params[:org_slug]).notificate_customer_order.deliver_later
 
-      redirect_to order_path(org_slug: params[:org_slug], id: @order), notice: t('storefront.flash.order_placed')
+      notice = impersonating? ? "Encomenda colocada em nome de #{current_customer.company_name}." : t('storefront.flash.order_placed')
+      redirect_to order_path(org_slug: params[:org_slug], id: @order), notice: notice
     rescue ActiveRecord::RecordInvalid => e
       @order_items = @order.order_items.includes(product: :category)
       @shipping_addresses = current_customer.shipping_addresses

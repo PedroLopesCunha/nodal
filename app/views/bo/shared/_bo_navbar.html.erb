@@ -6,13 +6,22 @@
     </button>
     <span class="d-md-none ms-2 fw-semibold small" style="white-space: nowrap;"><%= @current_organisation.name %></span>
     <ul class="dropdown-menu dropdown-menu-dark" style="max-height: 80vh; overflow-y: auto;">
-      <li><%= link_to bo_path, class: "dropdown-item" do %><i class="fa-solid fa-chart-line me-2"></i><%= t('bo.sidebar.dashboard') %><% end %></li>
-      <li><%= link_to bo_customers_path, class: "dropdown-item" do %><i class="fa-solid fa-users me-2"></i><%= t('bo.sidebar.customers') %><% end %></li>
-      <li><%= link_to bo_products_path, class: "dropdown-item" do %><i class="fa-solid fa-box me-2"></i><%= t('bo.sidebar.products') %><% end %></li>
-      <li><%= link_to bo_categories_path, class: "dropdown-item" do %><i class="fa-solid fa-folder-tree me-2"></i><%= t('bo.sidebar.categories') %><% end %></li>
-      <li><%= link_to bo_product_attributes_path, class: "dropdown-item" do %><i class="fa-solid fa-tags me-2"></i><%= t('bo.sidebar.attributes') %><% end %></li>
+      <% unless pure_sales_rep? %>
+        <li><%= link_to bo_path, class: "dropdown-item" do %><i class="fa-solid fa-chart-line me-2"></i><%= t('bo.sidebar.dashboard') %><% end %></li>
+        <li><%= link_to bo_customers_path, class: "dropdown-item" do %><i class="fa-solid fa-users me-2"></i><%= t('bo.sidebar.customers') %><% end %></li>
+      <% end %>
+      <% if sales_rep_capability? %>
+        <li><%= link_to bo_sales_rep_carteira_path, class: "dropdown-item" do %><i class="fa-solid fa-briefcase me-2"></i>A minha carteira<% end %></li>
+      <% end %>
+      <% unless pure_sales_rep? %>
+        <li><%= link_to bo_products_path, class: "dropdown-item" do %><i class="fa-solid fa-box me-2"></i><%= t('bo.sidebar.products') %><% end %></li>
+        <li><%= link_to bo_categories_path, class: "dropdown-item" do %><i class="fa-solid fa-folder-tree me-2"></i><%= t('bo.sidebar.categories') %><% end %></li>
+        <li><%= link_to bo_product_attributes_path, class: "dropdown-item" do %><i class="fa-solid fa-tags me-2"></i><%= t('bo.sidebar.attributes') %><% end %></li>
+      <% end %>
       <li><%= link_to bo_orders_path, class: "dropdown-item" do %><i class="fa-solid fa-clipboard-list me-2"></i><%= t('bo.sidebar.orders') %><% end %></li>
-      <li><%= link_to bo_pricing_path, class: "dropdown-item" do %><i class="fa-solid fa-percent me-2"></i><%= t('bo.sidebar.pricing') %><% end %></li>
+      <% unless pure_sales_rep? %>
+        <li><%= link_to bo_pricing_path, class: "dropdown-item" do %><i class="fa-solid fa-percent me-2"></i><%= t('bo.sidebar.pricing') %><% end %></li>
+      <% end %>
       <li><hr class="dropdown-divider"></li>
       <li>
         <%= link_to home_path(org_slug: params[:org_slug]), class: "dropdown-item", target: "_blank" do %>
@@ -20,9 +29,14 @@
           <i class="fa-solid fa-arrow-up-right-from-square ms-1 small text-muted"></i>
         <% end %>
       </li>
-      <li><%= link_to bo_team_members_path, class: "dropdown-item" do %><i class="fa-solid fa-users-gear me-2"></i><%= t('bo.sidebar.team') %><% end %></li>
+      <% unless pure_sales_rep? %>
+        <li><%= link_to bo_team_members_path, class: "dropdown-item" do %><i class="fa-solid fa-users-gear me-2"></i><%= t('bo.sidebar.team') %><% end %></li>
+      <% end %>
       <% if admin_or_owner? %>
         <li><%= link_to edit_bo_settings_path, class: "dropdown-item" do %><i class="fa-solid fa-gear me-2"></i><%= t('bo.sidebar.settings') %><% end %></li>
+      <% end %>
+      <% if pure_sales_rep? %>
+        <li><%= link_to edit_bo_team_member_path(id: current_org_member.id), class: "dropdown-item" do %><i class="fa-solid fa-user me-2"></i>Meu perfil<% end %></li>
       <% end %>
       <%# Mobile-only: language links %>
       <li class="d-md-none"><hr class="dropdown-divider"></li>

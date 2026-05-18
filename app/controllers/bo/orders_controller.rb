@@ -4,17 +4,26 @@ class Bo::OrdersController < Bo::BaseController
   before_action :set_order, only: [:show, :edit, :update, :destroy, :apply_discount, :remove_discount, :download_pdf, :retry_push]
 
   def index
-    @orders = apply_order_filters(policy_scope(current_organisation.orders.placed).includes(:customer, :customer_user, :order_items))
+    @orders = apply_order_filters(policy_scope(current_organisation.orders.placed).includes(:customer, :customer_user, :placed_by, :order_items))
 
     sort_direction = %w[asc desc].include?(params[:sort_dir]) ? params[:sort_dir] : "desc"
     @orders = @orders.order(Arel.sql("COALESCE(orders.placed_at, orders.created_at) #{sort_direction}"))
     @pagy, @orders = pagy(@orders)
 
-    @customers = current_organisation.customers.order(:company_name)
+    # Filter dropdown of customers: pure reps see only their carteira; everyone
+    # else sees the full org list (matches the underlying order scope).
+    @customers =
+      if pure_sales_rep?
+        current_org_member.assigned_customers.order(:company_name)
+      else
+        current_organisation.customers.order(:company_name)
+      end
   end
 
   def show
-    @order.mark_as_reviewed!
+    # Pure reps viewing an order should NOT clear the BO unreviewed badge —
+    # the admin team still needs to know there's a new order to process.
+    @order.mark_as_reviewed! unless pure_sales_rep?
   end
 
   def edit
@@ -121,7 +130,7 @@ class Bo::OrdersController < Bo::BaseController
   end
 
   def exportable_base_scope
-    policy_scope(current_organisation.orders.placed).includes(:customer, :customer_user, :order_items)
+    policy_scope(current_organisation.orders.placed).includes(:customer, :customer_user, :placed_by, :order_items)
   end
 
   def apply_export_filters(scope)

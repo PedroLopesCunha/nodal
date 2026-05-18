@@ -13,6 +13,10 @@ class CustomerMailer < ApplicationMailer
     @order = params[:order]
     @organisation = @order.organisation
     @customer = @order.customer
+    # Optional: the sales rep (Member) who placed the order on behalf of the
+    # customer. When present the template renders a "placed by your sales
+    # rep" preamble instead of the regular self-service confirmation.
+    @placed_by_rep = params[:placed_by_rep]
 
     unless EmailDeliveryGuard.should_send?(organisation: @organisation, email_type: "order_confirmation", customer: @customer_user)
       log_skipped(@organisation, "order_confirmation", @customer_user.email)
@@ -20,8 +24,12 @@ class CustomerMailer < ApplicationMailer
     end
 
     I18n.with_locale(@organisation.default_locale) do
-      subject = t('mailers.customer_mailer.confirm_order.subject',
-                  order_number: @order.order_number)
+      subject = if @placed_by_rep
+        "Encomenda #{@order.order_number} colocada em seu nome"
+      else
+        t('mailers.customer_mailer.confirm_order.subject',
+          order_number: @order.order_number)
+      end
       mail_with_org_defaults(@organisation, to: @customer_user.email, subject: subject)
     end
   end
