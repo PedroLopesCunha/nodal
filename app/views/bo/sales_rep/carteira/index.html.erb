@@ -6,6 +6,11 @@
       <h1>A minha carteira</h1>
       <p>Clientes atribuídos a ti como vendedor.</p>
     </div>
+    <div class="bo-page-actions">
+      <%= link_to new_bo_customer_path(org_slug: current_organisation.slug), class: "btn btn-primary" do %>
+        <i class="fa-solid fa-plus me-1"></i> Novo cliente
+      <% end %>
+    </div>
   </div>
 </div>
 
