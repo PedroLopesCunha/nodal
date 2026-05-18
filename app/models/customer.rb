@@ -34,9 +34,13 @@ class Customer < ApplicationRecord
   validates :contact_name, presence: true
   validates :active, inclusion: { in: [true, false] }
   validates :locale, inclusion: { in: I18n.available_locales.map(&:to_s) }, allow_nil: true
+  # Only fires when the NIF is being set/changed — protects new prospects
+  # against typing an existing NIF without breaking saves on the handful of
+  # legacy customers that still share a NIF (PHC-side dup pending cleanup).
   validates :taxpayer_id,
             uniqueness: { scope: :organisation_id, case_sensitive: false },
-            allow_blank: true
+            allow_blank: true,
+            if: :will_save_change_to_taxpayer_id?
 
   # Customers eligible to receive transactional/marketing emails: active,
   # accepted their invitation, and have notifications enabled. Auth emails
