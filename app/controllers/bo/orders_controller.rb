@@ -10,7 +10,14 @@ class Bo::OrdersController < Bo::BaseController
     @orders = @orders.order(Arel.sql("COALESCE(orders.placed_at, orders.created_at) #{sort_direction}"))
     @pagy, @orders = pagy(@orders)
 
-    @customers = current_organisation.customers.order(:company_name)
+    # Filter dropdown of customers: pure reps see only their carteira; everyone
+    # else sees the full org list (matches the underlying order scope).
+    @customers =
+      if pure_sales_rep?
+        current_org_member.assigned_customers.order(:company_name)
+      else
+        current_organisation.customers.order(:company_name)
+      end
   end
 
   def show

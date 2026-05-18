@@ -126,11 +126,20 @@ class Storefront::HomeController < Storefront::BaseController
   def load_frequent_products
     return [] if browsing_as_member?
 
-    # Top 8 most-ordered products by this customer
+    # Scope: during impersonation the rep doesn't have a personal CustomerUser
+    # session, so we aggregate frequently-ordered products at empresa level.
+    # For a normal customer login, scope to their personal history.
+    orders_scope =
+      if impersonating?
+        current_customer.orders
+      else
+        current_customer_user.orders
+      end
+
+    # Top 8 most-ordered products
     frequent_product_ids = OrderItem
       .joins(:order)
-      .where(orders: { customer_user_id: current_customer_user.id, organisation_id: current_organisation.id })
-      .where.not(orders: { placed_at: nil })
+      .where(order_id: orders_scope.where.not(placed_at: nil).select(:id))
       .group(:product_id)
       .order(Arel.sql("COUNT(*) DESC"))
       .limit(12)
@@ -147,8 +156,17 @@ class Storefront::HomeController < Storefront::BaseController
   end
 
   def load_new_products
-    cutoff = if !browsing_as_member? && current_customer_user.orders.placed.exists?
-               current_customer_user.orders.placed.order(placed_at: :desc).pick(:placed_at)
+    orders_scope =
+      if browsing_as_member? && !impersonating?
+        nil
+      elsif impersonating?
+        current_customer.orders
+      else
+        current_customer_user.orders
+      end
+
+    cutoff = if orders_scope && orders_scope.placed.exists?
+               orders_scope.placed.order(placed_at: :desc).pick(:placed_at)
              else
                30.days.ago
              end

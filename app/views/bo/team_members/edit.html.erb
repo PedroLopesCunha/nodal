@@ -111,23 +111,6 @@
           </div>
         </div>
 
-        <%# Separate form: anyone can toggle their own sales-rep capability —
-            it's additive and doesn't grant org-level powers, only a personal carteira. %>
-        <div class="card mb-3">
-          <div class="card-body">
-            <h5 class="card-title mb-3">Capacidades comerciais</h5>
-            <%= form_with model: @org_member, url: bo_team_member_path(org_slug: params[:org_slug], id: @org_member.id), method: :patch, local: true do |f| %>
-              <div class="form-check form-switch">
-                <%= f.check_box :is_sales_rep, class: "form-check-input", role: "switch", id: "selfSalesRepSwitch", onchange: "this.form.submit()" %>
-                <label class="form-check-label" for="selfSalesRepSwitch">Sou vendedor</label>
-              </div>
-              <small class="text-muted d-block mt-1">
-                Tens carteira de clientes própria e podes encomendar em nome deles.
-              </small>
-            <% end %>
-          </div>
-        </div>
-
         <div class="card">
           <div class="card-body">
             <h5 class="card-title mb-4"><%= t('bo.profiles.edit.account_info') %></h5>
