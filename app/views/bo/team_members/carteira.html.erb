@@ -34,7 +34,7 @@
               Sem clientes atribuídos. Adiciona à direita.
             </div>
           <% else %>
-            <%= form_with url: update_carteira_bo_team_member_path(params[:org_slug], @org_member), method: :post, local: true, data: { controller: "select-all", "select-all-checkbox-class": "assigned-checkbox" } do %>
+            <%= form_with url: update_carteira_bo_team_member_path(params[:org_slug], @org_member), method: :post, local: true, data: { controller: "select-all", "select-all-checkbox-class-value": "assigned-checkbox" } do %>
               <input type="hidden" name="action_type" value="remove">
 
               <div class="d-flex justify-content-between align-items-center mb-2 py-2 border-bottom">
@@ -103,7 +103,7 @@
               <% end %>
             </div>
           <% else %>
-            <%= form_with url: update_carteira_bo_team_member_path(params[:org_slug], @org_member), method: :post, local: true, data: { controller: "select-all", "select-all-checkbox-class": "available-checkbox" } do %>
+            <%= form_with url: update_carteira_bo_team_member_path(params[:org_slug], @org_member), method: :post, local: true, data: { controller: "select-all", "select-all-checkbox-class-value": "available-checkbox" } do %>
               <input type="hidden" name="action_type" value="add">
 
               <div class="d-flex justify-content-between align-items-center mb-2 py-2 border-bottom">
