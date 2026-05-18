@@ -1,5 +1,5 @@
 class Bo::TeamMembersController < Bo::BaseController
-  before_action :set_org_member, only: [:edit, :update, :destroy, :toggle_active, :resend_invitation]
+  before_action :set_org_member, only: [:edit, :update, :destroy, :toggle_active, :resend_invitation, :carteira, :update_carteira]
 
   def index
     @org_members = policy_scope(current_organisation.org_members).includes(:member)
