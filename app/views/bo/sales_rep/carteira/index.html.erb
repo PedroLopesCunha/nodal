@@ -1,5 +1,15 @@
 <% content_for :bo_main_content do %>
 
+<script>
+  document.addEventListener('turbo:load', function() {
+    document.querySelectorAll('.carteira-row').forEach(row => {
+      row.addEventListener('click', function() {
+        window.location.href = this.dataset.href;
+      });
+    });
+  });
+</script>
+
 <div class="bo-page-header">
   <div class="d-flex justify-content-between align-items-start">
     <div>
@@ -76,7 +86,7 @@
           </thead>
           <tbody>
             <% @customers.each do |customer| %>
-              <tr>
+              <tr class="carteira-row" data-href="<%= bo_customer_path(org_slug: current_organisation.slug, id: customer.id) %>" style="cursor: pointer;">
                 <td>
                   <div class="fw-semibold"><%= customer.contact_name %></div>
                   <small class="text-muted"><%= customer.email %></small>
@@ -99,16 +109,13 @@
                     </span>
                   <% end %>
                 </td>
-                <td class="text-end" style="white-space: nowrap;">
+                <td class="text-end" style="white-space: nowrap;" onclick="event.stopPropagation();">
                   <%= button_to bo_impersonation_path(org_slug: current_organisation.slug, customer_id: customer.id),
                                 method: :post,
                                 form: { class: "d-inline" },
                                 class: "btn btn-sm btn-success",
                                 data: { turbo_confirm: "Entrar no storefront como #{customer.company_name}?" } do %>
                     <i class="fa-solid fa-cart-shopping me-1"></i> Encomendar
-                  <% end %>
-                  <%= link_to bo_customer_path(org_slug: current_organisation.slug, id: customer.id), class: "btn btn-sm btn-outline-secondary" do %>
-                    <i class="fa-solid fa-eye"></i>
                   <% end %>
                 </td>
               </tr>
