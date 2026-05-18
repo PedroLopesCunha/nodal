@@ -31,9 +31,16 @@ module Bo
 
         @customers = @customers.order(:company_name)
 
-        # "Meus números": orders this rep has placed (sales_rep_id matches),
-        # this month vs last month. Counts placed orders only (not drafts).
-        rep_orders = current_organisation.orders.placed.where(sales_rep_id: current_org_member.id)
+        # "Meus números": all placed orders from customers in this rep's
+        # carteira — self-service by the customer counts too, since the rep
+        # owns the relationship. Plus any orders the rep placed for customers
+        # outside the carteira (e.g. owner+rep doing vacation coverage).
+        carteira_customer_ids = current_org_member.customer_assignments.pluck(:customer_id)
+        rep_orders = current_organisation.orders.placed.where(
+          "orders.customer_id IN (?) OR orders.sales_rep_id = ?",
+          carteira_customer_ids,
+          current_org_member.id
+        )
         currency = current_organisation.currency
 
         this_month_orders = rep_orders.where(placed_at: Time.current.beginning_of_month..Time.current.end_of_month)
