@@ -50,7 +50,7 @@ class Storefront::CheckoutsController < Storefront::BaseController
       else
         CustomerMailer.with(customer_user: current_customer_user, order: @order).confirm_order.deliver_later
       end
-      MemberMailer.with(customer: current_customer, order: @order, org_slug: params[:org_slug]).notificate_customer_order.deliver_later
+      MemberMailer.with(customer: current_customer, order: @order).notificate_customer_order.deliver_later
 
       notice = impersonating? ? "Encomenda colocada em nome de #{current_customer.company_name}." : t('storefront.flash.order_placed')
       redirect_to order_path(org_slug: params[:org_slug], id: @order), notice: notice
