@@ -7,8 +7,11 @@ class CustomerUsers::InvitationsController < Devise::InvitationsController
 
   protected
 
+  # current_organisation resolves by request.host first (custom domain) and
+  # falls back to params[:org_slug] so an invitation email link works on
+  # whichever host the email was generated for.
   def set_organisation
-    @organisation = Organisation.find_by!(slug: params[:org_slug])
+    @organisation = current_organisation || raise(ActiveRecord::RecordNotFound)
   end
 
   # Don't auto sign-in after accepting invitation (scoped auth makes this problematic)
