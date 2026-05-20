@@ -7,6 +7,29 @@
     <%= csrf_meta_tags %>
     <%= csp_meta_tag %>
 
+    <%
+      canonical_storefront_url =
+        if current_organisation
+          scheme = request.ssl? ? "https" : request.scheme
+          "#{scheme}://#{current_organisation.preferred_host}#{request.fullpath}"
+        end
+      og_title = current_organisation&.effective_storefront_title || "Nodal"
+      og_image_url = current_organisation&.logo&.attached? ? url_for(current_organisation.logo) : nil
+    %>
+
+    <% if canonical_storefront_url %>
+      <link rel="canonical" href="<%= canonical_storefront_url %>">
+      <meta property="og:url" content="<%= canonical_storefront_url %>">
+    <% end %>
+    <meta property="og:title" content="<%= og_title %>">
+    <meta property="og:type" content="website">
+    <% if og_image_url %>
+      <meta property="og:image" content="<%= og_image_url %>">
+      <meta name="twitter:image" content="<%= og_image_url %>">
+    <% end %>
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="<%= og_title %>">
+
     <%= stylesheet_link_tag "application", "data-turbo-track": "reload" %>
     <%= javascript_importmap_tags %>
     <%= organisation_branding_styles(current_organisation) %>

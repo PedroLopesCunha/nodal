@@ -1,17 +1,14 @@
 Rails.application.routes.draw do
   mount LetterOpenerWeb::Engine, at: "/letter_opener" if Rails.env.development?
 
-  root to: "pages#home"
-  # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
-
   # Reveal health status on /up that returns 200 if the app boots with no exceptions, otherwise 500.
   # Can be used by load balancers and uptime monitors to verify that the app is live.
   get "up" => "rails/health#show", as: :rails_health_check
 
   # Custom-domain mount — when request.host is some org's custom_domain,
   # storefront routes work without the slug prefix (e.g. b2b.cliente.pt/products).
-  # The slug-based mount below still matches; this block only handles the
-  # slug-less shape plus BO redirects back to the canonical host.
+  # Defined BEFORE the canonical root so b2b.cliente.pt/ resolves to the org's
+  # storefront home rather than the Nodal marketing landing.
   constraints CustomDomainConstraint.new do
     # BO never serves from a custom host. Redirect both shapes to canonical.
     match ':org_slug/bo(/*path)', via: :all, to: redirect { |params, req|
@@ -28,6 +25,9 @@ Rails.application.routes.draw do
       "#{scheme}://#{canonical}/#{slug}/bo#{tail}"
     }
 
+    # Root on a custom host means the storefront landing, not Nodal marketing.
+    root to: "storefront/home#show", as: :custom_host_root
+
     # Storefront without slug. Prefixed route names with `custom_host_` to
     # avoid collisions with the slug-based mount below — view/controller
     # helpers continue to point at the slug-based names by default.
@@ -35,6 +35,9 @@ Rails.application.routes.draw do
       draw :storefront
     end
   end
+
+  # Canonical-host root — Nodal marketing landing.
+  root to: "pages#home"
 
   # routes for each organisation (slug-based — source of truth, always works)
   scope ":org_slug" do
