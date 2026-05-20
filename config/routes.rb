@@ -38,6 +38,7 @@ Rails.application.routes.draw do
 
   # routes for each organisation (slug-based — source of truth, always works)
   scope ":org_slug" do
+    # routes for each organisation
     draw :storefront
 
     # bo routes
@@ -245,3 +246,9 @@ Rails.application.routes.draw do
     post 'invitations/:token/accept', to: 'members/invitations#create'
   end
 end
+
+# Install slug-less URL helper overrides now that the route table is fully
+# populated. Called from here (rather than from an initializer) so that the
+# install runs in every context — server, console, jobs, and tests — without
+# depending on after_initialize/to_prepare timing quirks.
+HostAwareUrlHelpers::Dispatcher.install!

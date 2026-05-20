@@ -1,5 +1,6 @@
 class ApplicationController < ActionController::Base
   include Pagy::Backend
+  include HostAwareUrlHelpers
 
   before_action :authenticate_user!
   before_action :set_locale

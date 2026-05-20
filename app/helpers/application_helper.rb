@@ -1,5 +1,6 @@
 module ApplicationHelper
   include Pagy::Frontend
+  include HostAwareUrlHelpers
 
   # Returns the OrgMember record for current_member in current_organisation
   def current_org_member
