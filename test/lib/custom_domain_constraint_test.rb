@@ -1,4 +1,5 @@
 require "test_helper"
+require "minitest/mock"
 
 class CustomDomainConstraintTest < ActiveSupport::TestCase
   setup do
@@ -32,6 +33,15 @@ class CustomDomainConstraintTest < ActiveSupport::TestCase
   test "does not match when host is blank" do
     request = stub_request("")
     assert_not @constraint.matches?(request)
+  end
+
+  test "returns false (does not raise) when the database lookup blows up" do
+    Organisation.stub :find_by_host, ->(_host) { raise ActiveRecord::StatementInvalid, "boom" } do
+      request = stub_request("anything.test")
+      assert_nothing_raised do
+        assert_not @constraint.matches?(request)
+      end
+    end
   end
 
   private

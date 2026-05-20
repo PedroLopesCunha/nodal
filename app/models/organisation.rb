@@ -94,6 +94,23 @@ class Organisation < ApplicationRecord
     Rails.application.config.x.canonical_host
   end
 
+  # Builds the canonical URL for this organisation given the current
+  # request. When the org has a verified custom_domain, strips the leading
+  # /:slug from the path so the URL lives at the org's host as the slug-less
+  # shape (which is what the dispatcher and routes emit elsewhere). For
+  # unverified orgs the path is left as-is and the canonical host is used.
+  def canonical_url_for_request(request)
+    scheme = request.ssl? ? "https" : request.scheme
+    path = request.fullpath
+
+    if custom_domain_verified?
+      path = path.sub(%r{\A/#{Regexp.escape(slug)}(?=/|\z)}, "")
+      path = "/" if path.empty?
+    end
+
+    "#{scheme}://#{preferred_host}#{path}"
+  end
+
   def currency_symbol
     Money::Currency.new(currency).symbol
   end

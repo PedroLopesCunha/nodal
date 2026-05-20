@@ -1,6 +1,20 @@
 require "test_helper"
 
 class OrganisationTest < ActiveSupport::TestCase
+  class FakeRequest
+    def initialize(ssl: false, scheme: "http", fullpath: "/")
+      @ssl = ssl
+      @scheme = scheme
+      @fullpath = fullpath
+    end
+
+    def ssl?
+      @ssl
+    end
+
+    attr_reader :scheme, :fullpath
+  end
+
   setup do
     @org = Organisation.create!(name: "Test Org")
   end
@@ -191,6 +205,55 @@ class OrganisationTest < ActiveSupport::TestCase
     @org.update!(name: "Acme Co", custom_domain: "b2b.example.com", custom_domain_verified_at: Time.current)
     canonical = Rails.application.config.x.canonical_host
     assert_equal "Acme Co <no-reply@#{canonical}>", @org.email_from_address
+  end
+
+  # canonical_url_for_request
+
+  test "canonical_url_for_request uses canonical host + full path when no verified custom_domain" do
+    org = Organisation.create!(name: "Plain Org", slug: "plain-org")
+    request = FakeRequest.new(ssl: true, fullpath: "/plain-org/products")
+    canonical = Rails.application.config.x.canonical_host
+    assert_equal "https://#{canonical}/plain-org/products", org.canonical_url_for_request(request)
+  end
+
+  test "canonical_url_for_request strips the leading slug when org has verified custom_domain" do
+    org = Organisation.create!(
+      name: "Host Org",
+      slug: "host-org",
+      custom_domain: "b2b.example.test",
+      custom_domain_verified_at: Time.current
+    )
+    request = FakeRequest.new(ssl: true, fullpath: "/host-org/products")
+    assert_equal "https://b2b.example.test/products", org.canonical_url_for_request(request)
+  end
+
+  test "canonical_url_for_request returns root path when only the slug is present" do
+    org = Organisation.create!(
+      name: "Host Org",
+      slug: "host-org",
+      custom_domain: "b2b.example.test",
+      custom_domain_verified_at: Time.current
+    )
+    request = FakeRequest.new(ssl: true, fullpath: "/host-org")
+    assert_equal "https://b2b.example.test/", org.canonical_url_for_request(request)
+  end
+
+  test "canonical_url_for_request leaves slug-less paths alone on verified custom_domain" do
+    org = Organisation.create!(
+      name: "Host Org",
+      slug: "host-org",
+      custom_domain: "b2b.example.test",
+      custom_domain_verified_at: Time.current
+    )
+    request = FakeRequest.new(ssl: true, fullpath: "/products")
+    assert_equal "https://b2b.example.test/products", org.canonical_url_for_request(request)
+  end
+
+  test "canonical_url_for_request uses http when request is not ssl" do
+    org = Organisation.create!(name: "Plain Org", slug: "plain-org")
+    request = FakeRequest.new(ssl: false, scheme: "http", fullpath: "/plain-org/products")
+    canonical = Rails.application.config.x.canonical_host
+    assert_equal "http://#{canonical}/plain-org/products", org.canonical_url_for_request(request)
   end
 
   # custom_domain change resets verification

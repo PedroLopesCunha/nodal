@@ -8,11 +8,7 @@
     <%= csp_meta_tag %>
 
     <%
-      canonical_storefront_url =
-        if current_organisation
-          scheme = request.ssl? ? "https" : request.scheme
-          "#{scheme}://#{current_organisation.preferred_host}#{request.fullpath}"
-        end
+      canonical_storefront_url = current_organisation&.canonical_url_for_request(request)
       og_title = current_organisation&.effective_storefront_title || "Nodal"
       og_image_url = current_organisation&.logo&.attached? ? url_for(current_organisation.logo) : nil
     %>
