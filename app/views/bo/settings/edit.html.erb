@@ -516,6 +516,58 @@
         </div>
       </div>
 
+      <div class="card mt-3">
+        <div class="card-body">
+          <h5 class="card-title mb-1"><i class="fa-solid fa-globe me-2"></i><%= t('bo.settings.edit.custom_domain.title', default: 'Domínio personalizado') %></h5>
+          <p class="text-muted small mb-4">
+            <%= t('bo.settings.edit.custom_domain.intro', default: 'Serve a tua loja a partir de um subdomínio teu, por exemplo b2b.aminhaempresa.pt. Os clientes vêem URLs limpos sem o slug.') %>
+          </p>
+
+          <div class="mb-3">
+            <label class="form-label"><%= t('bo.settings.edit.custom_domain.field_label', default: 'Domínio') %></label>
+            <%= f.text_field :custom_domain, class: "form-control", placeholder: "b2b.aminhaempresa.pt", autocapitalize: "off", spellcheck: "false" %>
+            <small class="text-muted d-block mt-1">
+              <%= t('bo.settings.edit.custom_domain.field_hint', default: 'Apenas o nome do host, sem https:// nem caminho. Para apex (sem subdomínio) usar Cloudflare em frente ou um registrar com suporte a ALIAS/ANAME.') %>
+            </small>
+          </div>
+
+          <% if @organisation.custom_domain.present? %>
+            <% if @organisation.custom_domain_verified? %>
+              <div class="alert alert-success py-2 mb-3 d-flex align-items-center" role="alert">
+                <i class="fa-solid fa-circle-check me-2"></i>
+                <div>
+                  <strong><%= t('bo.settings.edit.custom_domain.verified', default: 'Verificado') %></strong>
+                  <div class="small text-muted">
+                    <%= t('bo.settings.edit.custom_domain.verified_at', default: 'Confirmado em') %>
+                    <%= l(@organisation.custom_domain_verified_at, format: :long) %>
+                  </div>
+                </div>
+              </div>
+            <% else %>
+              <div class="alert alert-warning py-2 mb-3" role="alert">
+                <i class="fa-solid fa-clock me-2"></i>
+                <strong><%= t('bo.settings.edit.custom_domain.pending', default: 'Aguarda configuração DNS') %></strong>
+                <div class="small mt-1">
+                  <%= t('bo.settings.edit.custom_domain.pending_instructions_html', default: 'Configura no teu registrar/Cloudflare um <code>CNAME</code> de <code>%{host}</code> apontando para o endpoint que te enviarmos. Depois contacta-nos para activarmos.', host: @organisation.custom_domain) %>
+                </div>
+              </div>
+            <% end %>
+          <% end %>
+
+          <details>
+            <summary class="text-muted small"><%= t('bo.settings.edit.custom_domain.how_does_it_work', default: 'Como funciona?') %></summary>
+            <div class="small text-muted mt-2">
+              <ol class="mb-0 ps-3">
+                <li><%= t('bo.settings.edit.custom_domain.step_1', default: 'Indica aqui o subdomínio que queres usar (ex: b2b.aminhaempresa.pt) e grava.') %></li>
+                <li><%= t('bo.settings.edit.custom_domain.step_2', default: 'Contactamos-te com o registo DNS exacto para configurares no teu registrar (CNAME).') %></li>
+                <li><%= t('bo.settings.edit.custom_domain.step_3', default: 'Quando o DNS estiver activo e o certificado emitido, marcamos como verificado e o teu storefront passa a servir no teu domínio.') %></li>
+                <li><%= t('bo.settings.edit.custom_domain.step_4_html', default: 'O URL antigo (<code>%{canonical}/%{slug}/…</code>) continua a funcionar sempre — apenas o domínio do cliente fica preferido para links partilhados, emails, e SEO.', canonical: Rails.application.config.x.canonical_host, slug: @organisation.slug) %></li>
+              </ol>
+            </div>
+          </details>
+        </div>
+      </div>
+
     </div>
 
     <div class="col-md-4">

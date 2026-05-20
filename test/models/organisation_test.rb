@@ -192,4 +192,26 @@ class OrganisationTest < ActiveSupport::TestCase
     canonical = Rails.application.config.x.canonical_host
     assert_equal "Acme Co <no-reply@#{canonical}>", @org.email_from_address
   end
+
+  # custom_domain change resets verification
+
+  test "changing custom_domain clears the existing verified_at" do
+    @org.update!(custom_domain: "b2b.first.test", custom_domain_verified_at: Time.current)
+    assert @org.custom_domain_verified?
+    @org.update!(custom_domain: "b2b.second.test")
+    assert_nil @org.reload.custom_domain_verified_at
+  end
+
+  test "clearing custom_domain clears the existing verified_at" do
+    @org.update!(custom_domain: "b2b.first.test", custom_domain_verified_at: Time.current)
+    @org.update!(custom_domain: nil)
+    assert_nil @org.reload.custom_domain_verified_at
+  end
+
+  test "saving without touching custom_domain keeps verified_at intact" do
+    @org.update!(custom_domain: "b2b.first.test", custom_domain_verified_at: Time.current)
+    original_verified_at = @org.custom_domain_verified_at
+    @org.update!(name: "Renamed Co")
+    assert_in_delta original_verified_at.to_f, @org.reload.custom_domain_verified_at.to_f, 1.0
+  end
 end

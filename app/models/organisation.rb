@@ -67,6 +67,7 @@ class Organisation < ApplicationRecord
   before_validation :set_delivery_days_from_flags
   before_validation :normalize_cutoff_time
   before_validation :normalize_custom_domain
+  before_save :reset_custom_domain_verification_on_change
 
   attr_accessor :delivery_day_flags
 
@@ -219,6 +220,17 @@ class Organisation < ApplicationRecord
       .sub(%r{/.*\z}, "")
       .sub(/\.+\z/, "")
       .presence
+  end
+
+  # Any change to custom_domain invalidates the previous verification — the
+  # new host has to be re-confirmed at the DNS layer. Skip when the caller is
+  # already setting verified_at in the same save (e.g. operator marking the
+  # pilot as verified after a manual DNS check).
+  def reset_custom_domain_verification_on_change
+    return unless custom_domain_changed?
+    return if custom_domain_verified_at_changed?
+
+    self.custom_domain_verified_at = nil
   end
 
   def set_delivery_days_from_flags
