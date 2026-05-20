@@ -50,6 +50,7 @@ module HostAwareUrlHelpers
           HostAwareUrlHelpers.module_eval <<~RUBY, __FILE__, __LINE__ + 1
             def #{base_helper}(*args, **opts)
               if on_custom_host?
+                opts.delete(:org_slug)
                 #{custom_helper}(*args, **opts)
               else
                 super

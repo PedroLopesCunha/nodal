@@ -168,4 +168,28 @@ class OrganisationTest < ActiveSupport::TestCase
     @org.update!(custom_domain: "b2b.example.com", custom_domain_verified_at: Time.current)
     assert @org.custom_domain_verified?
   end
+
+  # preferred_host
+
+  test "preferred_host falls back to canonical host when no custom_domain set" do
+    assert_equal Rails.application.config.x.canonical_host, @org.preferred_host
+  end
+
+  test "preferred_host falls back to canonical when custom_domain is set but not verified" do
+    @org.update!(custom_domain: "b2b.example.com")
+    assert_equal Rails.application.config.x.canonical_host, @org.preferred_host
+  end
+
+  test "preferred_host returns the custom_domain when verified" do
+    @org.update!(custom_domain: "b2b.example.com", custom_domain_verified_at: Time.current)
+    assert_equal "b2b.example.com", @org.preferred_host
+  end
+
+  # email_from_address
+
+  test "email_from_address uses the canonical host regardless of custom_domain" do
+    @org.update!(name: "Acme Co", custom_domain: "b2b.example.com", custom_domain_verified_at: Time.current)
+    canonical = Rails.application.config.x.canonical_host
+    assert_equal "Acme Co <no-reply@#{canonical}>", @org.email_from_address
+  end
 end

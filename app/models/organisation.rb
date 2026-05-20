@@ -83,6 +83,16 @@ class Organisation < ApplicationRecord
     custom_domain.present? && custom_domain_verified_at.present?
   end
 
+  # The host this organisation wants its links to point at. Used by mailers
+  # and any background context where there's no request to inspect — returns
+  # the verified custom_domain when set, falls back to the canonical host
+  # otherwise.
+  def preferred_host
+    return custom_domain if custom_domain_verified?
+
+    Rails.application.config.x.canonical_host
+  end
+
   def currency_symbol
     Money::Currency.new(currency).symbol
   end
@@ -136,8 +146,13 @@ class Organisation < ApplicationRecord
     email_sender_name.presence || name
   end
 
+  # Sender address for outgoing emails. We deliberately keep the bare-host
+  # part on the canonical domain even for orgs with verified custom_domains
+  # (sending from no-reply@cliente.pt would force the customer to set up
+  # DKIM/SPF for us — friction we want to avoid). Links inside the email
+  # body still respect preferred_host. Same pattern as Shopify.
   def email_from_address
-    "#{effective_sender_name} <no-reply@nodal-seiri.dev>"
+    "#{effective_sender_name} <no-reply@#{Rails.application.config.x.canonical_host}>"
   end
 
   def email_reply_to_address

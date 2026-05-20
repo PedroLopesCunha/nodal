@@ -58,6 +58,11 @@ class HostAwareUrlHelpersTest < ActiveSupport::TestCase
     assert_equal "/perestrelo-cunha/cart", @harness.cart_path(org_slug: "perestrelo-cunha")
   end
 
+  test "redundant org_slug kwarg is dropped on custom host (no leakage as query string)" do
+    @harness.request = stub_request("b2b.example.test")
+    assert_equal "/products", @harness.products_path(org_slug: "perestrelo-cunha")
+  end
+
   private
 
   def stub_request(host)
