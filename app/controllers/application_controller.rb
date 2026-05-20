@@ -117,13 +117,16 @@ class ApplicationController < ActionController::Base
     nil
   end
 
-  # accessable form every where, done before everything
-  # sets the current organisation
+  # Resolve the tenant for this request. Host wins when an org has the request's
+  # host as its custom_domain; otherwise we fall back to the slug embedded in
+  # the URL. This keeps the slug URL working unconditionally (source of truth)
+  # while letting verified custom domains take precedence transparently.
   def current_organisation
     return @current_organisation if defined?(@current_organisation)
 
-    slug = params[:org_slug]
-    @current_organisation = Organisation.find_by(slug: slug)
+    @current_organisation =
+      Organisation.find_by_host(request.host) ||
+      Organisation.find_by(slug: params[:org_slug])
   end
 
   # The OrgMember row binding the logged-in Member to the current organisation.
