@@ -5,6 +5,7 @@ class Organisation < ApplicationRecord
   OUT_OF_STOCK_STRATEGIES = %w[do_nothing deactivate hide].freeze
   HEX_COLOR_REGEX = /\A#[0-9A-Fa-f]{6}\z/
   CUTOFF_TIME_REGEX = /\A([01]\d|2[0-3]):[0-5]\d\z/
+  CUSTOM_DOMAIN_REGEX = /\A(?:[a-z0-9](?:[a-z0-9\-]{0,61}[a-z0-9])?\.)+[a-z]{2,}\z/
   WEEKDAY_NAMES = %w[sunday monday tuesday wednesday thursday friday saturday].freeze
 
   monetize :shipping_cost_cents
@@ -58,13 +59,29 @@ class Organisation < ApplicationRecord
   validates :order_cutoff_time, format: { with: CUTOFF_TIME_REGEX }, allow_blank: true
   validates :timezone, inclusion: { in: ActiveSupport::TimeZone::MAPPING.values.uniq }
   validates :default_product_sort, inclusion: { in: Product::SORT_OPTIONS }
+  validates :custom_domain,
+            format: { with: CUSTOM_DOMAIN_REGEX, message: :invalid_hostname },
+            uniqueness: { case_sensitive: false },
+            allow_blank: true
 
   before_validation :set_delivery_days_from_flags
   before_validation :normalize_cutoff_time
+  before_validation :normalize_custom_domain
 
   attr_accessor :delivery_day_flags
 
   slugify :name
+
+  def self.find_by_host(host)
+    normalized = host.to_s.strip.downcase.presence
+    return nil if normalized.nil?
+
+    find_by(custom_domain: normalized)
+  end
+
+  def custom_domain_verified?
+    custom_domain.present? && custom_domain_verified_at.present?
+  end
 
   def currency_symbol
     Money::Currency.new(currency).symbol
@@ -174,6 +191,19 @@ class Organisation < ApplicationRecord
     return if order_cutoff_time.blank?
 
     self.order_cutoff_time = order_cutoff_time.strip[0, 5]
+  end
+
+  def normalize_custom_domain
+    return if custom_domain.nil?
+
+    self.custom_domain = custom_domain
+      .to_s
+      .strip
+      .downcase
+      .sub(%r{\Ahttps?://}, "")
+      .sub(%r{/.*\z}, "")
+      .sub(/\.+\z/, "")
+      .presence
   end
 
   def set_delivery_days_from_flags
