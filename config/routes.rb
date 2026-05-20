@@ -8,88 +8,37 @@ Rails.application.routes.draw do
   # Can be used by load balancers and uptime monitors to verify that the app is live.
   get "up" => "rails/health#show", as: :rails_health_check
 
-  # Defines the root path route ("/")
-  # root "posts#index"
+  # Custom-domain mount — when request.host is some org's custom_domain,
+  # storefront routes work without the slug prefix (e.g. b2b.cliente.pt/products).
+  # The slug-based mount below still matches; this block only handles the
+  # slug-less shape plus BO redirects back to the canonical host.
+  constraints CustomDomainConstraint.new do
+    # BO never serves from a custom host. Redirect both shapes to canonical.
+    match ':org_slug/bo(/*path)', via: :all, to: redirect { |params, req|
+      scheme = req.ssl? ? "https" : "http"
+      canonical = Rails.application.config.x.canonical_host
+      tail = params[:path].present? ? "/#{params[:path]}" : ""
+      "#{scheme}://#{canonical}/#{params[:org_slug]}/bo#{tail}"
+    }
+    match 'bo(/*path)', via: :all, to: redirect { |params, req|
+      scheme = req.ssl? ? "https" : "http"
+      canonical = Rails.application.config.x.canonical_host
+      slug = Organisation.find_by_host(req.host)&.slug
+      tail = params[:path].present? ? "/#{params[:path]}" : ""
+      "#{scheme}://#{canonical}/#{slug}/bo#{tail}"
+    }
 
-  # routes for each organisation
+    # Storefront without slug. Prefixed route names with `custom_host_` to
+    # avoid collisions with the slug-based mount below — view/controller
+    # helpers continue to point at the slug-based names by default.
+    scope as: :custom_host do
+      draw :storefront
+    end
+  end
+
+  # routes for each organisation (slug-based — source of truth, always works)
   scope ":org_slug" do
-    # Locale switching
-    patch 'locale', to: 'locales#update', as: :update_locale
-
-    # customer routes (auth lives on CustomerUser; the empresa is Customer).
-    # path: "customers" preserves public URLs so existing bookmarks and
-    # already-sent invitation/reset_password links keep working.
-    devise_for :customer_users, skip: [:registrations],
-                path: "customers",
-                controllers: {
-                  sessions: 'customer_users/sessions',
-                  invitations: 'customer_users/invitations',
-                  passwords: 'customer_users/passwords'
-                }
-
-    # Legal pages (public, no auth required)
-    scope module: :storefront do
-      get 'terms', to: 'legal_pages#terms', as: :terms
-      get 'privacy', to: 'legal_pages#privacy', as: :privacy
-    end
-
-    # storefront (customer-facing)
-    scope module: :storefront do
-      # Quick-access landing — scans of QR cards / stickers land here.
-      # Validates the token, audits the scan, then redirects to the
-      # CustomerUser sign-in page with the email pre-filled.
-      get 'quick/:token', to: 'quick_access#show', as: :quick_access
-
-      get 'home', to: 'home#show', as: :home
-      resource :contact, only: [:show]
-      resources :products, only: [:index, :show] do
-        get :autocomplete, on: :collection
-      end
-
-      # Cart (current draft order)
-      resource :cart, only: [:show] do
-        delete :clear, on: :member
-      end
-
-      # Checkout
-      resource :checkout, only: [:show, :update]
-
-      # Promo codes (apply/remove at checkout)
-      resource :promo_code, only: [] do
-        post :apply
-        delete :remove
-      end
-
-      # Order items (add/update/remove from cart)
-      resources :order_items, only: [:create, :update, :destroy]
-
-      # Order history (placed orders only)
-      resources :orders, only: [:index, :show] do
-        collection do
-          get :export
-          get :export_items
-        end
-        member do
-          get :download_pdf
-          post :reorder
-          post :add_to_cart
-        end
-      end
-
-      # Shopping lists
-      resources :shopping_lists, except: [:edit] do
-        member do
-          post :add_to_cart
-          get :product_picker
-        end
-        resources :shopping_list_items, only: [:create, :update, :destroy], as: :items
-      end
-
-      # Customer account settings
-      resource :account, only: [:show, :update] do
-        patch :toggle_hide_prices
-      end
-    end
+    draw :storefront
 
     # bo routes
     devise_for :members, controllers: { sessions: "members/sessions" }
