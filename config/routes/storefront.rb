@@ -4,19 +4,16 @@
 #
 # Don't add BO, member auth, or invitation routes here — those belong only on
 # the canonical host and stay in routes.rb.
+#
+# IMPORTANT — devise_for is NOT drawn here. Inside `scope as: :custom_host`,
+# devise_for would create a second Devise mapping (:custom_host_customer_user)
+# and the warden session written by a custom-host login wouldn't be visible
+# to current_customer_user on subsequent requests, producing a sign-in →
+# /home → sign_in redirect loop. The slug-based devise_for is mounted once
+# in routes.rb under :org_slug; the custom-host equivalents are manually
+# defined within devise_scope :customer_user so they share the same scope.
 
 patch 'locale', to: 'locales#update', as: :update_locale
-
-# Customer auth (login lives on CustomerUser; empresa is Customer).
-# path: "customers" preserves public URLs so existing bookmarks and
-# already-sent invitation/reset_password links keep working.
-devise_for :customer_users, skip: [:registrations],
-            path: "customers",
-            controllers: {
-              sessions: 'customer_users/sessions',
-              invitations: 'customer_users/invitations',
-              passwords: 'customer_users/passwords'
-            }
 
 # Legal pages (public, no auth required)
 scope module: :storefront do
