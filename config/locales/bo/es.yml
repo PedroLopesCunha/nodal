@@ -1346,6 +1346,7 @@ es:
         edit: "Editar"
         invite: "Enviar invitación"
         resend_invite: "Reenviar invitación"
+        share_invite: "Compartir invitación (WhatsApp, SMS, enlace…)"
         activate: "Activar"
         deactivate: "Desactivar"
         quick_access: "Acceso rápido (QR)"
@@ -1356,9 +1357,25 @@ es:
       flash:
         invited: "Invitación enviada a %{email}."
         invitation_resent: "Invitación reenviada a %{email}."
+        share_link_ready: "Enlace de invitación listo para %{email}. URL: %{url}"
         updated: "Login actualizado con éxito."
         activated: "Login %{email} activado."
         deactivated: "Login %{email} desactivado."
+      invitation_share:
+        title: "Compartir invitación"
+        intro: "Elige cómo entregar el enlace de invitación a %{email}. El email habitual sigue disponible — usa estas opciones cuando el cliente no recibe correos (ej: filtrado corporativo)."
+        whatsapp: "Enviar por WhatsApp"
+        whatsapp_hint: "Abre WhatsApp pre-rellenado con mensaje para %{phone}"
+        sms: "Enviar por SMS"
+        sms_hint: "Abre la app de mensajes para %{phone}"
+        email: "Enviar por email"
+        email_hint: "Abre el cliente de email con mensaje para %{email}"
+        no_phone: "Añade el teléfono del cliente en su perfil para habilitar esta opción"
+        copy: "Copiar enlace"
+        copied: "¡Enlace copiado!"
+        message_body: "¡Hola! Has sido invitado a la tienda online de %{company}. Configura tu contraseña aquí: %{url}"
+        email_subject: "Invitación a %{company}"
+        security_note: "Este enlace solo puede usarse una vez para crear la contraseña. Generar uno nuevo invalida cualquier enlace anterior."
 
     quick_access_tokens:
       show:

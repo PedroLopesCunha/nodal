@@ -1,6 +1,6 @@
 class Bo::CustomerUsersController < Bo::BaseController
   before_action :set_customer
-  before_action :set_customer_user, only: [:edit, :update, :resend_invitation, :toggle_active]
+  before_action :set_customer_user, only: [:edit, :update, :resend_invitation, :share_invitation, :toggle_active]
 
   def new
     @customer_user = @customer.customer_users.build
@@ -58,6 +58,32 @@ class Bo::CustomerUsersController < Bo::BaseController
                   notice: t("bo.customer_users.flash.#{flash_key}", email: @customer_user.email)
   end
 
+  # Generates a fresh invitation token without sending the email, then
+  # renders a modal exposing the accept URL plus WhatsApp / SMS / mailto
+  # share buttons. This is the deliverability workaround for customers
+  # whose corporate Outlook quietly quarantines our invitation emails.
+  #
+  # IMPORTANT: regenerating invalidates any previous active link the
+  # customer may have. Acceptable here because we're explicitly choosing
+  # to deliver via another channel.
+  def share_invitation
+    authorize @customer_user, :resend_invitation?
+    @customer_user.invited_by = current_member
+    @customer_user.skip_invitation = true
+    @customer_user.invite!
+    @raw_invitation_token = @customer_user.raw_invitation_token
+    @invitation_url = build_invitation_url(@customer_user.organisation, @raw_invitation_token)
+
+    respond_to do |format|
+      format.turbo_stream
+      format.html do
+        redirect_back fallback_location: bo_customer_path(params[:org_slug], @customer),
+                      notice: t("bo.customer_users.flash.share_link_ready",
+                                email: @customer_user.email, url: @invitation_url)
+      end
+    end
+  end
+
   def toggle_active
     authorize @customer_user
     @customer_user.update(active: !@customer_user.active?)
@@ -90,5 +116,25 @@ class Bo::CustomerUsersController < Bo::BaseController
       :contact_name, :contact_phone, :locale,
       :hide_prices, :email_notifications_enabled, :active
     )
+  end
+
+  # Picks the right route helper based on whether the org has a verified
+  # custom_domain. Devise's URL helpers route through main_app, which does
+  # not see HostAwareUrlHelpers' dispatcher, so we branch explicitly here.
+  def build_invitation_url(organisation, raw_token)
+    if organisation.custom_domain_verified?
+      custom_host_accept_customer_user_invitation_url(
+        invitation_token: raw_token,
+        host: organisation.custom_domain,
+        protocol: "https"
+      )
+    else
+      accept_customer_user_invitation_url(
+        invitation_token: raw_token,
+        org_slug: organisation.slug,
+        host: Rails.application.config.x.canonical_host,
+        protocol: "https"
+      )
+    end
   end
 end

@@ -1429,6 +1429,7 @@ pt:
         edit: "Editar"
         invite: "Enviar convite"
         resend_invite: "Reenviar convite"
+        share_invite: "Partilhar convite (WhatsApp, SMS, link…)"
         activate: "Ativar"
         deactivate: "Desativar"
         quick_access: "Acesso rápido (QR)"
@@ -1439,9 +1440,25 @@ pt:
       flash:
         invited: "Convite enviado para %{email}."
         invitation_resent: "Convite reenviado para %{email}."
+        share_link_ready: "Link de convite gerado para %{email}. URL: %{url}"
         updated: "Login atualizado com sucesso."
         activated: "Login %{email} ativado."
         deactivated: "Login %{email} desativado."
+      invitation_share:
+        title: "Partilhar convite"
+        intro: "Escolhe como queres entregar o link de convite a %{email}. O email habitual continua disponível — usa estas opções quando o cliente não está a receber emails (ex: filtragem corporativa)."
+        whatsapp: "Enviar por WhatsApp"
+        whatsapp_hint: "Abre o WhatsApp pré-preenchido com mensagem para %{phone}"
+        sms: "Enviar por SMS"
+        sms_hint: "Abre app de mensagens para %{phone}"
+        email: "Enviar por email"
+        email_hint: "Abre o cliente de email com mensagem para %{email}"
+        no_phone: "Adiciona o telefone do cliente no perfil para usar esta opção"
+        copy: "Copiar link"
+        copied: "Link copiado!"
+        message_body: "Olá! Foste convidado para a loja online da %{company}. Acede aqui para criar a tua password: %{url}"
+        email_subject: "Convite para %{company}"
+        security_note: "Este link só pode ser usado uma vez para criar a password. Ao gerá-lo de novo, qualquer link anterior fica inválido."
 
     quick_access_tokens:
       show:

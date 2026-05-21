@@ -307,6 +307,13 @@
                                         title: invite_label do %>
                             <i class="fa-solid fa-paper-plane"></i>
                           <% end %>
+                          <%= button_to share_invitation_bo_customer_customer_user_path(org_slug: @current_organisation.slug, customer_id: @customer.id, id: cu.id),
+                                        method: :post,
+                                        form: { class: "d-inline", data: { turbo_stream: true } },
+                                        class: "btn btn-sm btn-link text-muted",
+                                        title: t('bo.customer_users.actions.share_invite') do %>
+                            <i class="fa-solid fa-share-from-square"></i>
+                          <% end %>
                         <% end %>
                         <%= button_to toggle_active_bo_customer_customer_user_path(org_slug: @current_organisation.slug, customer_id: @customer.id, id: cu.id),
                                       method: :patch,
@@ -462,5 +469,10 @@
   </div>
 
 </div>
+
+<%# Target for the share-invitation Turbo Stream response. The action
+   appends a Bootstrap modal element here which then auto-opens via the
+   `auto-modal` Stimulus controller and removes itself on close. %>
+<div id="invite_share_modal_target"></div>
 
 <% end %>

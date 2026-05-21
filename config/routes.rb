@@ -109,6 +109,11 @@ Rails.application.routes.draw do
           member do
             post :resend_invitation
             patch :toggle_active
+            # Regenerates the Devise invite token without sending email and
+            # surfaces the URL in a modal so admins can paste it into
+            # WhatsApp / SMS / their own channel. Bypasses corporate email
+            # filtering that holds our invitation messages in quarantine.
+            post :share_invitation
           end
           resource :quick_access_token, only: [:show, :create, :destroy] do
             get :download
