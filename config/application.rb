@@ -47,5 +47,11 @@ module Nodal
     # Custom-domain requests redirect BO traffic here. Override via env var
     # for dev/test or alternative deployments.
     config.x.canonical_host = ENV.fetch("CANONICAL_HOST", "nodal-seiri.dev")
+
+    # Domain used in the "no-reply@…" From: header of outgoing emails. By
+    # default we strip a leading "www." from canonical_host so the sender
+    # lives on the apex that Resend authorises; override here when the
+    # convention doesn't fit (e.g. mail.example.com).
+    config.x.mail_sender_domain = ENV.fetch("MAIL_SENDER_DOMAIN", nil)
   end
 end

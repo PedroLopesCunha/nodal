@@ -201,10 +201,28 @@ class OrganisationTest < ActiveSupport::TestCase
 
   # email_from_address
 
-  test "email_from_address uses the canonical host regardless of custom_domain" do
+  test "email_from_address uses the apex of canonical_host regardless of custom_domain" do
     @org.update!(name: "Acme Co", custom_domain: "b2b.example.com", custom_domain_verified_at: Time.current)
-    canonical = Rails.application.config.x.canonical_host
-    assert_equal "Acme Co <no-reply@#{canonical}>", @org.email_from_address
+    apex = Rails.application.config.x.canonical_host.to_s.sub(/\Awww\./, "")
+    assert_equal "Acme Co <no-reply@#{apex}>", @org.email_from_address
+  end
+
+  test "email_from_address strips a leading www. from canonical_host" do
+    original = Rails.application.config.x.canonical_host
+    Rails.application.config.x.canonical_host = "www.example.test"
+    @org.update!(name: "Acme Co")
+    assert_equal "Acme Co <no-reply@example.test>", @org.email_from_address
+  ensure
+    Rails.application.config.x.canonical_host = original
+  end
+
+  test "email_from_address honours MAIL_SENDER_DOMAIN override" do
+    original = Rails.application.config.x.mail_sender_domain
+    Rails.application.config.x.mail_sender_domain = "mail.acme.test"
+    @org.update!(name: "Acme Co")
+    assert_equal "Acme Co <no-reply@mail.acme.test>", @org.email_from_address
+  ensure
+    Rails.application.config.x.mail_sender_domain = original
   end
 
   # canonical_url_for_request
