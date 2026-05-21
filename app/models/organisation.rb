@@ -169,8 +169,15 @@ class Organisation < ApplicationRecord
   # (sending from no-reply@cliente.pt would force the customer to set up
   # DKIM/SPF for us — friction we want to avoid). Links inside the email
   # body still respect preferred_host. Same pattern as Shopify.
+  #
+  # The sender uses the APEX domain (no www.), not the canonical_host the
+  # rest of the app uses for URLs. Resend (and most providers) authorize an
+  # apex; sending as no-reply@www.<apex> is rejected with 550. Allow override
+  # via MAIL_SENDER_DOMAIN env var for environments where this rule differs.
   def email_from_address
-    "#{effective_sender_name} <no-reply@#{Rails.application.config.x.canonical_host}>"
+    domain = Rails.application.config.x.mail_sender_domain
+    domain ||= Rails.application.config.x.canonical_host.to_s.sub(/\Awww\./, "")
+    "#{effective_sender_name} <no-reply@#{domain}>"
   end
 
   def email_reply_to_address
