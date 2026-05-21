@@ -5,6 +5,7 @@ class Organisation < ApplicationRecord
   OUT_OF_STOCK_STRATEGIES = %w[do_nothing deactivate hide].freeze
   HEX_COLOR_REGEX = /\A#[0-9A-Fa-f]{6}\z/
   CUTOFF_TIME_REGEX = /\A([01]\d|2[0-3]):[0-5]\d\z/
+  CUSTOM_DOMAIN_REGEX = /\A(?:[a-z0-9](?:[a-z0-9\-]{0,61}[a-z0-9])?\.)+[a-z]{2,}\z/
   WEEKDAY_NAMES = %w[sunday monday tuesday wednesday thursday friday saturday].freeze
 
   monetize :shipping_cost_cents
@@ -58,13 +59,57 @@ class Organisation < ApplicationRecord
   validates :order_cutoff_time, format: { with: CUTOFF_TIME_REGEX }, allow_blank: true
   validates :timezone, inclusion: { in: ActiveSupport::TimeZone::MAPPING.values.uniq }
   validates :default_product_sort, inclusion: { in: Product::SORT_OPTIONS }
+  validates :custom_domain,
+            format: { with: CUSTOM_DOMAIN_REGEX, message: :invalid_hostname },
+            uniqueness: { case_sensitive: false },
+            allow_blank: true
 
   before_validation :set_delivery_days_from_flags
   before_validation :normalize_cutoff_time
+  before_validation :normalize_custom_domain
+  before_save :reset_custom_domain_verification_on_change
 
   attr_accessor :delivery_day_flags
 
   slugify :name
+
+  def self.find_by_host(host)
+    normalized = host.to_s.strip.downcase.presence
+    return nil if normalized.nil?
+
+    find_by(custom_domain: normalized)
+  end
+
+  def custom_domain_verified?
+    custom_domain.present? && custom_domain_verified_at.present?
+  end
+
+  # The host this organisation wants its links to point at. Used by mailers
+  # and any background context where there's no request to inspect — returns
+  # the verified custom_domain when set, falls back to the canonical host
+  # otherwise.
+  def preferred_host
+    return custom_domain if custom_domain_verified?
+
+    Rails.application.config.x.canonical_host
+  end
+
+  # Builds the canonical URL for this organisation given the current
+  # request. When the org has a verified custom_domain, strips the leading
+  # /:slug from the path so the URL lives at the org's host as the slug-less
+  # shape (which is what the dispatcher and routes emit elsewhere). For
+  # unverified orgs the path is left as-is and the canonical host is used.
+  def canonical_url_for_request(request)
+    scheme = request.ssl? ? "https" : request.scheme
+    path = request.fullpath
+
+    if custom_domain_verified?
+      path = path.sub(%r{\A/#{Regexp.escape(slug)}(?=/|\z)}, "")
+      path = "/" if path.empty?
+    end
+
+    "#{scheme}://#{preferred_host}#{path}"
+  end
 
   def currency_symbol
     Money::Currency.new(currency).symbol
@@ -119,8 +164,13 @@ class Organisation < ApplicationRecord
     email_sender_name.presence || name
   end
 
+  # Sender address for outgoing emails. We deliberately keep the bare-host
+  # part on the canonical domain even for orgs with verified custom_domains
+  # (sending from no-reply@cliente.pt would force the customer to set up
+  # DKIM/SPF for us — friction we want to avoid). Links inside the email
+  # body still respect preferred_host. Same pattern as Shopify.
   def email_from_address
-    "#{effective_sender_name} <no-reply@nodal-seiri.dev>"
+    "#{effective_sender_name} <no-reply@#{Rails.application.config.x.canonical_host}>"
   end
 
   def email_reply_to_address
@@ -174,6 +224,30 @@ class Organisation < ApplicationRecord
     return if order_cutoff_time.blank?
 
     self.order_cutoff_time = order_cutoff_time.strip[0, 5]
+  end
+
+  def normalize_custom_domain
+    return if custom_domain.nil?
+
+    self.custom_domain = custom_domain
+      .to_s
+      .strip
+      .downcase
+      .sub(%r{\Ahttps?://}, "")
+      .sub(%r{/.*\z}, "")
+      .sub(/\.+\z/, "")
+      .presence
+  end
+
+  # Any change to custom_domain invalidates the previous verification — the
+  # new host has to be re-confirmed at the DNS layer. Skip when the caller is
+  # already setting verified_at in the same save (e.g. operator marking the
+  # pilot as verified after a manual DNS check).
+  def reset_custom_domain_verification_on_change
+    return unless custom_domain_changed?
+    return if custom_domain_verified_at_changed?
+
+    self.custom_domain_verified_at = nil
   end
 
   def set_delivery_days_from_flags

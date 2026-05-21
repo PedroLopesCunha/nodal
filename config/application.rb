@@ -42,5 +42,10 @@ module Nodal
     config.active_job.queue_adapter = :solid_queue
 
     config.middleware.insert_before Rack::Runtime, BlockBotUserAgents
+
+    # Host used to serve the BO and as the always-on fallback for storefront.
+    # Custom-domain requests redirect BO traffic here. Override via env var
+    # for dev/test or alternative deployments.
+    config.x.canonical_host = ENV.fetch("CANONICAL_HOST", "nodal-seiri.dev")
   end
 end

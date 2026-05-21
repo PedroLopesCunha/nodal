@@ -29,8 +29,11 @@ class CustomerUsers::SessionsController < Devise::SessionsController
 
   private
 
+  # current_organisation resolves by request.host first (custom domain) and
+  # falls back to params[:org_slug] (canonical slug URL), so sign-in works
+  # whichever shape the form was submitted from.
   def set_organisation
-    @organisation = Organisation.find_by!(slug: params[:org_slug])
+    @organisation = current_organisation || raise(ActiveRecord::RecordNotFound)
   end
 
   # Inject organisation_id so Devise authenticates on [email, organisation_id]

@@ -1,4 +1,7 @@
 class QuickAccessPdfRenderer
+  include Rails.application.routes.url_helpers
+  include HostAwareUrlHelpers
+
   PdfFormatError = Class.new(StandardError)
 
   GROVER_OPTIONS = {
@@ -16,16 +19,36 @@ class QuickAccessPdfRenderer
     Grover.new(html, **GROVER_OPTIONS.fetch(@layout)).to_pdf
   end
 
+  # Background context — no request to consult. We treat the token's
+  # organisation as authoritative: HostAwareUrlHelpers' dispatcher uses this
+  # to pick between slug-based and slug-less variants of quick_access_url.
+  def on_custom_host?
+    organisation&.custom_domain_verified?
+  end
+
+  # Inject the right host into URL generation so the QR URL points at the
+  # storefront the customer should actually land on.
+  def default_url_options
+    if Rails.env.production?
+      { host: organisation&.preferred_host || Rails.application.config.x.canonical_host, protocol: "https" }
+    else
+      { host: "localhost", port: 3000, protocol: "http" }
+    end
+  end
+
   private
+
+  def organisation
+    @organisation ||= @token.customer_user.customer.organisation
+  end
 
   def html
     customer_user = @token.customer_user
     customer = customer_user.customer
-    qr_url = Rails.application.routes.url_helpers.quick_access_url(
-      org_slug: customer.organisation.slug,
-      token: @token.token,
-      **url_options
-    )
+    # The dispatcher routes this through custom_host_quick_access_url and
+    # drops org_slug when on_custom_host?, so we can pass org_slug
+    # unconditionally and get the right URL shape either way.
+    url = quick_access_url(org_slug: organisation.slug, token: @token.token)
 
     ApplicationController.render(
       template: "bo/quick_access_tokens/pdf_#{@layout}",
@@ -34,8 +57,8 @@ class QuickAccessPdfRenderer
         token: @token,
         customer: customer,
         customer_user: customer_user,
-        qr_url: qr_url,
-        qr_svg: build_qr_svg(qr_url)
+        qr_url: url,
+        qr_svg: build_qr_svg(url)
       }
     )
   end
@@ -52,16 +75,5 @@ class QuickAccessPdfRenderer
       use_path: true,
       viewbox: true
     )
-  end
-
-  # The renderer runs in a background job (no request context), so we
-  # need to give Rails URL helpers an explicit host. Production sets
-  # APP_HOST and uses HTTPS; dev falls back to localhost:3000.
-  def url_options
-    if Rails.env.production?
-      { host: ENV.fetch("APP_HOST", "www.nodal-seiri.dev"), protocol: "https" }
-    else
-      { host: "localhost", port: 3000, protocol: "http" }
-    end
   end
 end

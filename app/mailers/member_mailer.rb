@@ -26,8 +26,10 @@ class MemberMailer < ApplicationMailer
     @customer_user = @order.customer_user
     @placed_by = @order.placed_by
     @sales_rep = @order.sales_rep
-    org_slug = params[:org_slug]
-    @organisation = Organisation.find_by(slug: org_slug)
+    # Always derive the org from the order itself — the caller used to pass
+    # params[:org_slug] but that's nil when the checkout request came in
+    # via a custom domain, leaving @organisation = nil and crashing below.
+    @organisation = @order.organisation
 
     mailing_list = @organisation.org_members
                      .order_notification_recipients

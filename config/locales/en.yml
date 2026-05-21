@@ -7,6 +7,10 @@ en:
             receive_on:
               invalid_delivery_day: "is not a valid delivery day"
               too_early: "is too early, please select a later date"
+        organisation:
+          attributes:
+            custom_domain:
+              invalid_hostname: "must be a valid hostname (e.g. b2b.example.com), without https:// or paths"
         product_attribute_value:
           attributes:
             value:

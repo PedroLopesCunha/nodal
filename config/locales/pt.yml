@@ -14,6 +14,10 @@ pt:
             receive_on:
               invalid_delivery_day: "não é um dia de entrega válido"
               too_early: "é demasiado cedo, por favor selecione uma data posterior"
+        organisation:
+          attributes:
+            custom_domain:
+              invalid_hostname: "deve ser um hostname válido (ex: b2b.exemplo.com), sem https:// ou caminhos"
         product_attribute_value:
           attributes:
             value:

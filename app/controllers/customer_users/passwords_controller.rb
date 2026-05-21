@@ -7,7 +7,9 @@ class CustomerUsers::PasswordsController < Devise::PasswordsController
 
   private
 
+  # current_organisation resolves by request.host first (custom domain) and
+  # falls back to params[:org_slug] so the reset flow works on either shape.
   def set_organisation
-    @organisation = Organisation.find_by!(slug: params[:org_slug])
+    @organisation = current_organisation || raise(ActiveRecord::RecordNotFound)
   end
 end

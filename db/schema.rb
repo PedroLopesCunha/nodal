@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2026_05_12_100005) do
+ActiveRecord::Schema[7.1].define(version: 2026_05_20_120000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_trgm"
   enable_extension "plpgsql"
@@ -584,6 +584,9 @@ ActiveRecord::Schema[7.1].define(version: 2026_05_12_100005) do
     t.boolean "special_prices_show_discount_badge", default: true, null: false
     t.boolean "special_prices_show_sale_badge", default: true, null: false
     t.integer "quick_access_token_ttl_days", default: 90
+    t.string "custom_domain"
+    t.datetime "custom_domain_verified_at"
+    t.index ["custom_domain"], name: "index_organisations_on_custom_domain", unique: true, where: "(custom_domain IS NOT NULL)"
     t.index ["default_locale"], name: "index_organisations_on_default_locale"
     t.index ["slug"], name: "index_organisations_on_slug", unique: true
   end
