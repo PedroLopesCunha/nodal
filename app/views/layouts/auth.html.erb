@@ -1,9 +1,10 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>Nodal - Sign In</title>
+    <% auth_org = @organisation || current_organisation %>
+    <title><%= [(auth_org&.effective_storefront_title || "Nodal"), t("auth.tab_title_suffix")].join(" — ") %></title>
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <%= favicon_link_tag "/favicon.svg", type: "image/svg+xml" %>
+    <%= organisation_favicon_tag(auth_org) %>
     <%= csrf_meta_tags %>
     <%= csp_meta_tag %>
 

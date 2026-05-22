@@ -282,6 +282,7 @@ en:
 
   # Auth Pages
   auth:
+    tab_title_suffix: "Sign in"
     sign_in:
       welcome_back: "Welcome back"
       subtitle: "Sign in to your account to continue"

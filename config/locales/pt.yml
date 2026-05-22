@@ -289,6 +289,7 @@ pt:
 
   # Auth Pages
   auth:
+    tab_title_suffix: "Iniciar Sessão"
     sign_in:
       welcome_back: "Bem-vindo de volta"
       subtitle: "Inicia sessão na tua conta para continuar"
