@@ -233,6 +233,7 @@ pt:
         title: "O Seu Carrinho"
         empty_cart: "O seu carrinho está vazio"
         empty_cart_hint: "Explore os nossos produtos e adicione itens ao seu carrinho."
+        prices_updated: "Os preços foram atualizados desde a tua última visita."
         stock:
           out_of_stock: "Esgotado"
           only_n_left:
@@ -322,6 +323,11 @@ pt:
         privacy_link: "Política de Privacidade"
         confirm_stock_checkbox: "Confirmo que pretendo encomendar mesmo com itens sem stock disponível."
         stock_block_notice: "Há itens sem stock suficiente. Ajuste as quantidades ou remova-os do carrinho para continuar."
+        prices_updated: "Os preços foram atualizados desde a tua última visita."
+        price_change_modal:
+          title: "Os preços foram atualizados"
+          body: "Alguns preços ou descontos mudaram desde que adicionaste os itens. Reviste o resumo antes de finalizar."
+          accept: "Aceitar e continuar"
         table:
           product: "Produto"
           quantity: "Qtd"
@@ -330,6 +336,7 @@ pt:
       errors:
         stock_blocked: "Não é possível finalizar: há itens sem stock disponível."
         stock_unconfirmed: "Confirme que pretende encomendar mesmo com itens sem stock disponível."
+        pricing_unconfirmed: "Os preços mudaram. Confirme as alterações antes de finalizar."
 
     # Páginas legais
     legal_pages:

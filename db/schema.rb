@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2026_05_29_130000) do
+ActiveRecord::Schema[7.1].define(version: 2026_05_29_140000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_trgm"
   enable_extension "plpgsql"
@@ -493,6 +493,7 @@ ActiveRecord::Schema[7.1].define(version: 2026_05_29_130000) do
     t.string "placed_by_type"
     t.bigint "placed_by_id"
     t.bigint "sales_rep_id"
+    t.datetime "pricing_changed_at"
     t.index ["applied_by_id"], name: "index_orders_on_applied_by_id"
     t.index ["billing_address_id"], name: "index_orders_on_billing_address_id"
     t.index ["customer_id"], name: "index_orders_on_customer_id"
@@ -589,6 +590,7 @@ ActiveRecord::Schema[7.1].define(version: 2026_05_29_130000) do
     t.string "cart_stock_policy", default: "warn", null: false
     t.string "cart_qty_overflow_policy", default: "warn", null: false
     t.string "checkout_stock_policy", default: "warn", null: false
+    t.string "cart_price_change_policy", default: "notify", null: false
     t.index ["custom_domain"], name: "index_organisations_on_custom_domain", unique: true, where: "(custom_domain IS NOT NULL)"
     t.index ["default_locale"], name: "index_organisations_on_default_locale"
     t.index ["slug"], name: "index_organisations_on_slug", unique: true

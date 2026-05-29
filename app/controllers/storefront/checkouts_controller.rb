@@ -14,6 +14,20 @@ class Storefront::CheckoutsController < Storefront::BaseController
     @shipping_addresses = current_customer.shipping_addresses
     @billing_address = current_customer.billing_address
     @earliest_delivery_date = current_organisation.earliest_delivery_date
+
+    case current_organisation.cart_price_change_policy
+    when "notify"
+      flash.now[:notice] = t("storefront.checkouts.show.prices_updated") if cart_pricing_changed?
+    when "confirm"
+      @price_change_modal = @order.pricing_change_pending?
+    end
+  end
+
+  def acknowledge_pricing
+    @order = current_cart
+    authorize @order, :checkout?, policy_class: OrderPolicy
+    @order&.acknowledge_pricing_change!
+    redirect_to checkout_path(org_slug: params[:org_slug])
   end
 
   def update

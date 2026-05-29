@@ -185,7 +185,24 @@ class Order < ApplicationRecord
         end
       end
     end
+
+    # Under the "confirm" price-change policy we persist that a change is
+    # pending, so the checkout can require an explicit acknowledgement even
+    # if the customer first saw the change on the cart page.
+    if (changes[:price_changed].any? || changes[:discount_changed].any?) &&
+       organisation.cart_price_change_policy == "confirm"
+      update_column(:pricing_changed_at, Time.current)
+    end
+
     changes
+  end
+
+  def pricing_change_pending?
+    pricing_changed_at.present?
+  end
+
+  def acknowledge_pricing_change!
+    update_column(:pricing_changed_at, nil) if pricing_changed_at.present?
   end
 
   # Line items that aren't cleanly purchasable at the requested quantity.
@@ -216,10 +233,21 @@ class Order < ApplicationRecord
     end
   end
 
+  # Under the "confirm" policy, refuse to place until the customer has
+  # acknowledged a pending price/discount change (cleared via the modal).
+  def validate_pricing_acknowledged!
+    return unless organisation.cart_price_change_policy == "confirm"
+    return unless pricing_change_pending?
+
+    errors.add(:base, I18n.t("storefront.checkouts.errors.pricing_unconfirmed"))
+    raise ActiveRecord::RecordInvalid, self
+  end
+
   def finalize_checkout!(same_as_billing: false)
     self.shipping_address = billing_address if same_as_billing && billing_address.present?
     refresh_cart!
     validate_checkout_stock!
+    validate_pricing_acknowledged!
     self.tax_amount = calculated_tax
     self.shipping_amount = calculated_shipping
     snapshot_auto_discount!

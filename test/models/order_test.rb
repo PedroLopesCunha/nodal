@@ -137,4 +137,49 @@ class OrderTest < ActiveSupport::TestCase
 
     assert @order.placed?
   end
+
+  test "refresh_cart! flags a pending pricing change under the confirm policy" do
+    @org.update!(cart_price_change_policy: "confirm")
+    @order.order_items.create!(product: @product, quantity: 1)
+    @product.default_variant.update!(unit_price_cents: 1500)
+    @order.reload
+
+    @order.refresh_cart!
+
+    assert @order.reload.pricing_change_pending?
+  end
+
+  test "refresh_cart! does not flag a pending pricing change under notify" do
+    # default cart_price_change_policy is "notify"
+    @order.order_items.create!(product: @product, quantity: 1)
+    @product.default_variant.update!(unit_price_cents: 1500)
+    @order.reload
+
+    @order.refresh_cart!
+
+    assert_not @order.reload.pricing_change_pending?
+  end
+
+  test "acknowledge_pricing_change! clears the pending flag" do
+    @order.update_column(:pricing_changed_at, Time.current)
+    @order.acknowledge_pricing_change!
+    assert_not @order.reload.pricing_change_pending?
+  end
+
+  test "finalize_checkout! blocks under confirm until the pricing change is acknowledged" do
+    @org.update!(cart_price_change_policy: "confirm")
+    @order.order_items.create!(product: @product, quantity: 1)
+    @product.default_variant.update!(unit_price_cents: 1500)
+    @order.reload
+    @order.terms_accepted_at = Time.current
+
+    assert_raises(ActiveRecord::RecordInvalid) { @order.finalize_checkout! }
+    assert_not @order.reload.placed?
+
+    @order.acknowledge_pricing_change!
+    @order.terms_accepted_at = Time.current
+    @order.finalize_checkout!
+
+    assert @order.placed?
+  end
 end

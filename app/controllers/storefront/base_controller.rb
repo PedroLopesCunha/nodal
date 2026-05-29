@@ -73,6 +73,12 @@ class Storefront::BaseController < ApplicationController
     @cart_changes = current_cart&.refresh_cart!
   end
 
+  # True when the just-run refresh moved any line's price or discount.
+  def cart_pricing_changed?
+    @cart_changes.present? &&
+      (@cart_changes[:price_changed].any? || @cart_changes[:discount_changed].any?)
+  end
+
   def authenticate_customer_user!
     # Allow CustomerUsers whose Customer (empresa) belongs to this org
     return if current_customer_user.present? && current_customer_user.customer&.organisation == current_organisation

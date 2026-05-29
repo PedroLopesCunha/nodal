@@ -423,3 +423,23 @@
     </div>
   </div>
 </div>
+
+<% if @price_change_modal %>
+  <div class="modal fade" tabindex="-1" data-controller="auto-modal"
+       data-bs-backdrop="static" data-bs-keyboard="false" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title"><i class="fa-solid fa-tag me-2"></i><%= t('storefront.checkouts.show.price_change_modal.title') %></h5>
+        </div>
+        <div class="modal-body"><%= t('storefront.checkouts.show.price_change_modal.body') %></div>
+        <div class="modal-footer">
+          <%= button_to acknowledge_pricing_checkout_path(org_slug: params[:org_slug]),
+                method: :post, class: "btn btn-primary" do %>
+            <%= t('storefront.checkouts.show.price_change_modal.accept') %>
+          <% end %>
+        </div>
+      </div>
+    </div>
+  </div>
+<% end %>

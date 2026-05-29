@@ -304,6 +304,16 @@ class OrganisationTest < ActiveSupport::TestCase
     assert_equal "warn", @org.checkout_stock_policy
   end
 
+  test "defaults cart_price_change_policy to notify" do
+    assert_equal "notify", @org.cart_price_change_policy
+  end
+
+  test "rejects an invalid cart_price_change_policy" do
+    @org.cart_price_change_policy = "explode"
+    assert_not @org.valid?
+    assert_includes @org.errors[:cart_price_change_policy], "is not included in the list"
+  end
+
   test "rejects an invalid checkout_stock_policy" do
     @org.checkout_stock_policy = "explode"
     assert_not @org.valid?

@@ -40,7 +40,9 @@ scope module: :storefront do
   end
 
   # Checkout
-  resource :checkout, only: [:show, :update]
+  resource :checkout, only: [:show, :update] do
+    post :acknowledge_pricing, on: :member
+  end
 
   # Promo codes (apply/remove at checkout)
   resource :promo_code, only: [] do
