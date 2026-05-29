@@ -301,6 +301,13 @@ class OrganisationTest < ActiveSupport::TestCase
   test "defaults cart policies to warn" do
     assert_equal "warn", @org.cart_stock_policy
     assert_equal "warn", @org.cart_qty_overflow_policy
+    assert_equal "warn", @org.checkout_stock_policy
+  end
+
+  test "rejects an invalid checkout_stock_policy" do
+    @org.checkout_stock_policy = "explode"
+    assert_not @org.valid?
+    assert_includes @org.errors[:checkout_stock_policy], "is not included in the list"
   end
 
   test "rejects an invalid cart_stock_policy" do

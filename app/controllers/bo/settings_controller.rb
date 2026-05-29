@@ -28,7 +28,7 @@ class Bo::SettingsController < Bo::BaseController
       :contact_email, :phone, :whatsapp, :business_hours, :use_billing_address_for_contact, :show_whatsapp_button,
       :instagram_url, :facebook_url, :linkedin_url,
       :storefront_title, :favicon, :taxpayer_id, :show_related_products, :out_of_stock_strategy,
-      :cart_stock_policy, :cart_qty_overflow_policy,
+      :cart_stock_policy, :cart_qty_overflow_policy, :checkout_stock_policy,
       :show_product_sku, :show_product_min_quantity, :show_product_category, :show_product_availability, :show_scroll_to_top,
       :default_product_sort,
       :terms_and_conditions, :privacy_policy,

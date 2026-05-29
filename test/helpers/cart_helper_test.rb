@@ -13,7 +13,7 @@ class CartHelperTest < ActionView::TestCase
 
   test "qty_overflow shows a badge only under the warn policy" do
     item = @order.order_items.create!(product: @product, quantity: 5)
-    @product.default_variant.update!(track_stock: true, stock_quantity: 2)
+    @product.default_variant.update!(track_stock: true, stock_quantity: 2, stock_policy: "show_badge")
     item.reload
     assert_equal :qty_overflow, item.stock_status
 

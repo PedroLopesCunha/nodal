@@ -308,11 +308,16 @@ es:
         terms_checkbox_html: "He leído y acepto los %{terms_link} y la %{privacy_link}."
         terms_link: "Términos y Condiciones"
         privacy_link: "Política de Privacidad"
+        confirm_stock_checkbox: "Confirmo que deseo pedir incluso con artículos sin stock disponible."
+        stock_block_notice: "Hay artículos sin stock suficiente. Ajuste las cantidades o elimínelos del carrito para continuar."
         table:
           product: "Producto"
           quantity: "Cant"
           price: "Precio"
           total: "Total"
+      errors:
+        stock_blocked: "No se puede finalizar: hay artículos sin stock disponible."
+        stock_unconfirmed: "Confirme que desea pedir incluso con artículos sin stock disponible."
 
     # Páginas legales
     legal_pages:

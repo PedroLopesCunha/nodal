@@ -320,11 +320,16 @@ en:
         terms_checkbox_html: "I have read and accept the %{terms_link} and the %{privacy_link}."
         terms_link: "Terms and Conditions"
         privacy_link: "Privacy Policy"
+        confirm_stock_checkbox: "I confirm I want to order even with items that are out of stock."
+        stock_block_notice: "Some items don't have enough stock. Adjust the quantities or remove them from the cart to continue."
         table:
           product: "Product"
           quantity: "Qty"
           price: "Price"
           total: "Total"
+      errors:
+        stock_blocked: "Can't complete checkout: some items are out of stock."
+        stock_unconfirmed: "Please confirm you want to order even with items that are out of stock."
 
     # Legal pages
     legal_pages:

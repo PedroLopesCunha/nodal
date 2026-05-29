@@ -72,7 +72,7 @@ class OrderTest < ActiveSupport::TestCase
   test "refresh_cart! caps quantity to available stock under the cap policy" do
     @org.update!(cart_qty_overflow_policy: "cap")
     item = @order.order_items.create!(product: @product, quantity: 5)
-    @product.default_variant.update!(track_stock: true, stock_quantity: 2)
+    @product.default_variant.update!(track_stock: true, stock_quantity: 2, stock_policy: "show_badge")
     @order.reload
 
     changes = @order.refresh_cart!
@@ -83,12 +83,58 @@ class OrderTest < ActiveSupport::TestCase
 
   test "refresh_cart! warns on qty overflow without changing quantity by default" do
     item = @order.order_items.create!(product: @product, quantity: 5)
-    @product.default_variant.update!(track_stock: true, stock_quantity: 2)
+    @product.default_variant.update!(track_stock: true, stock_quantity: 2, stock_policy: "show_badge")
     @order.reload
 
     changes = @order.refresh_cart!
 
     assert_equal 5, item.reload.quantity
     assert_equal 2, changes[:qty_overflow].first[:available]
+  end
+
+  test "finalize_checkout! blocks placing with out-of-stock items under block policy" do
+    @org.update!(checkout_stock_policy: "block")
+    @order.order_items.create!(product: @product, quantity: 1)
+    @product.default_variant.update!(track_stock: true, stock_quantity: 0, stock_policy: "show_badge")
+    @order.reload
+    @order.terms_accepted_at = Time.current
+
+    assert_raises(ActiveRecord::RecordInvalid) { @order.finalize_checkout! }
+    assert_not @order.reload.placed?
+  end
+
+  test "finalize_checkout! requires confirmation for out-of-stock items under warn policy" do
+    # default checkout_stock_policy is "warn"
+    @order.order_items.create!(product: @product, quantity: 1)
+    @product.default_variant.update!(track_stock: true, stock_quantity: 0, stock_policy: "show_badge")
+    @order.reload
+    @order.terms_accepted_at = Time.current
+
+    assert_raises(ActiveRecord::RecordInvalid) { @order.finalize_checkout! }
+    assert_not @order.reload.placed?
+  end
+
+  test "finalize_checkout! places under warn policy once confirmed" do
+    @order.order_items.create!(product: @product, quantity: 1)
+    @product.default_variant.update!(track_stock: true, stock_quantity: 0, stock_policy: "show_badge")
+    @order.reload
+    @order.terms_accepted_at = Time.current
+    @order.confirmed_stock_warnings = "1"
+
+    @order.finalize_checkout!
+
+    assert @order.placed?
+  end
+
+  test "finalize_checkout! places out-of-stock items under allow policy" do
+    @org.update!(checkout_stock_policy: "allow")
+    @order.order_items.create!(product: @product, quantity: 1)
+    @product.default_variant.update!(track_stock: true, stock_quantity: 0, stock_policy: "show_badge")
+    @order.reload
+    @order.terms_accepted_at = Time.current
+
+    @order.finalize_checkout!
+
+    assert @order.placed?
   end
 end

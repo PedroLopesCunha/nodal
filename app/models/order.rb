@@ -17,6 +17,10 @@ class Order < ApplicationRecord
   # asked to ship to the billing address. Resolved in finalize_checkout!.
   attr_accessor :same_as_billing
 
+  # Virtual attribute set by the checkout form's extra confirmation checkbox,
+  # used by validate_checkout_stock! when checkout_stock_policy is "warn".
+  attr_accessor :confirmed_stock_warnings
+
   belongs_to :customer
   belongs_to :customer_user, optional: true
   belongs_to :organisation
@@ -184,9 +188,38 @@ class Order < ApplicationRecord
     changes
   end
 
+  # Line items that aren't cleanly purchasable at the requested quantity.
+  def stock_issue_items
+    order_items.reject { |item| item.stock_status == :purchasable }
+  end
+
+  def stock_issues?
+    stock_issue_items.any?
+  end
+
+  # Enforces the organisation's checkout_stock_policy when finalising:
+  #   allow → backorder, no-op
+  #   block → refuse to place if any item has a stock issue
+  #   warn  → refuse unless the customer ticked the confirmation checkbox
+  # Runs after refresh_cart!, so items already removed/capped by the cart
+  # policies are no longer counted here.
+  def validate_checkout_stock!
+    policy = organisation.checkout_stock_policy
+    return if policy == "allow" || stock_issue_items.empty?
+
+    if policy == "block"
+      errors.add(:base, I18n.t("storefront.checkouts.errors.stock_blocked"))
+      raise ActiveRecord::RecordInvalid, self
+    elsif policy == "warn" && !ActiveModel::Type::Boolean.new.cast(confirmed_stock_warnings)
+      errors.add(:base, I18n.t("storefront.checkouts.errors.stock_unconfirmed"))
+      raise ActiveRecord::RecordInvalid, self
+    end
+  end
+
   def finalize_checkout!(same_as_billing: false)
     self.shipping_address = billing_address if same_as_billing && billing_address.present?
     refresh_cart!
+    validate_checkout_stock!
     self.tax_amount = calculated_tax
     self.shipping_amount = calculated_shipping
     snapshot_auto_discount!

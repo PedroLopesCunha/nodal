@@ -390,7 +390,24 @@
           </div>
         <% end %>
 
-        <button type="submit" form="checkout-form" class="btn btn-primary w-100 btn-lg">
+        <% checkout_stock_policy = current_organisation.checkout_stock_policy %>
+        <% has_stock_issues = @order.stock_issues? %>
+        <% block_checkout = has_stock_issues && checkout_stock_policy == "block" %>
+
+        <% if has_stock_issues && block_checkout %>
+          <div class="alert alert-danger small d-flex align-items-center">
+            <i class="fa-solid fa-ban me-2"></i><%= t('storefront.checkouts.show.stock_block_notice') %>
+          </div>
+        <% elsif has_stock_issues && checkout_stock_policy == "warn" %>
+          <div class="form-check mb-3">
+            <input type="checkbox" name="order[confirmed_stock_warnings]" value="1" id="confirm_stock" class="form-check-input" required form="checkout-form">
+            <label class="form-check-label small text-warning-emphasis" for="confirm_stock">
+              <%= t('storefront.checkouts.show.confirm_stock_checkbox') %>
+            </label>
+          </div>
+        <% end %>
+
+        <button type="submit" form="checkout-form" class="btn btn-primary w-100 btn-lg" <%= "disabled" if block_checkout %>>
           <i class="fa-solid fa-check me-2"></i><%= t('storefront.checkouts.show.place_order') %>
         </button>
 

@@ -75,7 +75,12 @@ class OrderItem < ApplicationRecord
     return :variant_unpublished if product_variant.nil? || !product_variant.published?
     return :out_of_stock unless product_variant.purchasable?
 
-    if product_variant.track_stock? && quantity.to_i > product_variant.stock_quantity.to_i
+    # track_only means the org opted out of stock enforcement (backorder), so
+    # an over-stock quantity is not an issue there — only flag it when stock
+    # is actually enforced for the variant.
+    if product_variant.track_stock? &&
+       product_variant.effective_stock_policy != "track_only" &&
+       quantity.to_i > product_variant.stock_quantity.to_i
       return :qty_overflow
     end
 
