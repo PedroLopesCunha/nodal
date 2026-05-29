@@ -233,6 +233,17 @@ pt:
         title: "O Seu Carrinho"
         empty_cart: "O seu carrinho está vazio"
         empty_cart_hint: "Explore os nossos produtos e adicione itens ao seu carrinho."
+        stock:
+          out_of_stock: "Esgotado"
+          only_n_left:
+            one: "Só resta %{count} unidade"
+            other: "Só restam %{count} unidades"
+          items_removed:
+            one: "Removemos 1 item do carrinho que ficou sem stock."
+            other: "Removemos %{count} itens do carrinho que ficaram sem stock."
+          items_capped:
+            one: "Ajustámos a quantidade de 1 item ao stock disponível."
+            other: "Ajustámos a quantidade de %{count} itens ao stock disponível."
         order_discounts_available: "Descontos de Encomenda Disponíveis!"
         order_discounts_hint: "Poupe mais quando a sua encomenda atingir estes valores:"
         table:

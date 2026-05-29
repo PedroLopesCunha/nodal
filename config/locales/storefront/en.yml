@@ -233,6 +233,17 @@ en:
         title: "Your Cart"
         empty_cart: "Your cart is empty"
         empty_cart_hint: "Browse our products and add items to your cart."
+        stock:
+          out_of_stock: "Out of stock"
+          only_n_left:
+            one: "Only %{count} left"
+            other: "Only %{count} left"
+          items_removed:
+            one: "We removed 1 item from your cart that ran out of stock."
+            other: "We removed %{count} items from your cart that ran out of stock."
+          items_capped:
+            one: "We adjusted the quantity of 1 item to the available stock."
+            other: "We adjusted the quantity of %{count} items to the available stock."
         order_discounts_available: "Order Discounts Available!"
         order_discounts_hint: "Save more when your order reaches these thresholds:"
         table:

@@ -221,6 +221,17 @@ es:
         title: "Su Carrito"
         empty_cart: "Su carrito está vacío"
         empty_cart_hint: "Explore nuestros productos y añada artículos a su carrito."
+        stock:
+          out_of_stock: "Agotado"
+          only_n_left:
+            one: "Solo queda %{count} unidad"
+            other: "Solo quedan %{count} unidades"
+          items_removed:
+            one: "Eliminamos 1 artículo del carrito que se quedó sin stock."
+            other: "Eliminamos %{count} artículos del carrito que se quedaron sin stock."
+          items_capped:
+            one: "Ajustamos la cantidad de 1 artículo al stock disponible."
+            other: "Ajustamos la cantidad de %{count} artículos al stock disponible."
         order_discounts_available: "¡Descuentos de Pedido Disponibles!"
         order_discounts_hint: "Ahorre más cuando su pedido alcance estos valores:"
         table:

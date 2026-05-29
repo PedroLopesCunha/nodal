@@ -70,7 +70,7 @@ class Storefront::BaseController < ApplicationController
   # whenever the customer re-engages with cart/checkout, so an expired
   # discount or an ERP price change can't be carried silently into checkout.
   def refresh_cart_pricing
-    current_cart&.refresh_cart!
+    @cart_changes = current_cart&.refresh_cart!
   end
 
   def authenticate_customer_user!

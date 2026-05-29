@@ -65,4 +65,32 @@ class OrderItemTest < ActiveSupport::TestCase
     assert_equal({}, item.refresh_pricing!)
     assert_equal 1000, item.unit_price
   end
+
+  test "stock_status is purchasable when quantity fits the tracked stock" do
+    @product.default_variant.update!(track_stock: true, stock_quantity: 10)
+    item = @order.order_items.create!(product: @product, quantity: 3)
+    item.reload
+    assert_equal :purchasable, item.stock_status
+  end
+
+  test "stock_status flags qty_overflow when quantity exceeds tracked stock" do
+    item = @order.order_items.create!(product: @product, quantity: 5)
+    @product.default_variant.update!(track_stock: true, stock_quantity: 2)
+    item.reload
+    assert_equal :qty_overflow, item.stock_status
+  end
+
+  test "stock_status is out_of_stock when a tracked variant hits zero" do
+    item = @order.order_items.create!(product: @product, quantity: 1)
+    @product.default_variant.update!(track_stock: true, stock_quantity: 0, stock_policy: "show_badge")
+    item.reload
+    assert_equal :out_of_stock, item.stock_status
+  end
+
+  test "stock_status is variant_unpublished when the variant is unpublished" do
+    item = @order.order_items.create!(product: @product, quantity: 1)
+    @product.default_variant.update!(published: false)
+    item.reload
+    assert_equal :variant_unpublished, item.stock_status
+  end
 end

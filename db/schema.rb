@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2026_05_20_120000) do
+ActiveRecord::Schema[7.1].define(version: 2026_05_29_120000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_trgm"
   enable_extension "plpgsql"
@@ -586,6 +586,8 @@ ActiveRecord::Schema[7.1].define(version: 2026_05_20_120000) do
     t.integer "quick_access_token_ttl_days", default: 90
     t.string "custom_domain"
     t.datetime "custom_domain_verified_at"
+    t.string "cart_stock_policy", default: "warn", null: false
+    t.string "cart_qty_overflow_policy", default: "warn", null: false
     t.index ["custom_domain"], name: "index_organisations_on_custom_domain", unique: true, where: "(custom_domain IS NOT NULL)"
     t.index ["default_locale"], name: "index_organisations_on_default_locale"
     t.index ["slug"], name: "index_organisations_on_slug", unique: true

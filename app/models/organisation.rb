@@ -3,6 +3,8 @@ class Organisation < ApplicationRecord
 
   SUPPORTED_CURRENCIES = %w[EUR CHF USD GBP].freeze
   OUT_OF_STOCK_STRATEGIES = %w[do_nothing deactivate hide].freeze
+  CART_STOCK_POLICIES = %w[allow warn remove].freeze
+  CART_QTY_OVERFLOW_POLICIES = %w[allow warn cap].freeze
   HEX_COLOR_REGEX = /\A#[0-9A-Fa-f]{6}\z/
   CUTOFF_TIME_REGEX = /\A([01]\d|2[0-3]):[0-5]\d\z/
   CUSTOM_DOMAIN_REGEX = /\A(?:[a-z0-9](?:[a-z0-9\-]{0,61}[a-z0-9])?\.)+[a-z]{2,}\z/
@@ -51,6 +53,8 @@ class Organisation < ApplicationRecord
   validates :currency, presence: true, inclusion: { in: SUPPORTED_CURRENCIES }
   validates :default_locale, inclusion: { in: I18n.available_locales.map(&:to_s) }
   validates :out_of_stock_strategy, inclusion: { in: OUT_OF_STOCK_STRATEGIES }
+  validates :cart_stock_policy, inclusion: { in: CART_STOCK_POLICIES }
+  validates :cart_qty_overflow_policy, inclusion: { in: CART_QTY_OVERFLOW_POLICIES }
   validates :primary_color, format: { with: HEX_COLOR_REGEX }, allow_blank: true
   validates :secondary_color, format: { with: HEX_COLOR_REGEX }, allow_blank: true
   validates :email_reply_to, format: { with: URI::MailTo::EMAIL_REGEXP }, allow_blank: true

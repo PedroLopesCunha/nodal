@@ -139,20 +139,47 @@ class Order < ApplicationRecord
     push_attempts >= MAX_PUSH_ATTEMPTS
   end
 
-  # Re-evaluates every line item's price and discount against current data,
-  # persisting the ones that changed. Returns a struct describing what moved
-  # so callers (cart/checkout) can surface it. No-op once the order is placed.
+  # Re-evaluates every line item against current data — re-pricing it and
+  # reacting to stock changes per the organisation's cart policies — and
+  # persists what moved. Returns a struct describing every change so callers
+  # (cart/checkout) can surface it. No-op once the order is placed.
+  #
+  # Stock reactions:
+  #   cart_stock_policy 'remove'    → drop items that went unpurchasable
+  #   cart_qty_overflow_policy 'cap' → reduce qty to the available stock
+  #   otherwise the issue is recorded for the view to warn about.
   def refresh_cart!
-    changes = { price_changed: [], discount_changed: [] }
+    changes = blank_cart_changes
     return changes if placed?
 
-    order_items.each do |item|
-      item_changes = item.refresh_pricing!
-      next if item_changes.empty?
+    order_items.to_a.each do |item|
+      status = item.stock_status
 
-      item.save!
-      changes[:price_changed] << item.id if item_changes.key?(:unit_price)
-      changes[:discount_changed] << item.id if item_changes.key?(:discount_percentage)
+      if status.in?(%i[out_of_stock variant_unpublished]) && organisation.cart_stock_policy == "remove"
+        changes[:removed] << cart_item_label(item)
+        item.destroy!
+        next
+      end
+
+      item_changes = item.refresh_pricing!
+      if item_changes.any?
+        item.save!
+        changes[:price_changed] << item.id if item_changes.key?(:unit_price)
+        changes[:discount_changed] << item.id if item_changes.key?(:discount_percentage)
+      end
+
+      case status
+      when :out_of_stock, :variant_unpublished
+        changes[:out_of_stock] << cart_item_label(item)
+      when :qty_overflow
+        available = item.product_variant.stock_quantity.to_i
+        if organisation.cart_qty_overflow_policy == "cap" && available >= 1
+          item.update!(quantity: available)
+          changes[:capped] << cart_item_label(item).merge(to: available)
+        else
+          changes[:qty_overflow] << cart_item_label(item).merge(available: available)
+        end
+      end
     end
     changes
   end
@@ -317,6 +344,14 @@ class Order < ApplicationRecord
   end
 
   private
+
+  def blank_cart_changes
+    { price_changed: [], discount_changed: [], removed: [], capped: [], out_of_stock: [], qty_overflow: [] }
+  end
+
+  def cart_item_label(item)
+    { id: item.id, name: item.product&.name, variant: item.variant_name }
+  end
 
   def discount_value_valid_for_type
     return unless discount_type.present? && discount_value.present?

@@ -65,6 +65,23 @@ class OrderItem < ApplicationRecord
     product_variant&.effective_photo || (product&.photo_attached? ? product.photo : nil)
   end
 
+  # Classifies the line against current variant stock so the cart/checkout
+  # can react per the organisation's policies:
+  #   :variant_unpublished — variant is gone or no longer published
+  #   :out_of_stock        — variant not purchasable (e.g. tracked stock at 0)
+  #   :qty_overflow        — purchasable, but requested qty exceeds stock
+  #   :purchasable         — fine to buy at the requested quantity
+  def stock_status
+    return :variant_unpublished if product_variant.nil? || !product_variant.published?
+    return :out_of_stock unless product_variant.purchasable?
+
+    if product_variant.track_stock? && quantity.to_i > product_variant.stock_quantity.to_i
+      return :qty_overflow
+    end
+
+    :purchasable
+  end
+
   # Re-evaluates unit_price and discount_percentage against the current
   # variant price and active discounts, leaving the new values in memory.
   # Returns a hash of {attribute => [old, new]} for whatever changed (empty
