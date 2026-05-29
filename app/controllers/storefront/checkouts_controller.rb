@@ -1,4 +1,6 @@
 class Storefront::CheckoutsController < Storefront::BaseController
+  before_action :refresh_cart_pricing, only: :show
+
   def show
     @order = current_cart
     authorize @order, :checkout?, policy_class: OrderPolicy

@@ -1,5 +1,6 @@
 class Storefront::CartsController < Storefront::BaseController
   before_action :require_customer!
+  before_action :refresh_cart_pricing, only: :show
 
   def show
     @order = current_cart

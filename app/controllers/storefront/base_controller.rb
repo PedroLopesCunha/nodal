@@ -66,6 +66,13 @@ class Storefront::BaseController < ApplicationController
 
   private
 
+  # Re-prices the cart against current variant prices and active discounts
+  # whenever the customer re-engages with cart/checkout, so an expired
+  # discount or an ERP price change can't be carried silently into checkout.
+  def refresh_cart_pricing
+    current_cart&.refresh_cart!
+  end
+
   def authenticate_customer_user!
     # Allow CustomerUsers whose Customer (empresa) belongs to this org
     return if current_customer_user.present? && current_customer_user.customer&.organisation == current_organisation

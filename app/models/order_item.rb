@@ -65,6 +65,31 @@ class OrderItem < ApplicationRecord
     product_variant&.effective_photo || (product&.photo_attached? ? product.photo : nil)
   end
 
+  # Re-evaluates unit_price and discount_percentage against the current
+  # variant price and active discounts, leaving the new values in memory.
+  # Returns a hash of {attribute => [old, new]} for whatever changed (empty
+  # when nothing did). The caller decides whether to persist. No-op once the
+  # order is placed, so historical orders keep the price they were sold at.
+  def refresh_pricing!
+    return {} if order&.placed?
+
+    new_price = product_variant&.unit_price_cents || product&.unit_price
+    self.unit_price = new_price if new_price.present?
+
+    calculator = DiscountCalculator.new(
+      product: product,
+      customer: order&.customer,
+      quantity: quantity || 1,
+      variant: product_variant
+    )
+    self.discount_percentage = calculator.effective_discount[:percentage] || 0
+
+    changes = {}
+    changes[:unit_price] = unit_price_change if unit_price_changed?
+    changes[:discount_percentage] = discount_percentage_change if discount_percentage_changed?
+    changes
+  end
+
   private
 
   def set_variant_for_simple_product

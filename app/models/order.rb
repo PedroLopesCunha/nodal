@@ -139,8 +139,27 @@ class Order < ApplicationRecord
     push_attempts >= MAX_PUSH_ATTEMPTS
   end
 
+  # Re-evaluates every line item's price and discount against current data,
+  # persisting the ones that changed. Returns a struct describing what moved
+  # so callers (cart/checkout) can surface it. No-op once the order is placed.
+  def refresh_cart!
+    changes = { price_changed: [], discount_changed: [] }
+    return changes if placed?
+
+    order_items.each do |item|
+      item_changes = item.refresh_pricing!
+      next if item_changes.empty?
+
+      item.save!
+      changes[:price_changed] << item.id if item_changes.key?(:unit_price)
+      changes[:discount_changed] << item.id if item_changes.key?(:discount_percentage)
+    end
+    changes
+  end
+
   def finalize_checkout!(same_as_billing: false)
     self.shipping_address = billing_address if same_as_billing && billing_address.present?
+    refresh_cart!
     self.tax_amount = calculated_tax
     self.shipping_amount = calculated_shipping
     snapshot_auto_discount!
