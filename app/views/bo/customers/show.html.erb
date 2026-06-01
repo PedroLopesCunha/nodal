@@ -295,7 +295,15 @@
                           <div class="mt-1"><small class="text-muted"><%= t('bo.customer_users.table.accepted_at', date: l(cu.invitation_accepted_at, format: :short)) %></small></div>
                         <% end %>
                       <td class="text-muted">
-                        <%= cu.last_sign_in_at ? l(cu.last_sign_in_at, format: :short) : t('bo.customer_users.table.never') %>
+                        <div><%= cu.last_sign_in_at ? l(cu.last_sign_in_at, format: :short) : t('bo.customer_users.table.never') %></div>
+                        <% if cu.sign_in_count.to_i > 0 %>
+                          <small class="text-muted d-block"><%= t('bo.customer_users.table.sign_in_count', count: cu.sign_in_count) %></small>
+                        <% end %>
+                        <% if cu.last_seen_at && cu.last_seen_at >= 5.minutes.ago %>
+                          <small class="text-success d-block"><i class="fa-solid fa-circle" style="font-size: 0.5rem;"></i> <%= t('bo.customer_users.table.online_now') %></small>
+                        <% elsif cu.last_seen_at %>
+                          <small class="text-muted d-block"><%= t('bo.customer_users.table.last_seen', time: time_ago_in_words(cu.last_seen_at)) %></small>
+                        <% end %>
                       </td>
                       <td class="text-end text-nowrap">
                         <% if cu.invitation_status == :pending || cu.invitation_status == :not_invited %>
@@ -377,12 +385,12 @@
             </div>
             <div class="col">
               <div class="border rounded p-3 text-center">
-                <small class="text-muted d-block mb-1"><%= t('bo.customers.show.last_login') %></small>
+                <small class="text-muted d-block mb-1"><%= t('bo.customers.show.avg_order_interval') %></small>
                 <span class="fs-4 fw-semibold">
-                  <% if @customer.last_sign_in_at %>
-                    <%= l(@customer.last_sign_in_at, format: :short) %>
+                  <% if @avg_order_interval_days %>
+                    <%= t('bo.customers.show.avg_order_interval_value', count: @avg_order_interval_days) %>
                   <% else %>
-                    <%= t('bo.customers.show.never') %>
+                    —
                   <% end %>
                 </span>
               </div>

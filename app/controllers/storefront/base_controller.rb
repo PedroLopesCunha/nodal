@@ -2,6 +2,7 @@ class Storefront::BaseController < ApplicationController
   layout "customer"
 
   before_action :authenticate_customer_user!
+  before_action :touch_last_seen
 
   helper_method :current_cart, :cart_item_count, :cart_line_item_count, :active_order_discounts,
                 :has_order_discounts?, :browsing_as_member?, :current_storefront_user,
@@ -65,6 +66,19 @@ class Storefront::BaseController < ApplicationController
   end
 
   private
+
+  # Updates the logged-in CustomerUser's last_seen_at on every storefront
+  # request, throttled to one write per minute so navigation doesn't
+  # hammer the DB. Skipped for impersonation/member browsing where there
+  # is no real customer user signed in.
+  def touch_last_seen
+    return unless current_customer_user
+
+    last = current_customer_user.last_seen_at
+    return if last && last > 60.seconds.ago
+
+    current_customer_user.update_column(:last_seen_at, Time.current)
+  end
 
   # Re-prices the cart against current variant prices and active discounts
   # whenever the customer re-engages with cart/checkout, so an expired

@@ -9,6 +9,12 @@ class Bo::CustomersController < Bo::BaseController
 
     # Always call policy_scope to satisfy Pundit's verify_policy_scoped
     load_customers
+
+    if @tab == 'customers'
+      @invitation_kpis = Dashboard::Metrics
+        .customer_health(organisation: current_organisation)
+        .slice(:total_customers, :active_users, :pending_users, :stale_pending_users, :uninvited_users)
+    end
   end
 
   def show
@@ -26,6 +32,11 @@ class Bo::CustomersController < Bo::BaseController
     @last_order = placed_orders.first
     @recent_orders = placed_orders.limit(5)
     @open_cart = @customer.orders.draft.includes(:order_items).first
+
+    @avg_order_interval_days = if @total_orders >= 2
+      span = @last_order.placed_at - placed_orders.last.placed_at
+      (span / (@total_orders - 1) / 1.day).round
+    end
   end
 
   def new
@@ -227,6 +238,51 @@ class Bo::CustomersController < Bo::BaseController
                             .where.not(customer_users: { invitation_sent_at: nil })
                             .select(:id)
       scope = scope.where(active: true).where.not(id: invited_ids)
+    when "stale_pending"
+      # At least one login invited >= 7 days ago and none accepted.
+      accepted_ids = Customer.joins(:customer_users)
+                             .where.not(customer_users: { invitation_accepted_at: nil })
+                             .select(:id)
+      scope = scope.where(active: true)
+                   .joins(:customer_users)
+                   .where("customer_users.invitation_sent_at <= ?", 7.days.ago)
+                   .where.not(id: accepted_ids)
+                   .distinct
+    end
+
+    case params[:activity]
+    when "online_now"
+      scope = scope.joins(:customer_users)
+                   .where("customer_users.last_seen_at >= ?", 5.minutes.ago)
+                   .distinct
+    when "active_week"
+      scope = scope.joins(:customer_users)
+                   .where("customer_users.current_sign_in_at >= ?", 7.days.ago)
+                   .distinct
+    when "accepted_no_return"
+      placed_customer_ids   = current_organisation.orders.placed.distinct.select(:customer_id)
+      returning_ids         = current_organisation.customers.joins(:customer_users)
+                                .where("customer_users.sign_in_count > 1").select(:id)
+      accepted_ids          = current_organisation.customers.joins(:customer_users)
+                                .where.not(customer_users: { invitation_accepted_at: nil }).select(:id)
+      scope = scope.where(id: accepted_ids)
+                   .where.not(id: returning_ids)
+                   .where.not(id: placed_customer_ids)
+    when "dormant"
+      returning_ids   = current_organisation.customers.joins(:customer_users)
+                          .where("customer_users.sign_in_count > 1").select(:id)
+      recently_active = current_organisation.customers.joins(:customer_users)
+                          .where("customer_users.current_sign_in_at >= ?", 30.days.ago).select(:id)
+      scope = scope.where(id: returning_ids).where.not(id: recently_active)
+    when "engaged_no_orders"
+      placed_customer_ids = current_organisation.orders.placed.distinct.select(:customer_id)
+      returning_ids       = current_organisation.customers.joins(:customer_users)
+                              .where("customer_users.sign_in_count > 1").select(:id)
+      recently_active     = current_organisation.customers.joins(:customer_users)
+                              .where("customer_users.current_sign_in_at >= ?", 30.days.ago).select(:id)
+      scope = scope.where(id: returning_ids)
+                   .where(id: recently_active)
+                   .where.not(id: placed_customer_ids)
     end
 
     scope = scope.where(customer_category_id: params[:category]) if params[:category].present?

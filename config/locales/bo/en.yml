@@ -263,6 +263,7 @@ en:
 
     sidebar:
       dashboard: "Dashboard"
+      analytics: "Analytics"
       customers: "Customers"
       products: "Products"
       categories: "Categories"
@@ -277,7 +278,42 @@ en:
       tasks: "Tasks"
 
     # Dashboard section
+    analytics:
+      title: "Analytics"
+      subtitle: "KPI evolution over time"
+      filters:
+        from: "From"
+        to: "To"
+        granularity: "Granularity"
+        client: "Client"
+        all_clients: "All clients"
+        apply: "Apply"
+      granularity:
+        day: "Day"
+        week: "Week"
+        month: "Month"
+      charts:
+        sales: "Total sales"
+        orders: "Number of orders"
+        aov: "Average order value"
+        unique_customers: "Unique customers placing orders"
+        logins: "Storefront logins"
+        carts: "Carts created vs placed"
+        avg_interval: "Average order frequency (days)"
+      series:
+        sales: "Sales"
+        orders: "Orders"
+        aov: "AOV"
+        unique_customers: "Customers"
+        logins: "Logins"
+        carts_created: "Created"
+        carts_placed: "Placed"
+        avg_interval: "Days between orders"
+
     dashboards:
+      tabs:
+        overview: "Overview"
+        analytics: "Analytics"
       index:
         title: "Dashboard"
         subtitle: "Business insights and KPI metrics for %{organisation}"
@@ -294,6 +330,31 @@ en:
         orders: "Orders"
         avg_order_value: "Avg Order Value"
         open_carts: "Open Carts"
+      customer_health:
+        title: "Customer Health"
+        total_customers:
+          one: "1 customer total"
+          other: "%{count} customers total"
+        invitations: "Invitations"
+        footprint: "Storefront footprint"
+        active_users: "Active"
+        active_users_hint: "Companies with at least one login that accepted the invite and is active."
+        pending_users: "Pending"
+        pending_users_hint: "Companies with an invite sent but not yet accepted."
+        stale_pending_users: "Pending for 7+ days"
+        stale_pending_users_hint: "Companies with an invite sent more than 7 days ago and still unaccepted — worth a follow-up."
+        uninvited_users: "Not invited"
+        uninvited_users_hint: "Companies with no invite sent yet."
+        online_now: "Online now"
+        online_now_hint: "Companies with at least one login active in the store right now (request in the last 5 minutes)."
+        active_week: "Active this week"
+        active_week_hint: "Companies with at least one login in the last week."
+        accepted_no_return: "Accepted, never returned"
+        accepted_no_return_hint: "Companies that accepted the invitation but never logged in again (single sign-in at acceptance time)."
+        dormant: "Dormant"
+        dormant_hint: "Companies that returned to the store after accepting but haven't logged in for 30+ days."
+        engaged_no_orders: "Browsing, no orders"
+        engaged_no_orders_hint: "Companies that visit the store regularly but haven't placed any order yet — follow-up opportunity."
       open_carts_modal:
         title: "Open Carts"
         empty: "No open carts."
@@ -391,6 +452,10 @@ en:
         total_orders: "Total Orders"
         total_spent: "Total Spent"
         avg_order_value: "Avg Order Value"
+        avg_order_interval: "Order Frequency"
+        avg_order_interval_value:
+          one: "%{count} day"
+          other: "%{count} days"
         last_login: "Last Login"
         never: "Never"
         open_cart: "Open Cart"
@@ -1422,6 +1487,11 @@ en:
         never: "Never"
         invited_at: "Invited %{date}"
         accepted_at: "Accepted %{date}"
+        sign_in_count:
+          one: "1 login total"
+          other: "%{count} logins total"
+        last_seen: "seen %{time} ago"
+        online_now: "Online now"
       new:
         title: "Add login"
         subtitle: "Invite a new login for %{company}"

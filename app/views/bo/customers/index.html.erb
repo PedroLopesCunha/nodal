@@ -48,6 +48,9 @@
           <%= link_to bo_customers_path(params[:org_slug], tab: 'customers'),
               class: "nav-link rounded-0 py-3 #{'active' if @tab == 'customers'}" do %>
             <i class="fa-solid fa-users me-2"></i><%= t('bo.customers.index.tabs.customers') %>
+            <% if @invitation_kpis && @invitation_kpis[:total_customers] %>
+              <span class="badge bg-light text-dark ms-2"><%= @invitation_kpis[:total_customers] %></span>
+            <% end %>
           <% end %>
         </li>
         <li class="nav-item" role="presentation">
@@ -61,6 +64,11 @@
   </div>
 
   <% if @tab == 'customers' %>
+    <%= render "invitation_kpi_bar",
+                kpis: @invitation_kpis,
+                org_slug: params[:org_slug],
+                current_status: params[:status] %>
+
     <% if @last_customer_sync %>
       <div class="border rounded d-flex align-items-center gap-2 py-2 px-3 mb-3 bg-light">
         <i class="fa-solid fa-rotate text-muted"></i>
