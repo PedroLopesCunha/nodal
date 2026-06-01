@@ -1,9 +1,17 @@
 <%
   share_phone = customer_user.contact_phone.presence || customer_user.customer&.contact_phone
   share_email = customer_user.email
-  share_msg   = t("bo.customer_users.invitation_share.message_body",
-                  company: customer_user.organisation.name,
-                  url: invitation_url)
+  share_first_name = customer_user.contact_name.to_s.strip.split(/\s+/).first
+  share_msg   = if share_first_name.present?
+    t("bo.customer_users.invitation_share.message_body_with_name",
+      name: share_first_name,
+      company: customer_user.organisation.name,
+      url: invitation_url)
+  else
+    t("bo.customer_users.invitation_share.message_body",
+      company: customer_user.organisation.name,
+      url: invitation_url)
+  end
 %>
 
 <div class="modal fade"
