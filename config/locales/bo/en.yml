@@ -1547,6 +1547,12 @@ en:
         email_subject: "Invitation to %{company}"
         security_note: "This link can be used only once to create the password. Generating a new one invalidates any previous link."
 
+    business_cards:
+      pdf:
+        cta_label: "Visit the store"
+        cta_sub: "Scan with your camera"
+        headline: "B2B Online Store"
+
     quick_access_tokens:
       show:
         title: "Quick Access (QR)"
@@ -1718,6 +1724,10 @@ en:
         cart_price_change_silent: "Don't notify"
         cart_price_change_notify: "Show a notice"
         cart_price_change_confirm: "Require confirmation at checkout"
+        business_card: "Business card"
+        business_card_hint: "Generic card with a QR code linking to the storefront sign-in page. Print and hand out to contacts without tying it to a specific customer — whoever scans lands on the store sign-in."
+        business_card_download_card: "Card (PDF)"
+        business_card_download_a4: "A4 sheet (10 cards)"
         branding: "Branding"
         organisation_logo: "Organisation Logo"
         logo_hint: "Recommended: PNG, JPG, or SVG. Max height 48px in navbar."

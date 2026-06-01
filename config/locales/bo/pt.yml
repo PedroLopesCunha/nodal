@@ -1537,6 +1537,12 @@ pt:
         email_subject: "Convite para %{company}"
         security_note: "Este link só pode ser usado uma vez para criar a password. Ao gerá-lo de novo, qualquer link anterior fica inválido."
 
+    business_cards:
+      pdf:
+        cta_label: "Aceda à loja"
+        cta_sub: "Aponte a câmara"
+        headline: "Loja Online B2B"
+
     quick_access_tokens:
       show:
         title: "Acesso Rápido (QR)"
@@ -1708,6 +1714,10 @@ pt:
         cart_price_change_silent: "Não avisar"
         cart_price_change_notify: "Mostrar aviso"
         cart_price_change_confirm: "Exigir confirmação no checkout"
+        business_card: "Cartão de visita"
+        business_card_hint: "Cartão genérico com QR code para a página de login da loja. Imprime e entrega a contactos sem ter de o associar a um cliente específico — quem digitalizar entra na página de login da loja."
+        business_card_download_card: "Cartão (PDF)"
+        business_card_download_a4: "Folha A4 (10 cartões)"
         branding: "Marca"
         organisation_logo: "Logótipo da Organização"
         logo_hint: "Recomendado: PNG, JPG ou SVG. Altura máxima 48px na barra de navegação."
