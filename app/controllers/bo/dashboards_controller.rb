@@ -15,6 +15,7 @@ class Bo::DashboardsController < Bo::BaseController
     @organisation = current_organisation
     authorize :dashboard, :index?
     @open_carts = Dashboard::Metrics.open_carts_detail(@organisation)
+    @customer_health = Dashboard::Metrics.customer_health(organisation: @organisation)
   end
 
   # GET /bo/dashboards/metrics

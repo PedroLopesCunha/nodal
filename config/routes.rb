@@ -89,6 +89,7 @@ Rails.application.routes.draw do
     namespace :bo do
       get "/", to: "dashboards#index"
       get "dashboards/metrics", to: "dashboards#metrics", as: :dashboards_metrics
+      get "analytics", to: "analytics#index", as: :analytics
       resources :orders do
         collection do
           get :export

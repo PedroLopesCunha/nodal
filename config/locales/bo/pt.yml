@@ -260,6 +260,7 @@ pt:
 
     sidebar:
       dashboard: "Painel"
+      analytics: "Analytics"
       customers: "Clientes"
       products: "Produtos"
       categories: "Categorias"
@@ -274,7 +275,42 @@ pt:
       tasks: "Tarefas"
 
     # Secção Dashboard
+    analytics:
+      title: "Analytics"
+      subtitle: "Evolução dos KPIs ao longo do tempo"
+      filters:
+        from: "De"
+        to: "Até"
+        granularity: "Granularidade"
+        client: "Cliente"
+        all_clients: "Todos os clientes"
+        apply: "Aplicar"
+      granularity:
+        day: "Dia"
+        week: "Semana"
+        month: "Mês"
+      charts:
+        sales: "Vendas totais"
+        orders: "Nº de encomendas"
+        aov: "Valor médio por encomenda"
+        unique_customers: "Clientes únicos a encomendar"
+        logins: "Logins na loja"
+        carts: "Carrinhos criados vs finalizados"
+        avg_interval: "Frequência média de encomenda (dias)"
+      series:
+        sales: "Vendas"
+        orders: "Encomendas"
+        aov: "AOV"
+        unique_customers: "Clientes"
+        logins: "Logins"
+        carts_created: "Criados"
+        carts_placed: "Finalizados"
+        avg_interval: "Dias entre encomendas"
+
     dashboards:
+      tabs:
+        overview: "Resumo"
+        analytics: "Analytics"
       index:
         title: "Painel"
         subtitle: "Métricas e indicadores de negócio para %{organisation}"
@@ -291,6 +327,31 @@ pt:
         orders: "Encomendas"
         avg_order_value: "Valor Médio"
         open_carts: "Carrinhos Abertos"
+      customer_health:
+        title: "Saúde dos Clientes"
+        total_customers:
+          one: "1 cliente no total"
+          other: "%{count} clientes no total"
+        invitations: "Convites"
+        footprint: "Pegada na loja"
+        active_users: "Ativos"
+        active_users_hint: "Empresas com pelo menos um login que aceitou o convite e está activo."
+        pending_users: "Pendentes"
+        pending_users_hint: "Empresas com convite enviado mas que ainda não foi aceite."
+        stale_pending_users: "Pendentes há +7 dias"
+        stale_pending_users_hint: "Empresas com convite enviado há mais de 7 dias sem ser aceite — vale a pena seguir."
+        uninvited_users: "Por convidar"
+        uninvited_users_hint: "Empresas ainda sem qualquer convite enviado."
+        online_now: "Online agora"
+        online_now_hint: "Empresas com pelo menos um login activo na loja agora (request nos últimos 5 minutos)."
+        active_week: "Ativos esta semana"
+        active_week_hint: "Empresas com pelo menos um login na última semana."
+        accepted_no_return: "Aceitou, nunca voltou"
+        accepted_no_return_hint: "Empresas que aceitaram o convite mas nunca mais entraram na loja (login único no dia do aceite)."
+        dormant: "Dormentes"
+        dormant_hint: "Empresas que já regressaram à loja após aceitar, mas não entram há mais de 30 dias."
+        engaged_no_orders: "Navega sem comprar"
+        engaged_no_orders_hint: "Empresas que entram regularmente na loja mas ainda não fizeram qualquer encomenda — oportunidade de seguimento."
       open_carts_modal:
         title: "Carrinhos Abertos"
         empty: "Sem carrinhos abertos."
@@ -388,6 +449,10 @@ pt:
         total_orders: "Total de Encomendas"
         total_spent: "Total Gasto"
         avg_order_value: "Valor Médio por Encomenda"
+        avg_order_interval: "Frequência de Encomenda"
+        avg_order_interval_value:
+          one: "%{count} dia"
+          other: "%{count} dias"
         last_login: "Último Login"
         never: "Nunca"
         open_cart: "Carrinho Aberto"
@@ -1412,6 +1477,11 @@ pt:
         never: "Nunca"
         invited_at: "Convidado a %{date}"
         accepted_at: "Aceite a %{date}"
+        sign_in_count:
+          one: "1 login no total"
+          other: "%{count} logins no total"
+        last_seen: "visto há %{time}"
+        online_now: "Online agora"
       new:
         title: "Adicionar login"
         subtitle: "Convidar um novo login para %{company}"

@@ -10,7 +10,7 @@
 
   <ul class="bo-sidebar-nav">
     <% unless pure_sales_rep? %>
-      <li class="bo-sidebar-item <%= 'active' if controller_name == 'dashboard' %>">
+      <li class="bo-sidebar-item <%= 'active' if controller_name.in?(%w[dashboards analytics]) %>">
         <%= link_to bo_path do %>
           <i class="fa-solid fa-chart-line"></i>
           <span><%= t('bo.sidebar.dashboard') %></span>

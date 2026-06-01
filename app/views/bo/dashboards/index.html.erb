@@ -58,6 +58,8 @@
   <div class="dashboard">
     <!-- Page Body -->
     <div class="bo-page-body">
+      <%= render "bo/dashboards/tabs" %>
+
       <!-- Top Row: KPI Cards -->
       <div class="dashboard__grid dashboard__grid--kpis mb-4">
 
@@ -92,6 +94,8 @@
       </div>
 
       <%= render "bo/dashboards/open_carts_modal", carts: @open_carts %>
+
+      <%= render "bo/dashboards/customer_health", health: @customer_health, org_slug: @organisation.slug %>
 
       <!-- Middle Section -->
       <div class="dashboard__grid dashboard__grid--middle mb-4">
