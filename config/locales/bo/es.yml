@@ -1375,7 +1375,8 @@ es:
         no_phone: "Añade el teléfono del cliente en su perfil para habilitar esta opción"
         copy: "Copiar enlace"
         copied: "¡Enlace copiado!"
-        message_body: "¡Hola! Has sido invitado a la tienda online de %{company}. Configura tu contraseña aquí: %{url}"
+        message_body: "¡Hola! Tu acceso al portal B2B de %{company} ya está disponible. Haz clic aquí para configurar tu contraseña y empezar a hacer pedidos online: %{url}"
+        message_body_with_name: "¡Hola %{name}! Tu acceso al portal B2B de %{company} ya está disponible. Haz clic aquí para configurar tu contraseña y empezar a hacer pedidos online: %{url}"
         email_subject: "Invitación a %{company}"
         security_note: "Este enlace solo puede usarse una vez para crear la contraseña. Generar uno nuevo invalida cualquier enlace anterior."
 
