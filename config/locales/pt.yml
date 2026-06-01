@@ -287,6 +287,10 @@ pt:
     es: "Español"
     switch: "Idioma"
 
+  # Shared meta tags (OG, Twitter)
+  meta:
+    og_description_fallback: "Portal B2B de %{company}"
+
   # Auth Pages
   auth:
     tab_title_suffix: "Iniciar Sessão"
