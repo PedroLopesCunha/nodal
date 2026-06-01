@@ -663,6 +663,25 @@
           </div>
         </div>
       </div>
+
+      <div class="card mb-3">
+        <div class="card-body">
+          <h5 class="card-title mb-2"><i class="fa-solid fa-qrcode me-2"></i><%= t('bo.settings.edit.business_card') %></h5>
+          <p class="text-muted small mb-3"><%= t('bo.settings.edit.business_card_hint') %></p>
+          <div class="d-grid gap-2">
+            <%= link_to bo_business_card_path(org_slug: @organisation.slug, layout: 'card'),
+                        class: "btn btn-outline-primary",
+                        target: "_blank" do %>
+              <i class="fa-solid fa-id-card me-2"></i><%= t('bo.settings.edit.business_card_download_card') %>
+            <% end %>
+            <%= link_to bo_business_card_path(org_slug: @organisation.slug, layout: 'a4'),
+                        class: "btn btn-outline-primary",
+                        target: "_blank" do %>
+              <i class="fa-solid fa-file-pdf me-2"></i><%= t('bo.settings.edit.business_card_download_a4') %>
+            <% end %>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 <% end %>

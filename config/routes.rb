@@ -90,6 +90,7 @@ Rails.application.routes.draw do
       get "/", to: "dashboards#index"
       get "dashboards/metrics", to: "dashboards#metrics", as: :dashboards_metrics
       get "analytics", to: "analytics#index", as: :analytics
+      get "business_card", to: "business_cards#show", as: :business_card
       resources :orders do
         collection do
           get :export
