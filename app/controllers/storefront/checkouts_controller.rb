@@ -1,4 +1,6 @@
 class Storefront::CheckoutsController < Storefront::BaseController
+  before_action :refresh_cart_pricing, only: :show
+
   def show
     @order = current_cart
     authorize @order, :checkout?, policy_class: OrderPolicy
@@ -12,6 +14,20 @@ class Storefront::CheckoutsController < Storefront::BaseController
     @shipping_addresses = current_customer.shipping_addresses
     @billing_address = current_customer.billing_address
     @earliest_delivery_date = current_organisation.earliest_delivery_date
+
+    case current_organisation.cart_price_change_policy
+    when "notify"
+      flash.now[:notice] = t("storefront.checkouts.show.prices_updated") if cart_pricing_changed?
+    when "confirm"
+      @price_change_modal = @order.pricing_change_pending?
+    end
+  end
+
+  def acknowledge_pricing
+    @order = current_cart
+    authorize @order, :checkout?, policy_class: OrderPolicy
+    @order&.acknowledge_pricing_change!
+    redirect_to checkout_path(org_slug: params[:org_slug])
   end
 
   def update
@@ -27,6 +43,7 @@ class Storefront::CheckoutsController < Storefront::BaseController
       @order.assign_attributes(order_params)
       handle_addresses
       @order.terms_accepted_at = Time.current if checkout_params[:terms_accepted] == "1"
+      @order.confirmed_stock_warnings = checkout_params[:confirmed_stock_warnings]
       if impersonating?
         @order.placed_by = current_member
         @order.sales_rep = current_org_member if current_org_member&.is_sales_rep?
@@ -95,12 +112,12 @@ class Storefront::CheckoutsController < Storefront::BaseController
 
   def order_params
     # Address IDs are handled separately in handle_addresses
-    checkout_params.except(:same_as_billing, :new_shipping_address, :new_billing_address, :shipping_address_id, :billing_address_id, :terms_accepted)
+    checkout_params.except(:same_as_billing, :new_shipping_address, :new_billing_address, :shipping_address_id, :billing_address_id, :terms_accepted, :confirmed_stock_warnings)
   end
 
   def checkout_params
     params.require(:order).permit(
-      :delivery_method, :receive_on, :notes, :terms_accepted,
+      :delivery_method, :receive_on, :notes, :terms_accepted, :confirmed_stock_warnings,
       :shipping_address_id, :billing_address_id, :same_as_billing,
       new_shipping_address: [:street_name, :postal_code, :city, :country],
       new_billing_address: [:street_name, :postal_code, :city, :country]

@@ -65,6 +65,53 @@ class OrderItem < ApplicationRecord
     product_variant&.effective_photo || (product&.photo_attached? ? product.photo : nil)
   end
 
+  # Classifies the line against current variant stock so the cart/checkout
+  # can react per the organisation's policies:
+  #   :variant_unpublished — variant is gone or no longer published
+  #   :out_of_stock        — variant not purchasable (e.g. tracked stock at 0)
+  #   :qty_overflow        — purchasable, but requested qty exceeds stock
+  #   :purchasable         — fine to buy at the requested quantity
+  def stock_status
+    return :variant_unpublished if product_variant.nil? || !product_variant.published?
+    return :out_of_stock unless product_variant.purchasable?
+
+    # track_only means the org opted out of stock enforcement (backorder), so
+    # an over-stock quantity is not an issue there — only flag it when stock
+    # is actually enforced for the variant.
+    if product_variant.track_stock? &&
+       product_variant.effective_stock_policy != "track_only" &&
+       quantity.to_i > product_variant.stock_quantity.to_i
+      return :qty_overflow
+    end
+
+    :purchasable
+  end
+
+  # Re-evaluates unit_price and discount_percentage against the current
+  # variant price and active discounts, leaving the new values in memory.
+  # Returns a hash of {attribute => [old, new]} for whatever changed (empty
+  # when nothing did). The caller decides whether to persist. No-op once the
+  # order is placed, so historical orders keep the price they were sold at.
+  def refresh_pricing!
+    return {} if order&.placed?
+
+    new_price = product_variant&.unit_price_cents || product&.unit_price
+    self.unit_price = new_price if new_price.present?
+
+    calculator = DiscountCalculator.new(
+      product: product,
+      customer: order&.customer,
+      quantity: quantity || 1,
+      variant: product_variant
+    )
+    self.discount_percentage = calculator.effective_discount[:percentage] || 0
+
+    changes = {}
+    changes[:unit_price] = unit_price_change if unit_price_changed?
+    changes[:discount_percentage] = discount_percentage_change if discount_percentage_changed?
+    changes
+  end
+
   private
 
   def set_variant_for_simple_product

@@ -233,6 +233,18 @@ en:
         title: "Your Cart"
         empty_cart: "Your cart is empty"
         empty_cart_hint: "Browse our products and add items to your cart."
+        prices_updated: "Prices were updated since your last visit."
+        stock:
+          out_of_stock: "Out of stock"
+          only_n_left:
+            one: "Only %{count} left"
+            other: "Only %{count} left"
+          items_removed:
+            one: "We removed 1 item from your cart that ran out of stock."
+            other: "We removed %{count} items from your cart that ran out of stock."
+          items_capped:
+            one: "We adjusted the quantity of 1 item to the available stock."
+            other: "We adjusted the quantity of %{count} items to the available stock."
         order_discounts_available: "Order Discounts Available!"
         order_discounts_hint: "Save more when your order reaches these thresholds:"
         table:
@@ -309,11 +321,22 @@ en:
         terms_checkbox_html: "I have read and accept the %{terms_link} and the %{privacy_link}."
         terms_link: "Terms and Conditions"
         privacy_link: "Privacy Policy"
+        confirm_stock_checkbox: "I confirm I want to order even with items that are out of stock."
+        stock_block_notice: "Some items don't have enough stock. Adjust the quantities or remove them from the cart to continue."
+        prices_updated: "Prices were updated since your last visit."
+        price_change_modal:
+          title: "Prices were updated"
+          body: "Some prices or discounts changed since you added these items. Please review the summary before placing your order."
+          accept: "Accept and continue"
         table:
           product: "Product"
           quantity: "Qty"
           price: "Price"
           total: "Total"
+      errors:
+        stock_blocked: "Can't complete checkout: some items are out of stock."
+        stock_unconfirmed: "Please confirm you want to order even with items that are out of stock."
+        pricing_unconfirmed: "Prices changed. Please confirm the changes before placing your order."
 
     # Legal pages
     legal_pages:

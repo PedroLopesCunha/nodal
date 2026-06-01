@@ -295,4 +295,40 @@ class OrganisationTest < ActiveSupport::TestCase
     @org.update!(name: "Renamed Co")
     assert_in_delta original_verified_at.to_f, @org.reload.custom_domain_verified_at.to_f, 1.0
   end
+
+  # cart policies
+
+  test "defaults cart policies to warn" do
+    assert_equal "warn", @org.cart_stock_policy
+    assert_equal "warn", @org.cart_qty_overflow_policy
+    assert_equal "warn", @org.checkout_stock_policy
+  end
+
+  test "defaults cart_price_change_policy to notify" do
+    assert_equal "notify", @org.cart_price_change_policy
+  end
+
+  test "rejects an invalid cart_price_change_policy" do
+    @org.cart_price_change_policy = "explode"
+    assert_not @org.valid?
+    assert_includes @org.errors[:cart_price_change_policy], "is not included in the list"
+  end
+
+  test "rejects an invalid checkout_stock_policy" do
+    @org.checkout_stock_policy = "explode"
+    assert_not @org.valid?
+    assert_includes @org.errors[:checkout_stock_policy], "is not included in the list"
+  end
+
+  test "rejects an invalid cart_stock_policy" do
+    @org.cart_stock_policy = "explode"
+    assert_not @org.valid?
+    assert_includes @org.errors[:cart_stock_policy], "is not included in the list"
+  end
+
+  test "rejects an invalid cart_qty_overflow_policy" do
+    @org.cart_qty_overflow_policy = "explode"
+    assert_not @org.valid?
+    assert_includes @org.errors[:cart_qty_overflow_policy], "is not included in the list"
+  end
 end

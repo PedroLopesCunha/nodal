@@ -1,5 +1,6 @@
 class Storefront::CartsController < Storefront::BaseController
   before_action :require_customer!
+  before_action :refresh_cart_pricing, only: :show
 
   def show
     @order = current_cart
@@ -7,6 +8,10 @@ class Storefront::CartsController < Storefront::BaseController
     @order_items = @order.order_items.includes(product: :category)
     @order_discounts = active_order_discounts
     @suggested_products = load_suggested_products
+
+    if cart_pricing_changed? && current_organisation.cart_price_change_policy != "silent"
+      flash.now[:notice] = t("storefront.carts.show.prices_updated")
+    end
   end
 
   def clear

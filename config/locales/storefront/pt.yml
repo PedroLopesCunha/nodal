@@ -233,6 +233,18 @@ pt:
         title: "O Seu Carrinho"
         empty_cart: "O seu carrinho está vazio"
         empty_cart_hint: "Explore os nossos produtos e adicione itens ao seu carrinho."
+        prices_updated: "Os preços foram atualizados desde a tua última visita."
+        stock:
+          out_of_stock: "Esgotado"
+          only_n_left:
+            one: "Só resta %{count} unidade"
+            other: "Só restam %{count} unidades"
+          items_removed:
+            one: "Removemos 1 item do carrinho que ficou sem stock."
+            other: "Removemos %{count} itens do carrinho que ficaram sem stock."
+          items_capped:
+            one: "Ajustámos a quantidade de 1 item ao stock disponível."
+            other: "Ajustámos a quantidade de %{count} itens ao stock disponível."
         order_discounts_available: "Descontos de Encomenda Disponíveis!"
         order_discounts_hint: "Poupe mais quando a sua encomenda atingir estes valores:"
         table:
@@ -309,11 +321,22 @@ pt:
         terms_checkbox_html: "Li e aceito os %{terms_link} e a %{privacy_link}."
         terms_link: "Termos e Condições"
         privacy_link: "Política de Privacidade"
+        confirm_stock_checkbox: "Confirmo que pretendo encomendar mesmo com itens sem stock disponível."
+        stock_block_notice: "Há itens sem stock suficiente. Ajuste as quantidades ou remova-os do carrinho para continuar."
+        prices_updated: "Os preços foram atualizados desde a tua última visita."
+        price_change_modal:
+          title: "Os preços foram atualizados"
+          body: "Alguns preços ou descontos mudaram desde que adicionaste os itens. Reviste o resumo antes de finalizar."
+          accept: "Aceitar e continuar"
         table:
           product: "Produto"
           quantity: "Qtd"
           price: "Preço"
           total: "Total"
+      errors:
+        stock_blocked: "Não é possível finalizar: há itens sem stock disponível."
+        stock_unconfirmed: "Confirme que pretende encomendar mesmo com itens sem stock disponível."
+        pricing_unconfirmed: "Os preços mudaram. Confirme as alterações antes de finalizar."
 
     # Páginas legais
     legal_pages:

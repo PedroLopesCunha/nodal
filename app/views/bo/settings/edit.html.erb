@@ -356,6 +356,63 @@
 
       <div class="card mb-3">
         <div class="card-body">
+          <h5 class="card-title mb-4"><%= t('bo.settings.edit.cart_checkout') %></h5>
+
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label class="form-label"><%= t('bo.settings.edit.cart_stock_policy') %></label>
+              <%= f.select :cart_stock_policy,
+                           options_for_select([
+                             [t('bo.settings.edit.cart_stock_allow'), 'allow'],
+                             [t('bo.settings.edit.cart_stock_warn'), 'warn'],
+                             [t('bo.settings.edit.cart_stock_remove'), 'remove']
+                           ], @organisation.cart_stock_policy),
+                           {},
+                           class: "form-control" %>
+              <small class="text-muted"><%= t('bo.settings.edit.cart_stock_policy_hint') %></small>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label"><%= t('bo.settings.edit.cart_qty_overflow_policy') %></label>
+              <%= f.select :cart_qty_overflow_policy,
+                           options_for_select([
+                             [t('bo.settings.edit.cart_qty_overflow_allow'), 'allow'],
+                             [t('bo.settings.edit.cart_qty_overflow_warn'), 'warn'],
+                             [t('bo.settings.edit.cart_qty_overflow_cap'), 'cap']
+                           ], @organisation.cart_qty_overflow_policy),
+                           {},
+                           class: "form-control" %>
+              <small class="text-muted"><%= t('bo.settings.edit.cart_qty_overflow_policy_hint') %></small>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label"><%= t('bo.settings.edit.checkout_stock_policy') %></label>
+              <%= f.select :checkout_stock_policy,
+                           options_for_select([
+                             [t('bo.settings.edit.checkout_stock_allow'), 'allow'],
+                             [t('bo.settings.edit.checkout_stock_warn'), 'warn'],
+                             [t('bo.settings.edit.checkout_stock_block'), 'block']
+                           ], @organisation.checkout_stock_policy),
+                           {},
+                           class: "form-control" %>
+              <small class="text-muted"><%= t('bo.settings.edit.checkout_stock_policy_hint') %></small>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label"><%= t('bo.settings.edit.cart_price_change_policy') %></label>
+              <%= f.select :cart_price_change_policy,
+                           options_for_select([
+                             [t('bo.settings.edit.cart_price_change_silent'), 'silent'],
+                             [t('bo.settings.edit.cart_price_change_notify'), 'notify'],
+                             [t('bo.settings.edit.cart_price_change_confirm'), 'confirm']
+                           ], @organisation.cart_price_change_policy),
+                           {},
+                           class: "form-control" %>
+              <small class="text-muted"><%= t('bo.settings.edit.cart_price_change_policy_hint') %></small>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card mb-3">
+        <div class="card-body">
           <h5 class="card-title mb-4"><%= t('bo.settings.edit.delivery_scheduling') %></h5>
 
           <div class="row g-3">
