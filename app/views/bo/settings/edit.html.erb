@@ -501,6 +501,14 @@
           </div>
 
           <div class="row g-3 mt-1">
+            <div class="col-md-12">
+              <label class="form-label"><%= t('bo.settings.edit.storefront_description') %></label>
+              <%= f.text_area :storefront_description, class: "form-control", rows: 2, maxlength: 200, placeholder: t('bo.settings.edit.storefront_description_placeholder', name: @organisation.name) %>
+              <small class="text-muted"><%= t('bo.settings.edit.storefront_description_hint') %></small>
+            </div>
+          </div>
+
+          <div class="row g-3 mt-1">
             <div class="col-md-6">
               <label class="form-label"><%= t('bo.settings.edit.primary_color') %></label>
               <div class="input-group">

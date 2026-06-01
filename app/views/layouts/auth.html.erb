@@ -2,11 +2,37 @@
 <html>
   <head>
     <% auth_org = @organisation || current_organisation %>
-    <title><%= [(auth_org&.effective_storefront_title || "Nodal"), t("auth.tab_title_suffix")].join(" — ") %></title>
+    <%
+      meta_locale = auth_org&.default_locale.presence || I18n.default_locale
+      og_title = auth_org&.effective_storefront_title || "Nodal"
+      og_description = I18n.with_locale(meta_locale) do
+        auth_org&.storefront_description.presence ||
+          I18n.t("meta.og_description_fallback", company: og_title)
+      end
+      og_image_url = auth_org&.logo&.attached? ? url_for(auth_org.logo) : nil
+      canonical_url = auth_org&.canonical_url_for_request(request)
+    %>
+    <title><%= I18n.with_locale(meta_locale) { [og_title, I18n.t("auth.tab_title_suffix")].join(" — ") } %></title>
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <%= organisation_favicon_tag(auth_org) %>
     <%= csrf_meta_tags %>
     <%= csp_meta_tag %>
+
+    <meta name="description" content="<%= og_description %>">
+    <meta property="og:title" content="<%= og_title %>">
+    <meta property="og:description" content="<%= og_description %>">
+    <meta property="og:type" content="website">
+    <% if canonical_url %>
+      <link rel="canonical" href="<%= canonical_url %>">
+      <meta property="og:url" content="<%= canonical_url %>">
+    <% end %>
+    <% if og_image_url %>
+      <meta property="og:image" content="<%= og_image_url %>">
+      <meta name="twitter:image" content="<%= og_image_url %>">
+    <% end %>
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="<%= og_title %>">
+    <meta name="twitter:description" content="<%= og_description %>">
 
     <%= stylesheet_link_tag "application", "data-turbo-track": "reload" %>
     <%= javascript_importmap_tags %>

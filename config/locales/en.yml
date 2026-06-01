@@ -280,6 +280,10 @@ en:
     es: "Español"
     switch: "Language"
 
+  # Shared meta tags (OG, Twitter)
+  meta:
+    og_description_fallback: "B2B Portal of %{company}"
+
   # Auth Pages
   auth:
     tab_title_suffix: "Sign in"
