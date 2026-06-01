@@ -63,6 +63,64 @@ class Storefront::OrderItemsController < Storefront::BaseController
     redirect_to cart_path(org_slug: params[:org_slug]), notice: "Item removed."
   end
 
+  # Bulk add multiple variants of one product to the cart in a single
+  # submission. Best-effort: each row saves independently, the response
+  # surfaces both successes and per-row failures so the customer isn't
+  # blocked by one bad line.
+  def bulk_add
+    @product = current_organisation.products.where(published: true).find(params[:product_id])
+    if @product.price_on_request?
+      redirect_to product_path(org_slug: params[:org_slug], id: @product),
+                  alert: t('storefront.products.show.price_on_request_not_purchasable')
+      return
+    end
+
+    @order = current_cart
+    authorize @order.order_items.build(product: @product), :create?
+    bulk_items = params[:bulk_items].respond_to?(:each_pair) ? params[:bulk_items] : {}
+
+    added = []
+    failed = []
+
+    bulk_items.each_pair do |variant_id, raw_qty|
+      qty = raw_qty.to_i
+      next if qty <= 0
+
+      variant = @product.product_variants.find_by(id: variant_id)
+      label = variant&.option_values_string.presence || variant&.name || variant_id.to_s
+
+      unless variant
+        failed << "#{label} (#{t('storefront.cart.bulk_add.variant_not_found')})"
+        next
+      end
+
+      item = @order.order_items.find_by(product: @product, product_variant: variant)
+      if item
+        item.quantity += qty
+      else
+        item = @order.order_items.build(product: @product, product_variant: variant, quantity: qty)
+      end
+
+      if item.save
+        added << label
+      else
+        failed << "#{label} (#{item.errors.full_messages.join(', ')})"
+      end
+    end
+
+    if added.empty? && failed.empty?
+      redirect_to product_path(org_slug: params[:org_slug], id: @product),
+                  alert: t('storefront.cart.bulk_add.nothing_selected')
+    elsif failed.any?
+      flash[:alert] = t('storefront.cart.bulk_add.partial_failure', items: failed.to_sentence)
+      redirect_to product_path(org_slug: params[:org_slug], id: @product),
+                  notice: (added.any? ? t('storefront.cart.bulk_add.added', count: added.size) : nil)
+    else
+      redirect_to product_path(org_slug: params[:org_slug], id: @product),
+                  notice: t('storefront.cart.bulk_add.added', count: added.size)
+    end
+  end
+
   private
 
   def order_item_params

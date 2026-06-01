@@ -51,7 +51,9 @@ scope module: :storefront do
   end
 
   # Order items (add/update/remove from cart)
-  resources :order_items, only: [:create, :update, :destroy]
+  resources :order_items, only: [:create, :update, :destroy] do
+    post :bulk_add, on: :collection
+  end
 
   # Order history (placed orders only)
   resources :orders, only: [:index, :show] do

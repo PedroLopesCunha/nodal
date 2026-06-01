@@ -6,6 +6,11 @@ class Product < ApplicationRecord
   # Reused by Organisation and Category to validate their default_product_sort.
   SORT_OPTIONS = %w[name_asc name_desc price_asc price_desc newest].freeze
 
+  # How the storefront product page renders add-to-cart. "default" keeps the
+  # current variant-selector flow; "grid" shows every visible variant as a row
+  # with its own qty input and one shared bulk-add button.
+  ADD_TO_CART_MODES = %w[default grid].freeze
+
   slugify :name, secondary: :sku
 
   belongs_to :organisation
@@ -73,6 +78,7 @@ class Product < ApplicationRecord
 
   validates :slug, uniqueness: true
   validates :name, presence: true
+  validates :add_to_cart_mode, inclusion: { in: ADD_TO_CART_MODES }
   monetize :unit_price, as: :price, allow_nil: true
 
   before_save :sync_description_columns
@@ -151,6 +157,12 @@ class Product < ApplicationRecord
 
   def variable?
     has_variants?
+  end
+
+  # True when the storefront should render the bulk-add grid instead of the
+  # standard variant selector. Only meaningful for products with variants.
+  def grid_add_to_cart?
+    add_to_cart_mode == "grid" && has_variants?
   end
 
   def purchasable?

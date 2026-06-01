@@ -123,6 +123,22 @@
               <%= f.text_field :min_quantity_type, class: "form-control", placeholder: t('bo.products.form.placeholders.min_quantity_type') %>
             </div>
           </div>
+
+          <% if @product.has_variants? %>
+            <div class="row g-3 mt-1">
+              <div class="col-md-6">
+                <label class="form-label"><%= t('bo.products.form.add_to_cart_mode') %></label>
+                <%= f.select :add_to_cart_mode,
+                             options_for_select([
+                               [t('bo.products.form.add_to_cart_mode_default'), 'default'],
+                               [t('bo.products.form.add_to_cart_mode_grid'), 'grid']
+                             ], @product.add_to_cart_mode),
+                             {},
+                             class: "form-control" %>
+                <small class="text-muted"><%= t('bo.products.form.add_to_cart_mode_hint') %></small>
+              </div>
+            </div>
+          <% end %>
         </div>
       </div>
 

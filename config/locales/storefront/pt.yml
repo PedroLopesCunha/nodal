@@ -224,10 +224,28 @@ pt:
         price_request_whatsapp_body: "Olá, gostaria de solicitar o preço de: *%{product}* (SKU: %{sku}). Poderiam enviar-me um orçamento?"
         add_to_list: "Guardar em Lista"
         create_new_list: "Criar Nova Lista"
+        grid:
+          variant: "Variante"
+          sku: "SKU"
+          price: "Preço"
+          quantity: "Quantidade"
+          show_more:
+            one: "Mostrar mais 1 variante"
+            other: "Mostrar mais %{count} variantes"
+          show_less: "Mostrar menos"
+          add_to_cart: "Adicionar ao carrinho"
+          no_variants: "Não há variantes disponíveis."
 
     # Secção do carrinho
     cart:
       item_added: "Item adicionado ao carrinho"
+      bulk_add:
+        added:
+          one: "1 item adicionado ao carrinho."
+          other: "%{count} itens adicionados ao carrinho."
+        nothing_selected: "Indica a quantidade de pelo menos um item antes de adicionar ao carrinho."
+        partial_failure: "Não foi possível adicionar: %{items}"
+        variant_not_found: "variante não encontrada"
     carts:
       show:
         title: "O Seu Carrinho"

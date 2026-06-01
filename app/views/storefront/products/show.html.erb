@@ -1,7 +1,3 @@
-<%= link_to products_path(org_slug: params[:org_slug], category: params[:category], queries: params[:queries], attrs: params[:attrs]&.to_unsafe_h, page: params[:page]), class: "text-muted text-decoration-none small d-inline-flex align-items-center mb-3 mt-4" do %>
-  <i class="fa-solid fa-chevron-left me-1" style="font-size: 0.7rem;"></i> <%= t('storefront.products.show.back_to_products') %>
-<% end %>
-
 <%
   controllers = "image-gallery"
   row_data = {}
@@ -37,9 +33,13 @@
     )
   end
 %>
-<div class="row g-4" data-controller="<%= controllers %>" <%= row_data.map { |k, v| "data-#{k}=\"#{ERB::Util.html_escape(v)}\"" }.join(" ").html_safe %>>
+<div class="row g-4 mt-4" data-controller="<%= controllers %>" <%= row_data.map { |k, v| "data-#{k}=\"#{ERB::Util.html_escape(v)}\"" }.join(" ").html_safe %>>
   <!-- Left Column - Product Image -->
   <div class="col-lg-6">
+    <div class="position-sticky" style="top: 6rem;">
+      <%= link_to products_path(org_slug: params[:org_slug], category: params[:category], queries: params[:queries], attrs: params[:attrs]&.to_unsafe_h, page: params[:page]), class: "text-muted text-decoration-none small d-inline-flex align-items-center mb-3" do %>
+        <i class="fa-solid fa-chevron-left me-1" style="font-size: 0.7rem;"></i> <%= t('storefront.products.show.back_to_products') %>
+      <% end %>
     <div class="card border-0 shadow-sm position-relative" style="background-color: #f8f9fa; border-radius: 12px; overflow: hidden;">
       <% discount_breakdown = @discount_calculator.discount_breakdown %>
 
@@ -81,6 +81,7 @@
         <% end %>
       </div>
     <% end %>
+    </div>
   </div>
 
   <!-- Right Column - Product Details -->
@@ -271,7 +272,9 @@
         <% end %>
 
         <!-- Variant Selector (for variable products) -->
-        <% if @product.has_variants? && @attributes_with_values.present? %>
+        <% if @product.grid_add_to_cart? %>
+          <%= render "storefront/products/grid_add_to_cart", product: @product %>
+        <% elsif @product.has_variants? && @attributes_with_values.present? %>
           <div class="mb-4">
             <h6 class="text-muted mb-3"><%= t('storefront.products.show.select_options') %></h6>
 
