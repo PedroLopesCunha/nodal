@@ -224,10 +224,28 @@ en:
         price_request_whatsapp_body: "Hello, I would like to request pricing for: *%{product}* (SKU: %{sku}). Could you send me a quote?"
         add_to_list: "Save to List"
         create_new_list: "Create New List"
+        grid:
+          variant: "Variant"
+          sku: "SKU"
+          price: "Price"
+          quantity: "Quantity"
+          show_more:
+            one: "Show 1 more variant"
+            other: "Show %{count} more variants"
+          show_less: "Show less"
+          add_to_cart: "Add to cart"
+          no_variants: "No variants available."
 
     # Cart section
     cart:
       item_added: "Item added to cart"
+      bulk_add:
+        added:
+          one: "1 item added to the cart."
+          other: "%{count} items added to the cart."
+        nothing_selected: "Set the quantity for at least one item before adding to the cart."
+        partial_failure: "Couldn't add: %{items}"
+        variant_not_found: "variant not found"
     carts:
       show:
         title: "Your Cart"

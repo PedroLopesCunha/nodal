@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2026_05_29_140000) do
+ActiveRecord::Schema[7.1].define(version: 2026_06_01_090000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_trgm"
   enable_extension "plpgsql"
@@ -726,6 +726,7 @@ ActiveRecord::Schema[7.1].define(version: 2026_05_29_140000) do
     t.boolean "price_on_request"
     t.boolean "featured"
     t.boolean "published", default: true, null: false
+    t.string "add_to_cart_mode", default: "default", null: false
     t.index ["category_id"], name: "index_products_on_category_id"
     t.index ["organisation_id", "external_id", "external_source"], name: "index_products_on_org_external_id_source", unique: true, where: "(external_id IS NOT NULL)"
     t.index ["organisation_id"], name: "index_products_on_organisation_id"
