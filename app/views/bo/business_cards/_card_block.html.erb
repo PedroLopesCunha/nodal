@@ -17,8 +17,9 @@
 
     <div class="who">
       <div class="name"><%= t("bo.business_cards.pdf.headline") %></div>
-      <% if organisation.storefront_title.present? %>
-        <div class="company"><%= organisation.storefront_title %></div>
+      <% website_display = organisation.website_url.to_s.sub(%r{\Ahttps?://}i, "").sub(%r{/\z}, "") %>
+      <% if website_display.present? %>
+        <div class="company"><%= website_display %></div>
       <% end %>
     </div>
 
