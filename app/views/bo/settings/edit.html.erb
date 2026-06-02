@@ -148,6 +148,14 @@
 
           <h6 class="mb-3"><%= t('bo.settings.edit.social_links') %></h6>
 
+          <div class="row g-3 mb-3">
+            <div class="col-md-8">
+              <label class="form-label"><i class="fa-solid fa-globe me-1"></i> <%= t('bo.settings.edit.website') %></label>
+              <%= f.url_field :website_url, class: "form-control", placeholder: t('bo.settings.edit.website_placeholder') %>
+              <small class="text-muted"><%= t('bo.settings.edit.website_hint') %></small>
+            </div>
+          </div>
+
           <div class="row g-3">
             <div class="col-md-4">
               <label class="form-label"><i class="fa-brands fa-instagram me-1"></i> Instagram</label>
