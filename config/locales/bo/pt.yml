@@ -29,7 +29,7 @@ pt:
         active: "Ativo"
         inactive: "Inativo"
         pending: "Pendente"
-        not_invited: "Não Convidado"
+        not_invited: "Por convidar"
         completed: "Concluído"
         draft: "Rascunho"
         in_process: "Em Processo"

@@ -177,6 +177,8 @@
       </div>
     </div>
   <% else %>
+    <%= render "kpi_bar", kpis: @carteira_kpis, current_status: params[:status] %>
+
     <div class="card">
       <div class="table-responsive">
         <table class="table table-hover mb-0">
@@ -198,17 +200,7 @@
                   <% end %>
                 <% end %>
               </th>
-              <th>
-                <%= link_to bo_sales_rep_carteira_path(org_slug: current_organisation.slug, **carteira_sort_link_params("last_order_at")), class: "text-decoration-none text-dark" do %>
-                  Última encomenda
-                  <% if @sort_column == "last_order_at" %>
-                    <i class="fa-solid fa-sort-<%= @sort_direction == 'asc' ? 'up' : 'down' %> ms-1 small"></i>
-                  <% end %>
-                <% end %>
-              </th>
-              <% if erp_customer_sync_enabled? %>
-                <th>Estado ERP</th>
-              <% end %>
+              <th>Estado</th>
               <th class="text-end">Ações</th>
             </tr>
           </thead>
@@ -216,42 +208,60 @@
             <% @customers.each do |customer| %>
               <tr class="carteira-row" data-href="<%= bo_customer_path(org_slug: current_organisation.slug, id: customer.id) %>" style="cursor: pointer;">
                 <td>
-                  <div class="fw-semibold">
-                    <%= customer.contact_name %>
-                    <% if @customer_ids_with_open_carts.include?(customer.id) %>
-                      <span class="badge bg-info-subtle text-info ms-1" title="Tem um carrinho com itens por finalizar">
-                        <i class="fa-solid fa-cart-shopping"></i> Carrinho aberto
-                      </span>
-                    <% end %>
-                  </div>
+                  <div class="fw-semibold"><%= customer.contact_name %></div>
                   <small class="text-muted"><%= customer.email %></small>
                 </td>
                 <td>
                   <div><%= customer.company_name %></div>
                   <% if customer.taxpayer_id.present? %>
-                    <small class="text-muted">NIF <%= customer.taxpayer_id %></small>
+                    <small class="text-muted d-block">NIF <%= customer.taxpayer_id %></small>
+                  <% end %>
+                  <% if (date = @last_order_at[customer.id]) %>
+                    <small class="text-muted d-block">Última: <%= l(date, format: :short) %> · há <%= time_ago_in_words(date) %></small>
                   <% end %>
                 </td>
                 <td>
-                  <% if (date = @last_order_at[customer.id]) %>
-                    <%= l(date, format: :short) %>
-                    <small class="text-muted d-block"><%= time_ago_in_words(date) %> atrás</small>
-                  <% else %>
-                    <span class="text-muted">—</span>
+                  <% case customer.invitation_status %>
+                  <% when :inactive %>
+                    <span class="badge rounded-pill bg-secondary-subtle text-secondary"><%= t('bo.common.statuses.inactive') %></span>
+                  <% when :not_invited %>
+                    <span class="badge rounded-pill bg-secondary-subtle text-secondary">
+                      <i class="fa-solid fa-envelope"></i> <%= t('bo.common.statuses.not_invited') %>
+                    </span>
+                  <% when :pending %>
+                    <span class="badge rounded-pill bg-info-subtle text-info">
+                      <i class="fa-solid fa-clock"></i> <%= t('bo.common.statuses.pending') %>
+                    </span>
+                  <% when :active %>
+                    <span class="badge rounded-pill bg-success-subtle text-success"><%= t('bo.common.statuses.active') %></span>
+                  <% end %>
+
+                  <% if @customer_ids_online.include?(customer.id) %>
+                    <span class="badge rounded-pill bg-success-subtle text-success d-inline-block mt-1" title="Login activo nos últimos 5 minutos">
+                      <i class="fa-solid fa-circle" style="font-size: 0.5rem;"></i> Online agora
+                    </span>
+                  <% end %>
+
+                  <% if @customer_ids_with_open_carts.include?(customer.id) %>
+                    <span class="badge rounded-pill bg-info-subtle text-info d-inline-block mt-1" title="Tem um carrinho com itens por finalizar">
+                      <i class="fa-solid fa-cart-shopping"></i> Carrinho aberto
+                    </span>
+                  <% end %>
+
+                  <% if erp_customer_sync_enabled? && customer.external_id.blank? %>
+                    <span class="badge rounded-pill bg-warning text-dark d-inline-block mt-1">
+                      <i class="fa-solid fa-rotate"></i> Por sincronizar
+                    </span>
                   <% end %>
                 </td>
-                <% if erp_customer_sync_enabled? %>
-                  <td>
-                    <% if customer.external_id.present? %>
-                      <span class="badge bg-success-subtle text-success">Sincronizado</span>
-                    <% else %>
-                      <span class="badge bg-warning text-dark">
-                        <i class="fa-solid fa-rotate"></i> Por sincronizar
-                      </span>
-                    <% end %>
-                  </td>
-                <% end %>
                 <td class="text-end" style="white-space: nowrap;" onclick="event.stopPropagation();">
+                  <% if customer.invitation_status.in?([:pending, :not_invited]) %>
+                    <%= link_to bo_customer_path(org_slug: current_organisation.slug, id: customer.id),
+                                class: "btn btn-sm btn-outline-primary me-1" do %>
+                      <i class="fa-solid fa-envelope me-1"></i>
+                      <%= customer.invitation_status == :pending ? "Reenviar" : "Convidar" %>
+                    <% end %>
+                  <% end %>
                   <%= button_to bo_impersonation_path(org_slug: current_organisation.slug, customer_id: customer.id),
                                 method: :post,
                                 form: { class: "d-inline" },
