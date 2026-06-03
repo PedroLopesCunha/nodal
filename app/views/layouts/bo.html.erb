@@ -22,6 +22,11 @@
       <%= yield :bo_main_content %>
     </main>
 
+    <%# Body-level targets used by Turbo Stream actions that inject modals
+        (logins management, invitation share). Stable across all bo pages. %>
+    <div id="customer_logins_modal_target"></div>
+    <div id="invite_share_modal_target"></div>
+
     <%= render "shared/flashes" %>
   </body>
 </html>

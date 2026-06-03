@@ -256,8 +256,10 @@
                 </td>
                 <td class="text-end" style="white-space: nowrap;" onclick="event.stopPropagation();">
                   <% if customer.invitation_status.in?([:pending, :not_invited]) %>
-                    <%= link_to bo_customer_path(org_slug: current_organisation.slug, id: customer.id),
-                                class: "btn btn-sm btn-outline-primary me-1" do %>
+                    <%= button_to logins_modal_bo_customer_path(org_slug: current_organisation.slug, id: customer.id),
+                                  method: :get,
+                                  form: { class: "d-inline", data: { turbo_stream: true } },
+                                  class: "btn btn-sm btn-outline-primary me-1" do %>
                       <i class="fa-solid fa-envelope me-1"></i>
                       <%= customer.invitation_status == :pending ? "Reenviar" : "Convidar" %>
                     <% end %>

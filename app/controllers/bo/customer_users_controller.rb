@@ -25,8 +25,18 @@ class Bo::CustomerUsersController < Bo::BaseController
     @customer_user = CustomerUser.invite!(invite_attrs)
 
     if @customer_user.errors.empty?
-      redirect_to bo_customer_path(params[:org_slug], @customer),
-                  notice: t("bo.customer_users.flash.invited", email: @customer_user.email)
+      respond_to do |format|
+        format.turbo_stream do
+          @customer_users = @customer.customer_users.order(:created_at)
+          @new_customer_user = @customer.customer_users.build
+          flash.now[:notice] = t("bo.customer_users.flash.invited", email: @customer_user.email)
+          render :create
+        end
+        format.html do
+          redirect_to bo_customer_path(params[:org_slug], @customer),
+                      notice: t("bo.customer_users.flash.invited", email: @customer_user.email)
+        end
+      end
     else
       render :new, status: :unprocessable_entity
     end
@@ -39,10 +49,20 @@ class Bo::CustomerUsersController < Bo::BaseController
   def update
     authorize @customer_user
     if @customer_user.update(customer_user_update_params)
-      redirect_to bo_customer_path(params[:org_slug], @customer),
-                  notice: t("bo.customer_users.flash.updated")
+      respond_to do |format|
+        format.turbo_stream { head :ok }
+        format.json         { head :ok }
+        format.html do
+          redirect_to bo_customer_path(params[:org_slug], @customer),
+                      notice: t("bo.customer_users.flash.updated")
+        end
+      end
     else
-      render :edit, status: :unprocessable_entity
+      respond_to do |format|
+        format.turbo_stream { render json: { errors: @customer_user.errors }, status: :unprocessable_entity }
+        format.json         { render json: { errors: @customer_user.errors }, status: :unprocessable_entity }
+        format.html         { render :edit, status: :unprocessable_entity }
+      end
     end
   end
 
@@ -111,11 +131,15 @@ class Bo::CustomerUsersController < Bo::BaseController
     )
   end
 
+  # Email is editable ONLY while the login is still :not_invited — once the
+  # invitation has been delivered, changing the address would leave a stale
+  # link in someone's inbox while the real recipient gets nothing. Lock the
+  # field server-side regardless of what the form submits.
   def customer_user_update_params
-    params.require(:customer_user).permit(
-      :contact_name, :contact_phone, :locale,
-      :hide_prices, :email_notifications_enabled, :active
-    )
+    permitted = [:contact_name, :contact_phone, :locale,
+                 :hide_prices, :email_notifications_enabled, :active]
+    permitted << :email if @customer_user.invitation_status == :not_invited
+    params.require(:customer_user).permit(*permitted)
   end
 
   # Picks the right route helper based on whether the org has a verified

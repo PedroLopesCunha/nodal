@@ -1520,6 +1520,16 @@ pt:
         updated: "Login atualizado com sucesso."
         activated: "Login %{email} ativado."
         deactivated: "Login %{email} desativado."
+      manage_modal:
+        title: "Logins de %{company}"
+        subtitle: "Vê estados, edita dados de contacto e envia convites sem sair desta página."
+        empty: "Este cliente ainda não tem nenhum login criado."
+        add_title: "Adicionar novo login"
+        save: "Criar e convidar"
+        saved: "Guardado"
+        save_error: "Erro ao guardar"
+        close: "Fechar"
+        email_readonly_hint: "Email só pode ser alterado antes do convite ser enviado"
       invitation_share:
         title: "Partilhar convite"
         intro: "Escolhe como queres entregar o link de convite a %{email}. O email habitual continua disponível — usa estas opções quando o cliente não está a receber emails (ex: filtragem corporativa)."
