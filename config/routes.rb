@@ -107,6 +107,9 @@ Rails.application.routes.draw do
         collection do
           get :export
         end
+        member do
+          get :logins_modal
+        end
         resources :customer_users, only: [:new, :create, :edit, :update] do
           member do
             post :resend_invitation

@@ -241,8 +241,8 @@ module Dashboard
     # NOT date-filtered (current-state, unlike sales metrics).
     # Thresholds: stale pending = 7d, dormant = 30d no login since accepting,
     # abandoned cart = draft untouched for 3d, online = request in last 5min.
-    def self.customer_health(organisation:)
-      customers = organisation.customers
+    def self.customer_health(organisation:, customers_scope: nil)
+      customers = customers_scope || organisation.customers
       accepted_customer_ids  = customers.joins(:customer_users)
                                         .where.not(customer_users: { invitation_accepted_at: nil })
                                         .select(:id)

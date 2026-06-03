@@ -1,7 +1,7 @@
 class Bo::CustomersController < Bo::BaseController
   include Exportable
 
-  before_action :set_and_authorize_customer, only: [:show, :edit, :update, :destroy]
+  before_action :set_and_authorize_customer, only: [:show, :edit, :update, :destroy, :logins_modal]
 
   def index
     @tab = params[:tab] || 'customers'
@@ -106,6 +106,16 @@ class Bo::CustomersController < Bo::BaseController
   def destroy
     @customer.destroy
     redirect_to bo_customers_path(params[:org_slug], filter_params_hash), status: :see_other, notice: "Customer deleted successfully."
+  end
+
+  # Lazy-loaded modal for managing a customer's logins (CustomerUsers) from
+  # any listing page. Returns turbo_stream that appends the modal to a stable
+  # body-level target. The modal lets a rep create/edit logins and trigger
+  # the invitation share flow without leaving the carteira / customers list.
+  def logins_modal
+    @customer_users = @customer.customer_users.order(:created_at)
+    @new_customer_user = @customer.customer_users.build
+    respond_to(&:turbo_stream)
   end
 
   helper_method :filter_params_hash, :sort_link_params

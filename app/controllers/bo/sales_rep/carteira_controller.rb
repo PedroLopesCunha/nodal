@@ -43,6 +43,18 @@ module Bo
         # Pre-load per-customer aggregates to avoid N+1 in the view.
         customer_ids = @customers.map(&:id)
         @last_order_at = current_organisation.orders.placed.where(customer_id: customer_ids).group(:customer_id).maximum(:placed_at)
+        @customer_ids_online = current_organisation.customer_users
+                                 .where(customer_id: customer_ids)
+                                 .where("last_seen_at >= ?", 5.minutes.ago)
+                                 .distinct.pluck(:customer_id).to_set
+
+        # Invitation KPIs scoped to this rep's carteira (not the whole org).
+        carteira_scope = current_organisation.customers
+                           .joins(:customer_assignment)
+                           .where(customer_assignments: { org_member_id: current_org_member.id })
+        @carteira_kpis = ::Dashboard::Metrics
+          .customer_health(organisation: current_organisation, customers_scope: carteira_scope)
+          .slice(:total_customers, :active_users, :pending_users, :stale_pending_users, :uninvited_users)
 
         load_kpis_and_open_carts
       end

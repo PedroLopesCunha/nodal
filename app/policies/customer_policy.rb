@@ -41,6 +41,12 @@ class CustomerPolicy < ApplicationPolicy
     customer_in_carteira?(record)
   end
 
+  # Manage logins modal — same gate as invite (creating/editing logins is
+  # the rep's path to onboarding customers in their carteira).
+  def logins_modal?
+    invite?
+  end
+
   class Scope < ApplicationPolicy::Scope
     # NOTE: Be explicit about which records you allow access to!
     def resolve

@@ -1530,6 +1530,16 @@ en:
         updated: "Login updated successfully."
         activated: "Login %{email} activated."
         deactivated: "Login %{email} deactivated."
+      manage_modal:
+        title: "Logins for %{company}"
+        subtitle: "Check status, edit contact details and send invitations without leaving this page."
+        empty: "This customer has no logins yet."
+        add_title: "Add a new login"
+        save: "Create and invite"
+        saved: "Saved"
+        save_error: "Save failed"
+        close: "Close"
+        email_readonly_hint: "Email can only be changed before the invitation is sent"
       invitation_share:
         title: "Share invitation"
         intro: "Choose how to deliver the invitation link to %{email}. Email is still available — use these when the customer isn't receiving emails (e.g. corporate filtering)."
