@@ -48,7 +48,10 @@ class Storefront::OrderItemsController < Storefront::BaseController
     @order_item = current_cart.order_items.find(params[:id])
     authorize @order_item
 
-    if @order_item.update(order_item_params)
+    @order_item.assign_attributes(order_item_params)
+    # :customer_change context enforces the minimum-quantity validation for a
+    # customer-initiated edit (system re-pricing saves without a context).
+    if @order_item.save(context: :customer_change)
       redirect_to cart_path(org_slug: params[:org_slug]), notice: "Cart updated."
     else
       redirect_to cart_path(org_slug: params[:org_slug]),

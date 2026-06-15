@@ -98,13 +98,14 @@
                         <small class="text-muted"><%= item.product.category&.name %></small>
                         <% badge = cart_stock_badge(item) %>
                         <% if badge %><div class="mt-1"><%= badge %></div><% end %>
+                        <%= render "storefront/carts/min_quantity_warning", shortfall: @min_quantity_shortfall_by_product_id[item.product_id] %>
                       </div>
                     </div>
                   </td>
                   <td>
                     <%= form_with model: item, url: order_item_path(org_slug: params[:org_slug], id: item), method: :patch, local: true, class: "d-flex justify-content-center" do |f| %>
                       <div class="input-group input-group-sm" style="width: 120px;">
-                        <%= f.number_field :quantity, min: item.product.min_quantity || 1, class: "form-control text-center" %>
+                        <%= f.number_field :quantity, min: item.product.quantity_input_min, class: "form-control text-center" %>
                         <button type="submit" class="btn btn-outline-secondary">
                           <i class="fa-solid fa-sync"></i>
                         </button>
@@ -162,6 +163,7 @@
                     <%= link_to item.product.name, product_path(org_slug: params[:org_slug], id: item.product), class: "fw-semibold text-truncate d-block text-decoration-none text-body", style: "font-size: 0.9rem;" %>
                     <% badge = cart_stock_badge(item) %>
                     <% if badge %><div class="mt-1" style="font-size: 0.65rem;"><%= badge %></div><% end %>
+                    <%= render "storefront/carts/min_quantity_warning", shortfall: @min_quantity_shortfall_by_product_id[item.product_id] %>
                   </div>
                   <%# Inline quantity controls %>
                   <%= form_with model: item, url: order_item_path(org_slug: params[:org_slug], id: item), method: :patch, local: true, class: "flex-shrink-0", data: { controller: "cart-quantity" } do |f| %>
@@ -170,7 +172,7 @@
                         <i class="fa-solid fa-minus" style="font-size: 0.65rem;"></i>
                       </button>
                       <%= f.number_field :quantity,
-                          min: item.product.min_quantity || 1,
+                          min: item.product.quantity_input_min,
                           class: "form-control text-center cart-quantity-input cart-quantity-input-compact",
                           data: { cart_quantity_target: "input", action: "change->cart-quantity#submit" } %>
                       <button type="button" class="btn btn-outline-secondary cart-quantity-btn cart-quantity-btn-compact" data-action="cart-quantity#increment" aria-label="<%= t('storefront.carts.show.increase_quantity') %>">

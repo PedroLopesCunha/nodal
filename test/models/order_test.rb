@@ -182,4 +182,72 @@ class OrderTest < ActiveSupport::TestCase
 
     assert @order.placed?
   end
+
+  test "finalize_checkout! blocks when a line is below the product minimum" do
+    @product.update!(min_quantity: 12)
+    item = @order.order_items.create!(product: @product, quantity: 12)
+    # Simulate a legacy/grid-built line that dropped below the minimum
+    item.update_column(:quantity, 3)
+    @order.reload
+    @order.terms_accepted_at = Time.current
+
+    assert_raises(ActiveRecord::RecordInvalid) { @order.finalize_checkout! }
+    assert_not @order.reload.placed?
+
+    item.update_column(:quantity, 12)
+    @order.reload
+    @order.terms_accepted_at = Time.current
+    @order.finalize_checkout!
+
+    assert @order.placed?
+  end
+
+  test "combined-scope minimum is met by the sum of the product's variant lines" do
+    product = Product.create!(organisation: @org, name: "Combo", published: true,
+      has_variants: true, min_quantity: 12, min_quantity_scope: "combined")
+    red = product.product_variants.create!(name: "Red", sku: "CMB-R",
+      unit_price_cents: 1000, published: true, is_default: false, track_stock: false)
+    blue = product.product_variants.create!(name: "Blue", sku: "CMB-B",
+      unit_price_cents: 1000, published: true, is_default: false, track_stock: false)
+
+    @order.order_items.create!(product: product, product_variant: red, quantity: 5)
+    @order.order_items.create!(product: product, product_variant: blue, quantity: 4)
+
+    shortfalls = @order.combined_min_quantity_shortfalls
+    assert_equal 1, shortfalls.size
+    assert_equal 9, shortfalls.first[:current]
+    assert_equal 3, shortfalls.first[:shortfall]
+
+    @order.terms_accepted_at = Time.current
+    assert_raises(ActiveRecord::RecordInvalid) { @order.finalize_checkout! }
+    assert_not @order.reload.placed?
+
+    # Bump the blue line so the combined total reaches 12
+    @order.order_items.find_by(product_variant: blue).update_column(:quantity, 7)
+    assert_empty @order.combined_min_quantity_shortfalls
+
+    @order.terms_accepted_at = Time.current
+    @order.finalize_checkout!
+    assert @order.placed?
+  end
+
+  test "combined minimum is waived when total stock can't reach it (no backorder)" do
+    @org.update!(out_of_stock_strategy: "deactivate") # no backorder
+    product = Product.create!(organisation: @org, name: "Combo2", published: true,
+      has_variants: true, min_quantity: 30, min_quantity_scope: "combined")
+    red = product.product_variants.create!(name: "Red", sku: "C2R",
+      unit_price_cents: 1000, published: true, is_default: false, track_stock: true, stock_quantity: 5)
+    blue = product.product_variants.create!(name: "Blue", sku: "C2B",
+      unit_price_cents: 1000, published: true, is_default: false, track_stock: true, stock_quantity: 4)
+
+    @order.order_items.create!(product: product, product_variant: red, quantity: 5)
+    @order.order_items.create!(product: product, product_variant: blue, quantity: 4)
+
+    # Total sellable stock is 9, far below the min of 30, and no backorder ->
+    # the minimum is waived, so checkout is not blocked (no dead-end).
+    assert_empty @order.combined_min_quantity_shortfalls
+    @order.terms_accepted_at = Time.current
+    @order.finalize_checkout!
+    assert @order.placed?
+  end
 end

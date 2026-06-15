@@ -100,4 +100,68 @@ class OrderItemTest < ActiveSupport::TestCase
     item.reload
     assert_equal :variant_unpublished, item.stock_status
   end
+
+  test "rejects quantity below the product minimum on create" do
+    @product.update!(min_quantity: 10)
+    item = @order.order_items.build(product: @product, quantity: 5)
+    assert_not item.valid?(:create)
+    assert item.errors[:base].present?
+  end
+
+  test "accepts quantity at or above the product minimum on create" do
+    @product.update!(min_quantity: 10)
+    item = @order.order_items.build(product: @product, quantity: 10)
+    assert item.valid?(:create)
+  end
+
+  test "does not enforce a minimum of 1 or less" do
+    @product.update!(min_quantity: 1)
+    item = @order.order_items.build(product: @product, quantity: 1)
+    assert item.valid?(:create)
+  end
+
+  test "rejects a below-minimum quantity on a customer_change save" do
+    @product.update!(min_quantity: 10)
+    item = @order.order_items.create!(product: @product, quantity: 10)
+    item.quantity = 4
+    assert_not item.save(context: :customer_change)
+    assert item.errors[:base].present?
+  end
+
+  test "does not enforce the minimum on a context-less save (system re-pricing)" do
+    @product.update!(min_quantity: 10)
+    item = @order.order_items.create!(product: @product, quantity: 10)
+    # Simulate a stale below-minimum line, then a system save (no context)
+    item.update_column(:quantity, 3)
+    item.unit_price = 1234
+    assert item.save, "system re-pricing must not be blocked by the minimum"
+  end
+
+  test "does not enforce a per-line minimum for combined-scope products" do
+    product = Product.create!(organisation: @org, name: "Combo", published: true,
+      has_variants: true, min_quantity: 12, min_quantity_scope: "combined")
+    variant = product.product_variants.create!(name: "Red", sku: "CMB-R",
+      unit_price_cents: 1000, published: true, is_default: false, track_stock: false)
+
+    item = @order.order_items.build(product: product, product_variant: variant, quantity: 5)
+    assert item.valid?(:create), "a single combined-scope line below the product min must be allowed"
+  end
+
+  test "waives the per-line minimum when stock can't reach it (no backorder)" do
+    @org.update!(out_of_stock_strategy: "deactivate") # inherit -> show_badge, no backorder
+    @product.update!(min_quantity: 10)
+    @product.default_variant.update!(track_stock: true, stock_quantity: 5) # 5 < 10
+
+    item = @order.order_items.build(product: @product, quantity: 5)
+    assert item.valid?(:create), "minimum must be waived when stock (5) < min (10) and no backorder"
+  end
+
+  test "still enforces the per-line minimum when stock can reach it" do
+    @org.update!(out_of_stock_strategy: "deactivate")
+    @product.update!(min_quantity: 10)
+    @product.default_variant.update!(track_stock: true, stock_quantity: 20) # 20 >= 10
+
+    item = @order.order_items.build(product: @product, quantity: 5)
+    assert_not item.valid?(:create), "minimum still applies when stock can reach it"
+  end
 end

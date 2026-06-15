@@ -235,10 +235,15 @@ en:
           show_less: "Show less"
           add_to_cart: "Add to cart"
           no_variants: "No variants available."
+          min_counter_below: "%{current} / %{minimum} total · %{shortfall} to go"
+          min_counter_met: "%{current} / %{minimum} total · minimum reached"
 
     # Cart section
     cart:
       item_added: "Item added to cart"
+      below_minimum_quantity: "%{product}: minimum quantity is %{minimum}"
+      below_minimum_combined: "%{product}: minimum quantity is %{minimum} in total (you have %{current})"
+      minimum_per_variant: "Minimum: %{minimum} per variant"
       bulk_add:
         added:
           one: "1 item added to the cart."
@@ -252,6 +257,7 @@ en:
         empty_cart: "Your cart is empty"
         empty_cart_hint: "Browse our products and add items to your cart."
         prices_updated: "Prices were updated since your last visit."
+        minimum_shortfall: "Min. %{minimum} total for %{product} · %{shortfall} to go"
         stock:
           out_of_stock: "Out of stock"
           only_n_left:

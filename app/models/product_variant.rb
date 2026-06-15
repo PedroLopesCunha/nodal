@@ -84,6 +84,18 @@ class ProductVariant < ApplicationRecord
     in_stock?
   end
 
+  # True when this variant can be sold beyond its stock (untracked or backorder).
+  def sells_without_stock?
+    !track_stock? || effective_stock_policy == 'track_only'
+  end
+
+  # Upper bound of how many units can be sold: unlimited for backorder/untracked
+  # variants, otherwise the current stock. Used to decide whether a minimum
+  # order quantity is reachable (and therefore enforceable).
+  def max_sellable_quantity
+    sells_without_stock? ? Float::INFINITY : stock_quantity.to_i
+  end
+
   def option_values_string
     attribute_values.joins(:product_attribute).order('product_attributes.position').map(&:value).join(' / ')
   end

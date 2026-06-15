@@ -24,7 +24,7 @@
       "variant-selector-default-final-price-cents-value" => @discount_calculator.final_price.cents,
       "variant-selector-default-has-discount-value" => @discount_calculator.discount_breakdown[:has_discount].to_s,
       "variant-selector-default-discount-percentage-value" => (@discount_calculator.discount_breakdown[:has_discount] && @discount_calculator.discount_breakdown[:effective_discount][:percentage].to_f.finite? ? (@discount_calculator.discount_breakdown[:effective_discount][:percentage] * 100).round(0) : 0).to_s,
-      "variant-selector-min-quantity-value" => @product.min_quantity || 1,
+      "variant-selector-min-quantity-value" => @product.quantity_input_min,
       "variant-selector-default-sku-value" => @product.sku,
       "variant-selector-in-stock-text-value" => t('storefront.products.show.in_stock'),
       "variant-selector-out-of-stock-text-value" => t('storefront.products.show.out_of_stock'),
@@ -362,8 +362,18 @@
             <% end %>
 
             <!-- Add to Cart Section -->
+            <% combined_counter = @product.min_quantity_combined? && @product.enforced_min_quantity.present? && @product.combined_min_reachable? %>
+            <% in_cart_qty = combined_counter ? current_cart&.order_items&.where(product_id: @product.id)&.sum(:quantity).to_i : 0 %>
+            <% counter_data = combined_counter ? {
+                 controller: "min-quantity-counter",
+                 min_quantity_counter_min_value: @product.enforced_min_quantity,
+                 min_quantity_counter_in_cart_value: in_cart_qty,
+                 min_quantity_counter_label_value: @product.minimum_quantity_label,
+                 min_quantity_counter_below_value: t('storefront.products.show.grid.min_counter_below'),
+                 min_quantity_counter_met_value: t('storefront.products.show.grid.min_counter_met')
+               } : {} %>
             <% unless browsing_as_member? || @product.price_on_request? %>
-              <%= form_with url: order_items_path(org_slug: params[:org_slug]), method: :post, local: true, class: "d-flex align-items-center gap-3 flex-wrap" do |f| %>
+              <%= form_with url: order_items_path(org_slug: params[:org_slug]), method: :post, local: true, class: "d-flex align-items-center gap-3 flex-wrap", data: counter_data do |f| %>
                 <%= hidden_field_tag :product_id, @product.id %>
                 <%= hidden_field_tag :variant_id, @default_variant&.id, data: { variant_selector_target: "variantId" } %>
                 <%= hidden_field_tag :category, params[:category] if params[:category].present? %>
@@ -372,7 +382,9 @@
 
                 <div class="d-flex align-items-center">
                   <label class="text-muted small me-2"><%= t('storefront.products.show.quantity') %></label>
-                  <%= number_field_tag "order_item[quantity]", @product.min_quantity || 1, min: @product.min_quantity || 1, class: "form-control text-center", style: "width: 70px;", data: { variant_selector_target: "quantity", action: "change->variant-selector#updateTotal input->variant-selector#updateTotal" } %>
+                  <% qty_action = "change->variant-selector#updateTotal input->variant-selector#updateTotal" %>
+                  <% qty_action += " input->min-quantity-counter#update" if combined_counter %>
+                  <%= number_field_tag "order_item[quantity]", @product.quantity_input_min, min: @product.quantity_input_min, class: "form-control text-center", style: "width: 70px;", data: { variant_selector_target: "quantity", min_quantity_counter_target: ("input" if combined_counter), action: qty_action } %>
                 </div>
 
                 <div class="d-flex align-items-center gap-2">
@@ -395,6 +407,12 @@
                   </span>
                 </div>
                 <% end %>
+
+                <% if combined_counter %>
+                  <div class="w-100 small">
+                    <i class="fa-solid fa-layer-group me-1 text-muted"></i><span class="text-muted" data-min-quantity-counter-target="output"></span>
+                  </div>
+                <% end %>
               <% end %>
             <% end %>
             <% unless browsing_as_member? %>
@@ -412,7 +430,7 @@
               <%= hidden_field_tag :page, params[:page] if params[:page].present? %>
               <div class="d-flex align-items-center">
                 <label class="text-muted small me-2"><%= t('storefront.products.show.quantity') %></label>
-                <%= number_field_tag "order_item[quantity]", @product.min_quantity || 1, min: @product.min_quantity || 1, class: "form-control text-center", style: "width: 70px;" %>
+                <%= number_field_tag "order_item[quantity]", @product.quantity_input_min, min: @product.quantity_input_min, class: "form-control text-center", style: "width: 70px;" %>
               </div>
 
               <button type="submit" class="btn btn-primary btn-lg px-4" style="border-radius: 8px;" <%= 'disabled' unless @product.purchasable? %>>

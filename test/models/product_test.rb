@@ -54,4 +54,26 @@ class ProductTest < ActiveSupport::TestCase
     assert_equal 2500, product.reload.default_variant.unit_price_cents
     assert_equal 2500, product.unit_price
   end
+
+  test "min_quantity_scope defaults to per_variant and rejects unknown values" do
+    assert_equal "per_variant", @product.min_quantity_scope
+    @product.min_quantity_scope = "weird"
+    assert_not @product.valid?
+  end
+
+  test "min_quantity_combined? is only true for combined-scope variable products" do
+    @product.update!(min_quantity: 12, min_quantity_scope: "combined")
+    assert_not @product.min_quantity_combined?, "simple product is never combined"
+
+    @product.update!(has_variants: true)
+    assert @product.min_quantity_combined?
+  end
+
+  test "quantity_input_min is 1 for combined products and the minimum otherwise" do
+    @product.update!(min_quantity: 12)
+    assert_equal 12, @product.quantity_input_min
+
+    @product.update!(has_variants: true, min_quantity_scope: "combined")
+    assert_equal 1, @product.quantity_input_min
+  end
 end

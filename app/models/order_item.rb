@@ -46,6 +46,10 @@ class OrderItem < ApplicationRecord
      less_than_or_equal_to: 1 }, allow_nil: true
   validate :variant_belongs_to_product
   validate :variant_is_purchasable, on: :create
+  # Only enforced on customer-initiated add/edit (:create, :customer_change),
+  # never on system re-pricing/stock-capping (refresh_cart! saves without a
+  # context), so an automatic save can't be blocked by a stale minimum.
+  validate :meets_minimum_quantity, on: [:create, :customer_change]
 
   before_validation :set_variant_for_simple_product, on: :create
   before_validation :set_unit_price_from_variant, on: :create
@@ -55,6 +59,13 @@ class OrderItem < ApplicationRecord
     subtotal = price * quantity
     discount = subtotal * (discount_percentage || 0)
     return subtotal - discount
+  end
+
+  # True when this line's minimum is waived because the variant can't reach it
+  # within stock (no backorder) — the customer may then buy up to stock.
+  def minimum_waived_by_stock?
+    min = product&.enforced_min_quantity
+    min.present? && product_variant.present? && product_variant.max_sellable_quantity < min
   end
 
   def variant_name
@@ -141,6 +152,22 @@ class OrderItem < ApplicationRecord
     unless product_variant.purchasable?
       errors.add(:product_variant, "is not available for purchase")
     end
+  end
+
+  def meets_minimum_quantity
+    return unless product
+    # Combined-scope minimums are checked across all the product's lines
+    # (at the cart/checkout level), never per line.
+    return if product.min_quantity_combined?
+
+    min = product.enforced_min_quantity
+    return unless min
+    return if minimum_waived_by_stock?
+    return if quantity.to_i >= min
+
+    errors.add(:base, I18n.t("storefront.cart.below_minimum_quantity",
+                             product: product.name,
+                             minimum: product.minimum_quantity_label))
   end
 
   def should_recalculate_discount?

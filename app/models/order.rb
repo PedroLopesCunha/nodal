@@ -243,10 +243,61 @@ class Order < ApplicationRecord
     raise ActiveRecord::RecordInvalid, self
   end
 
+  # Combined-scope products whose minimum isn't met by the SUM of their lines.
+  # Returns [{ product:, required:, current:, label:, shortfall: }]. Used for
+  # the cart warning and the checkout gate.
+  def combined_min_quantity_shortfalls
+    order_items.reload.group_by(&:product).filter_map do |product, items|
+      next unless product&.min_quantity_combined?
+
+      min = product.enforced_min_quantity
+      next unless min
+      # Waive when the minimum can't be reached within stock (no backorder).
+      next unless product.combined_min_reachable?
+
+      current = items.sum { |i| i.quantity.to_i }
+      next if current >= min
+
+      { product: product, required: min, current: current,
+        label: product.minimum_quantity_label, shortfall: min - current }
+    end
+  end
+
+  # Hard gate: refuse to place an order below the product minimum — per line for
+  # per_variant products, or by the combined total for combined products.
+  # Catches legacy/grid-built carts that never passed the earlier checks.
+  def validate_minimum_quantities!
+    messages = []
+
+    order_items.reload.each do |item|
+      product = item.product
+      next unless product && !product.min_quantity_combined?
+
+      min = product.enforced_min_quantity
+      next unless min && item.quantity.to_i < min
+      # Waive when stock can't reach the minimum (no backorder).
+      next if item.minimum_waived_by_stock?
+
+      messages << I18n.t("storefront.cart.below_minimum_quantity",
+                         product: product.name, minimum: product.minimum_quantity_label)
+    end
+
+    combined_min_quantity_shortfalls.each do |s|
+      messages << I18n.t("storefront.cart.below_minimum_combined",
+                         product: s[:product].name, minimum: s[:label], current: s[:current])
+    end
+
+    return if messages.empty?
+
+    messages.each { |msg| errors.add(:base, msg) }
+    raise ActiveRecord::RecordInvalid, self
+  end
+
   def finalize_checkout!(same_as_billing: false)
     self.shipping_address = billing_address if same_as_billing && billing_address.present?
     refresh_cart!
     validate_checkout_stock!
+    validate_minimum_quantities!
     validate_pricing_acknowledged!
     self.tax_amount = calculated_tax
     self.shipping_amount = calculated_shipping
