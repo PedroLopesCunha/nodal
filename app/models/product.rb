@@ -85,6 +85,7 @@ class Product < ApplicationRecord
   after_create :create_default_variant
   after_update :sync_default_variant, if: :should_sync_default_variant?
   after_update :clear_default_variant_for_variable, if: :became_variable?
+  after_update :promote_default_variant_for_simple, if: :became_simple?
 
   scope :simple, -> { where(has_variants: false) }
   scope :variable, -> { where(has_variants: true) }
@@ -274,6 +275,23 @@ class Product < ApplicationRecord
 
   def became_variable?
     saved_change_to_has_variants? && has_variants?
+  end
+
+  def became_simple?
+    saved_change_to_has_variants? && !has_variants?
+  end
+
+  # When a variable product is reclassified as simple, the price lived on the
+  # variant (product.unit_price stays nil for variable products). The mirror
+  # callback only fires on a variant price *change*, so a pure has_variants
+  # flip would leave product.unit_price stale (nil) — and the storefront, which
+  # reads product.unit_price, would show €0. Promote the default variant's
+  # commercial fields up to the product to keep them in sync.
+  def promote_default_variant_for_simple
+    variant = default_variant
+    return unless variant
+
+    update_columns(unit_price: variant.unit_price_cents, sku: variant.sku)
   end
 
   def clear_default_variant_for_variable
