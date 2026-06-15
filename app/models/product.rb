@@ -174,6 +174,19 @@ class Product < ApplicationRecord
     min_quantity_scope == "combined" && has_variants?
   end
 
+  # For combined minimums: can the customer ever reach the minimum given the
+  # variants' stock + backorder capability? When false, the minimum is waived
+  # (the customer may buy up to available stock — no dead-end at checkout).
+  def combined_min_reachable?
+    min = enforced_min_quantity
+    return true unless min
+
+    total = product_variants.where(is_default: false)
+                            .select(&:purchasable?)
+                            .sum(&:max_sellable_quantity)
+    total >= min
+  end
+
   # Minimum value for a single quantity input. Combined-scope products allow any
   # positive quantity per line (the total is checked across lines), so the floor
   # is 1; otherwise it's the product minimum.

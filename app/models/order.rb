@@ -252,6 +252,8 @@ class Order < ApplicationRecord
 
       min = product.enforced_min_quantity
       next unless min
+      # Waive when the minimum can't be reached within stock (no backorder).
+      next unless product.combined_min_reachable?
 
       current = items.sum { |i| i.quantity.to_i }
       next if current >= min
@@ -273,6 +275,8 @@ class Order < ApplicationRecord
 
       min = product.enforced_min_quantity
       next unless min && item.quantity.to_i < min
+      # Waive when stock can't reach the minimum (no backorder).
+      next if item.minimum_waived_by_stock?
 
       messages << I18n.t("storefront.cart.below_minimum_quantity",
                          product: product.name, minimum: product.minimum_quantity_label)

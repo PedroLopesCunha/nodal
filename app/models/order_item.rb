@@ -61,6 +61,13 @@ class OrderItem < ApplicationRecord
     return subtotal - discount
   end
 
+  # True when this line's minimum is waived because the variant can't reach it
+  # within stock (no backorder) — the customer may then buy up to stock.
+  def minimum_waived_by_stock?
+    min = product&.enforced_min_quantity
+    min.present? && product_variant.present? && product_variant.max_sellable_quantity < min
+  end
+
   def variant_name
     product_variant&.option_values_string.presence || product&.name
   end
@@ -155,6 +162,7 @@ class OrderItem < ApplicationRecord
 
     min = product.enforced_min_quantity
     return unless min
+    return if minimum_waived_by_stock?
     return if quantity.to_i >= min
 
     errors.add(:base, I18n.t("storefront.cart.below_minimum_quantity",

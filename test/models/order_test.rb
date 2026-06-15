@@ -230,4 +230,24 @@ class OrderTest < ActiveSupport::TestCase
     @order.finalize_checkout!
     assert @order.placed?
   end
+
+  test "combined minimum is waived when total stock can't reach it (no backorder)" do
+    @org.update!(out_of_stock_strategy: "deactivate") # no backorder
+    product = Product.create!(organisation: @org, name: "Combo2", published: true,
+      has_variants: true, min_quantity: 30, min_quantity_scope: "combined")
+    red = product.product_variants.create!(name: "Red", sku: "C2R",
+      unit_price_cents: 1000, published: true, is_default: false, track_stock: true, stock_quantity: 5)
+    blue = product.product_variants.create!(name: "Blue", sku: "C2B",
+      unit_price_cents: 1000, published: true, is_default: false, track_stock: true, stock_quantity: 4)
+
+    @order.order_items.create!(product: product, product_variant: red, quantity: 5)
+    @order.order_items.create!(product: product, product_variant: blue, quantity: 4)
+
+    # Total sellable stock is 9, far below the min of 30, and no backorder ->
+    # the minimum is waived, so checkout is not blocked (no dead-end).
+    assert_empty @order.combined_min_quantity_shortfalls
+    @order.terms_accepted_at = Time.current
+    @order.finalize_checkout!
+    assert @order.placed?
+  end
 end

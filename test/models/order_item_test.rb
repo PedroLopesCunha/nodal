@@ -146,4 +146,22 @@ class OrderItemTest < ActiveSupport::TestCase
     item = @order.order_items.build(product: product, product_variant: variant, quantity: 5)
     assert item.valid?(:create), "a single combined-scope line below the product min must be allowed"
   end
+
+  test "waives the per-line minimum when stock can't reach it (no backorder)" do
+    @org.update!(out_of_stock_strategy: "deactivate") # inherit -> show_badge, no backorder
+    @product.update!(min_quantity: 10)
+    @product.default_variant.update!(track_stock: true, stock_quantity: 5) # 5 < 10
+
+    item = @order.order_items.build(product: @product, quantity: 5)
+    assert item.valid?(:create), "minimum must be waived when stock (5) < min (10) and no backorder"
+  end
+
+  test "still enforces the per-line minimum when stock can reach it" do
+    @org.update!(out_of_stock_strategy: "deactivate")
+    @product.update!(min_quantity: 10)
+    @product.default_variant.update!(track_stock: true, stock_quantity: 20) # 20 >= 10
+
+    item = @order.order_items.build(product: @product, quantity: 5)
+    assert_not item.valid?(:create), "minimum still applies when stock can reach it"
+  end
 end

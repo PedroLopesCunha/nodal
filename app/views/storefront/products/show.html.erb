@@ -362,7 +362,7 @@
             <% end %>
 
             <!-- Add to Cart Section -->
-            <% combined_counter = @product.min_quantity_combined? && @product.enforced_min_quantity.present? %>
+            <% combined_counter = @product.min_quantity_combined? && @product.enforced_min_quantity.present? && @product.combined_min_reachable? %>
             <% in_cart_qty = combined_counter ? current_cart&.order_items&.where(product_id: @product.id)&.sum(:quantity).to_i : 0 %>
             <% counter_data = combined_counter ? {
                  controller: "min-quantity-counter",

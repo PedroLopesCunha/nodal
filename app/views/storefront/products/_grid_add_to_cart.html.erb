@@ -16,7 +16,7 @@
 <% attribute_names = product.product_product_attributes.includes(:product_attribute).order(:position).map { |ppa| ppa.product_attribute.name } %>
 
 <%# Live combined-minimum counter (illustrative only — never blocks adding) %>
-<% combined_counter = interactive && product.min_quantity_combined? && product.enforced_min_quantity.present? %>
+<% combined_counter = interactive && product.min_quantity_combined? && product.enforced_min_quantity.present? && product.combined_min_reachable? %>
 <% in_cart_qty = combined_counter ? current_cart&.order_items&.where(product_id: product.id)&.sum(:quantity).to_i : 0 %>
 <% counter_data = combined_counter ? {
      controller: "min-quantity-counter",
