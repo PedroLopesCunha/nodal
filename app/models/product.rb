@@ -142,7 +142,7 @@ class Product < ApplicationRecord
 
   def discounted_price_for(discount)
     return price unless discount
-    price - (price * discount.discount_percentage)
+    price - (price * discount.discount_value)
   end
 
   # Returns the primary category (first by position) or falls back to legacy category

@@ -10,8 +10,9 @@ class CustomerProductDiscount < ApplicationRecord
   belongs_to :organisation
 
   validates :discount_type, presence: true, inclusion: { in: DISCOUNT_TYPES }
-  validates :discount_percentage, numericality: { greater_than_or_equal_to: 0, less_than_or_equal_to: 1 }
+  validates :discount_value, presence: true, numericality: { greater_than: 0 }
 
+  validate :discount_value_valid_for_type
   validate :valid_until_after_valid_from
   validate :dates_not_in_past, on: :create
   validate :no_overlapping_discounts
@@ -68,14 +69,14 @@ class CustomerProductDiscount < ApplicationRecord
   end
 
   def percentage_display
-    (discount_percentage * 100).round(0)
+    (discount_value * 100).round(0)
   end
 
   def value_display
     if percentage?
       "#{percentage_display}%"
     else
-      discount_percentage
+      discount_value
     end
   end
 
@@ -92,6 +93,14 @@ class CustomerProductDiscount < ApplicationRecord
   end
 
   private
+
+  def discount_value_valid_for_type
+    return unless discount_value.present? && discount_type.present?
+
+    if percentage? && discount_value > 1
+      errors.add(:discount_value, "must be between 0 and 1 for percentage discounts (e.g., 0.15 for 15%)")
+    end
+  end
 
   def valid_until_after_valid_from
     return if valid_from.blank? || valid_until.blank?
