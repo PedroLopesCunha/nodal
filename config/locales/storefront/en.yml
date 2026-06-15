@@ -235,6 +235,8 @@ en:
           show_less: "Show less"
           add_to_cart: "Add to cart"
           no_variants: "No variants available."
+          min_counter_below: "%{current} / %{minimum} total · %{shortfall} to go"
+          min_counter_met: "%{current} / %{minimum} total · minimum reached"
 
     # Cart section
     cart:
@@ -242,7 +244,6 @@ en:
       below_minimum_quantity: "%{product}: minimum quantity is %{minimum}"
       below_minimum_combined: "%{product}: minimum quantity is %{minimum} in total (you have %{current})"
       minimum_per_variant: "Minimum: %{minimum} per variant"
-      minimum_combined: "Minimum: %{minimum} in total (variants combined)"
       bulk_add:
         added:
           one: "1 item added to the cart."

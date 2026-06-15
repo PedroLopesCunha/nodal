@@ -15,17 +15,33 @@
 <% min_qty = product.min_quantity || 1 %>
 <% attribute_names = product.product_product_attributes.includes(:product_attribute).order(:position).map { |ppa| ppa.product_attribute.name } %>
 
+<%# Live combined-minimum counter (illustrative only — never blocks adding) %>
+<% combined_counter = interactive && product.min_quantity_combined? && product.enforced_min_quantity.present? %>
+<% in_cart_qty = combined_counter ? current_cart&.order_items&.where(product_id: product.id)&.sum(:quantity).to_i : 0 %>
+<% counter_data = combined_counter ? {
+     controller: "min-quantity-counter",
+     min_quantity_counter_min_value: product.enforced_min_quantity,
+     min_quantity_counter_in_cart_value: in_cart_qty,
+     min_quantity_counter_label_value: product.minimum_quantity_label,
+     min_quantity_counter_below_value: t('storefront.products.show.grid.min_counter_below'),
+     min_quantity_counter_met_value: t('storefront.products.show.grid.min_counter_met')
+   } : {} %>
+
 <% if visible_variants.empty? %>
   <p class="text-muted small"><%= t('storefront.products.show.grid.no_variants') %></p>
 <% else %>
   <div class="mb-4" data-controller="expandable">
     <%= form_with url: bulk_add_order_items_path(org_slug: params[:org_slug]),
-                  method: :post, local: true do |f| %>
+                  method: :post, local: true, data: counter_data do |f| %>
       <%= hidden_field_tag :product_id, product.id %>
 
-      <% if interactive && product.minimum_quantity_label %>
+      <% if combined_counter %>
+        <p class="small mb-2">
+          <i class="fa-solid fa-layer-group me-1 text-muted"></i><span class="text-muted" data-min-quantity-counter-target="output"></span>
+        </p>
+      <% elsif interactive && product.minimum_quantity_label %>
         <p class="text-muted small mb-2">
-          <i class="fa-solid fa-circle-info me-1"></i><%= t(product.min_quantity_combined? ? 'storefront.cart.minimum_combined' : 'storefront.cart.minimum_per_variant', minimum: product.minimum_quantity_label) %>
+          <i class="fa-solid fa-circle-info me-1"></i><%= t('storefront.cart.minimum_per_variant', minimum: product.minimum_quantity_label) %>
         </p>
       <% end %>
 
@@ -68,7 +84,7 @@
                 <% end %>
                 <% if interactive %>
                   <td class="text-center align-middle">
-                    <%= number_field_tag "bulk_items[#{variant.id}]", 0, min: 0, class: "form-control text-center mx-auto d-block", style: "width: 100px;" %>
+                    <%= number_field_tag "bulk_items[#{variant.id}]", 0, min: 0, class: "form-control text-center mx-auto d-block", style: "width: 100px;", data: (combined_counter ? { min_quantity_counter_target: "input", action: "input->min-quantity-counter#update" } : {}) %>
                   </td>
                 <% end %>
               </tr>

@@ -235,6 +235,8 @@ pt:
           show_less: "Mostrar menos"
           add_to_cart: "Adicionar ao carrinho"
           no_variants: "Não há variantes disponíveis."
+          min_counter_below: "%{current} / %{minimum} no total · faltam %{shortfall}"
+          min_counter_met: "%{current} / %{minimum} no total · mínimo atingido"
 
     # Secção do carrinho
     cart:
@@ -242,7 +244,6 @@ pt:
       below_minimum_quantity: "%{product}: quantidade mínima de %{minimum}"
       below_minimum_combined: "%{product}: quantidade mínima de %{minimum} no total (tens %{current})"
       minimum_per_variant: "Mínimo: %{minimum} por variante"
-      minimum_combined: "Mínimo: %{minimum} no total (variantes combinadas)"
       bulk_add:
         added:
           one: "1 item adicionado ao carrinho."
