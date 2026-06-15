@@ -15,17 +15,6 @@
     <%= t('storefront.carts.show.stock.items_capped', count: @cart_changes[:capped].size) %>
   </div>
 <% end %>
-<% if @min_quantity_shortfalls.present? %>
-  <div class="alert alert-warning">
-    <i class="fa-solid fa-triangle-exclamation me-2"></i>
-    <%= t('storefront.carts.show.minimum_not_met') %>
-    <ul class="mb-0 mt-1">
-      <% @min_quantity_shortfalls.each do |s| %>
-        <li><%= t('storefront.cart.below_minimum_combined', product: s[:product].name, minimum: s[:label], current: s[:current]) %></li>
-      <% end %>
-    </ul>
-  </div>
-<% end %>
 
 <% if @order.order_items.empty? %>
   <div class="row g-4">
@@ -109,6 +98,7 @@
                         <small class="text-muted"><%= item.product.category&.name %></small>
                         <% badge = cart_stock_badge(item) %>
                         <% if badge %><div class="mt-1"><%= badge %></div><% end %>
+                        <%= render "storefront/carts/min_quantity_warning", shortfall: @min_quantity_shortfall_by_product_id[item.product_id] %>
                       </div>
                     </div>
                   </td>
@@ -173,6 +163,7 @@
                     <%= link_to item.product.name, product_path(org_slug: params[:org_slug], id: item.product), class: "fw-semibold text-truncate d-block text-decoration-none text-body", style: "font-size: 0.9rem;" %>
                     <% badge = cart_stock_badge(item) %>
                     <% if badge %><div class="mt-1" style="font-size: 0.65rem;"><%= badge %></div><% end %>
+                    <%= render "storefront/carts/min_quantity_warning", shortfall: @min_quantity_shortfall_by_product_id[item.product_id] %>
                   </div>
                   <%# Inline quantity controls %>
                   <%= form_with model: item, url: order_item_path(org_slug: params[:org_slug], id: item), method: :patch, local: true, class: "flex-shrink-0", data: { controller: "cart-quantity" } do |f| %>
