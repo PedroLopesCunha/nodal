@@ -256,7 +256,7 @@ en:
         empty_cart: "Your cart is empty"
         empty_cart_hint: "Browse our products and add items to your cart."
         prices_updated: "Prices were updated since your last visit."
-        minimum_shortfall: "%{shortfall} more to reach the minimum of %{minimum}."
+        minimum_shortfall: "Minimum of %{minimum} across all variants — you have %{current}, %{shortfall} to go."
         stock:
           out_of_stock: "Out of stock"
           only_n_left:

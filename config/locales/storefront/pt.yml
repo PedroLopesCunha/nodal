@@ -256,7 +256,7 @@ pt:
         empty_cart: "O seu carrinho está vazio"
         empty_cart_hint: "Explore os nossos produtos e adicione itens ao seu carrinho."
         prices_updated: "Os preços foram atualizados desde a tua última visita."
-        minimum_shortfall: "Faltam %{shortfall} para o mínimo de %{minimum}."
+        minimum_shortfall: "Mínimo de %{minimum} no total das variantes — tens %{current}, faltam %{shortfall}."
         stock:
           out_of_stock: "Esgotado"
           only_n_left:

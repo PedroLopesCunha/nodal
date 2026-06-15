@@ -3,6 +3,6 @@
     or nil. %>
 <% if shortfall %>
   <div class="text-warning small mt-1">
-    <i class="fa-solid fa-triangle-exclamation me-1"></i><%= t('storefront.carts.show.minimum_shortfall', shortfall: shortfall[:shortfall], minimum: shortfall[:label]) %>
+    <i class="fa-solid fa-triangle-exclamation me-1"></i><%= t('storefront.carts.show.minimum_shortfall', minimum: shortfall[:label], current: shortfall[:current], shortfall: shortfall[:shortfall]) %>
   </div>
 <% end %>
