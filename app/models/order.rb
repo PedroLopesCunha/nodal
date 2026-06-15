@@ -243,10 +243,29 @@ class Order < ApplicationRecord
     raise ActiveRecord::RecordInvalid, self
   end
 
+  # Hard gate: refuse to place an order with any line below the product's
+  # minimum order quantity. Catches legacy/grid-built carts that never passed
+  # the client-side or :create-context checks.
+  def validate_minimum_quantities!
+    offending = order_items.select do |item|
+      min = item.product&.enforced_min_quantity
+      min && item.quantity.to_i < min
+    end
+    return if offending.empty?
+
+    offending.each do |item|
+      errors.add(:base, I18n.t("storefront.cart.below_minimum_quantity",
+                               product: item.product.name,
+                               minimum: item.product.minimum_quantity_label))
+    end
+    raise ActiveRecord::RecordInvalid, self
+  end
+
   def finalize_checkout!(same_as_billing: false)
     self.shipping_address = billing_address if same_as_billing && billing_address.present?
     refresh_cart!
     validate_checkout_stock!
+    validate_minimum_quantities!
     validate_pricing_acknowledged!
     self.tax_amount = calculated_tax
     self.shipping_amount = calculated_shipping

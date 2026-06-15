@@ -156,6 +156,20 @@ class Product < ApplicationRecord
     !has_variants?
   end
 
+  # Enforced minimum order quantity, or nil when there's no real minimum.
+  def enforced_min_quantity
+    min = min_quantity.to_i
+    min > 1 ? min : nil
+  end
+
+  # Human label for the minimum, e.g. "10 caixas" or "10" — nil when no minimum.
+  def minimum_quantity_label
+    min = enforced_min_quantity
+    return nil unless min
+
+    [min, (min_quantity_type.presence || unit_description.presence)].compact.join(" ").strip
+  end
+
   def variable?
     has_variants?
   end

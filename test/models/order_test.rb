@@ -182,4 +182,23 @@ class OrderTest < ActiveSupport::TestCase
 
     assert @order.placed?
   end
+
+  test "finalize_checkout! blocks when a line is below the product minimum" do
+    @product.update!(min_quantity: 12)
+    item = @order.order_items.create!(product: @product, quantity: 12)
+    # Simulate a legacy/grid-built line that dropped below the minimum
+    item.update_column(:quantity, 3)
+    @order.reload
+    @order.terms_accepted_at = Time.current
+
+    assert_raises(ActiveRecord::RecordInvalid) { @order.finalize_checkout! }
+    assert_not @order.reload.placed?
+
+    item.update_column(:quantity, 12)
+    @order.reload
+    @order.terms_accepted_at = Time.current
+    @order.finalize_checkout!
+
+    assert @order.placed?
+  end
 end

@@ -100,4 +100,40 @@ class OrderItemTest < ActiveSupport::TestCase
     item.reload
     assert_equal :variant_unpublished, item.stock_status
   end
+
+  test "rejects quantity below the product minimum on create" do
+    @product.update!(min_quantity: 10)
+    item = @order.order_items.build(product: @product, quantity: 5)
+    assert_not item.valid?(:create)
+    assert item.errors[:base].present?
+  end
+
+  test "accepts quantity at or above the product minimum on create" do
+    @product.update!(min_quantity: 10)
+    item = @order.order_items.build(product: @product, quantity: 10)
+    assert item.valid?(:create)
+  end
+
+  test "does not enforce a minimum of 1 or less" do
+    @product.update!(min_quantity: 1)
+    item = @order.order_items.build(product: @product, quantity: 1)
+    assert item.valid?(:create)
+  end
+
+  test "rejects a below-minimum quantity on a customer_change save" do
+    @product.update!(min_quantity: 10)
+    item = @order.order_items.create!(product: @product, quantity: 10)
+    item.quantity = 4
+    assert_not item.save(context: :customer_change)
+    assert item.errors[:base].present?
+  end
+
+  test "does not enforce the minimum on a context-less save (system re-pricing)" do
+    @product.update!(min_quantity: 10)
+    item = @order.order_items.create!(product: @product, quantity: 10)
+    # Simulate a stale below-minimum line, then a system save (no context)
+    item.update_column(:quantity, 3)
+    item.unit_price = 1234
+    assert item.save, "system re-pricing must not be blocked by the minimum"
+  end
 end

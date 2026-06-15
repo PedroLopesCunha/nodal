@@ -46,6 +46,10 @@ class OrderItem < ApplicationRecord
      less_than_or_equal_to: 1 }, allow_nil: true
   validate :variant_belongs_to_product
   validate :variant_is_purchasable, on: :create
+  # Only enforced on customer-initiated add/edit (:create, :customer_change),
+  # never on system re-pricing/stock-capping (refresh_cart! saves without a
+  # context), so an automatic save can't be blocked by a stale minimum.
+  validate :meets_minimum_quantity, on: [:create, :customer_change]
 
   before_validation :set_variant_for_simple_product, on: :create
   before_validation :set_unit_price_from_variant, on: :create
@@ -141,6 +145,16 @@ class OrderItem < ApplicationRecord
     unless product_variant.purchasable?
       errors.add(:product_variant, "is not available for purchase")
     end
+  end
+
+  def meets_minimum_quantity
+    min = product&.enforced_min_quantity
+    return unless min
+    return if quantity.to_i >= min
+
+    errors.add(:base, I18n.t("storefront.cart.below_minimum_quantity",
+                             product: product.name,
+                             minimum: product.minimum_quantity_label))
   end
 
   def should_recalculate_discount?

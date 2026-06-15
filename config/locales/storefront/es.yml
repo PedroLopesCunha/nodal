@@ -227,6 +227,8 @@ es:
     # Sección del carrito
     cart:
       item_added: "Artículo añadido al carrito"
+      below_minimum_quantity: "%{product}: cantidad mínima de %{minimum}"
+      minimum_per_variant: "Mínimo: %{minimum} por variante"
       bulk_add:
         added:
           one: "1 artículo añadido al carrito."

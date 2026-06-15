@@ -239,6 +239,8 @@ en:
     # Cart section
     cart:
       item_added: "Item added to cart"
+      below_minimum_quantity: "%{product}: minimum quantity is %{minimum}"
+      minimum_per_variant: "Minimum: %{minimum} per variant"
       bulk_add:
         added:
           one: "1 item added to the cart."

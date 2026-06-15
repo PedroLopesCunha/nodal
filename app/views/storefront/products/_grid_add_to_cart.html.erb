@@ -23,6 +23,12 @@
                   method: :post, local: true do |f| %>
       <%= hidden_field_tag :product_id, product.id %>
 
+      <% if interactive && product.minimum_quantity_label %>
+        <p class="text-muted small mb-2">
+          <i class="fa-solid fa-circle-info me-1"></i><%= t('storefront.cart.minimum_per_variant', minimum: product.minimum_quantity_label) %>
+        </p>
+      <% end %>
+
       <div class="table-responsive">
         <table class="table align-middle mb-2">
           <thead class="table-light">
