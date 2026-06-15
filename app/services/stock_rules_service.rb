@@ -4,7 +4,15 @@ class StockRulesService
   end
 
   def apply_to_variant(variant)
-    return unless variant.track_stock?
+    # A variant that doesn't track stock is treated as unlimited / always in stock,
+    # so it must stay available regardless of the org's out-of-stock strategy.
+    # (Previously this returned early, leaving `available` stuck at its stale value
+    # and hiding non-tracked products under the 'hide' strategy.)
+    unless variant.track_stock?
+      variant.update_column(:available, true) unless variant.available
+      recalculate_product_availability(variant.product)
+      return
+    end
 
     policy = variant.effective_stock_policy
     # track_only: stock doesn't affect availability
