@@ -76,4 +76,21 @@ class ProductTest < ActiveSupport::TestCase
     @product.update!(has_variants: true, min_quantity_scope: "combined")
     assert_equal 1, @product.quantity_input_min
   end
+
+  test "discounted_price_range applies a fixed discount per variant, not by extrapolating a percentage" do
+    customer = Customer.create!(organisation: @org, company_name: "Acme", contact_name: "J", active: true)
+    product = Product.create!(organisation: @org, name: "Rings", published: true, has_variants: true)
+    product.product_variants.create!(name: "S", sku: "R-S", unit_price_cents: 1200, published: true, is_default: false, track_stock: false)
+    product.product_variants.create!(name: "L", sku: "R-L", unit_price_cents: 4300, published: true, is_default: false, track_stock: false)
+    CustomerProductDiscount.create!(organisation: @org, customer: customer, product: product,
+      discount_type: "fixed", discount_value: 10)
+
+    dr = product.discounted_price_range(customer)
+
+    assert_equal Money.new(1200, "EUR"), dr[:original_min]
+    assert_equal Money.new(4300, "EUR"), dr[:original_max]
+    # €10 off each end: €2.00 and €33.00 — NOT €7.17 (which a single-% extrapolation gives)
+    assert_equal Money.new(200, "EUR"), dr[:final_min]
+    assert_equal Money.new(3300, "EUR"), dr[:final_max]
+  end
 end

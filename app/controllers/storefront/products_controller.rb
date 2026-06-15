@@ -289,20 +289,15 @@ class Storefront::ProductsController < Storefront::BaseController
     # original range and a discounted range; for everything else display_price
     # and the regular discount UI cover the case.
     breakdown = @discount_calculator.discount_breakdown
-    pct = breakdown[:effective_discount][:percentage].to_f
-    if @product.has_variants? && breakdown[:has_discount] && pct.finite? && pct > 0 && (range = @product.price_range)
-      original_string = range[:range] ? "#{range[:min].format} - #{range[:max].format}" : range[:min].format
-      min_final = range[:min] - (range[:min] * pct)
-      max_final = range[:max] - (range[:max] * pct)
-      discounted_string = range[:range] ? "#{min_final.format} - #{max_final.format}" : min_final.format
-      @display_price_original = original_string
-      @display_price = discounted_string
-      @display_savings = if range[:range]
-        savings_min = range[:min] - min_final
-        savings_max = range[:max] - max_final
-        "#{savings_min.format} – #{savings_max.format}"
+    if @product.has_variants? && breakdown[:has_discount] && (dr = @product.discounted_price_range(current_customer))
+      @display_price_original = dr[:range] ? "#{dr[:original_min].format} - #{dr[:original_max].format}" : dr[:original_min].format
+      @display_price = dr[:range] ? "#{dr[:final_min].format} - #{dr[:final_max].format}" : dr[:final_min].format
+      savings_min = dr[:original_min] - dr[:final_min]
+      savings_max = dr[:original_max] - dr[:final_max]
+      @display_savings = if dr[:range] && savings_min != savings_max
+        "#{[savings_min, savings_max].min.format} – #{[savings_min, savings_max].max.format}"
       else
-        (range[:min] - min_final).format
+        savings_min.format
       end
     else
       @display_price_original = nil

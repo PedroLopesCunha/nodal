@@ -16,17 +16,14 @@
 <% if product.price_on_request? %>
   <span class="product-card-price"><%= t('storefront.products.index.price_on_request') %></span>
 <% elsif discount_info && discount_info[:has_discount] && discount_info[:effective_discount][:percentage]&.finite? && (product.variable? || !discount_info[:base_price].zero?) %>
-  <% pct = discount_info[:effective_discount][:percentage].to_f %>
-  <% range = product.variable? ? product.price_range : nil %>
+  <% dr = product.variable? ? product.discounted_price_range(current_customer) : nil %>
   <div>
-    <% if range %>
-      <% min_final = range[:min] - (range[:min] * pct) %>
-      <% max_final = range[:max] - (range[:max] * pct) %>
+    <% if dr %>
       <span class="product-card-price-original">
-        <%= range[:range] ? "#{range[:min].format} - #{range[:max].format}" : range[:min].format %>
+        <%= dr[:range] ? "#{dr[:original_min].format} - #{dr[:original_max].format}" : dr[:original_min].format %>
       </span>
       <span class="product-card-price-discounted">
-        <%= range[:range] ? "#{min_final.format} - #{max_final.format}" : min_final.format %>
+        <%= dr[:range] ? "#{dr[:final_min].format} - #{dr[:final_max].format}" : dr[:final_min].format %>
       </span>
     <% else %>
       <span class="product-card-price-original">
