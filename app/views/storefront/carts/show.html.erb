@@ -15,6 +15,17 @@
     <%= t('storefront.carts.show.stock.items_capped', count: @cart_changes[:capped].size) %>
   </div>
 <% end %>
+<% if @min_quantity_shortfalls.present? %>
+  <div class="alert alert-warning">
+    <i class="fa-solid fa-triangle-exclamation me-2"></i>
+    <%= t('storefront.carts.show.minimum_not_met') %>
+    <ul class="mb-0 mt-1">
+      <% @min_quantity_shortfalls.each do |s| %>
+        <li><%= t('storefront.cart.below_minimum_combined', product: s[:product].name, minimum: s[:label], current: s[:current]) %></li>
+      <% end %>
+    </ul>
+  </div>
+<% end %>
 
 <% if @order.order_items.empty? %>
   <div class="row g-4">
@@ -104,7 +115,7 @@
                   <td>
                     <%= form_with model: item, url: order_item_path(org_slug: params[:org_slug], id: item), method: :patch, local: true, class: "d-flex justify-content-center" do |f| %>
                       <div class="input-group input-group-sm" style="width: 120px;">
-                        <%= f.number_field :quantity, min: item.product.min_quantity || 1, class: "form-control text-center" %>
+                        <%= f.number_field :quantity, min: item.product.quantity_input_min, class: "form-control text-center" %>
                         <button type="submit" class="btn btn-outline-secondary">
                           <i class="fa-solid fa-sync"></i>
                         </button>
@@ -170,7 +181,7 @@
                         <i class="fa-solid fa-minus" style="font-size: 0.65rem;"></i>
                       </button>
                       <%= f.number_field :quantity,
-                          min: item.product.min_quantity || 1,
+                          min: item.product.quantity_input_min,
                           class: "form-control text-center cart-quantity-input cart-quantity-input-compact",
                           data: { cart_quantity_target: "input", action: "change->cart-quantity#submit" } %>
                       <button type="button" class="btn btn-outline-secondary cart-quantity-btn cart-quantity-btn-compact" data-action="cart-quantity#increment" aria-label="<%= t('storefront.carts.show.increase_quantity') %>">

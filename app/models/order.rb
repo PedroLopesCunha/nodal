@@ -243,21 +243,49 @@ class Order < ApplicationRecord
     raise ActiveRecord::RecordInvalid, self
   end
 
-  # Hard gate: refuse to place an order with any line below the product's
-  # minimum order quantity. Catches legacy/grid-built carts that never passed
-  # the client-side or :create-context checks.
-  def validate_minimum_quantities!
-    offending = order_items.select do |item|
-      min = item.product&.enforced_min_quantity
-      min && item.quantity.to_i < min
-    end
-    return if offending.empty?
+  # Combined-scope products whose minimum isn't met by the SUM of their lines.
+  # Returns [{ product:, required:, current:, label:, shortfall: }]. Used for
+  # the cart warning and the checkout gate.
+  def combined_min_quantity_shortfalls
+    order_items.reload.group_by(&:product).filter_map do |product, items|
+      next unless product&.min_quantity_combined?
 
-    offending.each do |item|
-      errors.add(:base, I18n.t("storefront.cart.below_minimum_quantity",
-                               product: item.product.name,
-                               minimum: item.product.minimum_quantity_label))
+      min = product.enforced_min_quantity
+      next unless min
+
+      current = items.sum { |i| i.quantity.to_i }
+      next if current >= min
+
+      { product: product, required: min, current: current,
+        label: product.minimum_quantity_label, shortfall: min - current }
     end
+  end
+
+  # Hard gate: refuse to place an order below the product minimum — per line for
+  # per_variant products, or by the combined total for combined products.
+  # Catches legacy/grid-built carts that never passed the earlier checks.
+  def validate_minimum_quantities!
+    messages = []
+
+    order_items.reload.each do |item|
+      product = item.product
+      next unless product && !product.min_quantity_combined?
+
+      min = product.enforced_min_quantity
+      next unless min && item.quantity.to_i < min
+
+      messages << I18n.t("storefront.cart.below_minimum_quantity",
+                         product: product.name, minimum: product.minimum_quantity_label)
+    end
+
+    combined_min_quantity_shortfalls.each do |s|
+      messages << I18n.t("storefront.cart.below_minimum_combined",
+                         product: s[:product].name, minimum: s[:label], current: s[:current])
+    end
+
+    return if messages.empty?
+
+    messages.each { |msg| errors.add(:base, msg) }
     raise ActiveRecord::RecordInvalid, self
   end
 

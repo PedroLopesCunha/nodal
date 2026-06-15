@@ -25,7 +25,7 @@
 
       <% if interactive && product.minimum_quantity_label %>
         <p class="text-muted small mb-2">
-          <i class="fa-solid fa-circle-info me-1"></i><%= t('storefront.cart.minimum_per_variant', minimum: product.minimum_quantity_label) %>
+          <i class="fa-solid fa-circle-info me-1"></i><%= t(product.min_quantity_combined? ? 'storefront.cart.minimum_combined' : 'storefront.cart.minimum_per_variant', minimum: product.minimum_quantity_label) %>
         </p>
       <% end %>
 

@@ -136,4 +136,14 @@ class OrderItemTest < ActiveSupport::TestCase
     item.unit_price = 1234
     assert item.save, "system re-pricing must not be blocked by the minimum"
   end
+
+  test "does not enforce a per-line minimum for combined-scope products" do
+    product = Product.create!(organisation: @org, name: "Combo", published: true,
+      has_variants: true, min_quantity: 12, min_quantity_scope: "combined")
+    variant = product.product_variants.create!(name: "Red", sku: "CMB-R",
+      unit_price_cents: 1000, published: true, is_default: false, track_stock: false)
+
+    item = @order.order_items.build(product: product, product_variant: variant, quantity: 5)
+    assert item.valid?(:create), "a single combined-scope line below the product min must be allowed"
+  end
 end

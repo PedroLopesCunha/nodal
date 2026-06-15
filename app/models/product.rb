@@ -11,6 +11,11 @@ class Product < ApplicationRecord
   # with its own qty input and one shared bulk-add button.
   ADD_TO_CART_MODES = %w[default grid].freeze
 
+  # How min_quantity is enforced across a product's variants:
+  #   per_variant — each variant line must meet the minimum on its own
+  #   combined    — the minimum is the sum of the product's variants in the cart
+  MIN_QUANTITY_SCOPES = %w[per_variant combined].freeze
+
   slugify :name, secondary: :sku
 
   belongs_to :organisation
@@ -79,6 +84,7 @@ class Product < ApplicationRecord
   validates :slug, uniqueness: true
   validates :name, presence: true
   validates :add_to_cart_mode, inclusion: { in: ADD_TO_CART_MODES }
+  validates :min_quantity_scope, inclusion: { in: MIN_QUANTITY_SCOPES }
   monetize :unit_price, as: :price, allow_nil: true
 
   before_save :sync_description_columns
@@ -162,7 +168,22 @@ class Product < ApplicationRecord
     min > 1 ? min : nil
   end
 
-  # Human label for the minimum, e.g. "10 caixas" or "10" — nil when no minimum.
+  # True when the minimum is the sum of the product's variants (combined),
+  # rather than per-variant. Only meaningful for variable products.
+  def min_quantity_combined?
+    min_quantity_scope == "combined" && has_variants?
+  end
+
+  # Minimum value for a single quantity input. Combined-scope products allow any
+  # positive quantity per line (the total is checked across lines), so the floor
+  # is 1; otherwise it's the product minimum.
+  def quantity_input_min
+    return 1 if min_quantity_combined?
+
+    [min_quantity.to_i, 1].max
+  end
+
+  # Human label for the minimum value, e.g. "10 caixas" or "10" — nil when none.
   def minimum_quantity_label
     min = enforced_min_quantity
     return nil unless min

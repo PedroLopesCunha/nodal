@@ -240,7 +240,9 @@ en:
     cart:
       item_added: "Item added to cart"
       below_minimum_quantity: "%{product}: minimum quantity is %{minimum}"
+      below_minimum_combined: "%{product}: minimum quantity is %{minimum} in total (you have %{current})"
       minimum_per_variant: "Minimum: %{minimum} per variant"
+      minimum_combined: "Minimum: %{minimum} in total (variants combined)"
       bulk_add:
         added:
           one: "1 item added to the cart."
@@ -254,6 +256,7 @@ en:
         empty_cart: "Your cart is empty"
         empty_cart_hint: "Browse our products and add items to your cart."
         prices_updated: "Prices were updated since your last visit."
+        minimum_not_met: "Some products haven't reached their minimum quantity yet:"
         stock:
           out_of_stock: "Out of stock"
           only_n_left:

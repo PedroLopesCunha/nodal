@@ -137,6 +137,17 @@
                              class: "form-control" %>
                 <small class="text-muted"><%= t('bo.products.form.add_to_cart_mode_hint') %></small>
               </div>
+              <div class="col-md-6">
+                <label class="form-label"><%= t('bo.products.form.min_quantity_scope') %></label>
+                <%= f.select :min_quantity_scope,
+                             options_for_select([
+                               [t('bo.products.form.min_quantity_scope_per_variant'), 'per_variant'],
+                               [t('bo.products.form.min_quantity_scope_combined'), 'combined']
+                             ], @product.min_quantity_scope),
+                             {},
+                             class: "form-control" %>
+                <small class="text-muted"><%= t('bo.products.form.min_quantity_scope_hint') %></small>
+              </div>
             </div>
           <% end %>
         </div>

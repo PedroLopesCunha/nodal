@@ -148,7 +148,12 @@ class OrderItem < ApplicationRecord
   end
 
   def meets_minimum_quantity
-    min = product&.enforced_min_quantity
+    return unless product
+    # Combined-scope minimums are checked across all the product's lines
+    # (at the cart/checkout level), never per line.
+    return if product.min_quantity_combined?
+
+    min = product.enforced_min_quantity
     return unless min
     return if quantity.to_i >= min
 

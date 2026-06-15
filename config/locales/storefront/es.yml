@@ -228,7 +228,9 @@ es:
     cart:
       item_added: "Artículo añadido al carrito"
       below_minimum_quantity: "%{product}: cantidad mínima de %{minimum}"
+      below_minimum_combined: "%{product}: cantidad mínima de %{minimum} en total (tienes %{current})"
       minimum_per_variant: "Mínimo: %{minimum} por variante"
+      minimum_combined: "Mínimo: %{minimum} en total (variantes combinadas)"
       bulk_add:
         added:
           one: "1 artículo añadido al carrito."
@@ -242,6 +244,7 @@ es:
         empty_cart: "Su carrito está vacío"
         empty_cart_hint: "Explore nuestros productos y añada artículos a su carrito."
         prices_updated: "Los precios se actualizaron desde su última visita."
+        minimum_not_met: "Algunos productos aún no alcanzan la cantidad mínima:"
         stock:
           out_of_stock: "Agotado"
           only_n_left:

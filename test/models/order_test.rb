@@ -201,4 +201,33 @@ class OrderTest < ActiveSupport::TestCase
 
     assert @order.placed?
   end
+
+  test "combined-scope minimum is met by the sum of the product's variant lines" do
+    product = Product.create!(organisation: @org, name: "Combo", published: true,
+      has_variants: true, min_quantity: 12, min_quantity_scope: "combined")
+    red = product.product_variants.create!(name: "Red", sku: "CMB-R",
+      unit_price_cents: 1000, published: true, is_default: false, track_stock: false)
+    blue = product.product_variants.create!(name: "Blue", sku: "CMB-B",
+      unit_price_cents: 1000, published: true, is_default: false, track_stock: false)
+
+    @order.order_items.create!(product: product, product_variant: red, quantity: 5)
+    @order.order_items.create!(product: product, product_variant: blue, quantity: 4)
+
+    shortfalls = @order.combined_min_quantity_shortfalls
+    assert_equal 1, shortfalls.size
+    assert_equal 9, shortfalls.first[:current]
+    assert_equal 3, shortfalls.first[:shortfall]
+
+    @order.terms_accepted_at = Time.current
+    assert_raises(ActiveRecord::RecordInvalid) { @order.finalize_checkout! }
+    assert_not @order.reload.placed?
+
+    # Bump the blue line so the combined total reaches 12
+    @order.order_items.find_by(product_variant: blue).update_column(:quantity, 7)
+    assert_empty @order.combined_min_quantity_shortfalls
+
+    @order.terms_accepted_at = Time.current
+    @order.finalize_checkout!
+    assert @order.placed?
+  end
 end
