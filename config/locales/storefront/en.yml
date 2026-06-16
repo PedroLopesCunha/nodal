@@ -185,6 +185,9 @@ en:
         category_discount: "Category Discount"
         customer_tier_discount: "Customer Tier Discount"
         your_special_price: "Your Special Price"
+        special_badge: "SPECIAL"
+        special_price_subtitle: "Exclusive pricing just for you"
+        units_threshold: "(%{quantity}+ units)"
         min_quantity_met: "Min. quantity met"
         buy_to_unlock: "Buy %{quantity}+ units to unlock this discount"
         you_save: "You Save: %{amount} per unit"
@@ -289,6 +292,7 @@ en:
         subtotal: "Subtotal"
         subtotal_items: "Subtotal (%{count} items)"
         order_discount: "Order Discount"
+        max_discount_applied: "Maximum discount of %{percentage} applied"
         available_discounts: "Available Order Discounts"
         spend_more_to_unlock: "Spend %{amount} more to unlock"
         discount_applied: "Applied to your order!"
@@ -560,6 +564,7 @@ en:
         customer_limit: "You have already used this promo code."
         not_eligible: "This promo code is not available for your account."
         min_amount: "Your order must be at least %{amount} to use this code."
+        not_stackable: "This code can't be combined with other order discounts."
         invalid: "This promo code could not be applied."
 
     # Flash messages

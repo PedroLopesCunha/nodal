@@ -124,8 +124,8 @@
             </div>
             <div class="col-md-4">
               <label class="form-label"><%= t('bo.pricing.form.discount_value') %> <span class="text-danger">*</span></label>
-              <%= f.number_field :discount_percentage, class: "form-control", placeholder: "0.10", step: 0.01, min: 0, max: 1, required: true %>
-              <small class="text-muted"><%= t('bo.pricing.custom_pricing.discount_value_hint') %></small>
+              <%= f.number_field :discount_value, class: "form-control", placeholder: "0.10", step: 0.01, min: 0, required: true %>
+              <small class="text-muted"><%= t('bo.pricing.form.discount_value_hint', symbol: @current_organisation.currency_symbol) %></small>
             </div>
           </div>
 

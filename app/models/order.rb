@@ -393,7 +393,10 @@ class Order < ApplicationRecord
 
     case discount_type
     when 'percentage'
-      total_amount * discount_value
+      # Compound: the manual discount applies last, on the total already reduced
+      # by the auto tier and the promo code — not on the gross total.
+      base = [total_with_auto_discount - promo_code_discount, Money.new(0, organisation.currency)].max
+      base * discount_value
     when 'fixed'
       Money.new((discount_value * 100).to_i, organisation.currency)
     else
@@ -401,10 +404,19 @@ class Order < ApplicationRecord
     end
   end
 
+  # Sum of line totals BEFORE any discount (base price × quantity) — the
+  # reference for the organisation's maximum-discount cap.
+  def gross_subtotal
+    order_items.sum { |i| i.price * i.quantity }
+  end
+
   def subtotal_after_discount
-    # Apply auto order tier discount, manual order discount, and promo code discount
-    result = total_with_auto_discount - order_discount_amount - promo_code_discount
-    [result, Money.new(0, organisation.currency)].max
+    cap_subtotal(raw_subtotal_after_discount)
+  end
+
+  # True when the org's maximum-discount cap actually reduced the total discount.
+  def discount_capped?
+    organisation.max_discount_enabled? && raw_subtotal_after_discount < max_discount_floor
   end
 
   def promo_code_discount
@@ -419,6 +431,14 @@ class Order < ApplicationRecord
 
   def has_promo_code?
     promo_code.present?
+  end
+
+  # True when the order already carries another order-level discount (an
+  # applicable auto tier or a manual discount). Used to block a non-stackable
+  # promo code. Line-level discounts (customer/product) are the customer's base
+  # pricing and don't count here.
+  def has_other_order_level_discount?
+    best_order_discount.present? || has_order_discount?
   end
 
   def order_discount_display
@@ -456,6 +476,22 @@ class Order < ApplicationRecord
   end
 
   private
+
+  # Order-level discounts compound, each on the already-discounted running
+  # total: gross -> auto tier -> promo code -> manual discount.
+  def raw_subtotal_after_discount
+    result = total_with_auto_discount - order_discount_amount - promo_code_discount
+    [result, Money.new(0, organisation.currency)].max
+  end
+
+  def max_discount_floor
+    gross_subtotal * (1 - organisation.max_discount_percentage)
+  end
+
+  def cap_subtotal(subtotal)
+    return subtotal unless organisation.max_discount_enabled?
+    [subtotal, max_discount_floor].max
+  end
 
   def blank_cart_changes
     { price_changed: [], discount_changed: [], removed: [], capped: [], out_of_stock: [], qty_overflow: [] }

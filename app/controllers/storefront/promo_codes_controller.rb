@@ -34,6 +34,7 @@ class Storefront::PromoCodesController < Storefront::BaseController
       when :customer_limit_reached then t('storefront.promo_codes.errors.customer_limit')
       when :not_eligible then t('storefront.promo_codes.errors.not_eligible')
       when :min_amount_not_met then t('storefront.promo_codes.errors.min_amount', amount: promo_code.min_order_amount.format)
+      when :not_stackable then t('storefront.promo_codes.errors.not_stackable')
       else t('storefront.promo_codes.errors.invalid')
       end
 

@@ -142,7 +142,7 @@ class Product < ApplicationRecord
 
   def discounted_price_for(discount)
     return price unless discount
-    price - (price * discount.discount_percentage)
+    price - (price * discount.discount_value)
   end
 
   # Returns the primary category (first by position) or falls back to legacy category
@@ -245,6 +245,31 @@ class Product < ApplicationRecord
     else
       range[:min].format
     end
+  end
+
+  # Discounted price range for a variable product, evaluated at the cheapest and
+  # the most-expensive visible variant. The per-unit final price is monotonic in
+  # the base price, so these two endpoints give the exact range — unlike
+  # extrapolating a single percentage, which is wrong for fixed (non-uniform)
+  # discounts (e.g. €10 off is 83% of €12 but only 23% of €43). Returns a hash
+  # of Money values, or nil when there are no visible priced variants.
+  def discounted_price_range(customer)
+    variants = product_variants.where(is_default: false, published: true)
+                               .where.not(unit_price_cents: [ nil, 0 ]).to_a
+                               .select { |v| v.available? || v.effective_stock_policy != "hide" }
+    return nil if variants.empty?
+
+    cheapest = variants.min_by(&:unit_price_cents)
+    priciest = variants.max_by(&:unit_price_cents)
+    finals = [ cheapest, priciest ].uniq.map do |v|
+      DiscountCalculator.new(product: self, customer: customer, for_display: true, variant: v).final_price
+    end
+
+    {
+      original_min: cheapest.price, original_max: priciest.price,
+      final_min: finals.min, final_max: finals.max,
+      range: cheapest.unit_price_cents != priciest.unit_price_cents
+    }
   end
 
   def available_values_by_attribute

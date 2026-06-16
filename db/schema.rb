@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2026_06_15_120000) do
+ActiveRecord::Schema[7.1].define(version: 2026_06_16_120000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_trgm"
   enable_extension "plpgsql"
@@ -163,7 +163,7 @@ ActiveRecord::Schema[7.1].define(version: 2026_06_15_120000) do
     t.bigint "customer_id"
     t.bigint "product_id"
     t.bigint "organisation_id", null: false
-    t.decimal "discount_percentage", precision: 5, scale: 4, default: "0.0"
+    t.decimal "discount_value", precision: 10, scale: 4, default: "0.0"
     t.date "valid_from"
     t.date "valid_until"
     t.datetime "created_at", null: false
@@ -595,6 +595,7 @@ ActiveRecord::Schema[7.1].define(version: 2026_06_15_120000) do
     t.string "cart_price_change_policy", default: "notify", null: false
     t.text "storefront_description"
     t.string "website_url"
+    t.decimal "max_discount_percentage", precision: 5, scale: 4
     t.index ["custom_domain"], name: "index_organisations_on_custom_domain", unique: true, where: "(custom_domain IS NOT NULL)"
     t.index ["default_locale"], name: "index_organisations_on_default_locale"
     t.index ["slug"], name: "index_organisations_on_slug", unique: true

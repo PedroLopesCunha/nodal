@@ -59,6 +59,7 @@ class Organisation < ApplicationRecord
   validates :cart_qty_overflow_policy, inclusion: { in: CART_QTY_OVERFLOW_POLICIES }
   validates :checkout_stock_policy, inclusion: { in: CHECKOUT_STOCK_POLICIES }
   validates :cart_price_change_policy, inclusion: { in: CART_PRICE_CHANGE_POLICIES }
+  validates :max_discount_percentage, numericality: { greater_than: 0, less_than_or_equal_to: 1 }, allow_nil: true
   validates :primary_color, format: { with: HEX_COLOR_REGEX }, allow_blank: true
   validates :secondary_color, format: { with: HEX_COLOR_REGEX }, allow_blank: true
   validates :email_reply_to, format: { with: URI::MailTo::EMAIL_REGEXP }, allow_blank: true
@@ -133,6 +134,10 @@ class Organisation < ApplicationRecord
 
   def free_shipping_enabled?
     free_shipping_threshold_cents.present? && free_shipping_threshold_cents > 0
+  end
+
+  def max_discount_enabled?
+    max_discount_percentage.present? && max_discount_percentage > 0
   end
 
   def effective_primary_color

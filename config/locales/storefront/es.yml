@@ -173,6 +173,9 @@ es:
         category_discount: "Descuento de Categoría"
         customer_tier_discount: "Descuento de Cliente"
         your_special_price: "Su Precio Especial"
+        special_badge: "ESPECIAL"
+        special_price_subtitle: "Precio exclusivo solo para ti"
+        units_threshold: "(%{quantity}+ unidades)"
         min_quantity_met: "Cantidad mín. alcanzada"
         buy_to_unlock: "Compre %{quantity}+ unidades para desbloquear este descuento"
         you_save: "Ahorra: %{amount} por unidad"
@@ -277,6 +280,7 @@ es:
         subtotal: "Subtotal"
         subtotal_items: "Subtotal (%{count} artículos)"
         order_discount: "Descuento de Pedido"
+        max_discount_applied: "Descuento máximo de %{percentage} aplicado"
         available_discounts: "Descuentos de Pedido Disponibles"
         spend_more_to_unlock: "Gaste %{amount} más para desbloquear"
         discount_applied: "¡Aplicado a su pedido!"
@@ -548,6 +552,7 @@ es:
         customer_limit: "Ya ha utilizado este código promocional."
         not_eligible: "Este código promocional no está disponible para su cuenta."
         min_amount: "Su pedido debe ser de al menos %{amount} para usar este código."
+        not_stackable: "Este código no se puede combinar con otros descuentos de pedido."
         invalid: "Este código promocional no pudo ser aplicado."
 
     # Mensajes flash

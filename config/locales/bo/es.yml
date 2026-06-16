@@ -1484,6 +1484,8 @@ es:
         tax_rate: "Tasa de IVA Predeterminada (%)"
         tax_rate_placeholder: "0.21"
         tax_rate_hint: "Introduzca como decimal (ej: 0.21 para 21%)"
+        max_discount_percentage: "Descuento máximo total"
+        max_discount_percentage_hint: "Límite de seguridad: el descuento total de un pedido nunca supera esto, sea cual sea la combinación. Decimal (ej: 0.40 = 40%). Vacío = sin límite."
         shipping_cost: "Coste de Envío Predeterminado"
         shipping_cost_placeholder: "15.00"
         shipping_cost_hint: "En %{currency}"
