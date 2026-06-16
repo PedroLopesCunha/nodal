@@ -301,7 +301,10 @@ class Storefront::ProductsController < Storefront::BaseController
       end
     else
       @display_price_original = nil
-      @display_price = @product.has_variants? ? @product.display_price : nil
+      # Only fall back to the (undiscounted) range string when there's NO discount.
+      # For a variable product with a discount but no priced variants (degenerate),
+      # leave nil so the view uses the breakdown's discounted price, not the gross.
+      @display_price = (@product.has_variants? && !breakdown[:has_discount]) ? @product.display_price : nil
       @display_savings = nil
     end
 

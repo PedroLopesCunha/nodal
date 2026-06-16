@@ -254,6 +254,11 @@ class Product < ApplicationRecord
   # discounts (e.g. €10 off is 83% of €12 but only 23% of €43). Returns a hash
   # of Money values, or nil when there are no visible priced variants.
   def discounted_price_range(customer)
+    @discounted_price_range ||= {}
+    @discounted_price_range[customer&.id] ||= compute_discounted_price_range(customer)
+  end
+
+  def compute_discounted_price_range(customer)
     variants = product_variants.where(is_default: false, published: true)
                                .where.not(unit_price_cents: [ nil, 0 ]).to_a
                                .select { |v| v.available? || v.effective_stock_policy != "hide" }

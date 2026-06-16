@@ -163,6 +163,7 @@ pt:
         no_products_hint: "Tente ajustar a sua pesquisa ou filtros."
         empty_catalog: "Não existem produtos disponíveis de momento."
         sale_badge: "PROMOÇÃO"
+        discount_up_to: "até -%{percentage}%"
         min_order: "Encomenda mín."
         price_on_request: "Preço sob consulta"
         showing_products: "A mostrar %{from}-%{to} de %{count} produtos"
