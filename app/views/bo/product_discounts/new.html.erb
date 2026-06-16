@@ -110,18 +110,18 @@
           </div>
 
           <div class="row g-3 mt-1" data-controller="discount-condition">
-            <div class="col-md-4">
+            <div class="col-md-6">
               <label class="form-label"><%= t('bo.pricing.form.condition_type') %></label>
               <%= f.select :condition_type,
                     [[t('bo.pricing.form.condition_quantity'), 'quantity'], [t('bo.pricing.form.condition_amount'), 'amount']],
                     {}, { class: "form-select", data: { discount_condition_target: "select", action: "change->discount-condition#update" } } %>
             </div>
-            <div class="col-md-4" data-discount-condition-target="quantity">
+            <div class="col-md-6" data-discount-condition-target="quantity">
               <label class="form-label"><%= t('bo.pricing.form.min_quantity') %></label>
               <%= f.number_field :min_quantity, class: "form-control", placeholder: "1", step: 1, min: 1, value: @discount.min_quantity || 1 %>
               <small class="text-muted"><%= t('bo.pricing.form.min_quantity_hint') %></small>
             </div>
-            <div class="col-md-4" data-discount-condition-target="amount">
+            <div class="col-md-6" data-discount-condition-target="amount">
               <label class="form-label"><%= t('bo.pricing.form.min_amount') %></label>
               <%= f.number_field :min_amount, class: "form-control", placeholder: "50", step: 0.01, min: 0 %>
               <small class="text-muted"><%= t('bo.pricing.form.min_amount_hint') %></small>
