@@ -191,6 +191,8 @@ pt:
         units_threshold: "(%{quantity}+ unidades)"
         min_quantity_met: "Quantidade mín. atingida"
         buy_to_unlock: "Compre %{quantity}+ unidades para desbloquear este desconto"
+        spend_to_unlock: "Gaste %{amount} neste produto para desbloquear este desconto"
+        min_amount_met: "Valor mínimo atingido"
         you_save: "Poupa: %{amount} por unidade"
         valid_until: "Válido até %{date}"
         min_order: "Encomenda mín."

@@ -1,0 +1,24 @@
+<%# Met / "unlock" hint for a line discount's condition (quantity or € value).
+    Local: discount — a discount hash carrying :condition + :meets_condition. %>
+<% condition = discount[:condition] %>
+<% if condition && condition[:type] == :quantity && condition[:quantity].to_i > 1 %>
+  <% if discount[:meets_condition] %>
+    <small class="text-success d-block">
+      <i class="fa-solid fa-check me-1"></i><%= t('storefront.products.show.min_quantity_met') %> <%= t('storefront.products.show.units_threshold', quantity: condition[:quantity]) %>
+    </small>
+  <% else %>
+    <small class="text-warning d-block">
+      <i class="fa-solid fa-info-circle me-1"></i><%= t('storefront.products.show.buy_to_unlock', quantity: condition[:quantity]) %>
+    </small>
+  <% end %>
+<% elsif condition && condition[:type] == :amount %>
+  <% if discount[:meets_condition] %>
+    <small class="text-success d-block">
+      <i class="fa-solid fa-check me-1"></i><%= t('storefront.products.show.min_amount_met') %>
+    </small>
+  <% else %>
+    <small class="text-warning d-block">
+      <i class="fa-solid fa-info-circle me-1"></i><%= t('storefront.products.show.spend_to_unlock', amount: condition[:amount].format) %>
+    </small>
+  <% end %>
+<% end %>
