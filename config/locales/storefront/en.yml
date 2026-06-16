@@ -563,6 +563,7 @@ en:
         customer_limit: "You have already used this promo code."
         not_eligible: "This promo code is not available for your account."
         min_amount: "Your order must be at least %{amount} to use this code."
+        not_stackable: "This code can't be combined with other order discounts."
         invalid: "This promo code could not be applied."
 
     # Flash messages

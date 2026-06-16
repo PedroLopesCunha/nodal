@@ -425,6 +425,14 @@ class Order < ApplicationRecord
     promo_code.present?
   end
 
+  # True when the order already carries another order-level discount (an
+  # applicable auto tier or a manual discount). Used to block a non-stackable
+  # promo code. Line-level discounts (customer/product) are the customer's base
+  # pricing and don't count here.
+  def has_other_order_level_discount?
+    best_order_discount.present? || has_order_discount?
+  end
+
   def order_discount_display
     return nil unless has_order_discount?
 

@@ -93,6 +93,8 @@ class PromoCode < ApplicationRecord
     if min_order_amount_cents > 0 && order.total_amount.cents < min_order_amount_cents
       return :min_amount_not_met
     end
+    return :not_stackable if !stackable? && order.has_other_order_level_discount?
+
     :ok
   end
 

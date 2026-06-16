@@ -551,6 +551,7 @@ es:
         customer_limit: "Ya ha utilizado este código promocional."
         not_eligible: "Este código promocional no está disponible para su cuenta."
         min_amount: "Su pedido debe ser de al menos %{amount} para usar este código."
+        not_stackable: "Este código no se puede combinar con otros descuentos de pedido."
         invalid: "Este código promocional no pudo ser aplicado."
 
     # Mensajes flash
