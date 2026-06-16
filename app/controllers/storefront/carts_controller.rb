@@ -10,6 +10,7 @@ class Storefront::CartsController < Storefront::BaseController
     @suggested_products = load_suggested_products
     @min_quantity_shortfall_by_product_id =
       @order.combined_min_quantity_shortfalls.index_by { |s| s[:product].id }
+    @discount_nudges = CartDiscountNudges.new(@order).opportunities if helpers.show_prices?
 
     if cart_pricing_changed? && current_organisation.cart_price_change_policy != "silent"
       flash.now[:notice] = t("storefront.carts.show.prices_updated")

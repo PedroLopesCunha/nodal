@@ -285,6 +285,10 @@
                 </div>
               <% end %>
             <% end %>
+
+            <% @discount_nudges&.each do |op| %>
+              <%= render 'storefront/carts/discount_nudge', opportunity: op %>
+            <% end %>
           <% else %>
             <div class="text-muted small mb-3">
               <%= t('storefront.common.items', count: @order.item_count) %>

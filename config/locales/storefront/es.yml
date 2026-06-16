@@ -297,6 +297,12 @@ es:
         min_order: "Mín"
         free_shipping_applied: "¡Envío gratis aplicado!"
         free_shipping_progress: "Gasta %{amount} más para envío gratis"
+        nudge:
+          remaining: "faltan %{remaining} para %{discount}"
+          save: "ahorras %{amount}"
+          units:
+            one: "%{count} unidad"
+            other: "%{count} unidades"
 
     # Sección de checkout
     checkouts:

@@ -309,6 +309,12 @@ en:
         min_order: "Min"
         free_shipping_applied: "Free shipping applied!"
         free_shipping_progress: "Spend %{amount} more for free shipping"
+        nudge:
+          remaining: "%{remaining} more for %{discount}"
+          save: "save %{amount}"
+          units:
+            one: "%{count} unit"
+            other: "%{count} units"
 
     # Checkout section
     checkouts:
