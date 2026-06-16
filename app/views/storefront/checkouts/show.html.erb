@@ -368,6 +368,12 @@
 
           <%= render 'storefront/checkouts/promo_code' %>
 
+          <% if @order.discount_capped? %>
+            <div class="text-muted small mb-2">
+              <i class="fa-solid fa-shield-halved me-1"></i><%= t('storefront.carts.show.max_discount_applied', percentage: number_to_percentage(@current_organisation.max_discount_percentage * 100, precision: 0)) %>
+            </div>
+          <% end %>
+
           <div class="d-flex justify-content-between mb-2">
             <span class="text-muted"><%= t('storefront.checkouts.show.summary.tax') %> (<%= (@current_organisation.tax_rate * 100).round(1) %>%)</span>
             <span><%= humanized_money_with_symbol(@order.calculated_tax) %></span>

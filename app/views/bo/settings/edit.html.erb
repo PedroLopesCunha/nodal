@@ -239,6 +239,11 @@
               <%= f.number_field :free_shipping_threshold, class: "form-control", step: 0.01, min: 0, placeholder: t('bo.settings.edit.free_shipping_threshold_placeholder') %>
               <small class="text-muted"><%= t('bo.settings.edit.free_shipping_threshold_hint') %></small>
             </div>
+            <div class="col-md-6">
+              <label class="form-label"><%= t('bo.settings.edit.max_discount_percentage') %></label>
+              <%= f.number_field :max_discount_percentage, class: "form-control", step: 0.01, min: 0, max: 1, placeholder: "0.40" %>
+              <small class="text-muted"><%= t('bo.settings.edit.max_discount_percentage_hint') %></small>
+            </div>
           </div>
         </div>
       </div>

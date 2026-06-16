@@ -202,6 +202,38 @@ class OrderTest < ActiveSupport::TestCase
     assert @order.placed?
   end
 
+  test "max discount cap limits an order-level discount that exceeds it" do
+    @org.update!(max_discount_percentage: 0.30) # never more than 30% off
+    @order.order_items.create!(product: @product, quantity: 100) # €1000 gross
+    OrderDiscount.create!(organisation: @org, discount_type: "percentage", discount_value: 0.50,
+      min_order_amount_cents: 100, active: true) # 50% alone exceeds 30%
+
+    assert_equal Money.new(100_000, "EUR"), @order.gross_subtotal
+    assert @order.discount_capped?
+    assert_equal Money.new(70_000, "EUR"), @order.subtotal_after_discount # capped to 30% off
+  end
+
+  test "max discount cap counts line-level discounts toward the total" do
+    @org.update!(max_discount_percentage: 0.20) # max 20%
+    CustomerDiscount.create!(organisation: @org, customer: @customer,
+      discount_type: "percentage", discount_value: 0.25, active: true) # 25% line alone > 20%
+    @order.order_items.create!(product: @product, quantity: 100) # gross €1000, line -25% -> €750
+
+    assert_equal Money.new(100_000, "EUR"), @order.gross_subtotal
+    assert @order.discount_capped?
+    assert_equal Money.new(80_000, "EUR"), @order.subtotal_after_discount # capped to 20% off €1000
+  end
+
+  test "max discount cap leaves orders below the cap untouched" do
+    @org.update!(max_discount_percentage: 0.30)
+    @order.order_items.create!(product: @product, quantity: 100)
+    OrderDiscount.create!(organisation: @org, discount_type: "percentage", discount_value: 0.10,
+      min_order_amount_cents: 100, active: true)
+
+    assert_not @order.discount_capped?
+    assert_equal Money.new(90_000, "EUR"), @order.subtotal_after_discount
+  end
+
   test "order-level discounts compound, each on the already-discounted total" do
     @order.order_items.create!(product: @product, quantity: 100) # €1000 line total
     OrderDiscount.create!(organisation: @org, discount_type: "percentage", discount_value: 0.10,

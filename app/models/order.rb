@@ -404,11 +404,19 @@ class Order < ApplicationRecord
     end
   end
 
+  # Sum of line totals BEFORE any discount (base price × quantity) — the
+  # reference for the organisation's maximum-discount cap.
+  def gross_subtotal
+    order_items.sum { |i| i.price * i.quantity }
+  end
+
   def subtotal_after_discount
-    # Order-level discounts compound, each on the already-discounted running
-    # total: gross -> auto tier -> promo code -> manual discount.
-    result = total_with_auto_discount - order_discount_amount - promo_code_discount
-    [result, Money.new(0, organisation.currency)].max
+    cap_subtotal(raw_subtotal_after_discount)
+  end
+
+  # True when the org's maximum-discount cap actually reduced the total discount.
+  def discount_capped?
+    organisation.max_discount_enabled? && raw_subtotal_after_discount < max_discount_floor
   end
 
   def promo_code_discount
@@ -468,6 +476,22 @@ class Order < ApplicationRecord
   end
 
   private
+
+  # Order-level discounts compound, each on the already-discounted running
+  # total: gross -> auto tier -> promo code -> manual discount.
+  def raw_subtotal_after_discount
+    result = total_with_auto_discount - order_discount_amount - promo_code_discount
+    [result, Money.new(0, organisation.currency)].max
+  end
+
+  def max_discount_floor
+    gross_subtotal * (1 - organisation.max_discount_percentage)
+  end
+
+  def cap_subtotal(subtotal)
+    return subtotal unless organisation.max_discount_enabled?
+    [subtotal, max_discount_floor].max
+  end
 
   def blank_cart_changes
     { price_changed: [], discount_changed: [], removed: [], capped: [], out_of_stock: [], qty_overflow: [] }

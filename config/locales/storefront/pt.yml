@@ -292,6 +292,7 @@ pt:
         subtotal: "Subtotal"
         subtotal_items: "Subtotal (%{count} itens)"
         order_discount: "Desconto de Encomenda"
+        max_discount_applied: "Desconto máximo de %{percentage} aplicado"
         available_discounts: "Descontos de Encomenda Disponíveis"
         spend_more_to_unlock: "Gaste mais %{amount} para desbloquear"
         discount_applied: "Aplicado à sua encomenda!"

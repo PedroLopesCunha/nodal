@@ -1676,6 +1676,8 @@ en:
         tax_rate: "Default Tax Rate (%)"
         tax_rate_placeholder: "0.08"
         tax_rate_hint: "Enter as decimal (e.g., 0.08 for 8%)"
+        max_discount_percentage: "Maximum total discount"
+        max_discount_percentage_hint: "Safety cap: the total discount on an order never exceeds this, whatever the combination. Decimal (e.g., 0.40 = 40%). Blank = no limit."
         shipping_cost: "Default Shipping Cost"
         shipping_cost_placeholder: "15.00"
         shipping_cost_hint: "In %{currency}"
