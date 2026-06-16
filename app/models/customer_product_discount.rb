@@ -1,5 +1,6 @@
 class CustomerProductDiscount < ApplicationRecord
   include HasEmailNotification
+  include HasDiscountCondition
 
   DISCOUNT_TYPES = %w[percentage fixed].freeze
 

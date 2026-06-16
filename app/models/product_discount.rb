@@ -1,5 +1,6 @@
 class ProductDiscount < ApplicationRecord
   include HasEmailNotification
+  include HasDiscountCondition
 
   DISCOUNT_TYPES = %w[percentage fixed].freeze
 
@@ -93,6 +94,7 @@ class ProductDiscount < ApplicationRecord
   end
 
   def min_quantity_not_below_product_minimum
+    return unless quantity_condition?
     return unless product? && product.present? && min_quantity.present?
 
     product_min = product.min_quantity || 1

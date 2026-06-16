@@ -32,7 +32,7 @@
         <th><%= t('bo.pricing.product_discounts.target_column') %></th>
         <th><%= t('bo.pricing.form.discount_type') %></th>
         <th><%= t('bo.pricing.form.value') %></th>
-        <th><%= t('bo.pricing.form.min_quantity') %></th>
+        <th><%= t('bo.pricing.form.condition_type') %></th>
         <th><%= t('bo.pricing.form.valid_period') %></th>
         <th><%= t('bo.common.tables.status') %></th>
         <th><%= t('bo.common.actions_column') %></th>
@@ -69,7 +69,7 @@
                 <span class="text-success fw-semibold"><%= humanized_money_with_symbol(Money.new((discount.discount_value * 100).to_i, @current_organisation.currency)) %></span>
               <% end %>
             </td>
-            <td><%= discount.min_quantity %></td>
+            <td><%= discount.condition_display %></td>
             <td><%= discount.valid_period_display %></td>
             <td>
               <%= form_with url: toggle_active_bo_product_discount_path(params[:org_slug], discount),
