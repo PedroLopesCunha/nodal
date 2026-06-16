@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2026_06_16_130100) do
+ActiveRecord::Schema[7.1].define(version: 2026_06_16_140000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_trgm"
   enable_extension "plpgsql"
@@ -176,6 +176,7 @@ ActiveRecord::Schema[7.1].define(version: 2026_06_16_130100) do
     t.string "condition_type", default: "none", null: false
     t.integer "min_quantity"
     t.integer "min_amount_cents"
+    t.string "condition_scope", default: "per_line", null: false
     t.index ["category_id"], name: "index_customer_product_discounts_on_category_id"
     t.index ["customer_category_id"], name: "index_customer_product_discounts_on_customer_category_id"
     t.index ["customer_id"], name: "index_customer_product_discounts_on_customer_id"
@@ -661,6 +662,7 @@ ActiveRecord::Schema[7.1].define(version: 2026_06_16_130100) do
     t.bigint "category_id"
     t.string "condition_type", default: "quantity", null: false
     t.integer "min_amount_cents"
+    t.string "condition_scope", default: "per_line", null: false
     t.index ["category_id"], name: "index_product_discounts_on_category_id"
     t.index ["organisation_id"], name: "index_product_discounts_on_organisation_id"
     t.index ["product_id", "organisation_id"], name: "index_product_discounts_on_product_id_and_organisation_id"

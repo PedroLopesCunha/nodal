@@ -144,7 +144,7 @@ class Bo::CustomerProductDiscountsController < Bo::BaseController
   def customer_product_discount_params
     params.require(:customer_product_discount).permit(
       :customer_id, :product_id, :category_id, :discount_value, :discount_type,
-      :condition_type, :min_quantity, :min_amount,
+      :condition_type, :condition_scope, :min_quantity, :min_amount,
       :valid_from, :valid_until, :stackable, :active
     )
   end

@@ -156,6 +156,10 @@ class Order < ApplicationRecord
     changes = blank_cart_changes
     return changes if placed?
 
+    # Built once so each line can evaluate "summed" discount conditions against
+    # the whole cart (a product's variants, or a category total).
+    cart_context = CartDiscountContext.new(order_items.includes(product: :categories).to_a)
+
     order_items.to_a.each do |item|
       status = item.stock_status
 
@@ -165,7 +169,7 @@ class Order < ApplicationRecord
         next
       end
 
-      item_changes = item.refresh_pricing!
+      item_changes = item.refresh_pricing!(cart_context: cart_context)
       if item_changes.any?
         item.save!
         changes[:price_changed] << item.id if item_changes.key?(:unit_price)

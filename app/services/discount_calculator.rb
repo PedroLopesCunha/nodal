@@ -4,12 +4,13 @@ class DiscountCalculator
   # for_display: true - shows all available discounts (ignoring min_quantity) for product pages
   # for_display: false - only shows applicable discounts (respecting min_quantity) for cart/checkout
   # variant: optional ProductVariant - if provided, uses variant price as base price
-  def initialize(product:, customer: nil, quantity: 1, for_display: false, variant: nil)
+  def initialize(product:, customer: nil, quantity: 1, for_display: false, variant: nil, cart_context: nil)
     @product = product
     @customer = customer
     @quantity = quantity
     @for_display = for_display
     @variant = variant || pick_reference_variant
+    @cart_context = cart_context
   end
 
   # Returns all applicable discounts with metadata
@@ -76,6 +77,26 @@ class DiscountCalculator
 
   private
 
+  # Evaluates a discount's condition. For a "summed" condition the threshold is
+  # checked against the cart-wide total for the discount's target (a product's
+  # variants, or all products in a category); otherwise against this line.
+  def meets_condition?(source)
+    qty, amount = condition_inputs(source)
+    source.condition_met?(quantity: qty, line_amount_cents: amount)
+  end
+
+  def condition_inputs(source)
+    return [quantity, @line_amount_cents] unless source.summed_condition? && @cart_context
+
+    if source.product_id
+      [@cart_context.product_quantity(source.product_id), @cart_context.product_amount_cents(source.product_id)]
+    elsif source.category_id
+      [@cart_context.category_quantity(source.category_id), @cart_context.category_amount_cents(source.category_id)]
+    else
+      [quantity, @line_amount_cents]
+    end
+  end
+
   # Builds a line-level discount hash for a source that carries a condition
   # (ProductDiscount / CustomerProductDiscount via HasDiscountCondition).
   def build_line_discount(type, label, source, meets)
@@ -118,7 +139,7 @@ class DiscountCalculator
   def collect_discounts
     discounts = []
     # Value of this line (base price × quantity), for amount-based conditions.
-    line_amount_cents = (base_price * quantity).cents
+    @line_amount_cents = (base_price * quantity).cents
 
     # 1. Product-level discounts (global, for all customers)
     # Variant-level overrides: custom discount replaces product discounts,
@@ -139,7 +160,7 @@ class DiscountCalculator
       # for_display: true - show all available discounts (ignore the condition)
       # for_display: false - only discounts whose condition (quantity or €) is met
       product.product_discounts.active.each do |pd|
-        meets = pd.condition_met?(quantity: quantity, line_amount_cents: line_amount_cents)
+        meets = meets_condition?(pd)
         next if !for_display && !meets
 
         discounts << build_line_discount(:product, "Product Sale", pd, meets)
@@ -148,7 +169,7 @@ class DiscountCalculator
       # Category-level discounts: find active discounts for any category
       # the product belongs to, including ancestor categories
       find_category_discounts.each do |cd|
-        meets = cd.condition_met?(quantity: quantity, line_amount_cents: line_amount_cents)
+        meets = meets_condition?(cd)
         next if !for_display && !meets
 
         discounts << build_line_discount(:category, "Category Sale", cd, meets)
@@ -160,13 +181,13 @@ class DiscountCalculator
     # 2. Customer-product specific discounts
     cpd = product.active_discount_for(customer)
     if cpd && cpd.active?
-      meets = cpd.condition_met?(quantity: quantity, line_amount_cents: line_amount_cents)
+      meets = meets_condition?(cpd)
       discounts << build_line_discount(:customer_product, "Your Special Price", cpd, meets) if for_display || meets
     end
 
     # 2b. Customer-category specific discounts
     find_customer_category_discounts.each do |ccpd|
-      meets = ccpd.condition_met?(quantity: quantity, line_amount_cents: line_amount_cents)
+      meets = meets_condition?(ccpd)
       next if !for_display && !meets
 
       discounts << build_line_discount(:customer_product, "Your Special Price", ccpd, meets)

@@ -4,7 +4,7 @@ import { Controller } from "@hotwired/stimulus"
 // condition_type select ("none" shows neither).
 // Connects to data-controller="discount-condition"
 export default class extends Controller {
-  static targets = ["select", "quantity", "amount"]
+  static targets = ["select", "quantity", "amount", "scope"]
 
   connect() {
     this.update()
@@ -17,6 +17,10 @@ export default class extends Controller {
     }
     if (this.hasAmountTarget) {
       this.amountTarget.style.display = value === "amount" ? "" : "none"
+    }
+    // Scope (per-line vs summed) only matters when there's a condition.
+    if (this.hasScopeTarget) {
+      this.scopeTarget.style.display = value === "none" ? "none" : ""
     }
   }
 }

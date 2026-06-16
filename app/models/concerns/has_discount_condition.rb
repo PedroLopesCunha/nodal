@@ -2,10 +2,12 @@ module HasDiscountCondition
   extend ActiveSupport::Concern
 
   CONDITION_TYPES = %w[none quantity amount].freeze
+  CONDITION_SCOPES = %w[per_line summed].freeze
 
   included do
     monetize :min_amount_cents, as: :min_amount, allow_nil: true
     validates :condition_type, inclusion: { in: CONDITION_TYPES }
+    validates :condition_scope, inclusion: { in: CONDITION_SCOPES }
     validates :min_amount_cents, numericality: { greater_than: 0 }, if: :amount_condition?
     validates :min_quantity, numericality: { greater_than: 0, only_integer: true }, if: :quantity_condition?
   end
@@ -20,6 +22,12 @@ module HasDiscountCondition
 
   def no_condition?
     condition_type == "none"
+  end
+
+  # Summed: the threshold is checked across the discount's whole target (a
+  # product's variants, or all products in a category) rather than per line.
+  def summed_condition?
+    condition_scope == "summed" && !no_condition?
   end
 
   # Does the line meet this discount's condition?
@@ -37,8 +45,8 @@ module HasDiscountCondition
   # Structured requirement for the storefront "unlock" nudge, or nil.
   def condition_requirement
     case condition_type
-    when "amount"   then { type: :amount, amount: min_amount }
-    when "quantity" then { type: :quantity, quantity: min_quantity }
+    when "amount"   then { type: :amount, amount: min_amount, scope: condition_scope.to_sym }
+    when "quantity" then { type: :quantity, quantity: min_quantity, scope: condition_scope.to_sym }
     end
   end
 
