@@ -393,7 +393,10 @@ class Order < ApplicationRecord
 
     case discount_type
     when 'percentage'
-      total_amount * discount_value
+      # Compound: the manual discount applies last, on the total already reduced
+      # by the auto tier and the promo code — not on the gross total.
+      base = [total_with_auto_discount - promo_code_discount, Money.new(0, organisation.currency)].max
+      base * discount_value
     when 'fixed'
       Money.new((discount_value * 100).to_i, organisation.currency)
     else
@@ -402,7 +405,8 @@ class Order < ApplicationRecord
   end
 
   def subtotal_after_discount
-    # Apply auto order tier discount, manual order discount, and promo code discount
+    # Order-level discounts compound, each on the already-discounted running
+    # total: gross -> auto tier -> promo code -> manual discount.
     result = total_with_auto_discount - order_discount_amount - promo_code_discount
     [result, Money.new(0, organisation.currency)].max
   end
