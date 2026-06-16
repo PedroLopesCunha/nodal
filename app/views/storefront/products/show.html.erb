@@ -151,7 +151,7 @@
                     <% if discount[:min_quantity_required] && discount[:min_quantity_required] > 1 %>
                       <% if discount[:meets_min_quantity] %>
                         <small class="text-success d-block">
-                          <i class="fa-solid fa-check me-1"></i><%= t('storefront.products.show.min_quantity_met') %> (<%= discount[:min_quantity_required] %>+ units)
+                          <i class="fa-solid fa-check me-1"></i><%= t('storefront.products.show.min_quantity_met') %> <%= t('storefront.products.show.units_threshold', quantity: discount[:min_quantity_required]) %>
                         </small>
                       <% else %>
                         <small class="text-warning d-block">
@@ -165,7 +165,7 @@
                     <% if discount[:min_quantity_required] && discount[:min_quantity_required] > 1 %>
                       <% if discount[:meets_min_quantity] %>
                         <small class="text-success d-block">
-                          <i class="fa-solid fa-check me-1"></i><%= t('storefront.products.show.min_quantity_met') %> (<%= discount[:min_quantity_required] %>+ units)
+                          <i class="fa-solid fa-check me-1"></i><%= t('storefront.products.show.min_quantity_met') %> <%= t('storefront.products.show.units_threshold', quantity: discount[:min_quantity_required]) %>
                         </small>
                       <% else %>
                         <small class="text-warning d-block">
@@ -176,9 +176,9 @@
                   <% when :customer %>
                     <strong><%= t('storefront.products.show.customer_tier_discount') %></strong>
                   <% when :customer_product %>
-                    <span class="badge bg-primary me-2">SPECIAL</span>
+                    <span class="badge bg-primary me-2"><%= t('storefront.products.show.special_badge') %></span>
                     <strong><%= t('storefront.products.show.your_special_price') %></strong>
-                    <small class="text-muted d-block">Exclusive pricing just for you</small>
+                    <small class="text-muted d-block"><%= t('storefront.products.show.special_price_subtitle') %></small>
                   <% end %>
                   <% if discount[:valid_until].present? %>
                     <small class="text-warning d-block">
