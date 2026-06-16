@@ -44,9 +44,10 @@ module HasDiscountCondition
 
   # Structured requirement for the storefront "unlock" nudge, or nil.
   def condition_requirement
+    base = { scope: condition_scope.to_sym, target: (category_id ? :category : :product) }
     case condition_type
-    when "amount"   then { type: :amount, amount: min_amount, scope: condition_scope.to_sym }
-    when "quantity" then { type: :quantity, quantity: min_quantity, scope: condition_scope.to_sym }
+    when "amount"   then base.merge(type: :amount, amount: min_amount)
+    when "quantity" then base.merge(type: :quantity, quantity: min_quantity)
     end
   end
 
