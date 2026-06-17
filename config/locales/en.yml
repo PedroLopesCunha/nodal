@@ -1,4 +1,8 @@
 en:
+  flash:
+    success: "Success"
+    error: "Error"
+    close: "Close"
   activerecord:
     errors:
       models:

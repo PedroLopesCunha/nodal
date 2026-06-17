@@ -55,7 +55,7 @@ class Storefront::OrderItemsController < Storefront::BaseController
     # :customer_change context enforces the minimum-quantity validation for a
     # customer-initiated edit (system re-pricing saves without a context).
     if @order_item.save(context: :customer_change)
-      redirect_to cart_path(org_slug: params[:org_slug]), notice: "Cart updated."
+      redirect_to cart_path(org_slug: params[:org_slug]), notice: t('storefront.flash.cart_updated')
     else
       redirect_to cart_path(org_slug: params[:org_slug]),
                   alert: @order_item.errors.full_messages.join(", ")
