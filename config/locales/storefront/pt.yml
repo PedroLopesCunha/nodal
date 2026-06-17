@@ -303,6 +303,8 @@ pt:
         spend_more_to_unlock: "Gaste mais %{amount} para desbloquear"
         discount_applied: "Aplicado à sua encomenda!"
         discount_off_orders_over: "%{value} em encomendas acima de %{amount}"
+        discount_off: "%{value} de desconto"
+        orders_over: "Em encomendas acima de %{amount}"
         proceed_to_checkout: "Finalizar Pedido"
         remove: "Remover"
         sku: "SKU"

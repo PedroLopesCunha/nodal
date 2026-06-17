@@ -43,13 +43,10 @@
                 <i class="fa-solid fa-tag text-success me-2"></i>
                 <div>
                   <div class="fw-semibold">
-                    <% if discount.percentage? %>
-                      <%= discount.value_display %> off
-                    <% else %>
-                      <%= humanized_money_with_symbol(Money.new((discount.discount_value * 100).to_i, @current_organisation.currency)) %> off
-                    <% end %>
+                    <% value = discount.percentage? ? discount.value_display : humanized_money_with_symbol(Money.new((discount.discount_value * 100).to_i, @current_organisation.currency)) %>
+                    <%= t('storefront.carts.show.discount_off', value: value) %>
                   </div>
-                  <small class="text-muted">Orders over <%= discount.min_amount_display %></small>
+                  <small class="text-muted"><%= t('storefront.carts.show.orders_over', amount: discount.min_amount_display) %></small>
                 </div>
               </div>
             <% end %>
