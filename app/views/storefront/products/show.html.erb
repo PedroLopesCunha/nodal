@@ -98,7 +98,8 @@
        product_pricing_currency_symbol_value: pp[:currency_symbol],
        product_pricing_remaining_template_value: t('storefront.carts.show.nudge.remaining', remaining: '%{remaining}', discount: '%{discount}'),
        product_pricing_celebration_default_value: t('storefront.products.show.unlocked_add_to_cart', discount: pp[:discount_label]),
-       product_pricing_celebration_from_cart_value: t('storefront.products.show.unlocked_from_cart', discount: pp[:discount_label], cart: pp[:cart_current_label])
+       product_pricing_celebration_from_cart_value: t('storefront.products.show.unlocked_from_cart', discount: pp[:discount_label], cart: pp[:cart_current_label]),
+       product_pricing_discount_applied_template_value: t('storefront.products.show.discount_applied', discount: '%{discount}')
      } : {} %>
   <div class="col-lg-6" <%= tag.attributes(data: pricing_data) %>>
     <div class="card border-0 shadow-sm" style="border-radius: 12px;">
@@ -428,28 +429,25 @@
           <!-- Add to Cart Section (simple product) -->
           <% unless browsing_as_member? || @product.price_on_request? %>
             <% pp = @product_pricing %>
-            <%= form_with url: order_items_path(org_slug: params[:org_slug]), method: :post, local: true, class: "d-flex align-items-center gap-3 flex-wrap" do |f| %>
+            <%= form_with url: order_items_path(org_slug: params[:org_slug]), method: :post, local: true, class: "w-100" do |f| %>
               <%= hidden_field_tag :product_id, @product.id %>
               <%= hidden_field_tag :variant_id, @default_variant&.id %>
               <%= hidden_field_tag :category, params[:category] if params[:category].present? %>
               <%= hidden_field_tag :queries, params[:queries] if params[:queries].present? %>
               <%= hidden_field_tag :page, params[:page] if params[:page].present? %>
-              <div class="d-flex align-items-center">
-                <label class="text-muted small me-2"><%= t('storefront.products.show.quantity') %></label>
-                <%= number_field_tag "order_item[quantity]", @product.quantity_input_min, min: @product.quantity_input_min, class: "form-control text-center", style: "width: 70px;", data: (pp ? { product_pricing_target: "quantity", action: "input->product-pricing#update" } : {}) %>
+              <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-2">
+                <div class="d-flex align-items-center">
+                  <label class="text-muted small me-2 mb-0"><%= t('storefront.products.show.quantity') %></label>
+                  <%= number_field_tag "order_item[quantity]", @product.quantity_input_min, min: @product.quantity_input_min, class: "form-control text-center", style: "width: 70px;", data: (pp ? { product_pricing_target: "quantity", action: "input->product-pricing#update" } : {}) %>
+                </div>
+                <% if show_prices? %>
+                  <small class="text-success fw-semibold" data-product-pricing-target="discountNote"></small>
+                <% end %>
               </div>
 
-              <button type="submit" class="btn btn-primary btn-lg px-4" style="border-radius: 8px;" <%= 'disabled' unless @product.purchasable? %>>
-                <i class="fa-solid fa-cart-plus me-2"></i><%= t('storefront.products.show.add_to_cart') %>
+              <button type="submit" class="btn btn-primary btn-lg w-100" style="border-radius: 8px;" <%= 'disabled' unless @product.purchasable? %>>
+                <i class="fa-solid fa-cart-plus me-2"></i><%= t('storefront.products.show.add_to_cart') %><% if show_prices? %> · <span data-product-pricing-target="total"><%= humanized_money_with_symbol((@actual_breakdown ? @actual_breakdown[:final_price] : @product.price) * @product.quantity_input_min) %></span><% end %>
               </button>
-
-              <% if show_prices? %>
-                <div class="text-muted">
-                  <i class="fa-solid fa-calculator me-2"></i><%= t('storefront.products.show.estimated_total') %>
-                  <span data-product-pricing-target="total"><%= humanized_money_with_symbol((@actual_breakdown ? @actual_breakdown[:final_price] : @product.price) * @product.quantity_input_min) %></span>
-                  <small class="text-success" data-product-pricing-target="discountNote"></small>
-                </div>
-              <% end %>
             <% end %>
           <% end %>
         <% end %>

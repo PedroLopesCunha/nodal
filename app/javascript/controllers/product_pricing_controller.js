@@ -26,7 +26,8 @@ export default class extends Controller {
     currencySymbol: String,
     remainingTemplate: String, // "faltam %{remaining} para %{discount}"
     celebrationDefault: String,
-    celebrationFromCart: String
+    celebrationFromCart: String,
+    discountAppliedTemplate: String // "(%{discount} aplicado)"
   }
 
   connect() {
@@ -43,7 +44,10 @@ export default class extends Controller {
 
     if (this.hasTotalTarget) this.totalTarget.textContent = this.formatPrice(unit * qty)
     if (this.hasDiscountNoteTarget) {
-      this.discountNoteTarget.textContent = met && hasCondition ? `(${this.discountLabelValue})` : ""
+      const discounted = unit < this.baseUnitCentsValue
+      this.discountNoteTarget.textContent = discounted
+        ? this.discountAppliedTemplateValue.replace("%{discount}", this.discountLabelValue)
+        : ""
     }
 
     this.updateHeader(unit)
