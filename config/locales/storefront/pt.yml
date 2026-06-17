@@ -314,7 +314,7 @@ pt:
         nudge:
           remaining: "faltam %{remaining} para %{discount}"
           save: "poupas %{amount}"
-          unlocked: "%{discount} desbloqueado · %{label}"
+          unlocked: "%{discount} desbloqueado"
           saved: "poupaste %{amount}"
           units:
             one: "%{count} unidade"

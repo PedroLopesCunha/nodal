@@ -114,15 +114,15 @@
                 <%= @display_price || humanized_money_with_symbol(discount_breakdown[:final_price]) %>
               </span>
             </div>
-          <% elsif discount_breakdown[:has_discount] %>
+          <% elsif @actual_breakdown && @actual_breakdown[:has_discount] %>
             <div class="price-with-discount">
               <span class="original-price text-muted text-decoration-line-through" style="font-size: 1.5rem;">
-                <%= humanized_money_with_symbol(discount_breakdown[:base_price]) %>
+                <%= humanized_money_with_symbol(@actual_breakdown[:base_price]) %>
               </span>
               <span class="discounted-price text-success" style="font-size: 2.5rem; font-weight: 700;">
-                <%= humanized_money_with_symbol(discount_breakdown[:final_price]) %>
+                <%= humanized_money_with_symbol(@actual_breakdown[:final_price]) %>
               </span>
-              <% if discount_breakdown[:applied_discounts].any? { |d| d[:type] == :product || d[:type] == :category } %>
+              <% if @actual_breakdown[:applied_discounts].any? { |d| d[:type] == :product || d[:type] == :category } %>
                 <span class="badge bg-danger fs-6 ms-1"><%= t('storefront.products.index.sale_badge') %></span>
               <% end %>
             </div>
@@ -421,9 +421,9 @@
               <% if show_prices? %>
               <div class="text-muted">
                 <i class="fa-solid fa-calculator me-2"></i><%= t('storefront.products.show.estimated_total') %>
-                <% if discount_breakdown[:has_discount] %>
-                  <%= humanized_money_with_symbol(discount_breakdown[:final_price]) %>
-                  <small class="text-success">(-<%= ((discount_breakdown[:effective_discount][:percentage].to_f * 100).finite? ? (discount_breakdown[:effective_discount][:percentage] * 100).round(0) : 0) %>%)</small>
+                <% if @actual_breakdown && @actual_breakdown[:has_discount] %>
+                  <%= humanized_money_with_symbol(@actual_breakdown[:final_price]) %>
+                  <small class="text-success">(-<%= ((@actual_breakdown[:effective_discount][:percentage].to_f * 100).finite? ? (@actual_breakdown[:effective_discount][:percentage] * 100).round(0) : 0) %>%)</small>
                 <% else %>
                   <%= humanized_money_with_symbol(@product.price) %>
                 <% end %>

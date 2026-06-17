@@ -302,7 +302,7 @@ es:
         nudge:
           remaining: "faltan %{remaining} para %{discount}"
           save: "ahorras %{amount}"
-          unlocked: "%{discount} desbloqueado · %{label}"
+          unlocked: "%{discount} desbloqueado"
           saved: "ahorraste %{amount}"
           units:
             one: "%{count} unidad"

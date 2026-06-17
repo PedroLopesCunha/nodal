@@ -284,6 +284,17 @@ class Storefront::ProductsController < Storefront::BaseController
       variant: @product.has_variants? ? nil : @default_variant
     )
 
+    # Honest header price for simple products: what the customer actually pays
+    # now (conditions respected against the current cart) — not the
+    # best-possible price that the "available discounts" panel advertises.
+    unless @product.has_variants?
+      cart_context = current_cart && CartDiscountContext.new(current_cart.order_items.includes(product: :categories).to_a)
+      @actual_breakdown = DiscountCalculator.new(
+        product: @product, customer: current_customer, quantity: 1,
+        for_display: false, variant: @default_variant, cart_context: cart_context
+      ).discount_breakdown
+    end
+
     # Build the display strings used while no variant is selected.
     # For variable products with a discount we want both a strikethrough
     # original range and a discounted range; for everything else display_price
