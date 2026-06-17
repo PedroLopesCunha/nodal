@@ -13,7 +13,7 @@ import { Controller } from "@hotwired/stimulus"
 export default class extends Controller {
   static targets = [
     "quantity", "total", "discountNote", "progress", "progressBar", "progressText",
-    "celebration", "headerPrice", "headerOriginal", "panelMet", "panelUnmet"
+    "celebration", "celebrationText", "headerPrice", "headerOriginal", "panelMet", "panelUnmet"
   ]
   static values = {
     lockedUnitCents: Number,
@@ -24,7 +24,9 @@ export default class extends Controller {
     cartCurrent: Number,
     discountLabel: String,
     currencySymbol: String,
-    remainingTemplate: String // "faltam %{remaining} para %{discount}"
+    remainingTemplate: String, // "faltam %{remaining} para %{discount}"
+    celebrationDefault: String,
+    celebrationFromCart: String
   }
 
   connect() {
@@ -65,7 +67,14 @@ export default class extends Controller {
   }
 
   updateProgress(hasCondition, met, projected) {
-    if (this.hasCelebrationTarget) this.celebrationTarget.classList.toggle("d-none", !(hasCondition && met))
+    if (this.hasCelebrationTarget) {
+      this.celebrationTarget.classList.toggle("d-none", !(hasCondition && met))
+      if (hasCondition && met && this.hasCelebrationTextTarget) {
+        // Already unlocked by what's in the cart vs. unlocked by the quantity now.
+        const byCart = this.cartCurrentValue >= this.thresholdValue
+        this.celebrationTextTarget.textContent = byCart ? this.celebrationFromCartValue : this.celebrationDefaultValue
+      }
+    }
     if (!this.hasProgressTarget) return
 
     const showProgress = hasCondition && !met

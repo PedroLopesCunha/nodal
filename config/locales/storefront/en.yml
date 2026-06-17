@@ -198,6 +198,7 @@ en:
         spend_to_unlock: "Spend %{amount} %{where} to unlock this discount"
         min_amount_met: "Minimum value reached"
         unlocked_add_to_cart: "%{discount} unlocked! Add to cart to lock in this price."
+        unlocked_from_cart: "%{discount} unlocked · you already have %{cart} in your cart"
         scope_per_variant: "per variant"
         scope_per_line: "on this product"
         scope_summed_variants: "across all variants"

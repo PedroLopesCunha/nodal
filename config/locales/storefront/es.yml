@@ -186,6 +186,7 @@ es:
         spend_to_unlock: "Gaste %{amount} %{where} para desbloquear este descuento"
         min_amount_met: "Valor mínimo alcanzado"
         unlocked_add_to_cart: "%{discount} desbloqueado! Añade al carrito para asegurar este precio."
+        unlocked_from_cart: "%{discount} desbloqueado · ya tienes %{cart} en el carrito"
         scope_per_variant: "por variante"
         scope_per_line: "en este producto"
         scope_summed_variants: "en total de las variantes"

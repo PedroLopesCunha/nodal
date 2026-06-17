@@ -354,6 +354,11 @@ class Storefront::ProductsController < Storefront::BaseController
     data[:threshold] = cond[:type] == :amount ? cond[:amount].cents : cond[:quantity]
     data[:discount_label] = discount_label_for(conditional)
     data[:cart_current] = cart_threshold_current(cond, source, cart_context)
+    data[:cart_current_label] = if cond[:type] == :amount
+      Money.new(data[:cart_current], current_organisation.currency).format
+    else
+      t('storefront.carts.show.nudge.units', count: data[:cart_current])
+    end
     data
   end
 

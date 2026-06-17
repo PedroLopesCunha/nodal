@@ -96,7 +96,9 @@
        product_pricing_cart_current_value: pp[:cart_current],
        product_pricing_discount_label_value: pp[:discount_label],
        product_pricing_currency_symbol_value: pp[:currency_symbol],
-       product_pricing_remaining_template_value: t('storefront.carts.show.nudge.remaining', remaining: '%{remaining}', discount: '%{discount}')
+       product_pricing_remaining_template_value: t('storefront.carts.show.nudge.remaining', remaining: '%{remaining}', discount: '%{discount}'),
+       product_pricing_celebration_default_value: t('storefront.products.show.unlocked_add_to_cart', discount: pp[:discount_label]),
+       product_pricing_celebration_from_cart_value: t('storefront.products.show.unlocked_from_cart', discount: pp[:discount_label], cart: pp[:cart_current_label])
      } : {} %>
   <div class="col-lg-6" <%= tag.attributes(data: pricing_data) %>>
     <div class="card border-0 shadow-sm" style="border-radius: 12px;">
@@ -447,7 +449,7 @@
                   </div>
                   <div class="w-100 d-none" data-product-pricing-target="celebration">
                     <div class="small text-success fw-semibold">
-                      <i class="fa-solid fa-circle-check me-1"></i><%= t('storefront.products.show.unlocked_add_to_cart', discount: pp[:discount_label]) %>
+                      <i class="fa-solid fa-circle-check me-1"></i><span data-product-pricing-target="celebrationText"></span>
                     </div>
                   </div>
                 <% end %>
