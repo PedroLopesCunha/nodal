@@ -312,6 +312,8 @@ en:
         spend_more_to_unlock: "Spend %{amount} more to unlock"
         tier_applied: "Applied"
         tier_remaining: "%{amount} to go"
+        order_ladder_next: "%{amount} to go for %{discount}"
+        order_ladder_done: "%{discount} applied"
         discount_applied: "Applied to your order!"
         discount_off_orders_over: "%{value} off orders over %{amount}"
         discount_off: "%{value} off"

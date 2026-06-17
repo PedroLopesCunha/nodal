@@ -312,6 +312,8 @@ pt:
         spend_more_to_unlock: "Gaste mais %{amount} para desbloquear"
         tier_applied: "Aplicado"
         tier_remaining: "faltam %{amount}"
+        order_ladder_next: "Faltam %{amount} para %{discount}"
+        order_ladder_done: "%{discount} aplicado"
         discount_applied: "Aplicado à sua encomenda!"
         discount_off_orders_over: "%{value} em encomendas acima de %{amount}"
         discount_off: "%{value} de desconto"

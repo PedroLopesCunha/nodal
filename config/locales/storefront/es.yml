@@ -300,6 +300,8 @@ es:
         spend_more_to_unlock: "Gaste %{amount} más para desbloquear"
         tier_applied: "Aplicado"
         tier_remaining: "faltan %{amount}"
+        order_ladder_next: "Faltan %{amount} para %{discount}"
+        order_ladder_done: "%{discount} aplicado"
         discount_applied: "¡Aplicado a su pedido!"
         discount_off_orders_over: "%{value} en pedidos superiores a %{amount}"
         discount_off: "%{value} de descuento"
