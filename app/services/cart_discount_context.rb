@@ -7,6 +7,8 @@ class CartDiscountContext
   def initialize(order_items)
     @product_qty = Hash.new(0)
     @product_amount = Hash.new(0)
+    @variant_qty = Hash.new(0)
+    @variant_amount = Hash.new(0)
     @category_qty = Hash.new(0)
     @category_amount = Hash.new(0)
 
@@ -15,6 +17,10 @@ class CartDiscountContext
 
   def product_quantity(product_id) = @product_qty[product_id]
   def product_amount_cents(product_id) = @product_amount[product_id]
+  # Per-variant totals, for per-line conditions on a variable product (a
+  # threshold met on one variant's own cart line, not summed across variants).
+  def variant_quantity(variant_id) = @variant_qty[variant_id]
+  def variant_amount_cents(variant_id) = @variant_amount[variant_id]
   def category_quantity(category_id) = @category_qty[category_id]
   def category_amount_cents(category_id) = @category_amount[category_id]
 
@@ -29,6 +35,10 @@ class CartDiscountContext
 
     @product_qty[product.id] += qty
     @product_amount[product.id] += amount
+    if item.product_variant_id
+      @variant_qty[item.product_variant_id] += qty
+      @variant_amount[item.product_variant_id] += amount
+    end
 
     product.categories.flat_map(&:path_ids).uniq.each do |category_id|
       @category_qty[category_id] += qty

@@ -1,9 +1,14 @@
 import { Controller } from "@hotwired/stimulus"
 
-// Live pricing + unlock progress on the product page (simple products).
-// On quantity change it recomputes the header price, the estimated total and
-// the "X more to unlock -Y%" progress — switching to the unlocked price the
-// moment the (per-line or cart-summed) threshold is reached, and celebrating it.
+// Live pricing + unlock progress on the product page.
+//
+// Simple products: the server renders the locked/unlocked unit prices and the
+// controller is active from connect().
+//
+// Variable products: the controller starts inert and the variant-selector
+// feeds it the selected variant's prices via applyVariant() (Stimulus outlet).
+// While no variant is selected it stays inert and leaves the header/total to
+// the variant-selector's range display.
 //
 // To avoid re-implementing the discount engine in JS, the server passes two
 // unit prices: lockedUnit (condition NOT met) and unlockedUnit (met). JS picks
@@ -22,19 +27,48 @@ export default class extends Controller {
     conditionType: String, // none | quantity | amount
     threshold: Number,     // units (quantity) or cents (amount)
     cartCurrent: Number,
+    cartCurrentLabel: String, // "12 unidades" — for the from-cart celebration
     discountLabel: String,
     currencySymbol: String,
     remainingTemplate: String, // "faltam %{remaining} para %{discount}"
     celebrationDefault: String,
-    celebrationFromCart: String,
-    discountAppliedTemplate: String // "(%{discount} aplicado)"
+    celebrationFromCartTemplate: String, // "%{discount} ... %{cart} ..." (cart filled in JS)
+    discountAppliedTemplate: String, // "(%{discount} aplicado)"
+    variantPricing: Object // { [variantId]: { locked_unit_cents, unlocked_unit_cents, base_unit_cents, cart_current, cart_current_label } }
   }
 
   connect() {
+    // Variable product: inert until a variant is applied. Simple: always active.
+    this.active = !this.isVariable()
+    this.update()
+  }
+
+  isVariable() {
+    return this.hasVariantPricingValue && Object.keys(this.variantPricingValue).length > 0
+  }
+
+  // Called by the variant-selector (outlet) when the selection changes.
+  applyVariant(variantId) {
+    const p = variantId != null ? this.variantPricingValue[variantId] : null
+    if (p) {
+      this.lockedUnitCentsValue = p.locked_unit_cents
+      this.unlockedUnitCentsValue = p.unlocked_unit_cents
+      this.baseUnitCentsValue = p.base_unit_cents
+      this.cartCurrentValue = p.cart_current
+      if (p.cart_current_label) this.cartCurrentLabelValue = p.cart_current_label
+      this.active = true
+    } else {
+      this.active = false
+    }
     this.update()
   }
 
   update() {
+    if (!this.active) {
+      this.deactivate()
+      return
+    }
+
     const qty = Math.max(parseInt(this.quantityTarget.value, 10) || 0, 0)
     const hasCondition = this.conditionTypeValue !== "none" && this.thresholdValue > 0
     const contribution = this.conditionTypeValue === "amount" ? qty * this.baseUnitCentsValue : qty
@@ -62,6 +96,14 @@ export default class extends Controller {
     }
   }
 
+  // Variable product with no variant selected: hide the live bits and leave the
+  // header/total to the variant-selector's range display.
+  deactivate() {
+    if (this.hasTrackerTarget) this.trackerTarget.classList.add("d-none")
+    if (this.hasDiscountNoteTarget) this.discountNoteTarget.textContent = ""
+    if (this.hasPanelUnmetTarget) this.panelUnmetTarget.classList.remove("d-none")
+  }
+
   updateHeader(unit) {
     if (!this.hasHeaderPriceTarget) return
     const discounted = unit < this.baseUnitCentsValue
@@ -85,7 +127,9 @@ export default class extends Controller {
     if (met) {
       // Unlocked by the cart vs. unlocked by the quantity now.
       const byCart = this.cartCurrentValue >= this.thresholdValue
-      this.trackerTextTarget.textContent = byCart ? this.celebrationFromCartValue : this.celebrationDefaultValue
+      this.trackerTextTarget.textContent = byCart
+        ? this.celebrationFromCartTemplateValue.replace("%{cart}", this.cartCurrentLabelValue)
+        : this.celebrationDefaultValue
       this.trackerIconTarget.className = "fa-solid fa-circle-check me-1"
       this.setTrackerTone(true)
       this.progressBarTarget.style.width = "100%"

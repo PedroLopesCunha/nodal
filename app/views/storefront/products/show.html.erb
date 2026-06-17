@@ -29,7 +29,9 @@
       "variant-selector-in-stock-text-value" => t('storefront.products.show.in_stock'),
       "variant-selector-out-of-stock-text-value" => t('storefront.products.show.out_of_stock'),
       "variant-selector-display-price-value" => (@display_price || @product.display_price),
-      "variant-selector-display-price-original-value" => (@display_price_original || "")
+      "variant-selector-display-price-original-value" => (@display_price_original || ""),
+      # Hand price/total/tracker to the product-pricing controller when present.
+      "variant-selector-product-pricing-outlet" => "[data-controller~='product-pricing']"
     )
   end
 %>
@@ -94,12 +96,14 @@
        product_pricing_condition_type_value: pp[:condition_type],
        product_pricing_threshold_value: pp[:threshold],
        product_pricing_cart_current_value: pp[:cart_current],
+       product_pricing_cart_current_label_value: pp[:cart_current_label],
        product_pricing_discount_label_value: pp[:discount_label],
        product_pricing_currency_symbol_value: pp[:currency_symbol],
        product_pricing_remaining_template_value: t('storefront.carts.show.nudge.remaining', remaining: '%{remaining}', discount: '%{discount}'),
        product_pricing_celebration_default_value: t('storefront.products.show.unlocked_add_to_cart', discount: pp[:discount_label]),
-       product_pricing_celebration_from_cart_value: t('storefront.products.show.unlocked_from_cart', discount: pp[:discount_label], cart: pp[:cart_current_label]),
-       product_pricing_discount_applied_template_value: t('storefront.products.show.discount_applied', discount: '%{discount}')
+       product_pricing_celebration_from_cart_template_value: t('storefront.products.show.unlocked_from_cart', discount: pp[:discount_label], cart: '%{cart}'),
+       product_pricing_discount_applied_template_value: t('storefront.products.show.discount_applied', discount: '%{discount}'),
+       product_pricing_variant_pricing_value: (@variant_pricing || {}).to_json
      } : {} %>
   <div class="col-lg-6" <%= tag.attributes(data: pricing_data) %>>
     <div class="card border-0 shadow-sm" style="border-radius: 12px;">
@@ -125,10 +129,10 @@
                 selected variant's honest price. %>
             <% var_has_disc = @display_price_original.present? %>
             <div class="price-with-discount">
-              <span class="original-price text-muted text-decoration-line-through <%= 'd-none' unless var_has_disc %>" style="font-size: 1.5rem;" data-variant-selector-target="originalPrice">
+              <span class="original-price text-muted text-decoration-line-through <%= 'd-none' unless var_has_disc %>" style="font-size: 1.5rem;" data-variant-selector-target="originalPrice" data-product-pricing-target="headerOriginal">
                 <%= @display_price_original %>
               </span>
-              <span class="<%= var_has_disc ? 'text-success' : 'text-primary' %>" data-variant-selector-target="mainPrice" style="font-size: 2.5rem; font-weight: 700;">
+              <span class="<%= var_has_disc ? 'text-success' : 'text-primary' %>" data-variant-selector-target="mainPrice" data-product-pricing-target="headerPrice" style="font-size: 2.5rem; font-weight: 700;">
                 <%= @display_price || money_amount(@reference_breakdown[:final_price]) %>
               </span>
             </div>
@@ -393,9 +397,9 @@
 
                 <div class="d-flex align-items-center">
                   <label class="text-muted small me-2"><%= t('storefront.products.show.quantity') %></label>
-                  <% qty_action = "change->variant-selector#updateTotal input->variant-selector#updateTotal" %>
+                  <% qty_action = "change->variant-selector#updateTotal input->variant-selector#updateTotal input->product-pricing#update" %>
                   <% qty_action += " input->min-quantity-counter#update" if combined_counter %>
-                  <%= number_field_tag "order_item[quantity]", @product.quantity_input_min, min: @product.quantity_input_min, class: "form-control text-center", style: "width: 70px;", data: { variant_selector_target: "quantity", min_quantity_counter_target: ("input" if combined_counter), action: qty_action } %>
+                  <%= number_field_tag "order_item[quantity]", @product.quantity_input_min, min: @product.quantity_input_min, class: "form-control text-center", style: "width: 70px;", data: { variant_selector_target: "quantity", product_pricing_target: "quantity", min_quantity_counter_target: ("input" if combined_counter), action: qty_action } %>
                 </div>
 
                 <div class="d-flex align-items-center gap-2">
@@ -409,13 +413,8 @@
                 <% if show_prices? %>
                 <div class="text-muted">
                   <i class="fa-solid fa-calculator me-2"></i><%= t('storefront.products.show.estimated_total') %>
-                  <span data-variant-selector-target="price">
-                    <% if discount_breakdown[:has_discount] %>
-                      <%= money_amount(discount_breakdown[:final_price]) %>
-                    <% else %>
-                      <%= money_amount(@default_variant&.price || @product.price) %>
-                    <% end %>
-                  </span>
+                  <span data-variant-selector-target="price" data-product-pricing-target="total"></span>
+                  <small class="text-success fw-semibold" data-product-pricing-target="discountNote"></small>
                 </div>
                 <% end %>
 

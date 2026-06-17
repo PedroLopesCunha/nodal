@@ -342,6 +342,28 @@ class Storefront::ProductsController < Storefront::BaseController
       @display_savings = nil
     end
 
+    # Live pricing for variable products (V2): the conditional discount lives on
+    # the product, so all variants share the global tracker config; per-variant
+    # locked/unlocked prices and cart contribution feed it as the variant
+    # selector changes. @product_pricing carries the globals (inert until a
+    # variant is chosen); @variant_pricing maps variant_id -> its values.
+    if @product.has_variants?
+      conditional = @discount_calculator.all_discounts.find { |d| d[:condition] }
+      if conditional
+        @live_discount = conditional
+        cond = conditional[:condition]
+        @product_pricing = {
+          locked_unit_cents: 0, unlocked_unit_cents: 0, base_unit_cents: 0, cart_current: 0,
+          currency_symbol: current_organisation.currency_symbol,
+          condition_type: cond[:type].to_s,
+          threshold: cond[:type] == :amount ? cond[:amount].cents : cond[:quantity],
+          discount_label: discount_label_for(conditional),
+          cart_current_label: t('storefront.carts.show.nudge.units', count: 0)
+        }
+        @variant_pricing = build_variant_pricing(conditional, @cart_context)
+      end
+    end
+
     # Fetch related products
     if @product.show_related_products?
       fetcher = RelatedProductsFetcher.new(product: @product, limit: 4)
@@ -392,15 +414,48 @@ class Storefront::ProductsController < Storefront::BaseController
     end
   end
 
+  # Per-variant live-pricing values: the price with the conditional discount
+  # locked (condition unmet) vs unlocked (met), the base price, and what's
+  # already in the cart toward the threshold for this variant.
+  def build_variant_pricing(conditional, cart_context)
+    cond = conditional[:condition]
+    source = conditional[:source]
+    min_qty = @product.quantity_input_min
+    @variants.each_with_object({}) do |v, hash|
+      next unless v.unit_price_cents.to_i.positive?
+
+      locked = DiscountCalculator.new(product: @product, customer: current_customer,
+        quantity: min_qty, for_display: false, variant: v, cart_context: cart_context).final_price
+      unlocked = DiscountCalculator.new(product: @product, customer: current_customer,
+        quantity: min_qty, for_display: true, variant: v, cart_context: cart_context).final_price
+      cart_units = if cart_context
+        (cond[:scope] == :summed ? cart_context.product_quantity(@product.id) : cart_context.variant_quantity(v.id)).to_i
+      else
+        0
+      end
+      hash[v.id] = {
+        locked_unit_cents: locked.cents,
+        unlocked_unit_cents: unlocked.cents,
+        base_unit_cents: v.unit_price_cents,
+        cart_current: cart_threshold_current(cond, source, cart_context, variant: v),
+        cart_current_label: t('storefront.carts.show.nudge.units', count: cart_units)
+      }
+    end
+  end
+
   # What's already in the cart toward the threshold. For a per-line or
   # product-summed condition, adding more of this product merges into the same
   # cart line, so the product's current cart contribution counts. For a
   # category-summed condition, the whole category's cart total counts.
-  def cart_threshold_current(cond, source, cart_context)
+  def cart_threshold_current(cond, source, cart_context, variant: nil)
     return 0 unless cart_context
 
     if cond[:scope] == :summed && source.category_id.present?
       cond[:type] == :amount ? cart_context.category_amount_cents(source.category_id) : cart_context.category_quantity(source.category_id)
+    elsif cond[:scope] != :summed && variant
+      # Per-line condition on a specific variant: only that variant's own cart
+      # line merges when the customer adds more.
+      cond[:type] == :amount ? cart_context.variant_amount_cents(variant.id) : cart_context.variant_quantity(variant.id)
     else
       cond[:type] == :amount ? cart_context.product_amount_cents(@product.id) : cart_context.product_quantity(@product.id)
     end
