@@ -87,10 +87,11 @@
                         </div>
                       <% end %>
                       <div>
-                        <%= link_to item.product.name, product_path(org_slug: params[:org_slug], id: item.product), class: "fw-medium text-decoration-none text-body" %>
+                        <%= link_to item.product.name, product_path(org_slug: params[:org_slug], id: item.product), class: "fw-medium text-decoration-none text-body d-block" %>
                         <% if item.product_variant && item.product_variant.attribute_values.any? %>
-                          <small class="text-primary"><%= item.product_variant.sku.presence || item.variant_name %></small>
-                          <br>
+                          <small class="text-primary d-block"><%= item.product_variant.sku.presence || item.variant_name %></small>
+                        <% elsif item.product.sku.present? %>
+                          <small class="text-muted d-block">SKU: <%= item.product.sku %></small>
                         <% end %>
                         <small class="text-muted"><%= item.product.category&.name %></small>
                         <% badge = cart_stock_badge(item) %>
@@ -185,6 +186,8 @@
                     <% parts = [] %>
                     <% if item.product_variant && item.product_variant.attribute_values.any? %>
                       <% parts << (item.product_variant.sku.presence || item.variant_name) %>
+                    <% elsif item.product.sku.present? %>
+                      <% parts << "SKU: #{item.product.sku}" %>
                     <% end %>
                     <% if item.product.category&.name.present? %>
                       <% parts << item.product.category.name %>

@@ -322,11 +322,11 @@ pt:
         free_shipping_progress: "Gaste mais %{amount} para envio grátis"
         nudge:
           remaining: "faltam %{remaining} para %{discount}"
-          save: "podes poupar até %{amount}"
+          save: "poupa até %{amount}"
           add_units:
             one: "Adicionar mais %{count} unidade"
             other: "Adicionar mais %{count} unidades"
-          add_units_short: "+%{count} un."
+          add_units_short: "adiciona %{count} un."
           unlocked: "%{discount} desbloqueado"
           saved: "poupaste %{amount}"
           units:
