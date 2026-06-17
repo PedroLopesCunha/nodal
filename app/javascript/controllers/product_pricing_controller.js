@@ -13,7 +13,7 @@ import { Controller } from "@hotwired/stimulus"
 export default class extends Controller {
   static targets = [
     "quantity", "total", "discountNote", "progress", "progressBar", "progressText",
-    "celebration", "headerPrice", "headerOriginal"
+    "celebration", "headerPrice", "headerOriginal", "panelMet", "panelUnmet"
   ]
   static values = {
     lockedUnitCents: Number,
@@ -46,6 +46,10 @@ export default class extends Controller {
 
     this.updateHeader(unit)
     this.updateProgress(hasCondition, met, projected)
+
+    // "Available discounts" panel hint reflects the live state.
+    if (this.hasPanelMetTarget) this.panelMetTarget.classList.toggle("d-none", !met)
+    if (this.hasPanelUnmetTarget) this.panelUnmetTarget.classList.toggle("d-none", met)
   }
 
   updateHeader(unit) {

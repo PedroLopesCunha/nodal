@@ -351,6 +351,7 @@ class Storefront::ProductsController < Storefront::BaseController
 
     cond = conditional[:condition]
     source = conditional[:source]
+    @live_discount = conditional # the panel hint for this one toggles live
     data[:condition_type] = cond[:type].to_s
     data[:threshold] = cond[:type] == :amount ? cond[:amount].cents : cond[:quantity]
     data[:discount_label] = discount_label_for(conditional)

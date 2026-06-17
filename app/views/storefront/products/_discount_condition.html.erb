@@ -1,7 +1,10 @@
 <%# Met / "unlock" hint for a line discount's condition (quantity or € value).
-    Local: discount — a discount hash carrying :condition + :meets_condition. %>
+    Locals: discount — a discount hash carrying :condition + :meets_condition.
+            live (optional) — when true, render both states (toggled live by the
+            product-pricing controller as the quantity changes). %>
 <% condition = discount[:condition] %>
-<% if condition %>
+<% live = local_assigns.fetch(:live, false) %>
+<% if condition && !(condition[:type] == :quantity && condition[:quantity].to_i <= 1) %>
   <% where = if condition[:scope] == :summed
        condition[:target] == :category ? t('storefront.products.show.scope_category') : t('storefront.products.show.scope_summed_variants')
      elsif @product&.variable?
@@ -9,25 +12,24 @@
      else
        t('storefront.products.show.scope_per_line')
      end %>
-  <% if condition[:type] == :quantity && condition[:quantity].to_i > 1 %>
-    <% if discount[:meets_condition] %>
-      <small class="text-success d-block">
-        <i class="fa-solid fa-check me-1"></i><%= t('storefront.products.show.min_quantity_met') %> <%= t('storefront.products.show.units_threshold', quantity: condition[:quantity]) %>
-      </small>
-    <% else %>
-      <small class="text-warning d-block">
-        <i class="fa-solid fa-info-circle me-1"></i><%= t('storefront.products.show.buy_to_unlock', quantity: condition[:quantity], where: where) %>
-      </small>
-    <% end %>
-  <% elsif condition[:type] == :amount %>
-    <% if discount[:meets_condition] %>
-      <small class="text-success d-block">
-        <i class="fa-solid fa-check me-1"></i><%= t('storefront.products.show.min_amount_met') %>
-      </small>
-    <% else %>
-      <small class="text-warning d-block">
-        <i class="fa-solid fa-info-circle me-1"></i><%= t('storefront.products.show.spend_to_unlock', amount: condition[:amount].format, where: where) %>
-      </small>
-    <% end %>
+  <% if condition[:type] == :amount %>
+    <% met_label = t('storefront.products.show.min_amount_met') %>
+    <% unmet_label = t('storefront.products.show.spend_to_unlock', amount: condition[:amount].format, where: where) %>
+  <% else %>
+    <% met_label = "#{t('storefront.products.show.min_quantity_met')} #{t('storefront.products.show.units_threshold', quantity: condition[:quantity])}" %>
+    <% unmet_label = t('storefront.products.show.buy_to_unlock', quantity: condition[:quantity], where: where) %>
+  <% end %>
+
+  <% if live %>
+    <small class="text-success d-block <%= 'd-none' unless discount[:meets_condition] %>" data-product-pricing-target="panelMet">
+      <i class="fa-solid fa-check me-1"></i><%= met_label %>
+    </small>
+    <small class="text-warning d-block <%= 'd-none' if discount[:meets_condition] %>" data-product-pricing-target="panelUnmet">
+      <i class="fa-solid fa-info-circle me-1"></i><%= unmet_label %>
+    </small>
+  <% elsif discount[:meets_condition] %>
+    <small class="text-success d-block"><i class="fa-solid fa-check me-1"></i><%= met_label %></small>
+  <% else %>
+    <small class="text-warning d-block"><i class="fa-solid fa-info-circle me-1"></i><%= unmet_label %></small>
   <% end %>
 <% end %>

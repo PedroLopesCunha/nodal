@@ -160,18 +160,18 @@
                   <% when :product %>
                     <span class="badge bg-danger me-2"><%= t('storefront.products.index.sale_badge') %></span>
                     <strong><%= t('storefront.products.show.product_discount') %></strong>
-                    <%= render 'storefront/products/discount_condition', discount: discount %>
+                    <%= render 'storefront/products/discount_condition', discount: discount, live: discount[:source].equal?(@live_discount&.dig(:source)) %>
                   <% when :category %>
                     <span class="badge bg-danger me-2"><%= t('storefront.products.index.sale_badge') %></span>
                     <strong><%= t('storefront.products.show.category_discount') %></strong>
-                    <%= render 'storefront/products/discount_condition', discount: discount %>
+                    <%= render 'storefront/products/discount_condition', discount: discount, live: discount[:source].equal?(@live_discount&.dig(:source)) %>
                   <% when :customer %>
                     <strong><%= t('storefront.products.show.customer_tier_discount') %></strong>
                   <% when :customer_product %>
                     <span class="badge bg-primary me-2"><%= t('storefront.products.show.special_badge') %></span>
                     <strong><%= t('storefront.products.show.your_special_price') %></strong>
                     <small class="text-muted d-block"><%= t('storefront.products.show.special_price_subtitle') %></small>
-                    <%= render 'storefront/products/discount_condition', discount: discount %>
+                    <%= render 'storefront/products/discount_condition', discount: discount, live: discount[:source].equal?(@live_discount&.dig(:source)) %>
                   <% end %>
                   <% if discount[:valid_until].present? %>
                     <small class="text-warning d-block">
