@@ -226,6 +226,14 @@
         </div>
       </div>
 
+      <% if @discount_nudges.present? %>
+        <div class="d-lg-none mt-3">
+          <% @discount_nudges.each do |op| %>
+            <%= render 'storefront/carts/discount_nudge', opportunity: op %>
+          <% end %>
+        </div>
+      <% end %>
+
       <div class="d-flex justify-content-between align-items-center mt-3">
         <%= link_to products_path(org_slug: params[:org_slug]), class: "btn btn-sm text-muted", style: "font-size: 0.8rem;" do %>
           <i class="fa-solid fa-chevron-left me-1"></i><%= t('storefront.carts.show.continue_shopping') %>
