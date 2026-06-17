@@ -8,20 +8,25 @@
     </span>
     <span class="badge bg-warning text-dark text-nowrap"><%= t('storefront.carts.show.nudge.save', amount: opportunity.reward.format) %></span>
   </div>
-  <div class="text-muted mb-1" style="font-size: 0.75rem;">
-    <%= t('storefront.carts.show.nudge.remaining', remaining: remaining, discount: opportunity.discount_label) %>
+  <% can_add = opportunity.add_product_id.present? && opportunity.units_to_add.to_i.positive? %>
+  <div class="d-flex justify-content-between align-items-center mb-1" style="gap: .5rem;">
+    <span class="text-muted text-truncate" style="font-size: 0.75rem;">
+      <%= t('storefront.carts.show.nudge.remaining', remaining: remaining, discount: opportunity.discount_label) %>
+    </span>
+    <% if can_add %>
+      <%= form_with url: order_items_path(org_slug: params[:org_slug]), method: :post, class: "m-0 flex-shrink-0" do %>
+        <%= hidden_field_tag :product_id, opportunity.add_product_id %>
+        <%= hidden_field_tag :return_to, 'cart' %>
+        <%= hidden_field_tag 'order_item[quantity]', opportunity.units_to_add %>
+        <button type="submit" class="btn btn-warning btn-sm py-0 px-2 fw-semibold text-nowrap"
+                style="font-size: 0.75rem;"
+                title="<%= t('storefront.carts.show.nudge.add_units', count: opportunity.units_to_add) %>">
+          <i class="fa-solid fa-plus me-1"></i><%= t('storefront.carts.show.nudge.add_units_short', count: opportunity.units_to_add) %>
+        </button>
+      <% end %>
+    <% end %>
   </div>
   <div class="progress" style="height: 6px;">
     <div class="progress-bar bg-warning" role="progressbar" style="width: <%= (opportunity.progress * 100).round %>%;"></div>
   </div>
-  <% if opportunity.add_product_id.present? && opportunity.units_to_add.to_i.positive? %>
-    <%= form_with url: order_items_path(org_slug: params[:org_slug]), method: :post, class: "mt-2" do %>
-      <%= hidden_field_tag :product_id, opportunity.add_product_id %>
-      <%= hidden_field_tag :return_to, 'cart' %>
-      <%= hidden_field_tag 'order_item[quantity]', opportunity.units_to_add %>
-      <button type="submit" class="btn btn-warning btn-sm w-100 fw-semibold">
-        <i class="fa-solid fa-plus me-1"></i><%= t('storefront.carts.show.nudge.add_units', count: opportunity.units_to_add) %>
-      </button>
-    <% end %>
-  <% end %>
 </div>

@@ -326,6 +326,7 @@ pt:
           add_units:
             one: "Adicionar mais %{count} unidade"
             other: "Adicionar mais %{count} unidades"
+          add_units_short: "+%{count} un."
           unlocked: "%{discount} desbloqueado"
           saved: "poupaste %{amount}"
           units:

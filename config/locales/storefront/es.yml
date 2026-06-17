@@ -314,6 +314,7 @@ es:
           add_units:
             one: "Añadir %{count} unidad más"
             other: "Añadir %{count} unidades más"
+          add_units_short: "+%{count} u."
           unlocked: "%{discount} desbloqueado"
           saved: "ahorraste %{amount}"
           units:
