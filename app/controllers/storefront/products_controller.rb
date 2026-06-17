@@ -293,6 +293,7 @@ class Storefront::ProductsController < Storefront::BaseController
         product: @product, customer: current_customer, quantity: 1,
         for_display: false, variant: @default_variant, cart_context: cart_context
       ).discount_breakdown
+      @product_pricing = product_pricing_data(cart_context)
     end
 
     # Build the display strings used while no variant is selected.
@@ -328,6 +329,54 @@ class Storefront::ProductsController < Storefront::BaseController
   end
 
   private
+
+  # Data for the live product-page pricing controller (simple products): two
+  # unit prices (locked = condition unmet, unlocked = met) so JS can switch on
+  # the quantity reaching the nearest conditional discount's threshold, plus
+  # what's already in the cart toward a summed threshold.
+  def product_pricing_data(cart_context)
+    conditional = @discount_calculator.all_discounts.find { |d| d[:condition] && !d[:meets_condition] }
+
+    data = {
+      locked_unit_cents: @actual_breakdown[:final_price].cents,
+      unlocked_unit_cents: @discount_calculator.final_price.cents,
+      base_unit_cents: @actual_breakdown[:base_price].cents,
+      currency_symbol: current_organisation.currency_symbol,
+      condition_type: "none",
+      threshold: 0,
+      cart_current: 0,
+      discount_label: ""
+    }
+    return data unless conditional
+
+    cond = conditional[:condition]
+    source = conditional[:source]
+    data[:condition_type] = cond[:type].to_s
+    data[:threshold] = cond[:type] == :amount ? cond[:amount].cents : cond[:quantity]
+    data[:discount_label] = discount_label_for(conditional)
+    data[:cart_current] = summed_cart_current(cond, source, cart_context)
+    data
+  end
+
+  def discount_label_for(discount)
+    if discount[:discount_type] == "percentage"
+      "-#{(discount[:value] * 100).round}%"
+    else
+      "-#{Money.new((discount[:value] * 100).to_i, current_organisation.currency).format}"
+    end
+  end
+
+  def summed_cart_current(cond, source, cart_context)
+    return 0 unless cond[:scope] == :summed && cart_context
+
+    by_category = source.category_id.present?
+    target_id = by_category ? source.category_id : source.product_id
+    if cond[:type] == :amount
+      by_category ? cart_context.category_amount_cents(target_id) : cart_context.product_amount_cents(target_id)
+    else
+      by_category ? cart_context.category_quantity(target_id) : cart_context.product_quantity(target_id)
+    end
+  end
 
   TRIGRAM_THRESHOLD = 0.5
 
