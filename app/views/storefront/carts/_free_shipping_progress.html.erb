@@ -9,7 +9,7 @@
   <% else %>
     <div class="bg-light rounded p-2 mb-3">
       <div class="d-flex justify-content-between small text-muted mb-1">
-        <span><%= t('storefront.carts.show.free_shipping_progress', amount: humanized_money_with_symbol(@order.free_shipping_amount_remaining)) %></span>
+        <span><%= t('storefront.carts.show.free_shipping_progress', amount: money_amount(@order.free_shipping_amount_remaining)) %></span>
       </div>
       <% progress = (@order.total_with_auto_discount.cents.to_f / @current_organisation.free_shipping_threshold.cents * 100).clamp(0, 100) %>
       <div class="progress" style="height: 6px;">

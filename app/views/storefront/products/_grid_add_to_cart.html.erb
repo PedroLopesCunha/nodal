@@ -75,10 +75,10 @@
                 <% if show_prices? %>
                   <td class="text-center align-middle">
                     <% if calc.effective_discount[:percentage].to_f > 0 %>
-                      <span class="text-decoration-line-through text-muted small d-block"><%= humanized_money_with_symbol(calc.base_price) %></span>
-                      <span class="text-success fw-medium"><%= humanized_money_with_symbol(calc.final_price) %></span>
+                      <span class="text-decoration-line-through text-muted small d-block"><%= money_amount(calc.base_price) %></span>
+                      <span class="text-success fw-medium"><%= money_amount(calc.final_price) %></span>
                     <% else %>
-                      <%= humanized_money_with_symbol(calc.final_price) %>
+                      <%= money_amount(calc.final_price) %>
                     <% end %>
                   </td>
                 <% end %>

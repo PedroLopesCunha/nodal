@@ -123,11 +123,11 @@
             <div class="price-with-discount">
               <span class="original-price text-muted text-decoration-line-through <%= 'd-none' unless discount_breakdown[:has_discount] %>" style="font-size: 1.5rem;" data-variant-selector-target="originalPrice">
                 <% if discount_breakdown[:has_discount] %>
-                  <%= @display_price_original || humanized_money_with_symbol(discount_breakdown[:base_price]) %>
+                  <%= @display_price_original || money_amount(discount_breakdown[:base_price]) %>
                 <% end %>
               </span>
               <span class="<%= discount_breakdown[:has_discount] ? 'text-success' : 'text-primary' %>" data-variant-selector-target="mainPrice" style="font-size: 2.5rem; font-weight: 700;">
-                <%= @display_price || humanized_money_with_symbol(discount_breakdown[:final_price]) %>
+                <%= @display_price || money_amount(discount_breakdown[:final_price]) %>
               </span>
             </div>
           <% elsif @product_pricing %>
@@ -135,14 +135,14 @@
             <% has_disc = @actual_breakdown[:has_discount] %>
             <div class="price-with-discount">
               <span class="original-price text-muted text-decoration-line-through <%= 'd-none' unless has_disc %>" data-product-pricing-target="headerOriginal" style="font-size: 1.5rem;">
-                <%= humanized_money_with_symbol(@actual_breakdown[:base_price]) %>
+                <%= money_amount(@actual_breakdown[:base_price]) %>
               </span>
               <span class="<%= has_disc ? 'text-success' : 'text-primary' %>" data-product-pricing-target="headerPrice" style="font-size: 2.5rem; font-weight: 700;">
-                <%= humanized_money_with_symbol(@actual_breakdown[:final_price]) %>
+                <%= money_amount(@actual_breakdown[:final_price]) %>
               </span>
             </div>
           <% else %>
-            <span class="text-primary" style="font-size: 2.5rem; font-weight: 700;"><%= humanized_money_with_symbol(@product.price) %></span>
+            <span class="text-primary" style="font-size: 2.5rem; font-weight: 700;"><%= money_amount(@product.price) %></span>
           <% end %>
           <% if @product.unit_description.present? && !@product.price_on_request? %>
             <span class="text-muted fs-5">/ <%= @product.unit_description %></span>
@@ -187,7 +187,7 @@
                   <% is_live = discount[:source].equal?(@live_discount&.dig(:source)) %>
                   <span class="badge fs-6 <%= unmet ? 'bg-warning text-dark' : 'bg-success' %>"
                         <%= 'data-product-pricing-target=panelBadge'.html_safe if is_live %>>
-                    -<%= discount[:discount_type] == 'percentage' ? "#{(discount[:value] * 100).round(0)}%" : humanized_money_with_symbol(Money.new((discount[:value] * 100).to_i, @current_organisation.currency)) %>
+                    -<%= discount[:discount_type] == 'percentage' ? "#{(discount[:value] * 100).round(0)}%" : money_amount(Money.new((discount[:value] * 100).to_i, @current_organisation.currency)) %>
                   </span>
                   <% if discount[:stackable] %>
                     <small class="text-muted d-block"><%= t('storefront.products.show.stackable') %></small>
@@ -197,7 +197,7 @@
             <% end %>
             <div class="mt-3 pt-2 border-top">
               <div class="d-flex justify-content-between">
-                <strong><%= t('storefront.products.show.you_save', amount: @display_savings || humanized_money_with_symbol(discount_breakdown[:savings])) %></strong>
+                <strong><%= t('storefront.products.show.you_save', amount: @display_savings || money_amount(discount_breakdown[:savings])) %></strong>
               </div>
             </div>
           </div>
@@ -409,9 +409,9 @@
                   <i class="fa-solid fa-calculator me-2"></i><%= t('storefront.products.show.estimated_total') %>
                   <span data-variant-selector-target="price">
                     <% if discount_breakdown[:has_discount] %>
-                      <%= humanized_money_with_symbol(discount_breakdown[:final_price]) %>
+                      <%= money_amount(discount_breakdown[:final_price]) %>
                     <% else %>
-                      <%= humanized_money_with_symbol(@default_variant&.price || @product.price) %>
+                      <%= money_amount(@default_variant&.price || @product.price) %>
                     <% end %>
                   </span>
                 </div>
@@ -446,7 +446,7 @@
               </div>
 
               <button type="submit" class="btn btn-primary btn-lg w-100" style="border-radius: 8px;" <%= 'disabled' unless @product.purchasable? %>>
-                <i class="fa-solid fa-cart-plus me-2"></i><%= t('storefront.products.show.add_to_cart') %><% if show_prices? %> · <span data-product-pricing-target="total"><%= humanized_money_with_symbol((@actual_breakdown ? @actual_breakdown[:final_price] : @product.price) * @product.quantity_input_min) %></span><% end %>
+                <i class="fa-solid fa-cart-plus me-2"></i><%= t('storefront.products.show.add_to_cart') %><% if show_prices? %> · <span data-product-pricing-target="total"><%= money_amount((@actual_breakdown ? @actual_breakdown[:final_price] : @product.price) * @product.quantity_input_min) %></span><% end %>
               </button>
             <% end %>
           <% end %>

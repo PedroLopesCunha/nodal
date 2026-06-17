@@ -196,7 +196,7 @@
                   <% if @tier_discount.discount_type == 'percentage' %>
                     <%= (@tier_discount.discount_value * 100).round(0) %>%
                   <% else %>
-                    <%= humanized_money_with_symbol(Money.new((@tier_discount.discount_value * 100).to_i, current_organisation.currency)) %>
+                    <%= money_amount(Money.new((@tier_discount.discount_value * 100).to_i, current_organisation.currency)) %>
                   <% end %>
                 </div>
                 <div class="small" style="opacity: 0.7;"><%= t('storefront.home.tier_discount.off_every_product') %></div>
@@ -218,10 +218,10 @@
                   <% if od.percentage? %>
                     <%= (od.discount_value * 100).round(0) %>%
                   <% else %>
-                    <%= humanized_money_with_symbol(Money.new((od.discount_value * 100).to_i, current_organisation.currency)) %>
+                    <%= money_amount(Money.new((od.discount_value * 100).to_i, current_organisation.currency)) %>
                   <% end %>
                 </div>
-                <div class="small" style="opacity: 0.7;"><%= t('storefront.home.tier_discount.off_orders_over', amount: humanized_money_with_symbol(od.min_order_amount)) %></div>
+                <div class="small" style="opacity: 0.7;"><%= t('storefront.home.tier_discount.off_orders_over', amount: money_amount(od.min_order_amount)) %></div>
               </div>
             </div>
           <% end %>
@@ -233,7 +233,7 @@
                   <% if pc.percentage? %>
                     <%= (pc.discount_value * 100).round(0) %>%
                   <% else %>
-                    <%= humanized_money_with_symbol(Money.new((pc.discount_value * 100).to_i, current_organisation.currency)) %>
+                    <%= money_amount(Money.new((pc.discount_value * 100).to_i, current_organisation.currency)) %>
                   <% end %>
                 </div>
                 <div class="small" style="opacity: 0.7;"><%= t('storefront.home.tier_discount.promo_code', code: pc.code) %></div>
@@ -244,7 +244,7 @@
             <div class="col-6 col-md">
               <div class="text-center rounded-2 py-2" style="background: rgba(255,255,255,0.1);">
                 <div class="fw-bold fs-5"><i class="fa-solid fa-truck me-1" style="opacity: 0.7;"></i><%= t('storefront.home.tier_discount.free_label') %></div>
-                <div class="small" style="opacity: 0.7;"><%= t('storefront.home.tier_discount.free_shipping_over', amount: humanized_money_with_symbol(current_organisation.free_shipping_threshold)) %></div>
+                <div class="small" style="opacity: 0.7;"><%= t('storefront.home.tier_discount.free_shipping_over', amount: money_amount(current_organisation.free_shipping_threshold)) %></div>
               </div>
             </div>
           <% end %>
@@ -392,7 +392,7 @@
               </div>
 <% if show_prices? %>
               <div class="text-center">
-                <div class="fw-bold"><%= humanized_money_with_symbol(@last_order.grand_total) %></div>
+                <div class="fw-bold"><%= money_amount(@last_order.grand_total) %></div>
                 <div class="text-muted small"><%= t('storefront.home.last_order.total_label') %></div>
               </div>
               <% end %>

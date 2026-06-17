@@ -62,19 +62,19 @@
                 <% if show_prices? %>
                   <td class="text-end">
                     <% if item.discount_percentage && item.discount_percentage > 0 %>
-                      <span class="text-muted text-decoration-line-through small d-block"><%= humanized_money_with_symbol(item.price) %></span>
-                      <span class="text-success"><%= humanized_money_with_symbol(item.price - (item.price * item.discount_percentage)) %></span>
+                      <span class="text-muted text-decoration-line-through small d-block"><%= money_amount(item.price) %></span>
+                      <span class="text-success"><%= money_amount(item.price - (item.price * item.discount_percentage)) %></span>
                       <span class="badge bg-success-subtle text-success small">-<%= format_discount_percentage(item.discount_percentage) %></span>
                     <% else %>
-                      <%= humanized_money_with_symbol(item.price) %>
+                      <%= money_amount(item.price) %>
                     <% end %>
                   </td>
                   <td class="text-end fw-medium">
                     <% if item.discount_percentage && item.discount_percentage > 0 %>
-                      <span class="text-muted text-decoration-line-through small d-block"><%= humanized_money_with_symbol(item.price * item.quantity) %></span>
-                      <span class="text-success"><%= humanized_money_with_symbol(item.total_price) %></span>
+                      <span class="text-muted text-decoration-line-through small d-block"><%= money_amount(item.price * item.quantity) %></span>
+                      <span class="text-success"><%= money_amount(item.total_price) %></span>
                     <% else %>
-                      <%= humanized_money_with_symbol(item.total_price) %>
+                      <%= money_amount(item.total_price) %>
                     <% end %>
                   </td>
                 <% end %>
@@ -91,24 +91,24 @@
             <% line_savings = @order.gross_subtotal - @order.total_amount %>
             <div class="d-flex justify-content-between mb-2">
               <span class="text-muted"><%= t('storefront.orders.show.summary.subtotal') %></span>
-              <span><%= humanized_money_with_symbol(line_savings.positive? ? @order.gross_subtotal : @order.total_amount) %></span>
+              <span><%= money_amount(line_savings.positive? ? @order.gross_subtotal : @order.total_amount) %></span>
             </div>
             <% if line_savings.positive? %>
               <div class="d-flex justify-content-between mb-2 text-success">
                 <span><%= t('storefront.carts.show.line_discount') %></span>
-                <span>-<%= humanized_money_with_symbol(line_savings) %></span>
+                <span>-<%= money_amount(line_savings) %></span>
               </div>
             <% end %>
             <% if @order.has_auto_discount_snapshot? %>
               <div class="d-flex justify-content-between mb-2 text-success">
                 <span><%= t('storefront.carts.show.order_discount') %> (<%= @order.auto_discount_display %>)</span>
-                <span>-<%= humanized_money_with_symbol(@order.auto_order_discount_amount) %></span>
+                <span>-<%= money_amount(@order.auto_order_discount_amount) %></span>
               </div>
             <% end %>
             <% if @order.has_order_discount? %>
               <div class="d-flex justify-content-between mb-2 text-success">
                 <span><%= t('storefront.orders.show.summary.discount') %> (<%= @order.order_discount_display %>)</span>
-                <span>-<%= humanized_money_with_symbol(@order.order_discount_amount) %></span>
+                <span>-<%= money_amount(@order.order_discount_amount) %></span>
               </div>
             <% end %>
             <% if @order.promo_code_discount_amount_cents.present? && @order.promo_code_discount_amount_cents > 0 %>
@@ -120,24 +120,24 @@
                     <span class="font-monospace">(<%= @order.promo_code.code %>)</span>
                   <% end %>
                 </span>
-                <span>-<%= humanized_money_with_symbol(@order.promo_code_discount) %></span>
+                <span>-<%= money_amount(@order.promo_code_discount) %></span>
               </div>
             <% end %>
             <% if @order.tax_amount.present? %>
               <div class="d-flex justify-content-between mb-2">
                 <span class="text-muted"><%= t('storefront.orders.show.summary.tax') %></span>
-                <span><%= humanized_money_with_symbol(@order.tax_amount) %></span>
+                <span><%= money_amount(@order.tax_amount) %></span>
               </div>
             <% end %>
             <% if @order.shipping_amount.present? %>
               <div class="d-flex justify-content-between mb-2">
                 <span class="text-muted"><%= t('storefront.orders.show.summary.shipping') %></span>
-                <span><%= humanized_money_with_symbol(@order.shipping_amount) %></span>
+                <span><%= money_amount(@order.shipping_amount) %></span>
               </div>
             <% end %>
             <div class="d-flex justify-content-between fw-bold border-top pt-2">
               <span><%= t('storefront.orders.show.summary.total') %></span>
-              <span><%= humanized_money_with_symbol(@order.grand_total) %></span>
+              <span><%= money_amount(@order.grand_total) %></span>
             </div>
           </div>
         </div>

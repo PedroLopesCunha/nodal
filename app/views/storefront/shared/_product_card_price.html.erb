@@ -27,15 +27,15 @@
       </span>
     <% else %>
       <span class="product-card-price-original">
-        <%= humanized_money_with_symbol(discount_info[:base_price]) %>
+        <%= money_amount(discount_info[:base_price]) %>
       </span>
       <span class="product-card-price-discounted">
-        <%= humanized_money_with_symbol(discount_info[:final_price]) %>
+        <%= money_amount(discount_info[:final_price]) %>
       </span>
     <% end %>
   </div>
 <% elsif product.variable? %>
   <span class="product-card-price"><%= product.display_price %></span>
 <% else %>
-  <span class="product-card-price"><%= humanized_money_with_symbol(product.price) %></span>
+  <span class="product-card-price"><%= money_amount(product.price) %></span>
 <% end %>
