@@ -55,7 +55,9 @@ class CartDiscountNudges
     if per_line_product?(discount)
       lines_for_product(discount.product_id).filter_map { |item| build_opportunity_line(discount, item) }
     else
-      Array(build_opportunity_aggregate(discount))
+      # NB: [x].compact, not Array(x) — Array() would decompose the Struct into
+      # its field values.
+      [build_opportunity_aggregate(discount)].compact
     end
   end
 
@@ -63,7 +65,7 @@ class CartDiscountNudges
     if per_line_product?(discount)
       lines_for_product(discount.product_id).filter_map { |item| build_unlocked_line(discount, item) }
     else
-      Array(build_unlocked_aggregate(discount))
+      [build_unlocked_aggregate(discount)].compact
     end
   end
 
