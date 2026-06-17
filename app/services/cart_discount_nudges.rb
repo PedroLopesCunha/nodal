@@ -49,12 +49,26 @@ class CartDiscountNudges
     )
   end
 
-  # € saved right now on the current cart contents by this discount.
+  # € saved right now on the current cart contents — the effective saving on
+  # the target's line items (gross - discounted total), so the celebration
+  # badge matches the "Desconto -€X" line in the order summary to the cent
+  # (both derive from the same rounded per-unit prices).
   def current_reward(discount, by_category, target_id)
-    amount = by_category ? @context.category_amount_cents(target_id) : @context.product_amount_cents(target_id)
-    qty = by_category ? @context.category_quantity(target_id) : @context.product_quantity(target_id)
-    cents = discount.percentage? ? (amount * discount.discount_value).round : (discount.discount_value * 100).to_i * qty
-    Money.new(cents, @currency)
+    cents = items_for_target(by_category, target_id).sum do |item|
+      (item.price * item.quantity - item.total_price).cents
+    end
+    Money.new([cents, 0].max, @currency)
+  end
+
+  def items_for_target(by_category, target_id)
+    @order.order_items.select do |item|
+      next false unless item.product
+      if by_category
+        item.product.categories.flat_map(&:path_ids).include?(target_id)
+      else
+        item.product_id == target_id
+      end
+    end
   end
 
   def candidate_discounts
