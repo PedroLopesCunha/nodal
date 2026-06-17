@@ -347,7 +347,7 @@ class Storefront::ProductsController < Storefront::BaseController
     # locked/unlocked prices and cart contribution feed it as the variant
     # selector changes. @product_pricing carries the globals (inert until a
     # variant is chosen); @variant_pricing maps variant_id -> its values.
-    if @product.has_variants?
+    if @product.has_variants? && !@product.grid_add_to_cart?
       conditional = @discount_calculator.all_discounts.find { |d| d[:condition] }
       if conditional
         @live_discount = conditional
