@@ -75,4 +75,18 @@ class CartDiscountNudgesTest < ActiveSupport::TestCase
     assert_equal Money.new(3000, "EUR"), op.remaining
     assert_equal Money.new(1000, "EUR"), op.reward # 10% of the €100 threshold
   end
+
+  # Regression: the aggregate (summed/category) path wrapped the result with
+  # Array(), which decomposed the Struct into its field values — the view then
+  # got a String and raised "undefined method discount_label".
+  test "summed unlocked returns an Unlocked struct, not its decomposed fields" do
+    ProductDiscount.create!(organisation: @org, product: @product, discount_type: "percentage",
+      discount_value: 0.15, condition_type: "quantity", min_quantity: 10, condition_scope: "summed")
+    @order.order_items.create!(product: @product, quantity: 12) # met
+
+    unlocked = CartDiscountNudges.new(@order).unlocked
+    assert_equal 1, unlocked.size
+    assert_instance_of CartDiscountNudges::Unlocked, unlocked.first
+    assert_equal "-15%", unlocked.first.discount_label
+  end
 end
