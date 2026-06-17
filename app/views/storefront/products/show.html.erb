@@ -85,7 +85,20 @@
   </div>
 
   <!-- Right Column - Product Details -->
-  <div class="col-lg-6">
+  <% pp = @product_pricing %>
+  <% pricing_data = pp ? {
+       controller: "product-pricing",
+       product_pricing_locked_unit_cents_value: pp[:locked_unit_cents],
+       product_pricing_unlocked_unit_cents_value: pp[:unlocked_unit_cents],
+       product_pricing_base_unit_cents_value: pp[:base_unit_cents],
+       product_pricing_condition_type_value: pp[:condition_type],
+       product_pricing_threshold_value: pp[:threshold],
+       product_pricing_cart_current_value: pp[:cart_current],
+       product_pricing_discount_label_value: pp[:discount_label],
+       product_pricing_currency_symbol_value: pp[:currency_symbol],
+       product_pricing_remaining_template_value: t('storefront.carts.show.nudge.remaining', remaining: '%{remaining}', discount: '%{discount}')
+     } : {} %>
+  <div class="col-lg-6" <%= tag.attributes(data: pricing_data) %>>
     <div class="card border-0 shadow-sm" style="border-radius: 12px;">
       <div class="card-body p-4">
         <!-- Product Name -->
@@ -114,17 +127,16 @@
                 <%= @display_price || humanized_money_with_symbol(discount_breakdown[:final_price]) %>
               </span>
             </div>
-          <% elsif @actual_breakdown && @actual_breakdown[:has_discount] %>
+          <% elsif @product_pricing %>
+            <%# Simple product — price updated live by the product-pricing JS. %>
+            <% has_disc = @actual_breakdown[:has_discount] %>
             <div class="price-with-discount">
-              <span class="original-price text-muted text-decoration-line-through" style="font-size: 1.5rem;">
+              <span class="original-price text-muted text-decoration-line-through <%= 'd-none' unless has_disc %>" data-product-pricing-target="headerOriginal" style="font-size: 1.5rem;">
                 <%= humanized_money_with_symbol(@actual_breakdown[:base_price]) %>
               </span>
-              <span class="discounted-price text-success" style="font-size: 2.5rem; font-weight: 700;">
+              <span class="<%= has_disc ? 'text-success' : 'text-primary' %>" data-product-pricing-target="headerPrice" style="font-size: 2.5rem; font-weight: 700;">
                 <%= humanized_money_with_symbol(@actual_breakdown[:final_price]) %>
               </span>
-              <% if @actual_breakdown[:applied_discounts].any? { |d| d[:type] == :product || d[:type] == :category } %>
-                <span class="badge bg-danger fs-6 ms-1"><%= t('storefront.products.index.sale_badge') %></span>
-              <% end %>
             </div>
           <% else %>
             <span class="text-primary" style="font-size: 2.5rem; font-weight: 700;"><%= humanized_money_with_symbol(@product.price) %></span>
@@ -404,19 +416,7 @@
           <!-- Add to Cart Section (simple product) -->
           <% unless browsing_as_member? || @product.price_on_request? %>
             <% pp = @product_pricing %>
-            <% pricing_data = pp ? {
-                 controller: "product-pricing",
-                 product_pricing_locked_unit_cents_value: pp[:locked_unit_cents],
-                 product_pricing_unlocked_unit_cents_value: pp[:unlocked_unit_cents],
-                 product_pricing_base_unit_cents_value: pp[:base_unit_cents],
-                 product_pricing_condition_type_value: pp[:condition_type],
-                 product_pricing_threshold_value: pp[:threshold],
-                 product_pricing_cart_current_value: pp[:cart_current],
-                 product_pricing_discount_label_value: pp[:discount_label],
-                 product_pricing_currency_symbol_value: pp[:currency_symbol],
-                 product_pricing_remaining_template_value: t('storefront.carts.show.nudge.remaining', remaining: '%{remaining}', discount: '%{discount}')
-               } : {} %>
-            <%= form_with url: order_items_path(org_slug: params[:org_slug]), method: :post, local: true, class: "d-flex align-items-center gap-3 flex-wrap", data: pricing_data do |f| %>
+            <%= form_with url: order_items_path(org_slug: params[:org_slug]), method: :post, local: true, class: "d-flex align-items-center gap-3 flex-wrap" do |f| %>
               <%= hidden_field_tag :product_id, @product.id %>
               <%= hidden_field_tag :variant_id, @default_variant&.id %>
               <%= hidden_field_tag :category, params[:category] if params[:category].present? %>
@@ -443,6 +443,11 @@
                     <div class="small text-warning mb-1"><i class="fa-solid fa-bolt me-1"></i><span data-product-pricing-target="progressText"></span></div>
                     <div class="progress" style="height: 6px; max-width: 320px;">
                       <div class="progress-bar bg-success" role="progressbar" data-product-pricing-target="progressBar" style="width: 0%;"></div>
+                    </div>
+                  </div>
+                  <div class="w-100 d-none" data-product-pricing-target="celebration">
+                    <div class="small text-success fw-semibold">
+                      <i class="fa-solid fa-circle-check me-1"></i><%= t('storefront.products.show.unlocked_add_to_cart', discount: pp[:discount_label]) %>
                     </div>
                   </div>
                 <% end %>

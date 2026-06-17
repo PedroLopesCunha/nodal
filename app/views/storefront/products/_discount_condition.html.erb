@@ -4,8 +4,10 @@
 <% if condition %>
   <% where = if condition[:scope] == :summed
        condition[:target] == :category ? t('storefront.products.show.scope_category') : t('storefront.products.show.scope_summed_variants')
-     else
+     elsif @product&.variable?
        t('storefront.products.show.scope_per_variant')
+     else
+       t('storefront.products.show.scope_per_line')
      end %>
   <% if condition[:type] == :quantity && condition[:quantity].to_i > 1 %>
     <% if discount[:meets_condition] %>

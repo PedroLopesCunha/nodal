@@ -354,7 +354,7 @@ class Storefront::ProductsController < Storefront::BaseController
     data[:condition_type] = cond[:type].to_s
     data[:threshold] = cond[:type] == :amount ? cond[:amount].cents : cond[:quantity]
     data[:discount_label] = discount_label_for(conditional)
-    data[:cart_current] = summed_cart_current(cond, source, cart_context)
+    data[:cart_current] = cart_threshold_current(cond, source, cart_context)
     data
   end
 
@@ -366,15 +366,17 @@ class Storefront::ProductsController < Storefront::BaseController
     end
   end
 
-  def summed_cart_current(cond, source, cart_context)
-    return 0 unless cond[:scope] == :summed && cart_context
+  # What's already in the cart toward the threshold. For a per-line or
+  # product-summed condition, adding more of this product merges into the same
+  # cart line, so the product's current cart contribution counts. For a
+  # category-summed condition, the whole category's cart total counts.
+  def cart_threshold_current(cond, source, cart_context)
+    return 0 unless cart_context
 
-    by_category = source.category_id.present?
-    target_id = by_category ? source.category_id : source.product_id
-    if cond[:type] == :amount
-      by_category ? cart_context.category_amount_cents(target_id) : cart_context.product_amount_cents(target_id)
+    if cond[:scope] == :summed && source.category_id.present?
+      cond[:type] == :amount ? cart_context.category_amount_cents(source.category_id) : cart_context.category_quantity(source.category_id)
     else
-      by_category ? cart_context.category_quantity(target_id) : cart_context.product_quantity(target_id)
+      cond[:type] == :amount ? cart_context.product_amount_cents(@product.id) : cart_context.product_quantity(@product.id)
     end
   end
 
