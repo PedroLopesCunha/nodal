@@ -21,9 +21,9 @@
       }.to_json,
       "variant-selector-currency-symbol-value" => current_organisation.currency_symbol,
       "variant-selector-default-price-cents-value" => @default_variant&.unit_price_cents || @product.unit_price,
-      "variant-selector-default-final-price-cents-value" => @discount_calculator.final_price.cents,
-      "variant-selector-default-has-discount-value" => @discount_calculator.discount_breakdown[:has_discount].to_s,
-      "variant-selector-default-discount-percentage-value" => (@discount_calculator.discount_breakdown[:has_discount] && @discount_calculator.discount_breakdown[:effective_discount][:percentage].to_f.finite? ? (@discount_calculator.discount_breakdown[:effective_discount][:percentage] * 100).round(0) : 0).to_s,
+      "variant-selector-default-final-price-cents-value" => @reference_breakdown[:final_price].cents,
+      "variant-selector-default-has-discount-value" => @reference_breakdown[:has_discount].to_s,
+      "variant-selector-default-discount-percentage-value" => (@reference_breakdown[:has_discount] && @reference_breakdown[:effective_discount][:percentage].to_f.finite? ? (@reference_breakdown[:effective_discount][:percentage] * 100).round(0) : 0).to_s,
       "variant-selector-min-quantity-value" => @product.quantity_input_min,
       "variant-selector-default-sku-value" => @product.sku,
       "variant-selector-in-stock-text-value" => t('storefront.products.show.in_stock'),
@@ -120,14 +120,16 @@
           <% if @product.price_on_request? %>
             <span class="text-primary" style="font-size: 2rem; font-weight: 700;"><%= t('storefront.products.show.price_on_request') %></span>
           <% elsif @product.variable? %>
+            <%# Honest no-selection header: strikethrough only when the range is
+                actually discounted (conditions respected). JS swaps to the
+                selected variant's honest price. %>
+            <% var_has_disc = @display_price_original.present? %>
             <div class="price-with-discount">
-              <span class="original-price text-muted text-decoration-line-through <%= 'd-none' unless discount_breakdown[:has_discount] %>" style="font-size: 1.5rem;" data-variant-selector-target="originalPrice">
-                <% if discount_breakdown[:has_discount] %>
-                  <%= @display_price_original || money_amount(discount_breakdown[:base_price]) %>
-                <% end %>
+              <span class="original-price text-muted text-decoration-line-through <%= 'd-none' unless var_has_disc %>" style="font-size: 1.5rem;" data-variant-selector-target="originalPrice">
+                <%= @display_price_original %>
               </span>
-              <span class="<%= discount_breakdown[:has_discount] ? 'text-success' : 'text-primary' %>" data-variant-selector-target="mainPrice" style="font-size: 2.5rem; font-weight: 700;">
-                <%= @display_price || money_amount(discount_breakdown[:final_price]) %>
+              <span class="<%= var_has_disc ? 'text-success' : 'text-primary' %>" data-variant-selector-target="mainPrice" style="font-size: 2.5rem; font-weight: 700;">
+                <%= @display_price || money_amount(@reference_breakdown[:final_price]) %>
               </span>
             </div>
           <% elsif @product_pricing %>
