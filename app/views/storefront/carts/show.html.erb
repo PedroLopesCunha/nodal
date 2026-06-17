@@ -107,13 +107,8 @@
                     </div>
                   </td>
                   <td>
-                    <%= form_with model: item, url: order_item_path(org_slug: params[:org_slug], id: item), method: :patch, local: true, class: "d-flex justify-content-center" do |f| %>
-                      <div class="input-group input-group-sm" style="width: 120px;">
-                        <%= f.number_field :quantity, min: item.product.quantity_input_min, class: "form-control text-center" %>
-                        <button type="submit" class="btn btn-outline-secondary">
-                          <i class="fa-solid fa-sync"></i>
-                        </button>
-                      </div>
+                    <%= form_with model: item, url: order_item_path(org_slug: params[:org_slug], id: item), method: :patch, local: true, class: "d-flex justify-content-center", data: { controller: "cart-quantity" } do |f| %>
+                      <%= f.number_field :quantity, min: item.product.quantity_input_min, class: "form-control text-center", style: "width: 70px;", data: { cart_quantity_target: "input", action: "change->cart-quantity#submit" } %>
                     <% end %>
                   </td>
                   <% if show_prices? %>
