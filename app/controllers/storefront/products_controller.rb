@@ -354,11 +354,9 @@ class Storefront::ProductsController < Storefront::BaseController
     data[:threshold] = cond[:type] == :amount ? cond[:amount].cents : cond[:quantity]
     data[:discount_label] = discount_label_for(conditional)
     data[:cart_current] = cart_threshold_current(cond, source, cart_context)
-    data[:cart_current_label] = if cond[:type] == :amount
-      Money.new(data[:cart_current], current_organisation.currency).format
-    else
-      t('storefront.carts.show.nudge.units', count: data[:cart_current])
-    end
+    # "já tem X no carrinho" reads in units regardless of the condition kind.
+    cart_units = cart_context ? cart_context.product_quantity(@product.id).to_i : 0
+    data[:cart_current_label] = t('storefront.carts.show.nudge.units', count: cart_units)
     data
   end
 
