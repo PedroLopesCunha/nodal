@@ -223,9 +223,12 @@
         </div>
       </div>
 
-      <% if show_prices? && (@current_organisation.free_shipping_enabled? || @discount_nudges.present?) %>
+      <% if show_prices? && (@current_organisation.free_shipping_enabled? || @discount_nudges.present? || @discount_unlocked.present?) %>
         <div class="d-lg-none mt-3">
           <%= render 'storefront/carts/free_shipping_progress' %>
+          <% @discount_unlocked&.each do |u| %>
+            <%= render 'storefront/carts/discount_unlocked', unlocked: u %>
+          <% end %>
           <% @discount_nudges&.each do |op| %>
             <%= render 'storefront/carts/discount_nudge', opportunity: op %>
           <% end %>
@@ -275,6 +278,9 @@
 
             <%= render 'storefront/carts/free_shipping_progress' %>
 
+            <% @discount_unlocked&.each do |u| %>
+              <%= render 'storefront/carts/discount_unlocked', unlocked: u %>
+            <% end %>
             <% @discount_nudges&.each do |op| %>
               <%= render 'storefront/carts/discount_nudge', opportunity: op %>
             <% end %>

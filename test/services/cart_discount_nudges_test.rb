@@ -44,6 +44,27 @@ class CartDiscountNudgesTest < ActiveSupport::TestCase
     assert_empty nudges
   end
 
+  test "celebrates a discount once its threshold is reached" do
+    ProductDiscount.create!(organisation: @org, product: @product, discount_type: "percentage",
+      discount_value: 0.15, condition_type: "quantity", min_quantity: 10)
+    @order.order_items.create!(product: @product, quantity: 12) # met
+
+    assert_empty CartDiscountNudges.new(@order).opportunities # no longer "almost"
+    unlocked = CartDiscountNudges.new(@order).unlocked
+    assert_equal 1, unlocked.size
+    assert_equal "-15%", unlocked.first.discount_label
+    # 15% of €120 (12 × €10) currently in the cart
+    assert_equal Money.new(1800, "EUR"), unlocked.first.reward
+  end
+
+  test "does not celebrate a discount that isn't reached yet" do
+    ProductDiscount.create!(organisation: @org, product: @product, discount_type: "percentage",
+      discount_value: 0.15, condition_type: "quantity", min_quantity: 10)
+    @order.order_items.create!(product: @product, quantity: 7)
+
+    assert_empty CartDiscountNudges.new(@order).unlocked
+  end
+
   test "surfaces a € amount threshold with the amount remaining" do
     ProductDiscount.create!(organisation: @org, product: @product, discount_type: "percentage",
       discount_value: 0.10, condition_type: "amount", min_amount_cents: 10000) # €100

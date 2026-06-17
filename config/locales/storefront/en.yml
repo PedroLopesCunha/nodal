@@ -314,6 +314,8 @@ en:
         nudge:
           remaining: "%{remaining} more for %{discount}"
           save: "save %{amount}"
+          unlocked: "%{discount} unlocked · %{label}"
+          saved: "you saved %{amount}"
           units:
             one: "%{count} unit"
             other: "%{count} units"

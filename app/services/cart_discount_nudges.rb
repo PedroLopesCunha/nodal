@@ -13,6 +13,9 @@ class CartDiscountNudges
     keyword_init: true
   )
 
+  # A conditional discount the customer has now reached (to celebrate).
+  Unlocked = Struct.new(:label, :discount_label, :reward, keyword_init: true)
+
   def initialize(order)
     @order = order
     @org = order.organisation
@@ -25,7 +28,34 @@ class CartDiscountNudges
                        .sort_by { |o| -o.progress }
   end
 
+  # Conditional discounts whose threshold is now met — to celebrate.
+  def unlocked
+    candidate_discounts.filter_map { |discount| build_unlocked(discount) }
+  end
+
   private
+
+  def build_unlocked(discount)
+    by_category = discount.category_id.present?
+    target_id = by_category ? discount.category_id : discount.product_id
+
+    current, threshold, = progress_for(discount, by_category, target_id)
+    return if threshold.to_i <= 0 || current < threshold
+
+    Unlocked.new(
+      label: discount_target_label(discount, by_category),
+      discount_label: discount_value_label(discount),
+      reward: current_reward(discount, by_category, target_id)
+    )
+  end
+
+  # € saved right now on the current cart contents by this discount.
+  def current_reward(discount, by_category, target_id)
+    amount = by_category ? @context.category_amount_cents(target_id) : @context.product_amount_cents(target_id)
+    qty = by_category ? @context.category_quantity(target_id) : @context.product_quantity(target_id)
+    cents = discount.percentage? ? (amount * discount.discount_value).round : (discount.discount_value * 100).to_i * qty
+    Money.new(cents, @currency)
+  end
 
   def candidate_discounts
     product_ids = @order.order_items.map(&:product_id).uniq.compact
