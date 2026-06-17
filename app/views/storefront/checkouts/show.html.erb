@@ -354,10 +354,18 @@
         <h5 class="card-title mb-3"><%= t('storefront.carts.show.order_summary') %></h5>
 
         <% if show_prices? %>
+          <% line_savings = @order.gross_subtotal - @order.total_amount %>
           <div class="d-flex justify-content-between mb-2">
             <span class="text-muted"><%= t('storefront.checkouts.show.summary.subtotal') %> (<%= t('storefront.common.items', count: @order.item_count) %>)</span>
-            <span><%= humanized_money_with_symbol(@order.total_amount) %></span>
+            <span><%= humanized_money_with_symbol(line_savings.positive? ? @order.gross_subtotal : @order.total_amount) %></span>
           </div>
+
+          <% if line_savings.positive? %>
+            <div class="d-flex justify-content-between mb-2 text-success">
+              <span><%= t('storefront.carts.show.line_discount') %></span>
+              <span>-<%= humanized_money_with_symbol(line_savings) %></span>
+            </div>
+          <% end %>
 
           <% if @order.best_order_discount.present? %>
             <div class="d-flex justify-content-between mb-2 text-success">
