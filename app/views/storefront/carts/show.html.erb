@@ -88,11 +88,17 @@
                       <% end %>
                       <div>
                         <%= link_to item.product.name, product_path(org_slug: params[:org_slug], id: item.product), class: "fw-medium text-decoration-none text-body d-block" %>
-                        <% if item.product_variant && item.product_variant.attribute_values.any? %>
-                          <small class="text-primary d-block"><%= item.product_variant.sku.presence || item.variant_name %></small>
-                        <% elsif item.product.sku.present? %>
-                          <small class="text-muted d-block">SKU: <%= item.product.sku %></small>
-                        <% end %>
+                        <% nudge = @nudge_by_product_id&.dig(item.product_id) %>
+                        <div class="d-flex align-items-center gap-2 flex-wrap">
+                          <% if item.product_variant && item.product_variant.attribute_values.any? %>
+                            <small class="text-primary"><%= item.product_variant.sku.presence || item.variant_name %></small>
+                          <% elsif item.product.sku.present? %>
+                            <small class="text-muted">SKU: <%= item.product.sku %></small>
+                          <% end %>
+                          <% if nudge %>
+                            <%= render 'storefront/carts/add_units_button', opportunity: nudge, variant_id: item.product_variant_id %>
+                          <% end %>
+                        </div>
                         <small class="text-muted"><%= item.product.category&.name %></small>
                         <% badge = cart_stock_badge(item) %>
                         <% if badge %><div class="mt-1"><%= badge %></div><% end %>
@@ -220,6 +226,13 @@
                     <% end %>
                   </div>
                 </div>
+                <%# Line 3: "add N units to unlock" (only when close to a discount) %>
+                <% nudge = @nudge_by_product_id&.dig(item.product_id) %>
+                <% if nudge %>
+                  <div class="mt-2" style="padding-left: 56px;">
+                    <%= render 'storefront/carts/add_units_button', opportunity: nudge, variant_id: item.product_variant_id %>
+                  </div>
+                <% end %>
               </div>
             <% end %>
           </div>

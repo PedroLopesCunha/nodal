@@ -10,7 +10,7 @@ class CartDiscountNudges
   # says which, so the view formats it.
   Opportunity = Struct.new(
     :label, :discount_label, :progress, :remaining, :condition_type, :reward,
-    :units_to_add, :add_product_id,
+    :units_to_add, :add_product_id, :sku,
     keyword_init: true
   )
 
@@ -119,7 +119,8 @@ class CartDiscountNudges
       units_to_add: add,
       # The "add N units" button only makes sense for a single product, not a
       # whole category (which product would we add?).
-      add_product_id: by_category ? nil : discount.product_id
+      add_product_id: by_category ? nil : discount.product_id,
+      sku: by_category ? nil : discount.product&.sku
     )
   end
 

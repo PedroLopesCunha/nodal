@@ -1,30 +1,22 @@
 <%# "Almost there" unlock nudge — one product/category close to a discount.
-    Local: opportunity (CartDiscountNudges::Opportunity). %>
+    Local: opportunity (CartDiscountNudges::Opportunity).
+    The "add N units" action lives on the product's cart row (next to its SKU),
+    so here we only show the goal, progress and reward. %>
 <% remaining = opportunity.condition_type == :amount ? opportunity.remaining.format : t('storefront.carts.show.nudge.units', count: opportunity.remaining) %>
 <div class="rounded p-2 mb-3" style="background: var(--bs-warning-bg-subtle, #fff3cd);">
-  <div class="d-flex justify-content-between align-items-center mb-1" style="gap: .5rem;">
-    <span class="small fw-semibold text-truncate">
+  <div class="mb-1">
+    <span class="small fw-semibold d-block text-truncate">
       <i class="fa-solid fa-bolt text-warning me-1"></i><%= opportunity.label %>
     </span>
-    <span class="badge bg-warning text-dark text-nowrap"><%= t('storefront.carts.show.nudge.save', amount: opportunity.reward.format) %></span>
+    <% if opportunity.sku.present? %>
+      <span class="text-muted d-block" style="font-size: 0.7rem;">SKU: <%= opportunity.sku %></span>
+    <% end %>
   </div>
-  <% can_add = opportunity.add_product_id.present? && opportunity.units_to_add.to_i.positive? %>
   <div class="d-flex justify-content-between align-items-center mb-1" style="gap: .5rem;">
     <span class="text-muted text-truncate" style="font-size: 0.75rem;">
       <%= t('storefront.carts.show.nudge.remaining', remaining: remaining, discount: opportunity.discount_label) %>
     </span>
-    <% if can_add %>
-      <%= form_with url: order_items_path(org_slug: params[:org_slug]), method: :post, class: "m-0 flex-shrink-0" do %>
-        <%= hidden_field_tag :product_id, opportunity.add_product_id %>
-        <%= hidden_field_tag :return_to, 'cart' %>
-        <%= hidden_field_tag 'order_item[quantity]', opportunity.units_to_add %>
-        <button type="submit" class="btn btn-warning btn-sm py-0 px-2 fw-semibold text-nowrap"
-                style="font-size: 0.75rem;"
-                title="<%= t('storefront.carts.show.nudge.add_units', count: opportunity.units_to_add) %>">
-          <i class="fa-solid fa-cart-plus me-1"></i><%= t('storefront.carts.show.nudge.add_units_short', count: opportunity.units_to_add) %>
-        </button>
-      <% end %>
-    <% end %>
+    <span class="badge bg-warning text-dark text-nowrap"><%= t('storefront.carts.show.nudge.save', amount: opportunity.reward.format) %></span>
   </div>
   <div class="progress" style="height: 6px;">
     <div class="progress-bar bg-warning" role="progressbar" style="width: <%= (opportunity.progress * 100).round %>%;"></div>
