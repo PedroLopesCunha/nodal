@@ -182,7 +182,10 @@
                   <% end %>
                 </div>
                 <div class="text-end">
-                  <span class="badge bg-success fs-6">
+                  <% unmet = discount[:condition] && !discount[:meets_condition] %>
+                  <% is_live = discount[:source].equal?(@live_discount&.dig(:source)) %>
+                  <span class="badge fs-6 <%= unmet ? 'bg-warning text-dark' : 'bg-success' %>"
+                        <%= 'data-product-pricing-target=panelBadge'.html_safe if is_live %>>
                     -<%= discount[:discount_type] == 'percentage' ? "#{(discount[:value] * 100).round(0)}%" : humanized_money_with_symbol(Money.new((discount[:value] * 100).to_i, @current_organisation.currency)) %>
                   </span>
                   <% if discount[:stackable] %>

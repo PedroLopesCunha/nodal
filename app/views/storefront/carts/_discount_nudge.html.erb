@@ -1,17 +1,17 @@
 <%# "Almost there" unlock nudge — one product/category close to a discount.
     Local: opportunity (CartDiscountNudges::Opportunity). %>
 <% remaining = opportunity.condition_type == :amount ? opportunity.remaining.format : t('storefront.carts.show.nudge.units', count: opportunity.remaining) %>
-<div class="rounded p-2 mb-3" style="background: var(--bs-success-bg-subtle, #d1e7dd);">
+<div class="rounded p-2 mb-3" style="background: var(--bs-warning-bg-subtle, #fff3cd);">
   <div class="d-flex justify-content-between align-items-center mb-1" style="gap: .5rem;">
     <span class="small fw-semibold text-truncate">
-      <i class="fa-solid fa-bolt text-success me-1"></i><%= opportunity.label %>
+      <i class="fa-solid fa-bolt text-warning me-1"></i><%= opportunity.label %>
     </span>
-    <span class="badge bg-success text-nowrap"><%= t('storefront.carts.show.nudge.save', amount: opportunity.reward.format) %></span>
+    <span class="badge bg-warning text-dark text-nowrap"><%= t('storefront.carts.show.nudge.save', amount: opportunity.reward.format) %></span>
   </div>
   <div class="text-muted mb-1" style="font-size: 0.75rem;">
     <%= t('storefront.carts.show.nudge.remaining', remaining: remaining, discount: opportunity.discount_label) %>
   </div>
   <div class="progress" style="height: 6px;">
-    <div class="progress-bar bg-success" role="progressbar" style="width: <%= (opportunity.progress * 100).round %>%;"></div>
+    <div class="progress-bar bg-warning" role="progressbar" style="width: <%= (opportunity.progress * 100).round %>%;"></div>
   </div>
 </div>

@@ -320,7 +320,7 @@ en:
         free_shipping_progress: "Spend %{amount} more for free shipping"
         nudge:
           remaining: "%{remaining} more for %{discount}"
-          save: "save %{amount}"
+          save: "save up to %{amount}"
           unlocked: "%{discount} unlocked"
           saved: "you saved %{amount}"
           units:
