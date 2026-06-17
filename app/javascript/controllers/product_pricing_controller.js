@@ -92,7 +92,7 @@ export default class extends Controller {
     const met = !hasCondition || projected >= this.thresholdValue
     const unit = met ? this.unlockedUnitCentsValue : this.lockedUnitCentsValue
 
-    if (this.hasTotalTarget) this.totalTarget.textContent = this.formatPrice(unit * qty)
+    if (this.hasTotalTarget) this.totalTarget.textContent = ` · ${this.formatPrice(unit * qty)}`
     if (this.hasDiscountNoteTarget) {
       const discounted = unit < this.baseUnitCentsValue
       this.discountNoteTarget.textContent = discounted
@@ -117,6 +117,7 @@ export default class extends Controller {
   deactivate() {
     if (this.hasTrackerTarget) this.trackerTarget.classList.add("d-none")
     if (this.hasDiscountNoteTarget) this.discountNoteTarget.textContent = ""
+    if (this.hasTotalTarget) this.totalTarget.textContent = ""
     if (this.hasPanelUnmetTarget) this.panelUnmetTarget.classList.remove("d-none")
   }
 

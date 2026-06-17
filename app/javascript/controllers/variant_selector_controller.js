@@ -204,7 +204,7 @@ export default class extends Controller {
 
     if (priceCents && this.hasPriceTarget) {
       const total = priceCents * quantity
-      this.priceTarget.textContent = this.formatPrice(total)
+      this.priceTarget.textContent = ` · ${this.formatPrice(total)}`
     }
   }
 
