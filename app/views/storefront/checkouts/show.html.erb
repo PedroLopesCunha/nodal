@@ -54,6 +54,8 @@
                           <div class="fw-medium"><%= item.product.name %></div>
                           <% if item.product_variant.present? && item.product.variable? %>
                             <small class="text-primary"><%= item.product_variant.sku.presence || item.product_variant.option_values_string %></small><br>
+                          <% elsif item.product.sku.present? %>
+                            <small class="text-muted d-block">SKU: <%= item.product.sku %></small>
                           <% end %>
                           <small class="text-muted"><%= item.product.category&.name %></small>
                         </div>
@@ -100,6 +102,8 @@
                     <div class="fw-semibold text-truncate"><%= item.product.name %></div>
                     <% if item.product_variant.present? && item.product.variable? %>
                       <small class="text-primary"><%= item.product_variant.sku.presence || item.product_variant.option_values_string %></small><br>
+                    <% elsif item.product.sku.present? %>
+                      <small class="text-muted d-block">SKU: <%= item.product.sku %></small>
                     <% end %>
                     <small class="text-muted"><%= item.product.category&.name %></small>
 
