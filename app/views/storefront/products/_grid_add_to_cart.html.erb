@@ -141,7 +141,7 @@
 
       <% if interactive %>
         <button type="submit" class="btn btn-primary btn-lg w-100 mt-2" style="border-radius: 8px;">
-          <i class="fa-solid fa-cart-plus me-2"></i><%= t('storefront.products.show.grid.add_to_cart') %>
+          <i class="fa-solid fa-cart-plus me-2"></i><%= t('storefront.products.show.grid.add_to_cart') %><span data-grid-pricing-target="buttonTotal"></span>
         </button>
       <% end %>
     <% end %>

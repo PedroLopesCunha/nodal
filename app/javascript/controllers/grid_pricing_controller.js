@@ -10,7 +10,7 @@ import { Controller } from "@hotwired/stimulus"
 //   total) and, once met, flips every row to its unlocked price and celebrates.
 export default class extends Controller {
   static targets = [
-    "rowInput", "rowPrice", "rowOriginal",
+    "rowInput", "rowPrice", "rowOriginal", "buttonTotal",
     "tracker", "trackerText", "trackerIcon", "trackerLine", "progressBar"
   ]
   static values = {
@@ -30,40 +30,60 @@ export default class extends Controller {
   }
 
   update() {
+    let grandTotal = 0
     if (this.scopeValue === "summed") {
-      this.updateSummed()
+      grandTotal = this.updateSummed()
+    } else if (this.scopeValue === "none") {
+      // No condition: just sum the rows for the button total.
+      this.rowInputTargets.forEach((input) => {
+        const p = this.pricingFor(input)
+        if (p) grandTotal += this.qtyOf(input) * p.locked
+      })
     } else {
-      this.rowInputTargets.forEach((input) => this.updatePerLineRow(input))
+      this.rowInputTargets.forEach((input) => { grandTotal += this.updatePerLineRow(input) })
     }
+    this.updateButtonTotal(grandTotal)
   }
 
-  // --- per-line: each row independent -----------------------------------
+  // --- per-line: each row independent. Returns the row's € contribution. --
   updatePerLineRow(input) {
     const p = this.pricingFor(input)
-    if (!p) return
+    if (!p) return 0
     const qty = this.qtyOf(input)
     const contribution = this.conditionTypeValue === "amount" ? qty * p.base : qty
     const met = (p.cart || 0) + contribution >= this.thresholdValue
-    this.setRowPrice(input, met ? p.unlocked : p.locked, p.base)
+    const unit = met ? p.unlocked : p.locked
+    this.setRowPrice(input, unit, p.base)
+    return qty * unit
   }
 
-  // --- summed: all rows share one threshold -----------------------------
+  // --- summed: all rows share one threshold. Returns the grid € total. ----
   updateSummed() {
-    let total = this.cartSummedValue || 0
+    let toward = this.cartSummedValue || 0
     this.rowInputTargets.forEach((input) => {
       const p = this.pricingFor(input)
       if (!p) return
       const qty = this.qtyOf(input)
-      total += this.conditionTypeValue === "amount" ? qty * p.base : qty
+      toward += this.conditionTypeValue === "amount" ? qty * p.base : qty
     })
-    const met = total >= this.thresholdValue
+    const met = toward >= this.thresholdValue
 
+    let total = 0
     this.rowInputTargets.forEach((input) => {
       const p = this.pricingFor(input)
-      if (p) this.setRowPrice(input, met ? p.unlocked : p.locked, p.base)
+      if (!p) return
+      const unit = met ? p.unlocked : p.locked
+      this.setRowPrice(input, unit, p.base)
+      total += this.qtyOf(input) * unit
     })
 
-    if (this.hasTrackerTarget) this.renderTracker(met, total)
+    if (this.hasTrackerTarget) this.renderTracker(met, toward)
+    return total
+  }
+
+  updateButtonTotal(cents) {
+    if (!this.hasButtonTotalTarget) return
+    this.buttonTotalTarget.textContent = cents > 0 ? ` · ${this.formatPrice(cents)}` : ""
   }
 
   renderTracker(met, total) {
