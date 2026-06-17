@@ -202,11 +202,21 @@
           </div>
         <% end %>
 
-        <!-- Additional Price Info -->
-        <% if current_organisation.show_product_sku? %>
-          <div class="mb-4 text-muted">
-            <% display_sku = @product.variable? ? (@default_variant&.sku || @product.sku) : @product.sku %>
-            <div class="sku-container <%= 'd-none' unless display_sku.present? %>"><i class="fa-solid fa-barcode me-2"></i>SKU: <span data-variant-selector-target="sku"><%= display_sku || '-' %></span></div>
+        <!-- SKU + save-to-list (kept together so the list action is always visible,
+             including in grid add-to-cart mode) -->
+        <% display_sku = @product.variable? ? (@default_variant&.sku || @product.sku) : @product.sku %>
+        <% show_sku = current_organisation.show_product_sku? && display_sku.present? %>
+        <% show_save_list = current_customer && !browsing_as_member? %>
+        <% if show_sku || show_save_list %>
+          <div class="mb-4 d-flex justify-content-between align-items-center flex-wrap gap-2">
+            <div class="text-muted">
+              <% if show_sku %>
+                <span class="sku-container"><i class="fa-solid fa-barcode me-2"></i>SKU: <span data-variant-selector-target="sku"><%= display_sku %></span></span>
+              <% end %>
+            </div>
+            <% if show_save_list %>
+              <%= render 'storefront/products/add_to_list_dropdown', product: @product, default_variant: @default_variant, has_variants: @product.variable?, wrapper_class: '' %>
+            <% end %>
           </div>
         <% end %>
 
@@ -413,9 +423,6 @@
                 <% end %>
               <% end %>
             <% end %>
-            <% unless browsing_as_member? %>
-              <%= render 'storefront/products/add_to_list_dropdown', product: @product, default_variant: @default_variant, has_variants: true %>
-            <% end %>
           </div>
         <% else %>
           <!-- Add to Cart Section (simple product) -->
@@ -442,19 +449,8 @@
                   <span data-product-pricing-target="total"><%= humanized_money_with_symbol((@actual_breakdown ? @actual_breakdown[:final_price] : @product.price) * @product.quantity_input_min) %></span>
                   <small class="text-success" data-product-pricing-target="discountNote"></small>
                 </div>
-
-                <% if pp && pp[:condition_type] != "none" %>
-                  <div class="w-100 d-none" data-product-pricing-target="celebration">
-                    <div class="small text-success fw-semibold">
-                      <i class="fa-solid fa-circle-check me-1"></i><span data-product-pricing-target="celebrationText"></span>
-                    </div>
-                  </div>
-                <% end %>
               <% end %>
             <% end %>
-          <% end %>
-          <% unless browsing_as_member? %>
-            <%= render 'storefront/products/add_to_list_dropdown', product: @product, default_variant: @default_variant, has_variants: false %>
           <% end %>
         <% end %>
 

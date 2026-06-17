@@ -12,8 +12,8 @@ import { Controller } from "@hotwired/stimulus"
 // merge into, or a summed product/category total).
 export default class extends Controller {
   static targets = [
-    "quantity", "total", "discountNote", "progress", "progressBar", "progressText",
-    "celebration", "celebrationText", "headerPrice", "headerOriginal", "panelMet", "panelUnmet", "panelBadge"
+    "quantity", "total", "discountNote", "tracker", "trackerLine", "trackerIcon",
+    "trackerText", "progressBar", "headerPrice", "headerOriginal", "panelUnmet", "panelBadge"
   ]
   static values = {
     lockedUnitCents: Number,
@@ -47,10 +47,9 @@ export default class extends Controller {
     }
 
     this.updateHeader(unit)
-    this.updateProgress(hasCondition, met, projected)
+    this.updateTracker(hasCondition, met, projected)
 
     // "Available discounts" panel hint reflects the live state.
-    if (this.hasPanelMetTarget) this.panelMetTarget.classList.toggle("d-none", !met)
     if (this.hasPanelUnmetTarget) this.panelUnmetTarget.classList.toggle("d-none", met)
     if (this.hasPanelBadgeTarget) {
       this.panelBadgeTarget.classList.toggle("bg-success", met)
@@ -71,32 +70,39 @@ export default class extends Controller {
     }
   }
 
-  updateProgress(hasCondition, met, projected) {
-    if (this.hasCelebrationTarget) {
-      this.celebrationTarget.classList.toggle("d-none", !(hasCondition && met))
-      if (hasCondition && met && this.hasCelebrationTextTarget) {
-        // Already unlocked by what's in the cart vs. unlocked by the quantity now.
-        const byCart = this.cartCurrentValue >= this.thresholdValue
-        this.celebrationTextTarget.textContent = byCart ? this.celebrationFromCartValue : this.celebrationDefaultValue
-      }
-    }
-    if (!this.hasProgressTarget) return
+  // One tracker that lives inside the discounts panel: while locked it shows
+  // "X to go" + a partial amber bar; once unlocked it becomes the celebration
+  // + a full green bar — so the goal and the payoff read in the same spot.
+  updateTracker(hasCondition, met, projected) {
+    if (!this.hasTrackerTarget) return
+    this.trackerTarget.classList.toggle("d-none", !hasCondition)
+    if (!hasCondition) return
 
-    const showProgress = hasCondition && !met
-    this.progressTarget.classList.toggle("d-none", !showProgress)
-    if (!showProgress) return
-
-    const remaining = this.thresholdValue - projected
-    const remainingText = this.conditionTypeValue === "amount" ? this.formatPrice(remaining) : `${remaining}`
-    if (this.hasProgressTextTarget) {
-      this.progressTextTarget.textContent = this.remainingTemplateValue
+    if (met) {
+      // Unlocked by the cart vs. unlocked by the quantity now.
+      const byCart = this.cartCurrentValue >= this.thresholdValue
+      this.trackerTextTarget.textContent = byCart ? this.celebrationFromCartValue : this.celebrationDefaultValue
+      this.trackerIconTarget.className = "fa-solid fa-circle-check me-1"
+      this.setTrackerTone(true)
+      this.progressBarTarget.style.width = "100%"
+    } else {
+      const remaining = this.thresholdValue - projected
+      const remainingText = this.conditionTypeValue === "amount" ? this.formatPrice(remaining) : `${remaining}`
+      this.trackerTextTarget.textContent = this.remainingTemplateValue
         .replace("%{remaining}", remainingText)
         .replace("%{discount}", this.discountLabelValue)
-    }
-    if (this.hasProgressBarTarget) {
+      this.trackerIconTarget.className = "fa-solid fa-bolt me-1"
+      this.setTrackerTone(false)
       const pct = Math.min(Math.round((projected / this.thresholdValue) * 100), 100)
       this.progressBarTarget.style.width = `${pct}%`
     }
+  }
+
+  setTrackerTone(met) {
+    this.trackerLineTarget.classList.toggle("text-success", met)
+    this.trackerLineTarget.classList.toggle("text-warning", !met)
+    this.progressBarTarget.classList.toggle("bg-success", met)
+    this.progressBarTarget.classList.toggle("bg-warning", !met)
   }
 
   formatPrice(cents) {
