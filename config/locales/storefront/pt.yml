@@ -164,6 +164,10 @@ pt:
         empty_catalog: "Não existem produtos disponíveis de momento."
         sale_badge: "PROMOÇÃO"
         discount_up_to: "até -%{percentage}%"
+        discount_from: "%{discount} a partir de %{condition}"
+        units_short:
+          one: "%{count} un."
+          other: "%{count} un."
         min_order: "Encomenda mín."
         price_on_request: "Preço sob consulta"
         showing_products: "A mostrar %{from}-%{to} de %{count} produtos"

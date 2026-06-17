@@ -152,6 +152,10 @@ es:
         empty_catalog: "No hay productos disponibles en este momento."
         sale_badge: "OFERTA"
         discount_up_to: "hasta -%{percentage}%"
+        discount_from: "%{discount} desde %{condition}"
+        units_short:
+          one: "%{count} u."
+          other: "%{count} u."
         min_order: "Pedido mín."
         price_on_request: "Precio bajo consulta"
         showing_products: "Mostrando %{from}-%{to} de %{count} productos"

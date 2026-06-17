@@ -16,7 +16,7 @@
 <% if product.price_on_request? %>
   <span class="product-card-price"><%= t('storefront.products.index.price_on_request') %></span>
 <% elsif discount_info && discount_info[:has_discount] && discount_info[:effective_discount][:percentage]&.finite? && (product.variable? || !discount_info[:base_price].zero?) %>
-  <% dr = product.variable? ? product.discounted_price_range(current_customer) : nil %>
+  <% dr = product.variable? ? product.discounted_price_range(current_customer, for_display: !@honest_cards, cart_context: @cart_context) : nil %>
   <div>
     <% if dr %>
       <span class="product-card-price-original">

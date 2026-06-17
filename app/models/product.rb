@@ -253,12 +253,12 @@ class Product < ApplicationRecord
   # extrapolating a single percentage, which is wrong for fixed (non-uniform)
   # discounts (e.g. €10 off is 83% of €12 but only 23% of €43). Returns a hash
   # of Money values, or nil when there are no visible priced variants.
-  def discounted_price_range(customer)
+  def discounted_price_range(customer, for_display: true, cart_context: nil)
     @discounted_price_range ||= {}
-    @discounted_price_range[customer&.id] ||= compute_discounted_price_range(customer)
+    @discounted_price_range[[customer&.id, for_display]] ||= compute_discounted_price_range(customer, for_display, cart_context)
   end
 
-  def compute_discounted_price_range(customer)
+  def compute_discounted_price_range(customer, for_display, cart_context)
     variants = product_variants.where(is_default: false, published: true)
                                .where.not(unit_price_cents: [ nil, 0 ]).to_a
                                .select { |v| v.available? || v.effective_stock_policy != "hide" }
@@ -267,7 +267,7 @@ class Product < ApplicationRecord
     cheapest = variants.min_by(&:unit_price_cents)
     priciest = variants.max_by(&:unit_price_cents)
     finals = [ cheapest, priciest ].uniq.map do |v|
-      DiscountCalculator.new(product: self, customer: customer, for_display: true, variant: v).final_price
+      DiscountCalculator.new(product: self, customer: customer, for_display: for_display, variant: v, cart_context: cart_context).final_price
     end
 
     {

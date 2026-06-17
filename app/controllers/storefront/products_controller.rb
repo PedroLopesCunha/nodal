@@ -120,12 +120,10 @@ class Storefront::ProductsController < Storefront::BaseController
     # Paginate results
     @pagy, @products = pagy(sorted_products)
 
-    # Build discount info for all products using DiscountCalculator
-    # for_display: true shows all available discounts (ignoring min_quantity) for display purposes
-    @product_discounts = @products.each_with_object({}) do |product, hash|
-      calculator = DiscountCalculator.new(product: product, customer: current_customer, for_display: true)
-      hash[product.id] = calculator.discount_breakdown
-    end
+    # Honest card pricing: the actual price (conditions respected against the
+    # current cart) + a teaser for any conditional discount still to unlock.
+    @cart_context = current_cart && CartDiscountContext.new(current_cart.order_items.includes(product: :categories).to_a)
+    @product_discounts, @product_unlocks = build_card_discounts(@products)
 
     # Load card attributes (show_on_card) for product listing
     @card_attributes = current_organisation.product_attributes.where(show_on_card: true).by_position
@@ -287,13 +285,13 @@ class Storefront::ProductsController < Storefront::BaseController
     # Honest header price for simple products: what the customer actually pays
     # now (conditions respected against the current cart) — not the
     # best-possible price that the "available discounts" panel advertises.
+    @cart_context = current_cart && CartDiscountContext.new(current_cart.order_items.includes(product: :categories).to_a)
     unless @product.has_variants?
-      cart_context = current_cart && CartDiscountContext.new(current_cart.order_items.includes(product: :categories).to_a)
       @actual_breakdown = DiscountCalculator.new(
         product: @product, customer: current_customer, quantity: 1,
-        for_display: false, variant: @default_variant, cart_context: cart_context
+        for_display: false, variant: @default_variant, cart_context: @cart_context
       ).discount_breakdown
-      @product_pricing = product_pricing_data(cart_context)
+      @product_pricing = product_pricing_data(@cart_context)
     end
 
     # Build the display strings used while no variant is selected.
@@ -324,7 +322,7 @@ class Storefront::ProductsController < Storefront::BaseController
     if @product.show_related_products?
       fetcher = RelatedProductsFetcher.new(product: @product, limit: 4)
       @related_products = fetcher.fetch
-      @related_product_discounts = build_discounts_for(@related_products)
+      @related_product_discounts, @related_product_unlocks = build_card_discounts(@related_products)
     end
   end
 
@@ -506,10 +504,28 @@ class Storefront::ProductsController < Storefront::BaseController
     attrs_hash.values
   end
 
-  def build_discounts_for(products)
-    products.each_with_object({}) do |product, hash|
-      calculator = DiscountCalculator.new(product: product, customer: current_customer, for_display: true)
-      hash[product.id] = calculator.discount_breakdown
+  # Per-product card data: the honest breakdown (conditions respected) and an
+  # optional "unlock" teaser (nearest conditional discount not yet met).
+  # Returns [discounts_by_id, unlocks_by_id].
+  def build_card_discounts(products)
+    @honest_cards = true # cards show the actual price + an unlock teaser, not the best-possible price
+    discounts = {}
+    unlocks = {}
+    products.each do |product|
+      discounts[product.id] = DiscountCalculator.new(
+        product: product, customer: current_customer, for_display: false, cart_context: @cart_context
+      ).discount_breakdown
+
+      unmet = DiscountCalculator.new(
+        product: product, customer: current_customer, for_display: true, cart_context: @cart_context
+      ).all_discounts.find { |d| d[:condition] && !d[:meets_condition] }
+      unlocks[product.id] = unmet && { discount_label: discount_label_for(unmet), condition_label: condition_label_for(unmet) }
     end
+    [discounts, unlocks]
+  end
+
+  def condition_label_for(discount)
+    cond = discount[:condition]
+    cond[:type] == :amount ? cond[:amount].format : t('storefront.products.index.units_short', count: cond[:quantity])
   end
 end
