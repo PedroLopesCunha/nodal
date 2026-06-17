@@ -313,7 +313,7 @@ class Storefront::ProductsController < Storefront::BaseController
     # no-selection header/badge defaults — the panel keeps its own (for_display)
     # calculator to advertise the conditions.
     if @product.has_variants?
-      ref_variant = @variants.min_by(&:unit_price_cents) || @default_variant
+      ref_variant = @variants.select { |v| v.unit_price_cents.to_i.positive? }.min_by(&:unit_price_cents) || @default_variant
       @reference_breakdown = DiscountCalculator.new(
         product: @product, customer: current_customer, quantity: @product.quantity_input_min,
         for_display: false, variant: ref_variant, cart_context: @cart_context
