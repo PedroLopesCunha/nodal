@@ -14,9 +14,12 @@ class Storefront::CartsController < Storefront::BaseController
       nudges = CartDiscountNudges.new(@order)
       @discount_nudges = nudges.opportunities
       @discount_unlocked = nudges.unlocked
-      # The "add N units" action lives on the product's cart row (next to its
-      # SKU), so it's unambiguous which product it tops up.
-      @nudge_by_product_id = @discount_nudges.select(&:add_product_id).index_by(&:add_product_id)
+      # The "add N units" action lives on the cart row next to its SKU. Per-line
+      # discounts nudge a specific variant (index by variant); summed ones nudge
+      # the whole product (index by product).
+      targeted = @discount_nudges.select(&:add_product_id)
+      @nudge_by_variant_id = targeted.select(&:add_variant_id).index_by(&:add_variant_id)
+      @nudge_by_product_id = targeted.reject(&:add_variant_id).index_by(&:add_product_id)
     end
 
     if cart_pricing_changed? && current_organisation.cart_price_change_policy != "silent"
