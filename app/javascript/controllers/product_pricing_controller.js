@@ -38,9 +38,25 @@ export default class extends Controller {
   }
 
   connect() {
+    // Grid mode: no quantity input here — the panel tracker is driven externally
+    // by the grid-pricing controller via renderSummedTracker(). Stay passive.
+    if (!this.hasQuantityTarget) return
     // Variable product: inert until a variant is applied. Simple: always active.
     this.active = !this.isVariable()
     this.update()
+  }
+
+  // Driven by grid-pricing (summed condition) to show the panel tracker from the
+  // grid's aggregate, without a single quantity of its own.
+  renderSummedTracker(toward) {
+    const met = toward >= this.thresholdValue
+    this.updateTracker(true, met, toward)
+    if (this.hasPanelUnmetTarget) this.panelUnmetTarget.classList.toggle("d-none", met)
+    if (this.hasPanelBadgeTarget) {
+      this.panelBadgeTarget.classList.toggle("bg-success", met)
+      this.panelBadgeTarget.classList.toggle("bg-warning", !met)
+      this.panelBadgeTarget.classList.toggle("text-dark", !met)
+    }
   }
 
   isVariable() {

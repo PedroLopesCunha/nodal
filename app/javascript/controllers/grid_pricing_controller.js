@@ -9,20 +9,17 @@ import { Controller } from "@hotwired/stimulus"
 // - summed scope: one tracker at the foot sums every row (+ the product's cart
 //   total) and, once met, flips every row to its unlocked price and celebrates.
 export default class extends Controller {
-  static targets = [
-    "rowInput", "rowPrice", "rowOriginal", "buttonTotal",
-    "tracker", "trackerText", "trackerIcon", "trackerLine", "progressBar"
-  ]
+  static targets = ["rowInput", "rowPrice", "rowOriginal", "buttonTotal"]
+  // The summed tracker is shown in the discounts panel (above the grid), driven
+  // through the product-pricing controller — same place/look as simple products.
+  static outlets = ["product-pricing"]
   static values = {
     pricing: Object,       // { [vid]: { locked, unlocked, base, cart } }
-    conditionType: String, // quantity | amount
+    conditionType: String, // quantity | amount | none
     threshold: Number,     // units or cents
-    scope: String,         // per_line | summed
+    scope: String,         // per_line | summed | none
     cartSummed: Number,    // product/category cart total toward a summed threshold
-    currencySymbol: String,
-    discountLabel: String,
-    remainingTemplate: String, // "faltam %{remaining} para %{discount}"
-    celebration: String        // "%{discount} desbloqueado..."
+    currencySymbol: String
   }
 
   connect() {
@@ -77,39 +74,18 @@ export default class extends Controller {
       total += this.qtyOf(input) * unit
     })
 
-    if (this.hasTrackerTarget) this.renderTracker(met, toward)
+    // The panel tracker (product-pricing) renders from the running aggregate.
+    if (this.hasProductPricingOutlet) this.productPricingOutlet.renderSummedTracker(toward)
     return total
+  }
+
+  productPricingOutletConnected() {
+    this.update()
   }
 
   updateButtonTotal(cents) {
     if (!this.hasButtonTotalTarget) return
     this.buttonTotalTarget.textContent = cents > 0 ? ` · ${this.formatPrice(cents)}` : ""
-  }
-
-  renderTracker(met, total) {
-    if (met) {
-      this.trackerTextTarget.textContent = this.celebrationValue
-      this.trackerIconTarget.className = "fa-solid fa-circle-check me-1"
-      this.toggleTone(true)
-      this.progressBarTarget.style.width = "100%"
-    } else {
-      const remaining = this.thresholdValue - total
-      const remainingText = this.conditionTypeValue === "amount" ? this.formatPrice(remaining) : `${remaining}`
-      this.trackerTextTarget.textContent = this.remainingTemplateValue
-        .replace("%{remaining}", remainingText)
-        .replace("%{discount}", this.discountLabelValue)
-      this.trackerIconTarget.className = "fa-solid fa-bolt me-1"
-      this.toggleTone(false)
-      const pct = Math.min(Math.round((total / this.thresholdValue) * 100), 100)
-      this.progressBarTarget.style.width = `${pct}%`
-    }
-  }
-
-  toggleTone(met) {
-    this.trackerLineTarget.classList.toggle("text-success", met)
-    this.trackerLineTarget.classList.toggle("text-warning", !met)
-    this.progressBarTarget.classList.toggle("bg-success", met)
-    this.progressBarTarget.classList.toggle("bg-warning", !met)
   }
 
   // --- helpers ----------------------------------------------------------

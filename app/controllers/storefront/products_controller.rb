@@ -347,20 +347,25 @@ class Storefront::ProductsController < Storefront::BaseController
     # locked/unlocked prices and cart contribution feed it as the variant
     # selector changes. @product_pricing carries the globals (inert until a
     # variant is chosen); @variant_pricing maps variant_id -> its values.
-    if @product.has_variants? && !@product.grid_add_to_cart?
+    if @product.has_variants?
       conditional = @discount_calculator.all_discounts.find { |d| d[:condition] }
       if conditional
-        @live_discount = conditional
         cond = conditional[:condition]
-        @product_pricing = {
-          locked_unit_cents: 0, unlocked_unit_cents: 0, base_unit_cents: 0, cart_current: 0,
-          currency_symbol: current_organisation.currency_symbol,
-          condition_type: cond[:type].to_s,
-          threshold: cond[:type] == :amount ? cond[:amount].cents : cond[:quantity],
-          discount_label: discount_label_for(conditional),
-          cart_current_label: t('storefront.carts.show.nudge.units', count: 0)
-        }
-        @variant_pricing = build_variant_pricing(conditional, @cart_context)
+        grid = @product.grid_add_to_cart?
+        # The panel tracker is shown for the selector mode, and for grid+summed
+        # (grid per-line flips each row instead, so no shared tracker).
+        if !grid || cond[:scope] == :summed
+          @live_discount = conditional
+          @product_pricing = {
+            locked_unit_cents: 0, unlocked_unit_cents: 0, base_unit_cents: 0, cart_current: 0,
+            currency_symbol: current_organisation.currency_symbol,
+            condition_type: cond[:type].to_s,
+            threshold: cond[:type] == :amount ? cond[:amount].cents : cond[:quantity],
+            discount_label: discount_label_for(conditional),
+            cart_current_label: t('storefront.carts.show.nudge.units', count: 0)
+          }
+          @variant_pricing = grid ? nil : build_variant_pricing(conditional, @cart_context)
+        end
       end
     end
 

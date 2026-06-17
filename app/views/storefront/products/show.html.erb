@@ -29,10 +29,13 @@
       "variant-selector-in-stock-text-value" => t('storefront.products.show.in_stock'),
       "variant-selector-out-of-stock-text-value" => t('storefront.products.show.out_of_stock'),
       "variant-selector-display-price-value" => (@display_price || @product.display_price),
-      "variant-selector-display-price-original-value" => (@display_price_original || ""),
-      # Hand price/total/tracker to the product-pricing controller when present.
-      "variant-selector-product-pricing-outlet" => "[data-controller~='product-pricing']"
+      "variant-selector-display-price-original-value" => (@display_price_original || "")
     )
+    # Hand price/total/tracker to the product-pricing controller — selector mode
+    # only (in grid mode the grid-pricing controller drives the panel tracker).
+    unless @product.grid_add_to_cart?
+      row_data["variant-selector-product-pricing-outlet"] = "[data-controller~='product-pricing']"
+    end
   end
 %>
 <div class="row g-4 mt-4" data-controller="<%= controllers %>" <%= row_data.map { |k, v| "data-#{k}=\"#{ERB::Util.html_escape(v)}\"" }.join(" ").html_safe %>>

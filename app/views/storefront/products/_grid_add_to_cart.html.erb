@@ -44,9 +44,7 @@
          grid_pricing_scope_value: grid[:scope],
          grid_pricing_cart_summed_value: grid[:cart_summed],
          grid_pricing_currency_symbol_value: current_organisation.currency_symbol,
-         grid_pricing_discount_label_value: grid[:discount_label],
-         grid_pricing_remaining_template_value: t('storefront.carts.show.nudge.remaining', remaining: '%{remaining}', discount: '%{discount}'),
-         grid_pricing_celebration_value: t('storefront.products.show.unlocked_add_to_cart', discount: grid[:discount_label])
+         grid_pricing_product_pricing_outlet: "[data-controller~='product-pricing']"
        ) %>
   <% end %>
   <div class="mb-4" <%= tag.attributes(data: wrapper_data) %>>
@@ -116,17 +114,9 @@
         </table>
       </div>
 
-      <%# Summed-condition tracker: one bar for the whole grid. %>
-      <% if grid && grid[:scope] == "summed" %>
-        <div class="rounded p-2 mb-2" style="background: var(--bs-warning-bg-subtle, #fff3cd);" data-grid-pricing-target="tracker">
-          <div class="small fw-semibold mb-1" data-grid-pricing-target="trackerLine">
-            <i class="me-1" data-grid-pricing-target="trackerIcon"></i><span data-grid-pricing-target="trackerText"></span>
-          </div>
-          <div class="progress" style="height: 6px;">
-            <div class="progress-bar" role="progressbar" data-grid-pricing-target="progressBar" style="width: 0%;"></div>
-          </div>
-        </div>
-      <% end %>
+      <%# The summed-condition tracker lives in the "Descontos Disponíveis" panel
+          above the grid (driven via the product-pricing outlet), so it matches
+          the simple-product layout — not a separate bar at the foot. %>
 
       <% if visible_variants.size > preview_count %>
         <div class="text-center my-3">
