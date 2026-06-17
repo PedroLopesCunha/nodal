@@ -324,18 +324,15 @@ class Storefront::ProductsController < Storefront::BaseController
       if has_disc
         @display_price_original = dr[:range] ? "#{dr[:original_min].format} - #{dr[:original_max].format}" : dr[:original_min].format
         @display_price = dr[:range] ? "#{dr[:final_min].format} - #{dr[:final_max].format}" : dr[:final_min].format
-        savings_min = dr[:original_min] - dr[:final_min]
-        savings_max = dr[:original_max] - dr[:final_max]
-        @display_savings = if dr[:range] && savings_min != savings_max
-          "#{[savings_min, savings_max].min.format} – #{[savings_min, savings_max].max.format}"
-        else
-          savings_min.format
-        end
       else
         @display_price_original = nil
         @display_price = @product.display_price
-        @display_savings = nil
       end
+
+      # "Poupa" lives in the (optimistic) discounts panel — show the per-unit
+      # savings the discount yields when applied, as a RANGE across variants
+      # (a percentage discount saves more on a pricier variant).
+      @display_savings = optimistic_savings_label
     else
       @display_price_original = nil
       @display_price = nil
@@ -417,6 +414,27 @@ class Storefront::ProductsController < Storefront::BaseController
     else
       "-#{Money.new((discount[:value] * 100).to_i, current_organisation.currency).format}"
     end
+  end
+
+  # Per-unit savings the discount would yield, as a range across the variants
+  # that actually get it (variants excluded from discounts are skipped, so an
+  # excluded priciest variant doesn't drag the range down to €0). nil when none.
+  def optimistic_savings_label
+    return nil unless @variants
+
+    min_qty = @product.quantity_input_min
+    savings = @variants.filter_map do |v|
+      next unless v.unit_price_cents.to_i.positive?
+
+      bd = DiscountCalculator.new(product: @product, customer: current_customer,
+        quantity: min_qty, for_display: true, variant: v, cart_context: @cart_context).discount_breakdown
+      diff = bd[:base_price] - bd[:final_price]
+      diff if diff.positive?
+    end
+    return nil if savings.empty?
+
+    lo, hi = savings.minmax
+    lo == hi ? lo.format : "#{lo.format} – #{hi.format}"
   end
 
   # Per-variant live-pricing values: the price with the conditional discount
