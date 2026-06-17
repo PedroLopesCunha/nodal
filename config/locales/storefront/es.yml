@@ -298,6 +298,8 @@ es:
         max_discount_applied: "Descuento máximo de %{percentage} aplicado"
         available_discounts: "Descuentos de Pedido Disponibles"
         spend_more_to_unlock: "Gaste %{amount} más para desbloquear"
+        tier_applied: "Aplicado"
+        tier_remaining: "faltan %{amount}"
         discount_applied: "¡Aplicado a su pedido!"
         discount_off_orders_over: "%{value} en pedidos superiores a %{amount}"
         discount_off: "%{value} de descuento"

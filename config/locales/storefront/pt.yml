@@ -310,6 +310,8 @@ pt:
         max_discount_applied: "Desconto máximo de %{percentage} aplicado"
         available_discounts: "Descontos de Encomenda Disponíveis"
         spend_more_to_unlock: "Gaste mais %{amount} para desbloquear"
+        tier_applied: "Aplicado"
+        tier_remaining: "faltam %{amount}"
         discount_applied: "Aplicado à sua encomenda!"
         discount_off_orders_over: "%{value} em encomendas acima de %{amount}"
         discount_off: "%{value} de desconto"

@@ -322,26 +322,33 @@
               <i class="fa-solid fa-percent text-primary me-2"></i><%= t('storefront.carts.show.available_discounts') %>
             </h6>
 
-            <% @order_discounts.each do |discount| %>
+            <%# Progress "ladder": each tier shows how close the order is to it,
+                with a bar — instead of radio-like circles that look selectable. %>
+            <% tiers = @order_discounts.sort_by(&:min_order_amount_cents) %>
+            <% best = @order.best_order_discount %>
+            <% tiers.each_with_index do |discount, i| %>
               <% qualified = discount.applicable_to?(@order.total_amount) %>
-              <% amount_needed = discount.min_order_amount - @order.total_amount %>
-
-              <div class="d-flex align-items-start mb-2 <%= qualified ? 'text-success' : 'text-muted' %>">
-                <% if qualified %>
-                  <i class="fa-solid fa-check-circle me-2 mt-1"></i>
-                <% else %>
-                  <i class="fa-regular fa-circle me-2 mt-1"></i>
-                <% end %>
-                <div>
-                  <div class="<%= qualified ? 'fw-semibold' : '' %>">
-                    <% discount_value = discount.percentage? ? discount.value_display : money_amount(Money.new((discount.discount_value * 100).to_i, @current_organisation.currency)) %>
-                    <%= t('storefront.carts.show.discount_off_orders_over', value: discount_value, amount: discount.min_amount_display) %>
-                  </div>
-                  <% if qualified %>
-                    <small><%= t('storefront.carts.show.discount_applied') %></small>
-                  <% elsif amount_needed > Money.new(0, @current_organisation.currency) %>
-                    <small><%= t('storefront.carts.show.spend_more_to_unlock', amount: money_amount(amount_needed)) %></small>
-                  <% end %>
+              <% is_best = best && discount.id == best.id %>
+              <% needed = discount.min_order_amount - @order.total_amount %>
+              <% pct = (@order.total_amount.cents.to_f / discount.min_order_amount_cents * 100).clamp(0, 100) %>
+              <% value = discount.percentage? ? discount.value_display : money_amount(Money.new((discount.discount_value * 100).to_i, @current_organisation.currency)) %>
+              <div class="<%= 'mb-3' unless i == tiers.size - 1 %>">
+                <div class="d-flex justify-content-between align-items-center small mb-1" style="gap: .5rem;">
+                  <span class="fw-semibold text-truncate <%= 'text-success' if qualified %>">
+                    -<%= value %> · <%= t('storefront.carts.show.orders_over', amount: discount.min_amount_display) %>
+                  </span>
+                  <span class="flex-shrink-0 <%= qualified ? 'text-success' : 'text-muted' %>">
+                    <% if is_best %>
+                      <i class="fa-solid fa-circle-check me-1"></i><%= t('storefront.carts.show.tier_applied') %>
+                    <% elsif qualified %>
+                      <i class="fa-solid fa-circle-check"></i>
+                    <% else %>
+                      <%= t('storefront.carts.show.tier_remaining', amount: money_amount(needed)) %>
+                    <% end %>
+                  </span>
+                </div>
+                <div class="progress" style="height: 6px;">
+                  <div class="progress-bar <%= qualified ? 'bg-success' : 'bg-secondary' %>" role="progressbar" style="width: <%= pct %>%"></div>
                 </div>
               </div>
             <% end %>

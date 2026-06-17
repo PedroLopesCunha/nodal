@@ -310,6 +310,8 @@ en:
         max_discount_applied: "Maximum discount of %{percentage} applied"
         available_discounts: "Available Order Discounts"
         spend_more_to_unlock: "Spend %{amount} more to unlock"
+        tier_applied: "Applied"
+        tier_remaining: "%{amount} to go"
         discount_applied: "Applied to your order!"
         discount_off_orders_over: "%{value} off orders over %{amount}"
         discount_off: "%{value} off"
