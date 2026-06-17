@@ -323,6 +323,9 @@ pt:
         nudge:
           remaining: "faltam %{remaining} para %{discount}"
           save: "podes poupar até %{amount}"
+          add_units:
+            one: "Adicionar mais %{count} unidade"
+            other: "Adicionar mais %{count} unidades"
           unlocked: "%{discount} desbloqueado"
           saved: "poupaste %{amount}"
           units:

@@ -311,6 +311,9 @@ es:
         nudge:
           remaining: "faltan %{remaining} para %{discount}"
           save: "ahorra hasta %{amount}"
+          add_units:
+            one: "Añadir %{count} unidad más"
+            other: "Añadir %{count} unidades más"
           unlocked: "%{discount} desbloqueado"
           saved: "ahorraste %{amount}"
           units:

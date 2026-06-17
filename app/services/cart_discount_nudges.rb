@@ -10,6 +10,7 @@ class CartDiscountNudges
   # says which, so the view formats it.
   Opportunity = Struct.new(
     :label, :discount_label, :progress, :remaining, :condition_type, :reward,
+    :units_to_add, :add_product_id,
     keyword_init: true
   )
 
@@ -104,13 +105,21 @@ class CartDiscountNudges
     progress = current.to_f / threshold
     return if progress < THRESHOLD_RATIO || progress >= 1.0
 
+    qty = by_category ? @context.category_quantity(target_id) : @context.product_quantity(target_id)
+    amount = by_category ? @context.category_amount_cents(target_id) : @context.product_amount_cents(target_id)
+    add = units_to_add(discount, threshold, qty, amount)
+
     Opportunity.new(
       label: discount_target_label(discount, by_category),
       discount_label: discount_value_label(discount),
       progress: progress,
       remaining: remaining,
       condition_type: discount.condition_type.to_sym,
-      reward: reward_for(discount, by_category, target_id, threshold)
+      reward: projected_reward(discount, qty, amount, add),
+      units_to_add: add,
+      # The "add N units" button only makes sense for a single product, not a
+      # whole category (which product would we add?).
+      add_product_id: by_category ? nil : discount.product_id
     )
   end
 
@@ -127,27 +136,26 @@ class CartDiscountNudges
     [current, threshold, remaining]
   end
 
-  # € the customer would save by reaching the threshold (best-effort).
-  def reward_for(discount, by_category, target_id, threshold)
-    qty = by_category ? @context.category_quantity(target_id) : @context.product_quantity(target_id)
-    amount = by_category ? @context.category_amount_cents(target_id) : @context.product_amount_cents(target_id)
-
-    base_cents =
-      if discount.amount_condition?
-        threshold # spend reaches the € threshold
-      elsif qty.positive?
-        (amount.to_f / qty * threshold).round # scale current avg price up to the threshold qty
-      else
-        amount
-      end
-
-    cents = if discount.percentage?
-      (base_cents * discount.discount_value).round
+  # Units of the target the customer must add to cross the threshold. For a €
+  # condition we divide the shortfall by the cart's average unit price; for a
+  # quantity condition it's simply the remaining count.
+  def units_to_add(discount, threshold, qty, amount)
+    if discount.amount_condition?
+      avg = qty.positive? ? amount.to_f / qty : 0
+      avg.positive? ? ((threshold - amount) / avg).ceil : 0
     else
-      target_qty = discount.quantity_condition? ? threshold : (base_cents.zero? ? 0 : (base_cents / (amount.to_f / [qty, 1].max)).round)
-      (discount.discount_value * 100).to_i * target_qty
+      [threshold - qty, 0].max
     end
-    Money.new(cents, @currency)
+  end
+
+  # € saved once the threshold is reached by adding `add` units. Uses the same
+  # rounded per-unit discount the cart applies (round(price * rate)), so it
+  # agrees with the "Desconto -€X" the summary will show after the add.
+  def projected_reward(discount, qty, amount, add)
+    projected_qty = qty + add
+    avg = qty.positive? ? amount.to_f / qty : 0
+    per_unit = discount.percentage? ? (avg * discount.discount_value).round : (discount.discount_value * 100).to_i
+    Money.new([per_unit * projected_qty, 0].max, @currency)
   end
 
   def discount_value_label(discount)

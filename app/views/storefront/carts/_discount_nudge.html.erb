@@ -14,4 +14,14 @@
   <div class="progress" style="height: 6px;">
     <div class="progress-bar bg-warning" role="progressbar" style="width: <%= (opportunity.progress * 100).round %>%;"></div>
   </div>
+  <% if opportunity.add_product_id.present? && opportunity.units_to_add.to_i.positive? %>
+    <%= form_with url: order_items_path(org_slug: params[:org_slug]), method: :post, class: "mt-2" do %>
+      <%= hidden_field_tag :product_id, opportunity.add_product_id %>
+      <%= hidden_field_tag :return_to, 'cart' %>
+      <%= hidden_field_tag 'order_item[quantity]', opportunity.units_to_add %>
+      <button type="submit" class="btn btn-warning btn-sm w-100 fw-semibold">
+        <i class="fa-solid fa-plus me-1"></i><%= t('storefront.carts.show.nudge.add_units', count: opportunity.units_to_add) %>
+      </button>
+    <% end %>
+  <% end %>
 </div>
