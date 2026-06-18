@@ -402,10 +402,26 @@ class Storefront::ProductsController < Storefront::BaseController
     data[:threshold] = cond[:type] == :amount ? cond[:amount].cents : cond[:quantity]
     data[:discount_label] = discount_label_for(conditional)
     data[:cart_current] = cart_threshold_current(cond, source, cart_context)
-    # "já tem X no carrinho" reads in units regardless of the condition kind.
-    cart_units = cart_context ? cart_context.product_quantity(@product.id).to_i : 0
-    data[:cart_current_label] = t('storefront.carts.show.nudge.units', count: cart_units)
+    # "já tem X no carrinho" reads in units of whatever scope unlocked it — the
+    # whole category for a category discount, not just this product.
+    data[:cart_current_label] = t('storefront.carts.show.nudge.units', count: cart_scope_quantity(cond, source, cart_context))
     data
+  end
+
+  # Units already in the cart toward the threshold, in the discount's scope:
+  # the category total for a category discount, this variant's line for a
+  # per-line variant, otherwise the product total. Always a count (for the
+  # "já tem X no carrinho" celebration), regardless of quantity/€ condition.
+  def cart_scope_quantity(cond, source, cart_context, variant: nil)
+    return 0 unless cart_context
+
+    if cond[:scope] == :summed && source.category_id.present?
+      cart_context.category_quantity(source.category_id).to_i
+    elsif cond[:scope] != :summed && variant
+      cart_context.variant_quantity(variant.id).to_i
+    else
+      cart_context.product_quantity(@product.id).to_i
+    end
   end
 
   def discount_label_for(discount)
@@ -451,17 +467,12 @@ class Storefront::ProductsController < Storefront::BaseController
         quantity: min_qty, for_display: false, variant: v, cart_context: cart_context).final_price
       unlocked = DiscountCalculator.new(product: @product, customer: current_customer,
         quantity: min_qty, for_display: true, variant: v, cart_context: cart_context).final_price
-      cart_units = if cart_context
-        (cond[:scope] == :summed ? cart_context.product_quantity(@product.id) : cart_context.variant_quantity(v.id)).to_i
-      else
-        0
-      end
       hash[v.id] = {
         locked_unit_cents: locked.cents,
         unlocked_unit_cents: unlocked.cents,
         base_unit_cents: v.unit_price_cents,
         cart_current: cart_threshold_current(cond, source, cart_context, variant: v),
-        cart_current_label: t('storefront.carts.show.nudge.units', count: cart_units)
+        cart_current_label: t('storefront.carts.show.nudge.units', count: cart_scope_quantity(cond, source, cart_context, variant: v))
       }
     end
   end
