@@ -169,7 +169,7 @@
               <div class="d-flex justify-content-between align-items-center py-2 <%= 'border-bottom' unless discount == discount_breakdown[:applied_discounts].last %>">
                 <div>
                   <% case discount[:type] %>
-                  <% when :product %>
+                  <% when :product, :variant %>
                     <span class="badge bg-danger me-2"><%= t('storefront.products.index.sale_badge') %></span>
                     <strong><%= t('storefront.products.show.product_discount') %></strong>
                     <%= render 'storefront/products/discount_condition', discount: discount, live: discount[:source].equal?(@live_discount&.dig(:source)) %>

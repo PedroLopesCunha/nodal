@@ -657,13 +657,16 @@ class Storefront::ProductsController < Storefront::BaseController
     cond[:type] == :amount ? cond[:amount].format : t('storefront.products.index.units_short', count: cond[:quantity])
   end
 
-  # Cheapest visible variant for a variable product (the price-range reference),
-  # or the default variant for a simple product.
+  # Cheapest VISIBLE variant for a variable product (same reference the price
+  # range uses), or the default variant for a simple product. Visibility matters:
+  # an out-of-stock (hidden) variant must not be the reference, or its
+  # (missing) discount would hide a discounted in-stock variant on the card.
   def card_reference_variant(product)
     return product.default_variant unless product.has_variants?
 
     product.product_variants.where(is_default: false, published: true)
-           .where.not(unit_price_cents: [ nil, 0 ])
+           .where.not(unit_price_cents: [ nil, 0 ]).to_a
+           .select { |v| v.available? || v.effective_stock_policy != "hide" }
            .min_by(&:unit_price_cents) || product.default_variant
   end
 end
