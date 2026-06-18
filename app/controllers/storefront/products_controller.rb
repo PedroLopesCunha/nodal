@@ -288,11 +288,17 @@ class Storefront::ProductsController < Storefront::BaseController
     # for_display: true shows all available discounts (ignoring min_quantity) for display purposes.
     # For variable products, leave variant: nil so the calculator picks the cheapest published
     # variant as reference — base_price/final_price/percentage stay meaningful.
+    # cart_context so the panel's met/unmet state respects what's already in the
+    # cart (a summed/category threshold can be reached by other lines) — matches
+    # the honest header. Without it the panel would say "Gaste €X..." even when
+    # the category already cleared it (only visible on variable products, where
+    # the live JS tracker isn't driving the panel until a variant is picked).
     @discount_calculator = DiscountCalculator.new(
       product: @product,
       customer: current_customer,
       for_display: true,
-      variant: @product.has_variants? ? nil : @default_variant
+      variant: @product.has_variants? ? nil : @default_variant,
+      cart_context: @cart_context
     )
 
     # Honest header price for simple products: what the customer actually pays
