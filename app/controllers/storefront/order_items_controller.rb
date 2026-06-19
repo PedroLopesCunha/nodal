@@ -35,12 +35,15 @@ class Storefront::OrderItemsController < Storefront::BaseController
     authorize @order_item
 
     filter_params = { category: params[:category], queries: params[:queries], page: params[:page] }
+    # An unlock nudge (and other in-cart actions) can ask to stay on the cart.
+    back_path = params[:return_to] == 'cart' ?
+      cart_path(org_slug: params[:org_slug]) :
+      product_path(org_slug: params[:org_slug], id: @product, **filter_params)
 
     if @order_item.save
-      redirect_to product_path(org_slug: params[:org_slug], id: @product, **filter_params), notice: t('storefront.cart.item_added')
+      redirect_to back_path, notice: t('storefront.cart.item_added')
     else
-      redirect_to product_path(org_slug: params[:org_slug], id: @product.id, **filter_params),
-                    alert: @order_item.errors.full_messages.join(", ")
+      redirect_to back_path, alert: @order_item.errors.full_messages.join(", ")
     end
   end
 
@@ -52,7 +55,7 @@ class Storefront::OrderItemsController < Storefront::BaseController
     # :customer_change context enforces the minimum-quantity validation for a
     # customer-initiated edit (system re-pricing saves without a context).
     if @order_item.save(context: :customer_change)
-      redirect_to cart_path(org_slug: params[:org_slug]), notice: "Cart updated."
+      redirect_to cart_path(org_slug: params[:org_slug]), notice: t('storefront.flash.cart_updated')
     else
       redirect_to cart_path(org_slug: params[:org_slug]),
                   alert: @order_item.errors.full_messages.join(", ")

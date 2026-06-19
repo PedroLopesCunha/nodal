@@ -43,13 +43,10 @@
                 <i class="fa-solid fa-tag text-success me-2"></i>
                 <div>
                   <div class="fw-semibold">
-                    <% if discount.percentage? %>
-                      <%= discount.value_display %> off
-                    <% else %>
-                      <%= humanized_money_with_symbol(Money.new((discount.discount_value * 100).to_i, @current_organisation.currency)) %> off
-                    <% end %>
+                    <% value = discount.percentage? ? discount.value_display : money_amount(Money.new((discount.discount_value * 100).to_i, @current_organisation.currency)) %>
+                    <%= t('storefront.carts.show.discount_off', value: value) %>
                   </div>
-                  <small class="text-muted">Orders over <%= discount.min_amount_display %></small>
+                  <small class="text-muted"><%= t('storefront.carts.show.orders_over', amount: discount.min_amount_display) %></small>
                 </div>
               </div>
             <% end %>
@@ -90,11 +87,18 @@
                         </div>
                       <% end %>
                       <div>
-                        <%= link_to item.product.name, product_path(org_slug: params[:org_slug], id: item.product), class: "fw-medium text-decoration-none text-body" %>
-                        <% if item.product_variant && item.product_variant.attribute_values.any? %>
-                          <small class="text-primary"><%= item.product_variant.sku.presence || item.variant_name %></small>
-                          <br>
-                        <% end %>
+                        <%= link_to item.product.name, product_path(org_slug: params[:org_slug], id: item.product), class: "fw-medium text-decoration-none text-body d-block" %>
+                        <% nudge = @nudge_by_variant_id&.dig(item.product_variant_id) || @nudge_by_product_id&.dig(item.product_id) %>
+                        <div class="d-flex align-items-center gap-2 flex-wrap">
+                          <% if item.product_variant && item.product_variant.attribute_values.any? %>
+                            <small class="text-primary"><%= item.product_variant.sku.presence || item.variant_name %></small>
+                          <% elsif item.product.sku.present? %>
+                            <small class="text-muted">SKU: <%= item.product.sku %></small>
+                          <% end %>
+                          <% if nudge %>
+                            <%= render 'storefront/carts/add_units_button', opportunity: nudge, variant_id: item.product_variant_id %>
+                          <% end %>
+                        </div>
                         <small class="text-muted"><%= item.product.category&.name %></small>
                         <% badge = cart_stock_badge(item) %>
                         <% if badge %><div class="mt-1"><%= badge %></div><% end %>
@@ -103,31 +107,26 @@
                     </div>
                   </td>
                   <td>
-                    <%= form_with model: item, url: order_item_path(org_slug: params[:org_slug], id: item), method: :patch, local: true, class: "d-flex justify-content-center" do |f| %>
-                      <div class="input-group input-group-sm" style="width: 120px;">
-                        <%= f.number_field :quantity, min: item.product.quantity_input_min, class: "form-control text-center" %>
-                        <button type="submit" class="btn btn-outline-secondary">
-                          <i class="fa-solid fa-sync"></i>
-                        </button>
-                      </div>
+                    <%= form_with model: item, url: order_item_path(org_slug: params[:org_slug], id: item), method: :patch, local: true, class: "d-flex justify-content-center", data: { controller: "cart-quantity" } do |f| %>
+                      <%= f.number_field :quantity, min: item.product.quantity_input_min, class: "form-control text-center", style: "width: 70px;", data: { cart_quantity_target: "input", action: "change->cart-quantity#submit" } %>
                     <% end %>
                   </td>
                   <% if show_prices? %>
                     <td class="text-end">
                       <% if item.discount_percentage && item.discount_percentage > 0 %>
-                        <span class="text-muted text-decoration-line-through small d-block"><%= humanized_money_with_symbol(item.price) %></span>
-                        <span class="text-success"><%= humanized_money_with_symbol(item.price - (item.price * item.discount_percentage)) %></span>
+                        <span class="text-muted text-decoration-line-through small d-block"><%= money_amount(item.price) %></span>
+                        <span class="text-success"><%= money_amount(item.price - (item.price * item.discount_percentage)) %></span>
                         <span class="badge bg-success-subtle text-success small">-<%= format_discount_percentage(item.discount_percentage) %></span>
                       <% else %>
-                        <%= humanized_money_with_symbol(item.price) %>
+                        <%= money_amount(item.price) %>
                       <% end %>
                     </td>
                     <td class="text-end fw-medium">
                       <% if item.discount_percentage && item.discount_percentage > 0 %>
-                        <span class="text-muted text-decoration-line-through small d-block"><%= humanized_money_with_symbol(item.price * item.quantity) %></span>
-                        <span class="text-success fw-bold"><%= humanized_money_with_symbol(item.total_price) %></span>
+                        <span class="text-muted text-decoration-line-through small d-block"><%= money_amount(item.price * item.quantity) %></span>
+                        <span class="text-success fw-bold"><%= money_amount(item.total_price) %></span>
                       <% else %>
-                        <%= humanized_money_with_symbol(item.total_price) %>
+                        <%= money_amount(item.total_price) %>
                       <% end %>
                     </td>
                   <% end %>
@@ -188,6 +187,8 @@
                     <% parts = [] %>
                     <% if item.product_variant && item.product_variant.attribute_values.any? %>
                       <% parts << (item.product_variant.sku.presence || item.variant_name) %>
+                    <% elsif item.product.sku.present? %>
+                      <% parts << "SKU: #{item.product.sku}" %>
                     <% end %>
                     <% if item.product.category&.name.present? %>
                       <% parts << item.product.category.name %>
@@ -195,12 +196,12 @@
                     <% if show_prices? %>
                       <% if item.discount_percentage && item.discount_percentage > 0 %>
                         <% parts << capture do %>
-                          <span class="text-decoration-line-through"><%= humanized_money_with_symbol(item.price) %></span>
-                          <span class="text-success"><%= humanized_money_with_symbol(item.price - (item.price * item.discount_percentage)) %></span>
+                          <span class="text-decoration-line-through"><%= money_amount(item.price) %></span>
+                          <span class="text-success"><%= money_amount(item.price - (item.price * item.discount_percentage)) %></span>
                           <span class="badge bg-success-subtle text-success" style="font-size: 0.65rem;">-<%= format_discount_percentage(item.discount_percentage) %></span>
                         <% end %>
                       <% else %>
-                        <% parts << humanized_money_with_symbol(item.price).to_s %>
+                        <% parts << money_amount(item.price).to_s %>
                       <% end %>
                     <% end %>
                     <%= raw parts.join(' · ') %>
@@ -209,9 +210,9 @@
                     <% if show_prices? %>
                       <span class="fw-bold small me-2">
                         <% if item.discount_percentage && item.discount_percentage > 0 %>
-                          <span class="text-success"><%= humanized_money_with_symbol(item.total_price) %></span>
+                          <span class="text-success"><%= money_amount(item.total_price) %></span>
                         <% else %>
-                          <%= humanized_money_with_symbol(item.total_price) %>
+                          <%= money_amount(item.total_price) %>
                         <% end %>
                       </span>
                     <% end %>
@@ -220,11 +221,30 @@
                     <% end %>
                   </div>
                 </div>
+                <%# Line 3: "add N units to unlock" (only when close to a discount) %>
+                <% nudge = @nudge_by_variant_id&.dig(item.product_variant_id) || @nudge_by_product_id&.dig(item.product_id) %>
+                <% if nudge %>
+                  <div class="mt-2" style="padding-left: 56px;">
+                    <%= render 'storefront/carts/add_units_button', opportunity: nudge, variant_id: item.product_variant_id %>
+                  </div>
+                <% end %>
               </div>
             <% end %>
           </div>
         </div>
       </div>
+
+      <% if show_prices? && (@current_organisation.free_shipping_enabled? || @discount_nudges.present? || @discount_unlocked.present?) %>
+        <div class="d-lg-none mt-3">
+          <%= render 'storefront/carts/free_shipping_progress' %>
+          <% @discount_unlocked&.each do |u| %>
+            <%= render 'storefront/carts/discount_unlocked', unlocked: u %>
+          <% end %>
+          <% @discount_nudges&.each do |op| %>
+            <%= render 'storefront/carts/discount_nudge', opportunity: op %>
+          <% end %>
+        </div>
+      <% end %>
 
       <div class="d-flex justify-content-between align-items-center mt-3">
         <%= link_to products_path(org_slug: params[:org_slug]), class: "btn btn-sm text-muted", style: "font-size: 0.8rem;" do %>
@@ -242,15 +262,23 @@
           <h5 class="card-title mb-3"><%= t('storefront.carts.show.order_summary') %></h5>
 
           <% if show_prices? %>
+            <% line_savings = @order.gross_subtotal - @order.total_amount %>
             <div class="d-flex justify-content-between mb-2">
               <span class="text-muted"><%= t('storefront.carts.show.subtotal') %> (<%= t('storefront.common.items', count: @order.item_count) %>)</span>
-              <span><%= humanized_money_with_symbol(@order.total_amount) %></span>
+              <span><%= money_amount(line_savings.positive? ? @order.gross_subtotal : @order.total_amount) %></span>
             </div>
+
+            <% if line_savings.positive? %>
+              <div class="d-flex justify-content-between mb-2 text-success">
+                <span><%= t('storefront.carts.show.line_discount') %></span>
+                <span>-<%= money_amount(line_savings) %></span>
+              </div>
+            <% end %>
 
             <% if @order.best_order_discount.present? %>
               <div class="d-flex justify-content-between mb-2 text-success">
                 <span><%= t('storefront.carts.show.order_discount') %> (<%= @order.best_order_discount.value_display %>)</span>
-                <span>-<%= humanized_money_with_symbol(@order.auto_order_discount_amount) %></span>
+                <span>-<%= money_amount(@order.auto_order_discount_amount) %></span>
               </div>
             <% end %>
 
@@ -264,26 +292,16 @@
 
             <div class="d-flex justify-content-between mb-4">
               <span class="fw-bold"><%= t('storefront.checkouts.show.summary.total') %></span>
-              <span class="fw-bold fs-5"><%= humanized_money_with_symbol(@order.total_with_auto_discount) %></span>
+              <span class="fw-bold fs-5"><%= money_amount(@order.total_with_auto_discount) %></span>
             </div>
 
-            <% if @current_organisation.free_shipping_enabled? %>
-              <% if @order.qualifies_for_free_shipping? %>
-                <div class="bg-light rounded p-2 mb-3 text-center">
-                  <i class="fa-solid fa-truck text-success me-1"></i>
-                  <span class="text-success small"><%= t('storefront.carts.show.free_shipping_applied') %></span>
-                </div>
-              <% else %>
-                <div class="bg-light rounded p-2 mb-3">
-                  <div class="d-flex justify-content-between small text-muted mb-1">
-                    <span><%= t('storefront.carts.show.free_shipping_progress', amount: humanized_money_with_symbol(@order.free_shipping_amount_remaining)) %></span>
-                  </div>
-                  <% progress = (@order.total_with_auto_discount.cents.to_f / @current_organisation.free_shipping_threshold.cents * 100).clamp(0, 100) %>
-                  <div class="progress" style="height: 6px;">
-                    <div class="progress-bar bg-secondary" role="progressbar" style="width: <%= progress %>%"></div>
-                  </div>
-                </div>
-              <% end %>
+            <%= render 'storefront/carts/free_shipping_progress' %>
+
+            <% @discount_unlocked&.each do |u| %>
+              <%= render 'storefront/carts/discount_unlocked', unlocked: u %>
+            <% end %>
+            <% @discount_nudges&.each do |op| %>
+              <%= render 'storefront/carts/discount_nudge', opportunity: op %>
             <% end %>
           <% else %>
             <div class="text-muted small mb-3">
@@ -304,29 +322,54 @@
               <i class="fa-solid fa-percent text-primary me-2"></i><%= t('storefront.carts.show.available_discounts') %>
             </h6>
 
-            <% @order_discounts.each do |discount| %>
-              <% qualified = discount.applicable_to?(@order.total_amount) %>
-              <% amount_needed = discount.min_order_amount - @order.total_amount %>
+            <%# One progress ladder: a single bar with a marker per tier, so the
+                order's progress across all thresholds reads at a glance. Tiers
+                get equal width on the bar (thresholds are far apart), so it's a
+                clean "staircase" rather than markers bunched at the start. %>
+            <% tiers = @order_discounts.sort_by(&:min_order_amount_cents) %>
+            <% best = @order.best_order_discount %>
+            <% total_c = @order.total_amount.cents %>
+            <% seg = 100.0 / tiers.size %>
+            <%
+              fill = 100.0
+              prev = 0
+              tiers.each_with_index do |d, i|
+                th = d.min_order_amount_cents
+                if total_c < th
+                  fill = (i + (total_c - prev).to_f / (th - prev)) * seg
+                  break
+                end
+                prev = th
+              end
+            %>
+            <% next_tier = tiers.find { |d| !d.applicable_to?(@order.total_amount) } %>
 
-              <div class="d-flex align-items-start mb-2 <%= qualified ? 'text-success' : 'text-muted' %>">
-                <% if qualified %>
-                  <i class="fa-solid fa-check-circle me-2 mt-1"></i>
-                <% else %>
-                  <i class="fa-regular fa-circle me-2 mt-1"></i>
-                <% end %>
-                <div>
-                  <div class="<%= qualified ? 'fw-semibold' : '' %>">
-                    <% discount_value = discount.percentage? ? discount.value_display : humanized_money_with_symbol(Money.new((discount.discount_value * 100).to_i, @current_organisation.currency)) %>
-                    <%= t('storefront.carts.show.discount_off_orders_over', value: discount_value, amount: discount.min_amount_display) %>
-                  </div>
-                  <% if qualified %>
-                    <small><%= t('storefront.carts.show.discount_applied') %></small>
-                  <% elsif amount_needed > Money.new(0, @current_organisation.currency) %>
-                    <small><%= t('storefront.carts.show.spend_more_to_unlock', amount: humanized_money_with_symbol(amount_needed)) %></small>
-                  <% end %>
-                </div>
-              </div>
-            <% end %>
+            <div class="small mb-2">
+              <% if next_tier %>
+                <% nv = next_tier.percentage? ? next_tier.value_display : money_amount(Money.new((next_tier.discount_value * 100).to_i, @current_organisation.currency)) %>
+                <i class="fa-solid fa-bolt text-warning me-1"></i><span class="text-muted"><%= t('storefront.carts.show.order_ladder_next', amount: money_amount(next_tier.min_order_amount - @order.total_amount), discount: "-#{nv}") %></span>
+              <% else %>
+                <% bv = best&.value_display %>
+                <i class="fa-solid fa-circle-check text-success me-1"></i><span class="text-success fw-semibold"><%= t('storefront.carts.show.order_ladder_done', discount: "-#{bv}") %></span>
+              <% end %>
+            </div>
+
+            <div class="progress position-relative" style="height: 8px; overflow: visible;">
+              <div class="progress-bar bg-success" role="progressbar" style="width: <%= fill %>%; border-radius: 4px;"></div>
+              <% tiers.each_with_index do |d, i| %>
+                <% next if i == tiers.size - 1 %>
+                <span class="position-absolute" style="left: <%= (i + 1) * seg %>%; top: 0; bottom: 0; width: 2px; background: #fff;"></span>
+              <% end %>
+            </div>
+
+            <div class="position-relative mt-1" style="height: 1rem;">
+              <% tiers.each_with_index do |d, i| %>
+                <% reached = d.applicable_to?(@order.total_amount) %>
+                <% v = d.percentage? ? d.value_display : money_amount(Money.new((d.discount_value * 100).to_i, @current_organisation.currency)) %>
+                <span class="position-absolute <%= reached ? 'text-success fw-semibold' : 'text-muted' %>"
+                      style="left: <%= (i + 1) * seg %>%; transform: translateX(<%= i == tiers.size - 1 ? '-100%' : '-50%' %>); font-size: 0.7rem; white-space: nowrap;">-<%= v %></span>
+              <% end %>
+            </div>
           </div>
         </div>
       <% end %>
@@ -357,7 +400,7 @@
     <div class="d-flex justify-content-between align-items-center mb-2">
       <span class="text-muted small"><%= t('storefront.common.items', count: @order.item_count) %></span>
       <% if show_prices? %>
-        <span class="fw-bold fs-5"><%= humanized_money_with_symbol(@order.total_with_auto_discount) %></span>
+        <span class="fw-bold fs-5"><%= money_amount(@order.total_with_auto_discount) %></span>
       <% end %>
     </div>
     <%= link_to checkout_path(org_slug: params[:org_slug]), class: "btn btn-primary w-100" do %>

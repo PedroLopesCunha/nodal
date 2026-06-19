@@ -129,7 +129,7 @@
   <% if show_prices? && current_organisation&.free_shipping_enabled? && controller_name.in?(%w[home carts]) %>
     <div class="py-2 text-center small fw-medium" style="background-color: #d1e7dd; color: #0f5132;">
       <i class="fa-solid fa-truck me-1"></i>
-      <%= t('storefront.free_shipping.banner', amount: humanized_money_with_symbol(current_organisation.free_shipping_threshold)) %>
+      <%= t('storefront.free_shipping.banner', amount: money_amount(current_organisation.free_shipping_threshold)) %>
     </div>
   <% end %>
 </header>

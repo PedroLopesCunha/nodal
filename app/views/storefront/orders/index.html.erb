@@ -43,7 +43,7 @@
               <td><%= order.placed_at&.strftime("%B %d, %Y") %></td>
               <td><%= t('storefront.common.items', count: order.order_items.count) %></td>
               <% if show_prices? %>
-                <td><%= humanized_money_with_symbol(order.total_amount) %></td>
+                <td><%= money_amount(order.total_amount) %></td>
               <% end %>
               <td>
                 <% status_class = case order.status
@@ -93,7 +93,7 @@
           <div class="d-flex justify-content-between align-items-center mb-3">
             <span class="text-muted small"><%= t('storefront.common.items', count: order.order_items.count) %></span>
             <% if show_prices? %>
-              <span class="fw-bold"><%= humanized_money_with_symbol(order.total_amount) %></span>
+              <span class="fw-bold"><%= money_amount(order.total_amount) %></span>
             <% end %>
           </div>
           <div class="d-flex gap-2">

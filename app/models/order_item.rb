@@ -103,7 +103,7 @@ class OrderItem < ApplicationRecord
   # Returns a hash of {attribute => [old, new]} for whatever changed (empty
   # when nothing did). The caller decides whether to persist. No-op once the
   # order is placed, so historical orders keep the price they were sold at.
-  def refresh_pricing!
+  def refresh_pricing!(cart_context: nil)
     return {} if order&.placed?
 
     new_price = product_variant&.unit_price_cents || product&.unit_price
@@ -113,7 +113,8 @@ class OrderItem < ApplicationRecord
       product: product,
       customer: order&.customer,
       quantity: quantity || 1,
-      variant: product_variant
+      variant: product_variant,
+      cart_context: cart_context
     )
     self.discount_percentage = calculator.effective_discount[:percentage] || 0
 

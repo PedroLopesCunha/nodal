@@ -10,6 +10,17 @@ class Storefront::CartsController < Storefront::BaseController
     @suggested_products = load_suggested_products
     @min_quantity_shortfall_by_product_id =
       @order.combined_min_quantity_shortfalls.index_by { |s| s[:product].id }
+    if helpers.show_prices?
+      nudges = CartDiscountNudges.new(@order)
+      @discount_nudges = nudges.opportunities
+      @discount_unlocked = nudges.unlocked
+      # The "add N units" action lives on the cart row next to its SKU. Per-line
+      # discounts nudge a specific variant (index by variant); summed ones nudge
+      # the whole product (index by product).
+      targeted = @discount_nudges.select(&:add_product_id)
+      @nudge_by_variant_id = targeted.select(&:add_variant_id).index_by(&:add_variant_id)
+      @nudge_by_product_id = targeted.reject(&:add_variant_id).index_by(&:add_product_id)
+    end
 
     if cart_pricing_changed? && current_organisation.cart_price_change_policy != "silent"
       flash.now[:notice] = t("storefront.carts.show.prices_updated")

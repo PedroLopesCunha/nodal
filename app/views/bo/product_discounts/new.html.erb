@@ -98,19 +98,40 @@
           </div>
 
           <div class="row g-3 mt-1">
-            <div class="col-md-4">
+            <div class="col-md-6">
               <label class="form-label"><%= t('bo.pricing.form.discount_type') %> <span class="text-danger">*</span></label>
               <%= f.select :discount_type, [[t('bo.pricing.form.percentage'), 'percentage'], [t('bo.pricing.form.fixed_amount'), 'fixed']], {}, { class: "form-select", required: true } %>
             </div>
-            <div class="col-md-4">
+            <div class="col-md-6">
               <label class="form-label"><%= t('bo.pricing.form.discount_value') %> <span class="text-danger">*</span></label>
               <%= f.number_field :discount_value, class: "form-control", placeholder: "0.10", step: 0.01, min: 0, required: true %>
               <small class="text-muted"><%= t('bo.pricing.form.discount_value_hint', symbol: @current_organisation.currency_symbol) %></small>
             </div>
-            <div class="col-md-4">
+          </div>
+
+          <div class="row g-3 mt-1" data-controller="discount-condition">
+            <div class="col-md-6">
+              <label class="form-label"><%= t('bo.pricing.form.condition_type') %></label>
+              <%= f.select :condition_type,
+                    [[t('bo.pricing.form.condition_quantity'), 'quantity'], [t('bo.pricing.form.condition_amount'), 'amount']],
+                    {}, { class: "form-select", data: { discount_condition_target: "select", action: "change->discount-condition#update" } } %>
+            </div>
+            <div class="col-md-6" data-discount-condition-target="quantity">
               <label class="form-label"><%= t('bo.pricing.form.min_quantity') %></label>
               <%= f.number_field :min_quantity, class: "form-control", placeholder: "1", step: 1, min: 1, value: @discount.min_quantity || 1 %>
               <small class="text-muted"><%= t('bo.pricing.form.min_quantity_hint') %></small>
+            </div>
+            <div class="col-md-6" data-discount-condition-target="amount">
+              <label class="form-label"><%= t('bo.pricing.form.min_amount') %></label>
+              <%= f.number_field :min_amount, class: "form-control", placeholder: "50", step: 0.01, min: 0 %>
+              <small class="text-muted"><%= t('bo.pricing.form.min_amount_hint') %></small>
+            </div>
+            <div class="col-12" data-discount-condition-target="scope">
+              <label class="form-label"><%= t('bo.pricing.form.condition_scope') %></label>
+              <%= f.select :condition_scope,
+                    [[t('bo.pricing.form.condition_per_line'), 'per_line'], [t('bo.pricing.form.condition_summed'), 'summed']],
+                    {}, { class: "form-select" } %>
+              <small class="text-muted"><%= t('bo.pricing.form.condition_scope_hint') %></small>
             </div>
           </div>
 

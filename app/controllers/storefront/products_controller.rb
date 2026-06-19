@@ -120,12 +120,10 @@ class Storefront::ProductsController < Storefront::BaseController
     # Paginate results
     @pagy, @products = pagy(sorted_products)
 
-    # Build discount info for all products using DiscountCalculator
-    # for_display: true shows all available discounts (ignoring min_quantity) for display purposes
-    @product_discounts = @products.each_with_object({}) do |product, hash|
-      calculator = DiscountCalculator.new(product: product, customer: current_customer, for_display: true)
-      hash[product.id] = calculator.discount_breakdown
-    end
+    # Honest card pricing: the actual price (conditions respected against the
+    # current cart) + a teaser for any conditional discount still to unlock.
+    @cart_context = current_cart && CartDiscountContext.new(current_cart.order_items.includes(product: :categories).to_a)
+    @product_discounts, @product_unlocks = build_card_discounts(@products)
 
     # Load card attributes (show_on_card) for product listing
     @card_attributes = current_organisation.product_attributes.where(show_on_card: true).by_position
@@ -238,6 +236,10 @@ class Storefront::ProductsController < Storefront::BaseController
       @breadcrumbs = @primary_category.ancestors.to_a << @primary_category
     end
 
+    # Cart aggregates up front, so per-variant prices and conditions reflect
+    # what's already in the cart (honest pricing, not the best-possible price).
+    @cart_context = current_cart && CartDiscountContext.new(current_cart.order_items.includes(product: :categories).to_a)
+
     # Load variants data for variable products
     if @product.has_variants?
       # Only show published, non-default variants; filter out hidden-when-unavailable
@@ -253,14 +255,23 @@ class Storefront::ProductsController < Storefront::BaseController
       }
       @default_variant = @product.default_variant
 
-      # Compute per-variant discount data for JS
+      # Per-variant discount data for JS. Honest pricing: the price reflects the
+      # discounts whose condition is actually met (against the current cart),
+      # not the best-possible price. A teaser carries the conditional discount
+      # that isn't met yet ("-17% a partir de €100"), so the UI can advertise it
+      # without pretending it's already applied.
+      min_qty = @product.quantity_input_min
       @variant_discounts = @variants.each_with_object({}) do |v, hash|
-        calc = DiscountCalculator.new(product: @product, customer: current_customer, for_display: true, variant: v)
-        bd = calc.discount_breakdown
+        honest = DiscountCalculator.new(product: @product, customer: current_customer,
+          quantity: min_qty, for_display: false, variant: v, cart_context: @cart_context).discount_breakdown
+        teaser = DiscountCalculator.new(product: @product, customer: current_customer,
+          quantity: min_qty, for_display: true, variant: v, cart_context: @cart_context)
+          .all_discounts.find { |d| d[:condition] && !d[:meets_condition] }
         hash[v.id] = {
-          has_discount: bd[:has_discount],
-          final_price_cents: bd[:final_price].cents,
-          discount_percentage: bd[:has_discount] && bd[:effective_discount][:percentage].to_f.finite? ? (bd[:effective_discount][:percentage] * 100).round(0) : 0
+          has_discount: honest[:has_discount],
+          final_price_cents: honest[:final_price].cents,
+          discount_percentage: honest[:has_discount] && honest[:effective_discount][:percentage].to_f.finite? ? (honest[:effective_discount][:percentage] * 100).round(0) : 0,
+          teaser_percentage: teaser && teaser[:discount_type] == "percentage" ? (teaser[:value] * 100).round(0) : nil
         }
       end
     else
@@ -277,43 +288,218 @@ class Storefront::ProductsController < Storefront::BaseController
     # for_display: true shows all available discounts (ignoring min_quantity) for display purposes.
     # For variable products, leave variant: nil so the calculator picks the cheapest published
     # variant as reference — base_price/final_price/percentage stay meaningful.
+    # cart_context so the panel's met/unmet state respects what's already in the
+    # cart (a summed/category threshold can be reached by other lines) — matches
+    # the honest header. Without it the panel would say "Gaste €X..." even when
+    # the category already cleared it (only visible on variable products, where
+    # the live JS tracker isn't driving the panel until a variant is picked).
     @discount_calculator = DiscountCalculator.new(
       product: @product,
       customer: current_customer,
       for_display: true,
-      variant: @product.has_variants? ? nil : @default_variant
+      variant: @product.has_variants? ? nil : @default_variant,
+      cart_context: @cart_context
     )
 
-    # Build the display strings used while no variant is selected.
-    # For variable products with a discount we want both a strikethrough
-    # original range and a discounted range; for everything else display_price
-    # and the regular discount UI cover the case.
-    breakdown = @discount_calculator.discount_breakdown
-    if @product.has_variants? && breakdown[:has_discount] && (dr = @product.discounted_price_range(current_customer))
-      @display_price_original = dr[:range] ? "#{dr[:original_min].format} - #{dr[:original_max].format}" : dr[:original_min].format
-      @display_price = dr[:range] ? "#{dr[:final_min].format} - #{dr[:final_max].format}" : dr[:final_min].format
-      savings_min = dr[:original_min] - dr[:final_min]
-      savings_max = dr[:original_max] - dr[:final_max]
-      @display_savings = if dr[:range] && savings_min != savings_max
-        "#{[savings_min, savings_max].min.format} – #{[savings_min, savings_max].max.format}"
+    # Honest header price for simple products: what the customer actually pays
+    # now (conditions respected against the current cart) — not the
+    # best-possible price that the "available discounts" panel advertises.
+    unless @product.has_variants?
+      @actual_breakdown = DiscountCalculator.new(
+        product: @product, customer: current_customer, quantity: 1,
+        for_display: false, variant: @default_variant, cart_context: @cart_context
+      ).discount_breakdown
+      @product_pricing = product_pricing_data(@cart_context)
+    end
+
+    # Build the display strings used while no variant is selected. Honest: the
+    # discounted range respects conditions against the cart (a conditional
+    # discount not yet met does not lower the displayed price). The reference
+    # breakdown (cheapest visible variant, conditions respected) drives the
+    # no-selection header/badge defaults — the panel keeps its own (for_display)
+    # calculator to advertise the conditions.
+    if @product.has_variants?
+      ref_variant = @variants.select { |v| v.unit_price_cents.to_i.positive? }.min_by(&:unit_price_cents) || @default_variant
+      @reference_breakdown = DiscountCalculator.new(
+        product: @product, customer: current_customer, quantity: @product.quantity_input_min,
+        for_display: false, variant: ref_variant, cart_context: @cart_context
+      ).discount_breakdown
+
+      dr = @product.discounted_price_range(current_customer, for_display: false, cart_context: @cart_context)
+      has_disc = dr && (dr[:final_min] < dr[:original_min] || dr[:final_max] < dr[:original_max])
+      if has_disc
+        @display_price_original = dr[:range] ? "#{dr[:original_min].format} - #{dr[:original_max].format}" : dr[:original_min].format
+        @display_price = dr[:range] ? "#{dr[:final_min].format} - #{dr[:final_max].format}" : dr[:final_min].format
       else
-        savings_min.format
+        @display_price_original = nil
+        @display_price = @product.display_price
       end
+
+      # "Poupa" lives in the (optimistic) discounts panel — show the per-unit
+      # savings the discount yields when applied, as a RANGE across variants
+      # (a percentage discount saves more on a pricier variant).
+      @display_savings = optimistic_savings_label
     else
       @display_price_original = nil
-      @display_price = @product.has_variants? ? @product.display_price : nil
+      @display_price = nil
       @display_savings = nil
+    end
+
+    # Live pricing for variable products (V2): the conditional discount lives on
+    # the product, so all variants share the global tracker config; per-variant
+    # locked/unlocked prices and cart contribution feed it as the variant
+    # selector changes. @product_pricing carries the globals (inert until a
+    # variant is chosen); @variant_pricing maps variant_id -> its values.
+    if @product.has_variants?
+      conditional = @discount_calculator.all_discounts.find { |d| d[:condition] }
+      if conditional
+        cond = conditional[:condition]
+        grid = @product.grid_add_to_cart?
+        # The panel tracker is shown for the selector mode, and for grid+summed
+        # (grid per-line flips each row instead, so no shared tracker).
+        if !grid || cond[:scope] == :summed
+          @live_discount = conditional
+          @product_pricing = {
+            locked_unit_cents: 0, unlocked_unit_cents: 0, base_unit_cents: 0, cart_current: 0,
+            currency_symbol: current_organisation.currency_symbol,
+            condition_type: cond[:type].to_s,
+            threshold: cond[:type] == :amount ? cond[:amount].cents : cond[:quantity],
+            discount_label: discount_label_for(conditional),
+            cart_current_label: t('storefront.carts.show.nudge.units', count: 0)
+          }
+          @variant_pricing = grid ? nil : build_variant_pricing(conditional, @cart_context)
+        end
+      end
     end
 
     # Fetch related products
     if @product.show_related_products?
       fetcher = RelatedProductsFetcher.new(product: @product, limit: 4)
       @related_products = fetcher.fetch
-      @related_product_discounts = build_discounts_for(@related_products)
+      @related_product_discounts, @related_product_unlocks = build_card_discounts(@related_products)
     end
   end
 
   private
+
+  # Data for the live product-page pricing controller (simple products): two
+  # unit prices (locked = condition unmet, unlocked = met) so JS can switch on
+  # the quantity reaching the nearest conditional discount's threshold, plus
+  # what's already in the cart toward a summed threshold.
+  def product_pricing_data(cart_context)
+    conditional = @discount_calculator.all_discounts.find { |d| d[:condition] && !d[:meets_condition] }
+
+    data = {
+      locked_unit_cents: @actual_breakdown[:final_price].cents,
+      unlocked_unit_cents: @discount_calculator.final_price.cents,
+      base_unit_cents: @actual_breakdown[:base_price].cents,
+      currency_symbol: current_organisation.currency_symbol,
+      condition_type: "none",
+      threshold: 0,
+      cart_current: 0,
+      discount_label: ""
+    }
+    return data unless conditional
+
+    cond = conditional[:condition]
+    source = conditional[:source]
+    @live_discount = conditional # the panel hint for this one toggles live
+    data[:condition_type] = cond[:type].to_s
+    data[:threshold] = cond[:type] == :amount ? cond[:amount].cents : cond[:quantity]
+    data[:discount_label] = discount_label_for(conditional)
+    data[:cart_current] = cart_threshold_current(cond, source, cart_context)
+    # "já tem X no carrinho" reads in units of whatever scope unlocked it — the
+    # whole category for a category discount, not just this product.
+    data[:cart_current_label] = t('storefront.carts.show.nudge.units', count: cart_scope_quantity(cond, source, cart_context))
+    data
+  end
+
+  # Units already in the cart toward the threshold, in the discount's scope:
+  # the category total for a category discount, this variant's line for a
+  # per-line variant, otherwise the product total. Always a count (for the
+  # "já tem X no carrinho" celebration), regardless of quantity/€ condition.
+  def cart_scope_quantity(cond, source, cart_context, variant: nil)
+    return 0 unless cart_context
+
+    if cond[:scope] == :summed && source.category_id.present?
+      cart_context.category_quantity(source.category_id).to_i
+    elsif cond[:scope] != :summed && variant
+      cart_context.variant_quantity(variant.id).to_i
+    else
+      cart_context.product_quantity(@product.id).to_i
+    end
+  end
+
+  def discount_label_for(discount)
+    if discount[:discount_type] == "percentage"
+      "-#{(discount[:value] * 100).round}%"
+    else
+      "-#{Money.new((discount[:value] * 100).to_i, current_organisation.currency).format}"
+    end
+  end
+
+  # Per-unit savings the discount would yield, as a range across the variants
+  # that actually get it (variants excluded from discounts are skipped, so an
+  # excluded priciest variant doesn't drag the range down to €0). nil when none.
+  def optimistic_savings_label
+    return nil unless @variants
+
+    min_qty = @product.quantity_input_min
+    savings = @variants.filter_map do |v|
+      next unless v.unit_price_cents.to_i.positive?
+
+      bd = DiscountCalculator.new(product: @product, customer: current_customer,
+        quantity: min_qty, for_display: true, variant: v, cart_context: @cart_context).discount_breakdown
+      diff = bd[:base_price] - bd[:final_price]
+      diff if diff.positive?
+    end
+    return nil if savings.empty?
+
+    lo, hi = savings.minmax
+    lo == hi ? lo.format : "#{lo.format} – #{hi.format}"
+  end
+
+  # Per-variant live-pricing values: the price with the conditional discount
+  # locked (condition unmet) vs unlocked (met), the base price, and what's
+  # already in the cart toward the threshold for this variant.
+  def build_variant_pricing(conditional, cart_context)
+    cond = conditional[:condition]
+    source = conditional[:source]
+    min_qty = @product.quantity_input_min
+    @variants.each_with_object({}) do |v, hash|
+      next unless v.unit_price_cents.to_i.positive?
+
+      locked = DiscountCalculator.new(product: @product, customer: current_customer,
+        quantity: min_qty, for_display: false, variant: v, cart_context: cart_context).final_price
+      unlocked = DiscountCalculator.new(product: @product, customer: current_customer,
+        quantity: min_qty, for_display: true, variant: v, cart_context: cart_context).final_price
+      hash[v.id] = {
+        locked_unit_cents: locked.cents,
+        unlocked_unit_cents: unlocked.cents,
+        base_unit_cents: v.unit_price_cents,
+        cart_current: cart_threshold_current(cond, source, cart_context, variant: v),
+        cart_current_label: t('storefront.carts.show.nudge.units', count: cart_scope_quantity(cond, source, cart_context, variant: v))
+      }
+    end
+  end
+
+  # What's already in the cart toward the threshold. For a per-line or
+  # product-summed condition, adding more of this product merges into the same
+  # cart line, so the product's current cart contribution counts. For a
+  # category-summed condition, the whole category's cart total counts.
+  def cart_threshold_current(cond, source, cart_context, variant: nil)
+    return 0 unless cart_context
+
+    if cond[:scope] == :summed && source.category_id.present?
+      cond[:type] == :amount ? cart_context.category_amount_cents(source.category_id) : cart_context.category_quantity(source.category_id)
+    elsif cond[:scope] != :summed && variant
+      # Per-line condition on a specific variant: only that variant's own cart
+      # line merges when the customer adds more.
+      cond[:type] == :amount ? cart_context.variant_amount_cents(variant.id) : cart_context.variant_quantity(variant.id)
+    else
+      cond[:type] == :amount ? cart_context.product_amount_cents(@product.id) : cart_context.product_quantity(@product.id)
+    end
+  end
 
   TRIGRAM_THRESHOLD = 0.5
 
@@ -440,10 +626,47 @@ class Storefront::ProductsController < Storefront::BaseController
     attrs_hash.values
   end
 
-  def build_discounts_for(products)
-    products.each_with_object({}) do |product, hash|
-      calculator = DiscountCalculator.new(product: product, customer: current_customer, for_display: true)
-      hash[product.id] = calculator.discount_breakdown
+  # Per-product card data: the honest breakdown (conditions respected) and an
+  # optional "unlock" teaser (nearest conditional discount not yet met).
+  # Returns [discounts_by_id, unlocks_by_id].
+  def build_card_discounts(products)
+    @honest_cards = true # cards show the actual price + an unlock teaser, not the best-possible price
+    discounts = {}
+    unlocks = {}
+    products.each do |product|
+      # For variable products the default variant is a price-less placeholder,
+      # so evaluate against the cheapest visible variant (same reference the
+      # price range uses) — otherwise the breakdown degenerates and the "-X%"
+      # badge goes missing.
+      ref = card_reference_variant(product)
+      qty = product.quantity_input_min
+      discounts[product.id] = DiscountCalculator.new(
+        product: product, customer: current_customer, quantity: qty, for_display: false, variant: ref, cart_context: @cart_context
+      ).discount_breakdown
+
+      unmet = DiscountCalculator.new(
+        product: product, customer: current_customer, quantity: qty, for_display: true, variant: ref, cart_context: @cart_context
+      ).all_discounts.find { |d| d[:condition] && !d[:meets_condition] }
+      unlocks[product.id] = unmet && { discount_label: discount_label_for(unmet), condition_label: condition_label_for(unmet) }
     end
+    [discounts, unlocks]
+  end
+
+  def condition_label_for(discount)
+    cond = discount[:condition]
+    cond[:type] == :amount ? cond[:amount].format : t('storefront.products.index.units_short', count: cond[:quantity])
+  end
+
+  # Cheapest VISIBLE variant for a variable product (same reference the price
+  # range uses), or the default variant for a simple product. Visibility matters:
+  # an out-of-stock (hidden) variant must not be the reference, or its
+  # (missing) discount would hide a discounted in-stock variant on the card.
+  def card_reference_variant(product)
+    return product.default_variant unless product.has_variants?
+
+    product.product_variants.where(is_default: false, published: true)
+           .where.not(unit_price_cents: [ nil, 0 ]).to_a
+           .select { |v| v.available? || v.effective_stock_policy != "hide" }
+           .min_by(&:unit_price_cents) || product.default_variant
   end
 end

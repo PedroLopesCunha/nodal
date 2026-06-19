@@ -19,7 +19,6 @@
 <% combined_counter = interactive && product.min_quantity_combined? && product.enforced_min_quantity.present? && product.combined_min_reachable? %>
 <% in_cart_qty = combined_counter ? current_cart&.order_items&.where(product_id: product.id)&.sum(:quantity).to_i : 0 %>
 <% counter_data = combined_counter ? {
-     controller: "min-quantity-counter",
      min_quantity_counter_min_value: product.enforced_min_quantity,
      min_quantity_counter_in_cart_value: in_cart_qty,
      min_quantity_counter_label_value: product.minimum_quantity_label,
@@ -27,12 +26,30 @@
      min_quantity_counter_met_value: t('storefront.products.show.grid.min_counter_met')
    } : {} %>
 
+<%# Live unlock pricing for a conditional discount (nil when there's none). %>
+<% grid = interactive ? grid_live_pricing(product, visible_variants) : nil %>
+
 <% if visible_variants.empty? %>
   <p class="text-muted small"><%= t('storefront.products.show.grid.no_variants') %></p>
 <% else %>
-  <div class="mb-4" data-controller="expandable">
+  <% controllers = ["expandable"] %>
+  <% controllers << "min-quantity-counter" if combined_counter %>
+  <% controllers << "grid-pricing" if grid %>
+  <% wrapper_data = counter_data.merge(controller: controllers.join(" ")) %>
+  <% if grid %>
+    <% wrapper_data.merge!(
+         grid_pricing_pricing_value: grid[:pricing].to_json,
+         grid_pricing_condition_type_value: grid[:condition_type],
+         grid_pricing_threshold_value: grid[:threshold],
+         grid_pricing_scope_value: grid[:scope],
+         grid_pricing_cart_summed_value: grid[:cart_summed],
+         grid_pricing_currency_symbol_value: current_organisation.currency_symbol,
+         grid_pricing_product_pricing_outlet: "[data-controller~='product-pricing']"
+       ) %>
+  <% end %>
+  <div class="mb-4" <%= tag.attributes(data: wrapper_data) %>>
     <%= form_with url: bulk_add_order_items_path(org_slug: params[:org_slug]),
-                  method: :post, local: true, data: counter_data do |f| %>
+                  method: :post, local: true do |f| %>
       <%= hidden_field_tag :product_id, product.id %>
 
       <% if combined_counter %>
@@ -63,6 +80,7 @@
           <tbody>
             <% visible_variants.each_with_index do |variant, idx| %>
               <% calc = DiscountCalculator.new(product: product, customer: current_customer, quantity: min_qty, variant: variant) %>
+              <% discounted = calc.effective_discount[:percentage].to_f > 0 %>
               <% hidden = idx >= preview_count %>
               <tr style="<%= 'display: none;' if hidden %>" <%= 'data-expandable-target="item"'.html_safe if hidden %>>
                 <td>
@@ -74,17 +92,20 @@
                 <td class="text-muted small text-center align-middle"><%= variant.sku %></td>
                 <% if show_prices? %>
                   <td class="text-center align-middle">
-                    <% if calc.effective_discount[:percentage].to_f > 0 %>
-                      <span class="text-decoration-line-through text-muted small d-block"><%= humanized_money_with_symbol(calc.base_price) %></span>
-                      <span class="text-success fw-medium"><%= humanized_money_with_symbol(calc.final_price) %></span>
-                    <% else %>
-                      <%= humanized_money_with_symbol(calc.final_price) %>
-                    <% end %>
+                    <span class="text-decoration-line-through text-muted small d-block <%= 'd-none' unless discounted %>" data-grid-pricing-target="rowOriginal"><%= money_amount(calc.base_price) %></span>
+                    <span class="<%= 'text-success fw-medium' if discounted %>" data-grid-pricing-target="rowPrice"><%= money_amount(calc.final_price) %></span>
                   </td>
                 <% end %>
                 <% if interactive %>
                   <td class="text-center align-middle">
-                    <%= number_field_tag "bulk_items[#{variant.id}]", 0, min: 0, class: "form-control text-center mx-auto d-block", style: "width: 100px;", data: (combined_counter ? { min_quantity_counter_target: "input", action: "input->min-quantity-counter#update" } : {}) %>
+                    <% input_data = { variant_id: variant.id } %>
+                    <% input_data[:min_quantity_counter_target] = "input" if combined_counter %>
+                    <% input_data[:grid_pricing_target] = "rowInput" if grid %>
+                    <% acts = [] %>
+                    <% acts << "input->min-quantity-counter#update" if combined_counter %>
+                    <% acts << "input->grid-pricing#update" if grid %>
+                    <% input_data[:action] = acts.join(" ") if acts.any? %>
+                    <%= number_field_tag "bulk_items[#{variant.id}]", 0, min: 0, class: "form-control text-center mx-auto d-block", style: "width: 100px;", data: input_data %>
                   </td>
                 <% end %>
               </tr>
@@ -92,6 +113,10 @@
           </tbody>
         </table>
       </div>
+
+      <%# The summed-condition tracker lives in the "Descontos Disponíveis" panel
+          above the grid (driven via the product-pricing outlet), so it matches
+          the simple-product layout — not a separate bar at the foot. %>
 
       <% if visible_variants.size > preview_count %>
         <div class="text-center my-3">
@@ -106,7 +131,7 @@
 
       <% if interactive %>
         <button type="submit" class="btn btn-primary btn-lg w-100 mt-2" style="border-radius: 8px;">
-          <i class="fa-solid fa-cart-plus me-2"></i><%= t('storefront.products.show.grid.add_to_cart') %>
+          <i class="fa-solid fa-cart-plus me-2"></i><%= t('storefront.products.show.grid.add_to_cart') %><span data-grid-pricing-target="buttonTotal"></span>
         </button>
       <% end %>
     <% end %>

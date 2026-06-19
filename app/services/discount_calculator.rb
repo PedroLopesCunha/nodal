@@ -4,12 +4,13 @@ class DiscountCalculator
   # for_display: true - shows all available discounts (ignoring min_quantity) for product pages
   # for_display: false - only shows applicable discounts (respecting min_quantity) for cart/checkout
   # variant: optional ProductVariant - if provided, uses variant price as base price
-  def initialize(product:, customer: nil, quantity: 1, for_display: false, variant: nil)
+  def initialize(product:, customer: nil, quantity: 1, for_display: false, variant: nil, cart_context: nil)
     @product = product
     @customer = customer
     @quantity = quantity
     @for_display = for_display
     @variant = variant || pick_reference_variant
+    @cart_context = cart_context
   end
 
   # Returns all applicable discounts with metadata
@@ -76,6 +77,46 @@ class DiscountCalculator
 
   private
 
+  # Evaluates a discount's condition. For a "summed" condition the threshold is
+  # checked against the cart-wide total for the discount's target (a product's
+  # variants, or all products in a category); otherwise against this line.
+  def meets_condition?(source)
+    qty, amount = condition_inputs(source)
+    source.condition_met?(quantity: qty, line_amount_cents: amount)
+  end
+
+  def condition_inputs(source)
+    return [quantity, @line_amount_cents] unless source.summed_condition? && @cart_context
+
+    if source.product_id
+      [@cart_context.product_quantity(source.product_id), @cart_context.product_amount_cents(source.product_id)]
+    elsif source.category_id
+      [@cart_context.category_quantity(source.category_id), @cart_context.category_amount_cents(source.category_id)]
+    else
+      [quantity, @line_amount_cents]
+    end
+  end
+
+  # Builds a line-level discount hash for a source that carries a condition
+  # (ProductDiscount / CustomerProductDiscount via HasDiscountCondition).
+  def build_line_discount(type, label, source, meets)
+    {
+      type: type,
+      discount_type: source.discount_type,
+      value: source.discount_value,
+      stackable: source.stackable,
+      label: label,
+      valid_until: source.valid_until,
+      source: source,
+      meets_condition: meets,
+      condition: source.condition_requirement,
+      # Back-compat with the quantity "unlock" badge (amount conditions land in
+      # the generalised cart nudge — Phase 2).
+      meets_min_quantity: meets,
+      min_quantity_required: (source.quantity_condition? ? source.min_quantity : nil)
+    }
+  end
+
   # On variable products the default variant is a placeholder with no price,
   # so for display we pick the cheapest visible non-default variant — that
   # way base_price/final_price/percentage are meaningful on listings/cards.
@@ -97,6 +138,8 @@ class DiscountCalculator
 
   def collect_discounts
     discounts = []
+    # Value of this line (base price × quantity), for amount-based conditions.
+    @line_amount_cents = (base_price * quantity).cents
 
     # 1. Product-level discounts (global, for all customers)
     # Variant-level overrides: custom discount replaces product discounts,
@@ -114,47 +157,22 @@ class DiscountCalculator
     elsif variant&.exclude_from_discounts?
       # Skip product discounts entirely
     else
-      # for_display: true - show all available discounts (ignore min_quantity)
-      # for_display: false - only applicable discounts (respect min_quantity)
-      product_discounts = if for_display
-        product.product_discounts.active
-      else
-        product.product_discounts.active.where("min_quantity <= ?", quantity)
-      end
+      # for_display: true - show all available discounts (ignore the condition)
+      # for_display: false - only discounts whose condition (quantity or €) is met
+      product.product_discounts.active.each do |pd|
+        meets = meets_condition?(pd)
+        next if !for_display && !meets
 
-      product_discounts.each do |pd|
-        meets_min_quantity = quantity >= pd.min_quantity
-        discounts << {
-          type: :product,
-          discount_type: pd.discount_type,
-          value: pd.discount_value,
-          stackable: pd.stackable,
-          label: "Product Sale",
-          valid_until: pd.valid_until,
-          source: pd,
-          meets_min_quantity: meets_min_quantity,
-          min_quantity_required: pd.min_quantity
-        }
+        discounts << build_line_discount(:product, "Product Sale", pd, meets)
       end
 
       # Category-level discounts: find active discounts for any category
       # the product belongs to, including ancestor categories
-      category_discount_records = find_category_discounts
-      category_discount_records.each do |cd|
-        meets_min_quantity = quantity >= cd.min_quantity
-        next if !for_display && !meets_min_quantity
+      find_category_discounts.each do |cd|
+        meets = meets_condition?(cd)
+        next if !for_display && !meets
 
-        discounts << {
-          type: :category,
-          discount_type: cd.discount_type,
-          value: cd.discount_value,
-          stackable: cd.stackable,
-          label: "Category Sale",
-          valid_until: cd.valid_until,
-          source: cd,
-          meets_min_quantity: meets_min_quantity,
-          min_quantity_required: cd.min_quantity
-        }
+        discounts << build_line_discount(:category, "Category Sale", cd, meets)
       end
     end
 
@@ -163,28 +181,16 @@ class DiscountCalculator
     # 2. Customer-product specific discounts
     cpd = product.active_discount_for(customer)
     if cpd && cpd.active?
-      discounts << {
-        type: :customer_product,
-        discount_type: cpd.discount_type,
-        value: cpd.discount_value,
-        stackable: cpd.stackable,
-        label: "Your Special Price",
-        valid_until: cpd.valid_until,
-        source: cpd
-      }
+      meets = meets_condition?(cpd)
+      discounts << build_line_discount(:customer_product, "Your Special Price", cpd, meets) if for_display || meets
     end
 
     # 2b. Customer-category specific discounts
     find_customer_category_discounts.each do |ccpd|
-      discounts << {
-        type: :customer_product,
-        discount_type: ccpd.discount_type,
-        value: ccpd.discount_value,
-        stackable: ccpd.stackable,
-        label: "Your Special Price",
-        valid_until: ccpd.valid_until,
-        source: ccpd
-      }
+      meets = meets_condition?(ccpd)
+      next if !for_display && !meets
+
+      discounts << build_line_discount(:customer_product, "Your Special Price", ccpd, meets)
     end
 
     # 3. Customer global discount (client tier)

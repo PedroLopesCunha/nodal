@@ -2,6 +2,11 @@ import { Controller } from "@hotwired/stimulus"
 
 export default class extends Controller {
   static targets = ["select", "group", "button", "variantId", "price", "originalPrice", "sku", "stock", "addToCart", "image", "zoomImage", "mainPrice", "discountBadge", "quantity"]
+  // When present, the product-pricing controller owns the header price, the
+  // estimated total and the live unlock tracker; the selector just feeds it the
+  // chosen variant. Without it (no conditional discount) the selector renders
+  // the price itself, as before.
+  static outlets = ["product-pricing"]
   static values = {
     variants: Array,
     currencySymbol: String,
@@ -30,6 +35,13 @@ export default class extends Controller {
       }))
     })
     this.filterAvailableOptions()
+    this.updateSelection()
+    this.updateTotal()
+  }
+
+  // The product-pricing tracker may connect after us; re-apply the current
+  // selection so it gets the right variant immediately.
+  productPricingOutletConnected() {
     this.updateSelection()
     this.updateTotal()
   }
@@ -174,6 +186,8 @@ export default class extends Controller {
   }
 
   updateTotal() {
+    if (this.hasProductPricingOutlet) return // product-pricing owns the total
+
     const quantity = this.hasQuantityTarget ? parseInt(this.quantityTarget.value) || this.minQuantityValue || 1 : this.minQuantityValue || 1
     const isVariable = this.variantsValue && this.variantsValue.length > 0
 
@@ -190,7 +204,7 @@ export default class extends Controller {
 
     if (priceCents && this.hasPriceTarget) {
       const total = priceCents * quantity
-      this.priceTarget.textContent = this.formatPrice(total)
+      this.priceTarget.textContent = ` · ${this.formatPrice(total)}`
     }
   }
 
@@ -201,10 +215,15 @@ export default class extends Controller {
     if (variant) {
       this.selectedVariant = variant
       this.updateDisplay(variant)
-      this.updateMainPrice(variant)
       this.enableAddToCart(variant)
+      if (this.hasProductPricingOutlet) {
+        this.productPricingOutlet.applyVariant(variant.id) // owns price/total/tracker
+      } else {
+        this.updateMainPrice(variant)
+      }
     } else {
       this.selectedVariant = null
+      if (this.hasProductPricingOutlet) this.productPricingOutlet.applyVariant(null)
       this.showPriceRange()
       this.disableAddToCart()
     }
