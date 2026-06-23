@@ -74,6 +74,25 @@ class Storefront::ProductsController < Storefront::BaseController
       products = base_products
     end
 
+    # "Campanhas" view — narrow to products carrying an active campaign discount.
+    if params[:promo].present?
+      products = products.on_promotion
+      @on_promotion = true
+      # Top-level (parent) categories that contain on-promotion products, rolled
+      # up from the products' own categories, shown as drill-down entries under
+      # "Campanhas" (MANGO-style). Each carries the count of promo products in
+      # its whole subtree.
+      promo_scope = base_products.on_promotion
+      promo_category_ids = CategoryProduct.where(product_id: promo_scope.select(:id)).distinct.pluck(:category_id)
+      root_ids = @all_kept_categories.select { |c| promo_category_ids.include?(c.id) }
+                                     .map { |c| c.path_ids.first }.uniq
+      @campaign_categories = @all_kept_categories.select { |c| root_ids.include?(c.id) }
+      @campaign_category_counts = @campaign_categories.to_h do |root|
+        subtree_ids = @all_kept_categories.select { |c| c.id == root.id || c.path_ids.include?(root.id) }.map(&:id)
+        [root.id, promo_scope.joins(:category_products).where(category_products: { category_id: subtree_ids }).distinct.count]
+      end
+    end
+
     # Parse attribute filters: params[:attrs] = { "cor" => ["vermelho", "azul"], "espessura" => ["10"] }
     @current_attrs = {}
     if params[:attrs].present? && params[:attrs].is_a?(ActionController::Parameters)

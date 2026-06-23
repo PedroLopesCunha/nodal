@@ -24,6 +24,7 @@ es:
     navbar:
       home: "Inicio"
       products: "Productos"
+      promotions: "Campañas"
       orders: "Pedidos"
       shopping_lists: "Listas"
       contact: "Contacto"
@@ -35,6 +36,7 @@ es:
       show_prices: "Mostrar precios"
       hide_prices: "Ocultar precios"
       hide_prices_hint: "Modo presentación"
+      customer_discount_hint: "Los precios mostrados reflejan tu descuento de cliente del %{percentage}."
 
     # Página de inicio
     home:
@@ -151,6 +153,9 @@ es:
         no_products_hint: "Intente ajustar su búsqueda o filtros."
         empty_catalog: "No hay productos disponibles en este momento."
         sale_badge: "OFERTA"
+        on_promotion: "Campañas"
+        on_promotion_title: "Productos en campaña"
+        exit_campaigns: "Salir"
         discount_up_to: "hasta -%{percentage}%"
         discount_from: "%{discount} desde %{condition}"
         units_short:
