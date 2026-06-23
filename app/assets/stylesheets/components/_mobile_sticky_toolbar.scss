@@ -3,7 +3,9 @@
 
 .mobile-sticky-toolbar {
   position: sticky;
-  top: 64px;
+  // Offset by the sticky header's real height (set by the sticky-offset
+  // controller); 64px is a sane fallback before JS runs.
+  top: var(--storefront-header-height, 64px);
   z-index: 1010;
   background: rgba(255, 255, 255, 0.92);
   backdrop-filter: blur(12px);
