@@ -96,6 +96,23 @@ class Product < ApplicationRecord
   scope :simple, -> { where(has_variants: false) }
   scope :variable, -> { where(has_variants: true) }
 
+  # Products carrying an active campaign discount — a product-level OR a
+  # category-level ProductDiscount (matching the storefront "PROMOÇÃO" badge).
+  # A category discount covers that category AND its descendants (subtree).
+  # Customer-independent: product/category discounts are global; per-customer
+  # special prices are a separate concept. Chain onto an org-scoped relation
+  # (e.g. organisation.products.on_promotion).
+  scope :on_promotion, -> {
+    active = ProductDiscount.active
+    direct = active.where.not(product_id: nil).select(:product_id)
+
+    discounted_category_ids = active.where.not(category_id: nil).distinct.pluck(:category_id)
+    subtree_ids = Category.where(id: discounted_category_ids).flat_map(&:subtree_ids).uniq
+    via_category = CategoryProduct.where(category_id: subtree_ids).select(:product_id)
+
+    where(id: direct).or(where(id: via_category))
+  }
+
   def self.exportable_columns
     [
       { key: :name, label: I18n.t("bo.export.columns.product.name"), default: true,

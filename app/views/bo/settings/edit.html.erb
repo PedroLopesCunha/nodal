@@ -562,6 +562,25 @@
                                  } %>
               </div>
             </div>
+            <div class="col-md-6">
+              <label class="form-label"><%= t('bo.settings.edit.campaign_color') %></label>
+              <div class="input-group">
+                <input type="color"
+                       id="campaign_color_picker"
+                       value="<%= @organisation.effective_campaign_color %>"
+                       class="form-control form-control-color"
+                       data-input-target="organisation_campaign_color"
+                       data-action="input->branding-preview#syncFromPicker">
+                <%= f.text_field :campaign_color,
+                                 class: "form-control",
+                                 placeholder: "#dc3545",
+                                 data: {
+                                   picker_target: "campaign_color_picker",
+                                   action: "input->branding-preview#syncFromInput"
+                                 } %>
+              </div>
+              <small class="text-muted"><%= t('bo.settings.edit.campaign_color_hint') %></small>
+            </div>
           </div>
 
           <div class="mt-4">

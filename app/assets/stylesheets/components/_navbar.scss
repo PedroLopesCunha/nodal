@@ -361,3 +361,16 @@ $breakpoint-mobile: 768px;
     box-shadow: none;
   }
 }
+
+// Storefront customer-discount note — thin, subtle line under the navbar that
+// reassures the customer their tier discount is already reflected in prices.
+// Lives outside the sticky header, so it just scrolls away with the page.
+.customer-discount-note {
+  font-size: 0.72rem;
+  line-height: 1.3;
+  padding: 0.3rem 0;
+
+  @media (max-width: 991.98px) {
+    font-size: 0.65rem;
+  }
+}

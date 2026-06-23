@@ -10,6 +10,41 @@ class ProductTest < ActiveSupport::TestCase
     assert_equal "default", @product.add_to_cart_mode
   end
 
+  test "on_promotion includes products with a direct product discount, excludes plain ones" do
+    promo = Product.create!(organisation: @org, name: "Promo", unit_price: 1000, published: true)
+    plain = Product.create!(organisation: @org, name: "Plain", unit_price: 1000, published: true)
+    ProductDiscount.create!(organisation: @org, product: promo, discount_type: "percentage",
+      discount_value: 0.1, condition_type: "quantity", min_quantity: 1, active: true)
+
+    ids = @org.products.on_promotion.pluck(:id)
+    assert_includes ids, promo.id
+    assert_not_includes ids, plain.id
+  end
+
+  test "on_promotion covers a discounted category AND its subcategories" do
+    parent = Category.create!(organisation: @org, name: "Comunhão", slug: "com-#{SecureRandom.hex(4)}")
+    child = Category.create!(organisation: @org, name: "Sub", slug: "sub-#{SecureRandom.hex(4)}", parent: parent)
+    in_parent = Product.create!(organisation: @org, name: "InParent", unit_price: 1000, published: true)
+    in_child = Product.create!(organisation: @org, name: "InChild", unit_price: 1000, published: true)
+    outside = Product.create!(organisation: @org, name: "Outside", unit_price: 1000, published: true)
+    CategoryProduct.create!(category: parent, product: in_parent)
+    CategoryProduct.create!(category: child, product: in_child)
+    ProductDiscount.create!(organisation: @org, category: parent, discount_type: "percentage",
+      discount_value: 0.12, condition_type: "quantity", condition_scope: "summed", min_quantity: 6, active: true)
+
+    ids = @org.products.on_promotion.pluck(:id)
+    assert_includes ids, in_parent.id
+    assert_includes ids, in_child.id, "a discount on the parent category must cover subcategory products"
+    assert_not_includes ids, outside.id
+  end
+
+  test "on_promotion excludes products whose only discount is inactive" do
+    promo = Product.create!(organisation: @org, name: "Inactive", unit_price: 1000, published: true)
+    ProductDiscount.create!(organisation: @org, product: promo, discount_type: "percentage",
+      discount_value: 0.1, condition_type: "quantity", min_quantity: 1, active: false)
+    assert_not_includes @org.products.on_promotion.pluck(:id), promo.id
+  end
+
   test "rejects an invalid add_to_cart_mode" do
     @product.add_to_cart_mode = "weird"
     assert_not @product.valid?

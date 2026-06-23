@@ -76,4 +76,75 @@
       color: #333;
     }
   }
+
+  // Campaign ("Campanhas") chip — distinct accent, owner-configurable later
+  // via the --campaign-color CSS variable (defaults to red).
+  &--campaign {
+    color: var(--campaign-color, #dc3545);
+    border-color: var(--campaign-color, #dc3545);
+    background: #fff;
+
+    &.active {
+      background: var(--campaign-color, #dc3545);
+      border-color: var(--campaign-color, #dc3545);
+      color: #fff;
+    }
+  }
+
+  // Non-clickable current-category label (context, not a button).
+  &--current {
+    background: transparent;
+    border-color: transparent;
+    color: #111;
+    font-weight: 700;
+    cursor: default;
+    padding-left: 0.35rem;
+    padding-right: 0.35rem;
+
+    &:hover {
+      background: transparent;
+      color: #111;
+    }
+  }
+
+}
+
+// Mobile campaign context bar — marks the "Campanhas" section (distinct from
+// the category chips) and offers a one-tap exit. Accent is owner-configurable
+// via --campaign-color.
+.campaign-context-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem 0.25rem;
+  font-size: 0.82rem;
+
+  &__title {
+    display: inline-flex;
+    align-items: center;
+    min-width: 0;
+    color: var(--campaign-color, #dc3545);
+    font-weight: 700;
+    text-decoration: none;
+  }
+
+  &__crumb {
+    margin-left: 0.35rem;
+    color: #555;
+    font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  &__exit {
+    flex-shrink: 0;
+    color: #6c757d;
+    font-weight: 500;
+    text-decoration: none;
+    white-space: nowrap;
+
+    &:hover { color: #333; }
+  }
 }

@@ -1760,6 +1760,8 @@ pt:
         storefront_description_hint: "Aparece em pré-visualizações quando partilhas links (WhatsApp, redes sociais, motores de busca). Até 200 caracteres."
         primary_color: "Cor Primária"
         secondary_color: "Cor Secundária"
+        campaign_color: "Cor das Campanhas"
+        campaign_color_hint: "Cor de destaque da entrada \"Campanhas\" na loja. Predefinição: vermelho."
         preview: "Pré-visualização"
         homepage_hero: "Homepage - Banner Principal"
         hero_image: "Imagem do Banner"

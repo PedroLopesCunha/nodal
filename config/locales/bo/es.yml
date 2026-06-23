@@ -1547,6 +1547,8 @@ es:
         storefront_description_hint: "Aparece en las vistas previas al compartir enlaces (WhatsApp, redes sociales, motores de búsqueda). Hasta 200 caracteres."
         primary_color: "Color Primario"
         secondary_color: "Color Secundario"
+        campaign_color: "Color de Campañas"
+        campaign_color_hint: "Color de acento de la entrada \"Campañas\" en la tienda. Por defecto: rojo."
         preview: "Vista Previa"
         organisation_info: "Información de la Organización"
         slug: "Slug"

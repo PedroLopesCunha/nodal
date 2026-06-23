@@ -1,4 +1,4 @@
-<% sort_base_params = { org_slug: params[:org_slug], category: params[:category], queries: params[:queries], attrs: @current_attrs.presence } %>
+<% sort_base_params = { org_slug: params[:org_slug], category: params[:category], queries: params[:queries], attrs: @current_attrs.presence, promo: params[:promo] } %>
 <% attr_filter_count = params[:attrs].present? ? params[:attrs].values.sum { |v| Array(v).length } : 0 %>
 <% active_filter_count = Array(params[:queries]).length + attr_filter_count %>
 
@@ -29,45 +29,91 @@
 
 <%# Mobile category chips (visible only < lg) %>
 <%
-  # Determine which categories to show as chips:
-  # - If inside a category with siblings, show parent's children + back chip
-  # - Otherwise show top-level categories
-  if @current_category && @current_category.parent
+  # Determine which categories to show as chips (normal browsing; the
+  # "Campanhas" view is handled separately below):
+  # - Inside a category that HAS children → drill into those children, with a
+  #   back chip up to its parent (so you can reach deep categories on mobile).
+  # - Inside a leaf category with a parent → show its siblings to switch between.
+  # - Otherwise → top-level categories.
+  chip_current_label = nil
+  if @current_category && (@category_children[@current_category.id] || []).any?
+    chip_categories = @category_children[@current_category.id] || []
+    chip_back_target = @current_category.parent
+    chip_current_label = @current_category # shown as a non-clickable context label
+  elsif @current_category && @current_category.parent
     chip_categories = (@category_children[@current_category.parent_id] || [])
     chip_back_target = @current_category.parent
-  elsif @current_category && (@category_children[@current_category.id] || []).any?
-    chip_categories = @category_children[@current_category.id] || []
-    chip_back_target = nil
   else
     chip_categories = @categories
     chip_back_target = nil
   end
 %>
+<%# Mobile campaign context bar — clearly marks "you're inside Campanhas"
+    (separate from the category chips) and offers a one-tap exit. %>
+<% if @on_promotion %>
+  <div class="campaign-context-bar d-lg-none">
+    <%= link_to products_path(org_slug: params[:org_slug], promo: 1), class: "campaign-context-bar__title" do %>
+      <i class="fa-solid fa-tag me-1"></i><%= t('storefront.products.index.on_promotion') %>
+      <% if @current_category %><span class="campaign-context-bar__crumb">› <%= @current_category.name %></span><% end %>
+    <% end %>
+    <%= link_to products_path(org_slug: params[:org_slug]), class: "campaign-context-bar__exit" do %>
+      <%= t('storefront.products.index.exit_campaigns') %><i class="fa-solid fa-xmark ms-1"></i>
+    <% end %>
+  </div>
+<% end %>
+
 <div class="mobile-category-chips d-lg-none" data-controller="horizontal-scroll">
   <div class="mobile-category-chips-track" data-horizontal-scroll-target="container">
-    <% if chip_back_target %>
-      <% back_params = { org_slug: params[:org_slug], category: chip_back_target.id } %>
-      <% back_params[:sort] = params[:sort] if params[:sort].present? %>
-      <%= link_to products_path(**back_params), class: "mobile-category-chip back-chip" do %>
-        <i class="fa-solid fa-chevron-left me-1"></i> <%= chip_back_target.name %>
+    <% if @on_promotion %>
+      <%# Campaign categories (the context + exit live in the bar above). %>
+      <% (@campaign_categories || []).each do |category| %>
+        <% cat_params = { org_slug: params[:org_slug], category: category.id, queries: params[:queries], promo: 1 } %>
+        <% cat_params[:sort] = params[:sort] if params[:sort].present? %>
+        <%= link_to products_path(**cat_params),
+            class: "mobile-category-chip #{'active' if @current_category&.id == category.id}" do %>
+          <%= category.name %>
+        <% end %>
       <% end %>
-    <% end %>
-
-    <% unless chip_back_target %>
-      <% all_params = { org_slug: params[:org_slug], queries: params[:queries] } %>
-      <% all_params[:sort] = params[:sort] if params[:sort].present? %>
-      <%= link_to products_path(**all_params),
-          class: "mobile-category-chip #{'active' if params[:category].blank?}" do %>
-        <%= t('storefront.products.index.all_products') %>
+    <% else %>
+      <% if chip_back_target %>
+        <% back_params = { org_slug: params[:org_slug], category: chip_back_target.id } %>
+        <% back_params[:sort] = params[:sort] if params[:sort].present? %>
+        <%= link_to products_path(**back_params), class: "mobile-category-chip back-chip" do %>
+          <i class="fa-solid fa-chevron-left me-1"></i> <%= chip_back_target.name %>
+        <% end %>
       <% end %>
-    <% end %>
 
-    <% chip_categories.each do |category| %>
-      <% cat_params = { org_slug: params[:org_slug], category: category.id, queries: params[:queries] } %>
-      <% cat_params[:sort] = params[:sort] if params[:sort].present? %>
-      <%= link_to products_path(**cat_params),
-          class: "mobile-category-chip #{'active' if @current_category&.id == category.id}" do %>
-        <%= category.name %>
+      <% unless chip_back_target %>
+        <% all_params = { org_slug: params[:org_slug], queries: params[:queries] } %>
+        <% all_params[:sort] = params[:sort] if params[:sort].present? %>
+        <%= link_to products_path(**all_params),
+            class: "mobile-category-chip #{'active' if params[:category].blank? && params[:promo].blank?}" do %>
+          <%= t('storefront.products.index.all_products') %>
+        <% end %>
+      <% end %>
+
+      <%# "Campanhas" is a root-level entry — it only shows when no category is
+          selected at all (not even a top-level one like Prata). %>
+      <% if current_organisation.has_active_promotions? && @current_category.blank? %>
+        <%= link_to products_path(org_slug: params[:org_slug], promo: 1),
+            class: "mobile-category-chip mobile-category-chip--campaign #{'active' if params[:promo].present? && params[:category].blank?}" do %>
+          <%= t('storefront.products.index.on_promotion') %>
+        <% end %>
+      <% end %>
+
+      <%# Non-clickable label for the current category when drilling into its
+          children, so you keep the context without it looking tappable. %>
+      <% if chip_current_label %>
+        <span class="mobile-category-chip mobile-category-chip--current"><%= chip_current_label.name %></span>
+      <% end %>
+
+      <% chip_categories.each do |category| %>
+        <% cat_params = { org_slug: params[:org_slug], category: category.id, queries: params[:queries] } %>
+        <% cat_params[:sort] = params[:sort] if params[:sort].present? %>
+        <%= link_to products_path(**cat_params),
+            class: "mobile-category-chip #{'active' if @current_category&.id == category.id}" do %>
+          <%= category.name %>
+        <% end %>
       <% end %>
     <% end %>
   </div>

@@ -4,6 +4,7 @@ module BrandingHelper
 
     primary = organisation.effective_primary_color
     secondary = organisation.effective_secondary_color
+    campaign = organisation.effective_campaign_color
     primary_hover = darken_color(primary, 15)
     contrast = contrast_color(primary)
     primary_rgb = hex_to_rgb(primary)
@@ -18,6 +19,7 @@ module BrandingHelper
           --org-primary-contrast: #{contrast};
           --org-primary-rgb: #{primary_rgb};
           --org-secondary-rgb: #{secondary_rgb};
+          --campaign-color: #{campaign};
         }
       CSS
     end

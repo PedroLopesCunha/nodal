@@ -24,7 +24,7 @@ class Bo::SettingsController < Bo::BaseController
 
   def organisation_params
     params.require(:organisation).permit(
-      :name, :billing_email, :tax_rate, :shipping_cost, :free_shipping_threshold, :default_locale, :logo, :primary_color, :secondary_color,
+      :name, :billing_email, :tax_rate, :shipping_cost, :free_shipping_threshold, :default_locale, :logo, :primary_color, :secondary_color, :campaign_color,
       :contact_email, :phone, :whatsapp, :business_hours, :use_billing_address_for_contact, :show_whatsapp_button,
       :instagram_url, :facebook_url, :linkedin_url, :website_url,
       :storefront_title, :storefront_description, :favicon, :taxpayer_id, :show_related_products, :out_of_stock_strategy,

@@ -1,4 +1,4 @@
-<header style="position: sticky; top: 0; z-index: 1020; background: #fff;">
+<header style="position: sticky; top: 0; z-index: 1020; background: #fff;" data-controller="sticky-offset">
   <% if browsing_as_member? %>
     <div class="py-2 text-center small" style="background-color: #0dcaf0; color: #000;">
       <i class="fa-solid fa-eye me-1"></i>
@@ -133,3 +133,12 @@
     </div>
   <% end %>
 </header>
+<%# Customer-discount note — kept OUTSIDE the sticky header so it simply scrolls
+    away with the page (no flicker, and it doesn't offset the sticky toolbar). %>
+<% if show_prices? && current_customer && (tier = current_customer.active_customer_discount)&.percentage? %>
+  <div class="customer-discount-note">
+    <div class="container text-muted text-center text-lg-end">
+      <i class="fa-solid fa-circle-info me-1"></i><%= t('storefront.navbar.customer_discount_hint', percentage: tier.value_display) %>
+    </div>
+  </div>
+<% end %>
