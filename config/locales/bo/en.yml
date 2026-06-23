@@ -1770,6 +1770,8 @@ en:
         storefront_description_hint: "Shown in link previews when sharing (WhatsApp, social media, search engines). Up to 200 characters."
         primary_color: "Primary Color"
         secondary_color: "Secondary Color"
+        campaign_color: "Campaign Color"
+        campaign_color_hint: "Accent colour for the storefront \"Campaigns\" entry. Defaults to red."
         preview: "Preview"
         homepage_hero: "Homepage - Hero Banner"
         hero_image: "Banner Image"
