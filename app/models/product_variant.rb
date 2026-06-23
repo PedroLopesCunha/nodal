@@ -100,6 +100,18 @@ class ProductVariant < ApplicationRecord
     attribute_values.joins(:product_attribute).order('product_attributes.position').map(&:value).join(' / ')
   end
 
+  # Sort key for natural ordering by option name: numeric chunks compare
+  # numerically (so "100" sorts after "20"), text chunks alphabetically.
+  # Mirrors ProductAttributeValue.naturally_sorted, applied per attribute in
+  # configured position order so multi-attribute variants order sensibly.
+  def natural_sort_key
+    attribute_values.sort_by { |av| av.product_attribute.position }.map do |av|
+      av.value.to_s.downcase.scan(/\d+\.?\d*|\D+/).map do |chunk|
+        chunk.match?(/\A\d/) ? [0, chunk.to_f] : [1, chunk]
+      end
+    end
+  end
+
   def display_name
     if is_default? && attribute_values.empty?
       product.name
