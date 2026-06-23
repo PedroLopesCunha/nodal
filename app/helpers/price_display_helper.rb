@@ -20,7 +20,7 @@ module PriceDisplayHelper
   def grid_live_pricing(product, variants)
     return nil unless show_prices?
 
-    cart = current_cart && CartDiscountContext.new(current_cart.order_items.includes(product: :categories).to_a)
+    cart = current_cart && CartDiscountContext.new(current_cart.order_items.includes(:product_variant, product: :categories).to_a)
     conditional = DiscountCalculator.new(product: product, customer: current_customer, for_display: true, variant: nil)
                                     .all_discounts.find { |d| d[:condition] }
     cond = conditional&.dig(:condition)
@@ -39,7 +39,7 @@ module PriceDisplayHelper
       end
       hash[v.id] = {
         locked: locked.cents, unlocked: unlocked.cents, base: v.unit_price_cents,
-        cart: conditional ? variant_cart_toward(cart, product, v, cond, summed) : 0
+        cart: conditional ? variant_cart_toward(cart, product, v, cond, summed, conditional[:source]) : 0
       }
     end
 
@@ -48,16 +48,24 @@ module PriceDisplayHelper
       condition_type: cond ? cond[:type].to_s : "none",
       threshold: cond ? (cond[:type] == :amount ? cond[:amount].cents : cond[:quantity]) : 0,
       scope: cond ? cond[:scope].to_s : "none",
-      cart_summed: summed ? variant_cart_toward(cart, product, nil, cond, true) : 0,
+      cart_summed: summed ? variant_cart_toward(cart, product, nil, cond, true, conditional[:source]) : 0,
       discount_label: conditional ? (conditional[:discount_type] == "percentage" ? "-#{(conditional[:value] * 100).round}%" : "-#{Money.new((conditional[:value] * 100).to_i, current_organisation.currency).format}") : ""
     }
   end
 
-  def variant_cart_toward(cart, product, variant, cond, summed)
+  # Cart units/€ already counting toward a summed threshold, in the discount's
+  # scope: the whole category for a category discount (mirrors the non-grid
+  # cart_scope_quantity), otherwise the product's own total. Per-line uses the
+  # variant's own cart line.
+  def variant_cart_toward(cart, product, variant, cond, summed, source = nil)
     return 0 unless cart
 
     if summed
-      cond[:type] == :amount ? cart.product_amount_cents(product.id) : cart.product_quantity(product.id)
+      if source&.category_id
+        cond[:type] == :amount ? cart.category_amount_cents(source.category_id) : cart.category_quantity(source.category_id)
+      else
+        cond[:type] == :amount ? cart.product_amount_cents(product.id) : cart.product_quantity(product.id)
+      end
     else
       cond[:type] == :amount ? cart.variant_amount_cents(variant.id) : cart.variant_quantity(variant.id)
     end

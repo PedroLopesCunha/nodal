@@ -29,6 +29,10 @@ class CartDiscountContext
   def add_item(item)
     product = item.product
     return unless product
+    # A variant flagged exclude_from_discounts can never receive a discount, so
+    # its units must not count toward unlocking one either — skip it from every
+    # aggregation (product- and category-summed thresholds, and cart nudges).
+    return if item.product_variant&.exclude_from_discounts?
 
     qty = item.quantity.to_i
     amount = (item.price * qty).cents # base line value, before discount

@@ -115,6 +115,41 @@ class DiscountConditionTest < ActiveSupport::TestCase
     assert d && d[:meets_condition]
   end
 
+  test "summed category condition ignores units of variants excluded from the discount" do
+    category = Category.create!(organisation: @org, name: "Comunhão", slug: "com-#{SecureRandom.hex(4)}")
+    included = Product.create!(organisation: @org, name: "Incluído", unit_price: 1000, published: true) # €10
+    excluded = Product.create!(organisation: @org, name: "Excluído", unit_price: 1000, published: true) # €10
+    CategoryProduct.create!(category: category, product: included)
+    CategoryProduct.create!(category: category, product: excluded)
+    # Pull the excluded product out of the discount via the variant flag (the
+    # "Excluir" checkbox on the category-discount form).
+    excluded.default_variant.update!(exclude_from_discounts: true)
+
+    # Buy 6 units in the category -> 12% off.
+    ProductDiscount.create!(organisation: @org, category: category, discount_type: "percentage",
+      discount_value: 0.12, condition_type: "quantity", condition_scope: "summed", min_quantity: 6)
+
+    order = Order.create!(organisation: @org, customer: @customer, customer_user: @cu)
+    order.order_items.create!(product: included, product_variant: included.default_variant, quantity: 2)
+    order.order_items.create!(product: excluded, product_variant: excluded.default_variant, quantity: 10)
+    ctx = CartDiscountContext.new(order.order_items.includes(:product_variant, product: :categories).to_a)
+
+    # 2 eligible units + 10 excluded units: the excluded ones must NOT count, so
+    # the 6-unit threshold is not reached and the discount stays locked.
+    calc = DiscountCalculator.new(product: included, customer: @customer, quantity: 2,
+      variant: included.default_variant, cart_context: ctx)
+    d = calc.all_discounts.find { |x| x[:type] == :category }
+    assert(d.nil? || !d[:meets_condition], "excluded units must not unlock the category discount")
+
+    # Bump the eligible line to 6 -> threshold met on eligible units alone.
+    order.order_items.find_by(product: included).update!(quantity: 6)
+    ctx2 = CartDiscountContext.new(order.order_items.includes(:product_variant, product: :categories).to_a)
+    calc2 = DiscountCalculator.new(product: included, customer: @customer, quantity: 6,
+      variant: included.default_variant, cart_context: ctx2)
+    d2 = calc2.all_discounts.find { |x| x[:type] == :category }
+    assert d2 && d2[:meets_condition], "6 eligible units should unlock the category discount"
+  end
+
   test "condition_display summarises the requirement" do
     qty = ProductDiscount.new(condition_type: "quantity", min_quantity: 5)
     amt = ProductDiscount.new(organisation: @org, condition_type: "amount", min_amount_cents: 5000)

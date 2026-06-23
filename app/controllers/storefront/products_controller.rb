@@ -122,7 +122,7 @@ class Storefront::ProductsController < Storefront::BaseController
 
     # Honest card pricing: the actual price (conditions respected against the
     # current cart) + a teaser for any conditional discount still to unlock.
-    @cart_context = current_cart && CartDiscountContext.new(current_cart.order_items.includes(product: :categories).to_a)
+    @cart_context = current_cart && CartDiscountContext.new(current_cart.order_items.includes(:product_variant, product: :categories).to_a)
     @product_discounts, @product_unlocks = build_card_discounts(@products)
 
     # Load card attributes (show_on_card) for product listing
@@ -238,7 +238,7 @@ class Storefront::ProductsController < Storefront::BaseController
 
     # Cart aggregates up front, so per-variant prices and conditions reflect
     # what's already in the cart (honest pricing, not the best-possible price).
-    @cart_context = current_cart && CartDiscountContext.new(current_cart.order_items.includes(product: :categories).to_a)
+    @cart_context = current_cart && CartDiscountContext.new(current_cart.order_items.includes(:product_variant, product: :categories).to_a)
 
     # Load variants data for variable products
     if @product.has_variants?

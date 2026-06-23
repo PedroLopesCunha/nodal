@@ -158,7 +158,7 @@ class Order < ApplicationRecord
 
     # Built once so each line can evaluate "summed" discount conditions against
     # the whole cart (a product's variants, or a category total).
-    cart_context = CartDiscountContext.new(order_items.includes(product: :categories).to_a)
+    cart_context = CartDiscountContext.new(order_items.includes(:product_variant, product: :categories).to_a)
 
     order_items.to_a.each do |item|
       status = item.stock_status
