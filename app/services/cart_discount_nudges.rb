@@ -26,7 +26,7 @@ class CartDiscountNudges
     @order = order
     @org = order.organisation
     @currency = @org.currency
-    @context = CartDiscountContext.new(order.order_items.includes(product: :categories).to_a)
+    @context = CartDiscountContext.new(order.order_items.includes(:product_variant, product: :categories).to_a)
   end
 
   def opportunities
