@@ -99,9 +99,11 @@ class Product < ApplicationRecord
   # Products carrying an active campaign discount — a product-level OR a
   # category-level ProductDiscount (matching the storefront "PROMOÇÃO" badge).
   # A category discount covers that category AND its descendants (subtree).
-  # Customer-independent: product/category discounts are global; per-customer
-  # special prices are a separate concept. Chain onto an org-scoped relation
-  # (e.g. organisation.products.on_promotion).
+  # Products whose sellable variants were all excluded from the discount
+  # (exclude_from_discounts) are dropped, since they'd appear in the campaign
+  # listing without ever receiving the price. Customer-independent: product/
+  # category discounts are global; per-customer special prices are separate.
+  # Chain onto an org-scoped relation (e.g. organisation.products.on_promotion).
   scope :on_promotion, -> {
     active = ProductDiscount.active
     direct = active.where.not(product_id: nil).select(:product_id)
@@ -110,7 +112,15 @@ class Product < ApplicationRecord
     subtree_ids = Category.where(id: discounted_category_ids).flat_map(&:subtree_ids).uniq
     via_category = CategoryProduct.where(category_id: subtree_ids).select(:product_id)
 
-    where(id: direct).or(where(id: via_category))
+    # At least one sellable variant must be able to receive the discount: a
+    # simple product's default variant, or a variable product's non-default
+    # variants, with exclude_from_discounts off.
+    with_eligible_variant = ProductVariant.joins(:product)
+      .where(exclude_from_discounts: [nil, false])
+      .where("(products.has_variants AND NOT product_variants.is_default) OR (NOT products.has_variants AND product_variants.is_default)")
+      .select(:product_id)
+
+    where(id: direct).or(where(id: via_category)).where(id: with_eligible_variant)
   }
 
   def self.exportable_columns

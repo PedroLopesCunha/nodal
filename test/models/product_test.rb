@@ -45,6 +45,22 @@ class ProductTest < ActiveSupport::TestCase
     assert_not_includes @org.products.on_promotion.pluck(:id), promo.id
   end
 
+  test "on_promotion drops products excluded from the campaign discount" do
+    category = Category.create!(organisation: @org, name: "Comunhão", slug: "com-#{SecureRandom.hex(4)}")
+    included = Product.create!(organisation: @org, name: "Incluído", unit_price: 1000, published: true)
+    excluded = Product.create!(organisation: @org, name: "Excluído", unit_price: 1000, published: true)
+    CategoryProduct.create!(category: category, product: included)
+    CategoryProduct.create!(category: category, product: excluded)
+    # The excluded product's sellable (default) variant is pulled from discounts.
+    excluded.default_variant.update!(exclude_from_discounts: true)
+    ProductDiscount.create!(organisation: @org, category: category, discount_type: "percentage",
+      discount_value: 0.12, condition_type: "quantity", condition_scope: "summed", min_quantity: 6, active: true)
+
+    ids = @org.products.on_promotion.pluck(:id)
+    assert_includes ids, included.id
+    assert_not_includes ids, excluded.id, "a product excluded from the discount must not show under Campanhas"
+  end
+
   test "rejects an invalid add_to_cart_mode" do
     @product.add_to_cart_mode = "weird"
     assert_not @product.valid?
