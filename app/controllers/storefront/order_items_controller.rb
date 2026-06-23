@@ -34,11 +34,10 @@ class Storefront::OrderItemsController < Storefront::BaseController
 
     authorize @order_item
 
-    filter_params = { category: params[:category], queries: params[:queries], page: params[:page] }
     # An unlock nudge (and other in-cart actions) can ask to stay on the cart.
     back_path = params[:return_to] == 'cart' ?
       cart_path(org_slug: params[:org_slug]) :
-      product_path(org_slug: params[:org_slug], id: @product, **filter_params)
+      product_path(org_slug: params[:org_slug], id: @product, **storefront_filter_params)
 
     if @order_item.save
       redirect_to back_path, notice: t('storefront.cart.item_added')
@@ -76,7 +75,7 @@ class Storefront::OrderItemsController < Storefront::BaseController
   def bulk_add
     @product = current_organisation.products.where(published: true).find(params[:product_id])
     if @product.price_on_request?
-      redirect_to product_path(org_slug: params[:org_slug], id: @product),
+      redirect_to product_path(org_slug: params[:org_slug], id: @product, **storefront_filter_params),
                   alert: t('storefront.products.show.price_on_request_not_purchasable')
       return
     end
@@ -115,19 +114,32 @@ class Storefront::OrderItemsController < Storefront::BaseController
     end
 
     if added.empty? && failed.empty?
-      redirect_to product_path(org_slug: params[:org_slug], id: @product),
+      redirect_to product_path(org_slug: params[:org_slug], id: @product, **storefront_filter_params),
                   alert: t('storefront.cart.bulk_add.nothing_selected')
     elsif failed.any?
       flash[:alert] = t('storefront.cart.bulk_add.partial_failure', items: failed.to_sentence)
-      redirect_to product_path(org_slug: params[:org_slug], id: @product),
+      redirect_to product_path(org_slug: params[:org_slug], id: @product, **storefront_filter_params),
                   notice: (added.any? ? t('storefront.cart.bulk_add.added', count: added.size) : nil)
     else
-      redirect_to product_path(org_slug: params[:org_slug], id: @product),
+      redirect_to product_path(org_slug: params[:org_slug], id: @product, **storefront_filter_params),
                   notice: t('storefront.cart.bulk_add.added', count: added.size)
     end
   end
 
   private
+
+  # Listing context (category, search, page, attribute filters) carried through
+  # add/bulk_add so the product page — and its "back to products" link — return
+  # the customer to the exact filtered page they came from. attrs is a nested
+  # hash, so unwrap it from ActionController::Parameters the way the back link does.
+  def storefront_filter_params
+    {
+      category: params[:category],
+      queries: params[:queries],
+      page: params[:page],
+      attrs: params[:attrs].respond_to?(:to_unsafe_h) ? params[:attrs].to_unsafe_h : params[:attrs]
+    }.compact
+  end
 
   def order_item_params
     params.require(:order_item).permit(:quantity)

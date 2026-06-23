@@ -53,6 +53,15 @@
                   method: :post, local: true do |f| %>
       <%= hidden_field_tag :product_id, product.id %>
 
+      <%# Carry the listing filters/page so the post-add redirect (and the
+          "back to products" link) returns to where the customer came from. %>
+      <%= hidden_field_tag :category, params[:category] if params[:category].present? %>
+      <% Array(params[:queries]).each do |query| %>
+        <%= hidden_field_tag "queries[]", query %>
+      <% end %>
+      <%= hidden_field_tag :page, params[:page] if params[:page].present? %>
+      <%= render 'storefront/products/attrs_hidden_fields' %>
+
       <% if combined_counter %>
         <p class="small mb-2">
           <i class="fa-solid fa-layer-group me-1 text-muted"></i><span class="text-muted" data-min-quantity-counter-target="output"></span>
