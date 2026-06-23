@@ -13,9 +13,13 @@
     product       — Product
     discount_info — Hash from DiscountCalculator#discount_breakdown (or nil)
 %>
+<%# Strikethrough "sale" treatment only for flag-worthy discounts (campaign /
+    special price / variant), NOT the customer's global tier — a tier shows the
+    customer's real price plain, without making every card look discounted. %>
+<% has_flag = discount_info && discount_info[:all_discounts]&.any? { |d| [:product, :category, :customer_product, :variant].include?(d[:type]) } %>
 <% if product.price_on_request? %>
   <span class="product-card-price"><%= t('storefront.products.index.price_on_request') %></span>
-<% elsif discount_info && discount_info[:has_discount] && discount_info[:effective_discount][:percentage]&.finite? && (product.variable? || !discount_info[:base_price].zero?) %>
+<% elsif has_flag && discount_info[:effective_discount][:percentage]&.finite? && (product.variable? || !discount_info[:base_price].zero?) %>
   <% dr = product.variable? ? product.discounted_price_range(current_customer, for_display: !@honest_cards, cart_context: @cart_context) : nil %>
   <div>
     <% if dr %>
@@ -34,6 +38,14 @@
       </span>
     <% end %>
   </div>
+<% elsif discount_info && discount_info[:has_discount] && (product.variable? || !discount_info[:base_price].zero?) %>
+  <%# Tier-only (or other non-flag) discount: show the customer's real price, plain. %>
+  <% dr = product.variable? ? product.discounted_price_range(current_customer, for_display: !@honest_cards, cart_context: @cart_context) : nil %>
+  <% if dr %>
+    <span class="product-card-price"><%= dr[:range] ? "#{dr[:final_min].format} - #{dr[:final_max].format}" : dr[:final_min].format %></span>
+  <% else %>
+    <span class="product-card-price"><%= money_amount(discount_info[:final_price]) %></span>
+  <% end %>
 <% elsif product.variable? %>
   <span class="product-card-price"><%= product.display_price %></span>
 <% else %>

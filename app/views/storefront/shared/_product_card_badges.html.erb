@@ -14,7 +14,11 @@
 <% pct = discount_info && discount_info[:has_discount] ? discount_info[:effective_discount][:percentage].to_f : 0 %>
 <% has_visible_discount = pct.finite? && pct > 0 %>
 <% has_promotion = discount_info && discount_info[:all_discounts]&.any? { |d| d[:type] == :product || d[:type] == :category } %>
-<% show_pct = show_discount_badge && has_visible_discount %>
+<%# A "flag-worthy" discount is a campaign (product/category), a per-product
+    special price, or a variant override — but NOT the customer's global tier,
+    which applies to everything and shouldn't make the whole catalog look on sale. %>
+<% has_flag = discount_info && discount_info[:all_discounts]&.any? { |d| [:product, :category, :customer_product, :variant].include?(d[:type]) } %>
+<% show_pct = show_discount_badge && has_visible_discount && has_flag %>
 <% show_promo = show_promotion_badge && has_promotion %>
 <%# pct is the cheapest variant's effective % (= the max for a fixed € discount).
     When that discount isn't uniform across a variable product's price range,
