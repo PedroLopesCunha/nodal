@@ -5,7 +5,7 @@ class Storefront::OrderItemsController < Storefront::BaseController
     @product = current_organisation.products.where(published: true).find(params[:product_id])
 
     if @product.price_on_request?
-      redirect_to product_path(org_slug: params[:org_slug], id: @product, category: params[:category], queries: params[:queries], page: params[:page]), alert: t('storefront.products.show.price_on_request_not_purchasable')
+      redirect_to product_path(org_slug: params[:org_slug], id: @product, **storefront_filter_params), alert: t('storefront.products.show.price_on_request_not_purchasable')
       return
     end
 
@@ -137,6 +137,7 @@ class Storefront::OrderItemsController < Storefront::BaseController
       category: params[:category],
       queries: params[:queries],
       page: params[:page],
+      promo: params[:promo],
       attrs: params[:attrs].respond_to?(:to_unsafe_h) ? params[:attrs].to_unsafe_h : params[:attrs]
     }.compact
   end

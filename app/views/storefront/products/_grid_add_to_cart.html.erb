@@ -60,6 +60,7 @@
         <%= hidden_field_tag "queries[]", query %>
       <% end %>
       <%= hidden_field_tag :page, params[:page] if params[:page].present? %>
+      <%= hidden_field_tag :promo, params[:promo] if params[:promo].present? %>
       <%= render 'storefront/products/attrs_hidden_fields' %>
 
       <% if combined_counter %>
