@@ -127,7 +127,7 @@ class Bo::CustomersController < Bo::BaseController
   end
 
   def exportable_base_scope
-    policy_scope(current_organisation.customers).includes(:customer_category)
+    policy_scope(current_organisation.customers).includes(:customer_category, :customer_users)
   end
 
   def apply_export_filters(scope)
