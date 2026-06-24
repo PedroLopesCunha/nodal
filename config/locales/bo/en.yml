@@ -194,7 +194,8 @@ en:
         customer:
           company_name: "Company"
           contact_name: "Contact"
-          email: "Email"
+          login_emails: "Login emails"
+          email: "Email (ERP)"
           contact_phone: "Phone"
           category: "Category"
           taxpayer_id: "Tax ID"

@@ -191,7 +191,8 @@ pt:
         customer:
           company_name: "Empresa"
           contact_name: "Contacto"
-          email: "Email"
+          login_emails: "Emails de login"
+          email: "Email (ERP)"
           contact_phone: "Telefone"
           category: "Categoria"
           taxpayer_id: "NIF"

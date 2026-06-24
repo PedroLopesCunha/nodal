@@ -186,7 +186,8 @@ es:
         customer:
           company_name: "Empresa"
           contact_name: "Contacto"
-          email: "Email"
+          login_emails: "Emails de acceso"
+          email: "Email (ERP)"
           contact_phone: "Teléfono"
           category: "Categoría"
           taxpayer_id: "NIF"

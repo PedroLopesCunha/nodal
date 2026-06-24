@@ -100,7 +100,11 @@ class Customer < ApplicationRecord
         value: ->(r) { r.company_name } },
       { key: :contact_name, label: I18n.t("bo.export.columns.customer.contact_name"), default: true,
         value: ->(r) { r.contact_name } },
-      { key: :email, label: I18n.t("bo.export.columns.customer.email"), default: true,
+      { key: :login_emails, label: I18n.t("bo.export.columns.customer.login_emails"), default: true,
+        value: ->(r) { r.customer_users.map(&:email).compact_blank.join("; ").presence } },
+      # Legacy orphan ERP-mirror field (the real login email lives on
+      # CustomerUser → login_emails above); off by default to avoid confusion.
+      { key: :email, label: I18n.t("bo.export.columns.customer.email"), default: false,
         value: ->(r) { r.email } },
       { key: :contact_phone, label: I18n.t("bo.export.columns.customer.contact_phone"), default: true,
         value: ->(r) { r.contact_phone } },
