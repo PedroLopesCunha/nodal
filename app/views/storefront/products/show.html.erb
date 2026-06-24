@@ -42,7 +42,7 @@
   <!-- Left Column - Product Image -->
   <div class="col-lg-6">
     <div class="position-sticky" style="top: 6rem;">
-      <%= link_to products_path(org_slug: params[:org_slug], category: params[:category], queries: params[:queries], attrs: params[:attrs]&.to_unsafe_h, page: params[:page]), class: "text-muted text-decoration-none small d-inline-flex align-items-center mb-3" do %>
+      <%= link_to products_path(org_slug: params[:org_slug], category: params[:category], queries: params[:queries], attrs: params[:attrs]&.to_unsafe_h, page: params[:page], promo: params[:promo]), class: "text-muted text-decoration-none small d-inline-flex align-items-center mb-3" do %>
         <i class="fa-solid fa-chevron-left me-1" style="font-size: 0.7rem;"></i> <%= t('storefront.products.show.back_to_products') %>
       <% end %>
     <div class="card border-0 shadow-sm position-relative" style="background-color: #f8f9fa; border-radius: 12px; overflow: hidden;">
@@ -397,6 +397,7 @@
                 <%= hidden_field_tag :category, params[:category] if params[:category].present? %>
                 <%= hidden_field_tag :queries, params[:queries] if params[:queries].present? %>
                 <%= hidden_field_tag :page, params[:page] if params[:page].present? %>
+                <%= hidden_field_tag :promo, params[:promo] if params[:promo].present? %>
                 <%= render 'storefront/products/attrs_hidden_fields' %>
 
                 <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-2">
@@ -435,6 +436,7 @@
               <%= hidden_field_tag :category, params[:category] if params[:category].present? %>
               <%= hidden_field_tag :queries, params[:queries] if params[:queries].present? %>
               <%= hidden_field_tag :page, params[:page] if params[:page].present? %>
+              <%= hidden_field_tag :promo, params[:promo] if params[:promo].present? %>
               <%= render 'storefront/products/attrs_hidden_fields' %>
               <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-2">
                 <div class="d-flex align-items-center">
