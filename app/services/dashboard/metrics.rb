@@ -222,17 +222,20 @@ module Dashboard
         .distinct
         .includes(:customer, :order_items)
 
-      # Calculate totals and sort by amount descending
-      top_carts = carts_with_items.map do |cart|
+      # Calculate per-cart totals
+      carts = carts_with_items.map do |cart|
         total = cart.order_items.sum { |item| item.unit_price * item.quantity } / 100.0
         {
           cart_id: cart.id,
           client_name: cart.customer&.company_name || "Unknown",
           cart_total: total.round(2)
         }
-      end.sort_by { |c| -c[:cart_total] }.first(10)
+      end
 
-      { value: carts_with_items.count, top_carts: top_carts }
+      total_value = carts.sum { |c| c[:cart_total] }.round(2)
+      top_carts = carts.sort_by { |c| -c[:cart_total] }.first(10)
+
+      { value: carts.size, total_value: total_value, top_carts: top_carts }
     end
 
     # Snapshot counts powering the "Saúde dos Clientes" dashboard section.
