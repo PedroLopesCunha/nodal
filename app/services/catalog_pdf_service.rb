@@ -191,6 +191,7 @@ class CatalogPdfService
   end
 
   def chunk_assigns(products_chunk, image_map, grouped)
+    card_attributes, card_attribute_data = card_attributes_for(products_chunk)
     {
       products: products_chunk,
       image_map: image_map,
@@ -203,11 +204,42 @@ class CatalogPdfService
       show_variant_price: @options["show_variant_price"] == "1",
       show_variant_photo: @show_variant_photo,
       only_available_variants: @only_available_variants,
+      card_attributes: card_attributes,
+      card_attribute_data: card_attribute_data,
       layout: @options["catalog_layout"] == "list" ? "list" : "grid",
       group_by_category: @options["group_by_category"] == "1",
       grouped: grouped,
       organisation: @organisation,
       catalog_host: @catalog_host
     }
+  end
+
+  # Card attributes for SIMPLE products in this chunk, mirroring the storefront
+  # card display (attributes flagged show_on_card, read from the default variant).
+  # Variable products already surface their attributes through the variant list.
+  # Returns [ordered_attributes, { product_id => { attribute => [values] } }].
+  def card_attributes_for(products_chunk)
+    card_attributes = @organisation.product_attributes.where(show_on_card: true).by_position.to_a
+    simple_ids = products_chunk.reject(&:has_variants?).map(&:id)
+    return [card_attributes, {}] if card_attributes.empty? || simple_ids.empty?
+
+    pairs = VariantAttributeValue
+      .joins(product_variant: :product)
+      .joins(:product_attribute_value)
+      .where(products: { id: simple_ids })
+      .where(product_variants: { is_default: true, published: true, available: true })
+      .where(product_attribute_values: { product_attribute_id: card_attributes.map(&:id) })
+      .pluck(:product_id, :product_attribute_value_id)
+
+    values_by_id = ProductAttributeValue
+      .where(id: pairs.map(&:last).uniq)
+      .includes(:product_attribute)
+      .index_by(&:id)
+
+    data = pairs.group_by(&:first).transform_values do |rows|
+      rows.map { |(_pid, vid)| values_by_id[vid] }.compact.uniq.group_by(&:product_attribute)
+    end
+
+    [card_attributes, data]
   end
 end

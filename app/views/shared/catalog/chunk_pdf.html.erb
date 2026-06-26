@@ -30,6 +30,16 @@
     .variant-sku { font-family: monospace; color: #d63384; font-size: 9px; }
     .variant-price { font-weight: 600; color: #222; white-space: nowrap; }
 
+    /* Simple-product attributes */
+    .product-card-attributes { margin-top: 6px; padding-top: 6px; border-top: 1px solid #eee; }
+    .product-card-attribute { font-size: 10px; color: #555; padding: 1px 0; }
+    .product-card-attribute .attr-name { color: #999; }
+    .product-card-attribute .attr-value { color: #333; font-weight: 600; }
+    .product-list-attributes { margin-top: 4px; }
+    .product-list-attribute { font-size: 10px; color: #555; padding: 1px 0; }
+    .product-list-attribute .attr-name { color: #999; }
+    .product-list-attribute .attr-value { color: #333; font-weight: 600; }
+
     /* List layout */
     .product-list { margin-bottom: 10px; }
     .product-list-item { display: flex; gap: 15px; padding: 12px 0; border-bottom: 1px solid #eee; page-break-inside: avoid; }
@@ -52,6 +62,15 @@
   </style>
 </head>
 <body>
+  <%
+    card_locals = {
+      image_map: @image_map, show_prices: @show_prices, show_sku: @show_sku,
+      show_description: @show_description, show_variants: @show_variants,
+      show_variant_sku: @show_variant_sku, show_variant_price: @show_variant_price,
+      show_variant_photo: @show_variant_photo, only_available_variants: @only_available_variants,
+      card_attributes: @card_attributes, card_attribute_data: @card_attribute_data
+    }
+  %>
   <% if @group_by_category && @grouped %>
     <% @grouped.each do |category_name, products| %>
       <div class="category-header">
@@ -60,13 +79,13 @@
       <% if @layout == "grid" %>
         <div class="product-grid">
           <% products.each do |product| %>
-            <%= render partial: "shared/catalog/product_grid", locals: { product: product, image_map: @image_map, show_prices: @show_prices, show_sku: @show_sku, show_description: @show_description, show_variants: @show_variants, show_variant_sku: @show_variant_sku, show_variant_price: @show_variant_price, show_variant_photo: @show_variant_photo, only_available_variants: @only_available_variants } %>
+            <%= render partial: "shared/catalog/product_grid", locals: card_locals.merge(product: product) %>
           <% end %>
         </div>
       <% else %>
         <div class="product-list">
           <% products.each do |product| %>
-            <%= render partial: "shared/catalog/product_list", locals: { product: product, image_map: @image_map, show_prices: @show_prices, show_sku: @show_sku, show_description: @show_description, show_variants: @show_variants, show_variant_sku: @show_variant_sku, show_variant_price: @show_variant_price, show_variant_photo: @show_variant_photo, only_available_variants: @only_available_variants } %>
+            <%= render partial: "shared/catalog/product_list", locals: card_locals.merge(product: product) %>
           <% end %>
         </div>
       <% end %>
@@ -75,13 +94,13 @@
     <% if @layout == "grid" %>
       <div class="product-grid">
         <% @products.each do |product| %>
-          <%= render partial: "shared/catalog/product_grid", locals: { product: product, image_map: @image_map, show_prices: @show_prices, show_sku: @show_sku, show_description: @show_description, show_variants: @show_variants, show_variant_sku: @show_variant_sku, show_variant_price: @show_variant_price, show_variant_photo: @show_variant_photo, only_available_variants: @only_available_variants } %>
+          <%= render partial: "shared/catalog/product_grid", locals: card_locals.merge(product: product) %>
         <% end %>
       </div>
     <% else %>
       <div class="product-list">
         <% @products.each do |product| %>
-          <%= render partial: "shared/catalog/product_list", locals: { product: product, image_map: @image_map, show_prices: @show_prices, show_sku: @show_sku, show_description: @show_description, show_variants: @show_variants, show_variant_sku: @show_variant_sku, show_variant_price: @show_variant_price, show_variant_photo: @show_variant_photo, only_available_variants: @only_available_variants } %>
+          <%= render partial: "shared/catalog/product_list", locals: card_locals.merge(product: product) %>
         <% end %>
       </div>
     <% end %>
