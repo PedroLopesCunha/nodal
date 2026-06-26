@@ -14,6 +14,21 @@
     <% if show_description && product.description.present? %>
       <div class="product-list-description"><%= product.description %></div>
     <% end %>
+    <% if !product.has_variants? && defined?(card_attributes) && card_attributes.present? %>
+      <% attr_data = card_attribute_data&.fetch(product.id, nil) %>
+      <% if attr_data.present? %>
+        <div class="product-list-attributes">
+          <% card_attributes.each do |attr| %>
+            <% values = attr_data[attr] %>
+            <% next if values.blank? %>
+            <div class="product-list-attribute">
+              <span class="attr-name"><%= attr.name %>:</span>
+              <span class="attr-value"><%= values.map(&:value).uniq.join(', ') %></span>
+            </div>
+          <% end %>
+        </div>
+      <% end %>
+    <% end %>
     <% if show_variants && product.has_variants? %>
       <% variants = product.product_variants.reject(&:is_default?).select(&:published?) %>
       <% variants = variants.select(&:available?) if only_available_variants %>
