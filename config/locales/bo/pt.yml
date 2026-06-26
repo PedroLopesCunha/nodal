@@ -416,6 +416,7 @@ pt:
           contact: "Contacto"
           category: "Categoria"
           status: "Estado"
+          last_access: "Último Acesso"
           actions: "Ações"
       show:
         title: "Detalhes do Cliente"

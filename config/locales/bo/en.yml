@@ -419,6 +419,7 @@ en:
           contact: "Contact"
           category: "Category"
           status: "Status"
+          last_access: "Last Access"
           actions: "Actions"
       show:
         title: "Customer Details"

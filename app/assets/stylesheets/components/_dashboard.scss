@@ -158,6 +158,11 @@
     border-radius: 4px;
   }
 
+  &[data-kpi="open_carts"] &__delta {
+    font-weight: normal;
+    padding: 0;
+  }
+
   &__period {
     color: #9ca3af;
   }
