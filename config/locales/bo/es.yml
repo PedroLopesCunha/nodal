@@ -349,6 +349,7 @@ es:
           contact: "Contacto"
           category: "Categoría"
           status: "Estado"
+          last_access: "Último Acceso"
           actions: "Acciones"
       show:
         title: "Detalles del Cliente"

@@ -6,8 +6,7 @@
 @media (max-width: 767.98px) {
   // BO action buttons in tables
   .product-actions,
-  .order-actions,
-  .customer-actions {
+  .order-actions {
     .btn-sm {
       min-width: 40px;
       min-height: 40px;
@@ -138,8 +137,7 @@
 // --- Hide text on action buttons mobile, show only icons ---
 @media (max-width: 575.98px) {
   .order-actions .btn span,
-  .product-actions .btn span,
-  .customer-actions .btn span {
+  .product-actions .btn span {
     display: none;
   }
 }

@@ -118,9 +118,17 @@ class Bo::CustomersController < Bo::BaseController
     respond_to(&:turbo_stream)
   end
 
-  helper_method :filter_params_hash, :sort_link_params
+  helper_method :filter_params_hash, :sort_link_params, :parse_db_time
 
   private
+
+  # Aggregate columns from load_customers come back as raw values that may be
+  # a String or a Time depending on the adapter — normalise to a zoned Time.
+  def parse_db_time(value)
+    return if value.blank?
+
+    value.is_a?(Time) ? value : Time.zone.parse(value.to_s)
+  end
 
   def exportable_class
     Customer
@@ -189,14 +197,35 @@ class Bo::CustomersController < Bo::BaseController
   end
 
   def load_customers
-    @customers = apply_customer_filters(
+    scope = apply_customer_filters(
       policy_scope(current_organisation.customers)
         .includes(:customer_category, :customer_users, customer_assignment: { org_member: :member })
     )
 
-    @sort_column = %w[company_name contact_name email active].include?(params[:sort]) ? params[:sort] : "company_name"
+    # Aggregate login/invitation data per empresa (a Customer may have N logins).
+    #   last_access_at     = most recent login across all logins
+    #   total_sign_in_count = summed login count
+    #   first_invited_at / first_accepted_at = earliest invite / acceptance
+    login_agg = CustomerUser
+      .select("customer_id, MAX(last_sign_in_at) AS last_access_at, " \
+              "COALESCE(SUM(sign_in_count), 0) AS total_sign_in_count, " \
+              "MIN(invitation_sent_at) AS first_invited_at, " \
+              "MIN(invitation_accepted_at) AS first_accepted_at")
+      .group(:customer_id)
+
+    scope = scope
+      .joins("LEFT JOIN (#{login_agg.to_sql}) login_agg ON login_agg.customer_id = customers.id")
+      .select("customers.*, login_agg.last_access_at, login_agg.total_sign_in_count, " \
+              "login_agg.first_invited_at, login_agg.first_accepted_at")
+
+    @sort_column = %w[company_name contact_name email active last_access].include?(params[:sort]) ? params[:sort] : "company_name"
     @sort_direction = %w[asc desc].include?(params[:direction]) ? params[:direction] : "asc"
-    @customers = @customers.order(@sort_column => @sort_direction)
+    @customers = if @sort_column == "last_access"
+      dir = @sort_direction == "asc" ? "ASC" : "DESC"
+      scope.order(Arel.sql("login_agg.last_access_at #{dir} NULLS LAST"))
+    else
+      scope.order(@sort_column => @sort_direction)
+    end
     @pagy, @customers = pagy(@customers)
 
     @last_customer_sync = current_organisation.erp_sync_logs.for_entity('customers').completed.recent.first if current_organisation.erp_configuration&.enabled?
