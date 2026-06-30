@@ -16,9 +16,13 @@ class Storefront::ProductsController < Storefront::BaseController
     @all_kept_categories = current_organisation.categories.kept.by_position.to_a
     @categories = @all_kept_categories.select { |c| c.ancestry.nil? }
 
-    # Precompute product counts and children lookup (2 queries instead of N+1)
+    # Precompute product counts and children lookup (2 queries instead of N+1).
+    # Restrict to products the customer can actually see (published + visible per
+    # the stock/visibility rules) so sidebar counts match the grid, not the raw
+    # category links.
     direct_counts = CategoryProduct
       .where(category_id: @all_kept_categories.map(&:id))
+      .where(product_id: base_products.select(:id))
       .group(:category_id)
       .distinct
       .count(:product_id)

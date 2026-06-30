@@ -62,6 +62,20 @@ class ProductsControllerTest < ActionDispatch::IntegrationTest
     assert_not_includes labels, "20", "espessura only on non-matching products must be filtered out"
   end
 
+  test "sidebar category count only counts products the customer can see" do
+    # An extra product linked to the category but NOT published must not inflate
+    # the sidebar count (it never appears in the grid).
+    hidden = Product.create!(organisation: @org, name: "Escondido", unit_price: 1000,
+                             published: false, available: true, has_variants: true)
+    CategoryProduct.create!(category: @category, product: hidden)
+
+    get products_path(org_slug: @org.slug)
+    assert_response :success
+
+    # @a, @b, @c are published (3); the hidden one is excluded → count is 3, not 4.
+    assert_select "li[data-category-id=?] .category-count", @category.id.to_s, text: "3"
+  end
+
   test "with no filters all values of every attribute are offered" do
     get products_path(org_slug: @org.slug, category: @category.slug)
     assert_response :success
