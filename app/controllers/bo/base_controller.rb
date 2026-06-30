@@ -33,7 +33,7 @@ class Bo::BaseController < ApplicationController
     products categories product_attributes product_variants
     pricing customer_product_discounts product_discounts
     customer_discounts order_discounts promo_codes
-    customer_categories
+    customer_categories unmet_demands
     settings erp_settings homepage_settings email_settings background_tasks
   ].freeze
 
@@ -89,6 +89,8 @@ class Bo::BaseController < ApplicationController
 
   def set_sidebar_counts
     @unreviewed_orders_count = current_organisation.orders.unreviewed.count
+    # Decision 3: reps are out of the Faltas feature for v1, so don't badge them.
+    @open_unmet_demands_count = pure_sales_rep? ? 0 : current_organisation.unmet_demands.open.count
     # Only count "pending ERP sync" customers when the org actually uses ERP
     # customer sync — otherwise the badge would never go away.
     @pending_erp_sync_count = erp_customer_sync_enabled? ? current_organisation.customers.pending_erp_sync.count : 0

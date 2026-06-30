@@ -358,6 +358,25 @@
     </div>
   </div>
 
+  <%# === Faltas: demand cut from this customer's carts by stock policies === %>
+  <% customer_demands = @customer.unmet_demands.open.includes(:product, :product_variant).order(last_seen_at: :desc) %>
+  <% if customer_demands.any? %>
+    <div class="row g-3 mb-4">
+      <div class="col-12">
+        <div class="card border-warning-subtle">
+          <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="card-title mb-0"><i class="fa-solid fa-cart-flatbed-suitcase me-2 text-warning"></i><%= t('bo.unmet_demands.customer_card.title') %></h5>
+            <%= link_to t('bo.unmet_demands.customer_card.view_all'), bo_unmet_demands_path(org_slug: current_organisation.slug), class: "small text-decoration-none" %>
+          </div>
+          <div class="card-body p-0">
+            <%= render "bo/unmet_demands/demands_table", demands: customer_demands %>
+          </div>
+        </div>
+      </div>
+    </div>
+    <%= render "bo/unmet_demands/trocar_modal", variants: Bo::UnmetDemandsController.substitute_variants(current_organisation) %>
+  <% end %>
+
   <%# === Row 3: Activity Overview === %>
   <div class="row g-3 mb-4">
     <div class="col-12">
