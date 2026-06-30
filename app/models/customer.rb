@@ -23,6 +23,8 @@ class Customer < ApplicationRecord
   has_one :billing_address_with_archived, -> { billing }, class_name: "Address", as: :addressable, dependent: :destroy
   has_many :shipping_addresses_with_archived, -> { shipping }, class_name: "Address", as: :addressable, dependent: :destroy
   has_many :shopping_lists, dependent: :destroy
+  has_many :unmet_demands, dependent: :destroy
+  has_many :unmet_demand_occurrences, dependent: :destroy
   has_many :customer_product_discounts, dependent: :destroy
   has_many :customer_discounts, dependent: :destroy
   has_many :promo_code_customers, dependent: :destroy

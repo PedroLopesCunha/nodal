@@ -34,6 +34,8 @@ class Organisation < ApplicationRecord
   has_many :product_attributes, dependent: :destroy
   has_many :product_variants, dependent: :destroy
   has_many :orders, dependent: :destroy
+  has_many :unmet_demands, dependent: :destroy
+  has_many :unmet_demand_occurrences, dependent: :destroy
   has_many :customer_product_discounts, dependent: :destroy
   has_many :product_discounts, dependent: :destroy
   has_many :customer_discounts, dependent: :destroy
@@ -65,6 +67,7 @@ class Organisation < ApplicationRecord
   validates :campaign_color, format: { with: HEX_COLOR_REGEX }, allow_blank: true
   validates :email_reply_to, format: { with: URI::MailTo::EMAIL_REGEXP }, allow_blank: true
   validates :lead_time_days, numericality: { greater_than_or_equal_to: 0, only_integer: true }
+  validates :low_stock_threshold, numericality: { greater_than_or_equal_to: 0, only_integer: true }
   validates :delivery_days, numericality: { greater_than: 0, only_integer: true }
   validates :order_cutoff_time, format: { with: CUTOFF_TIME_REGEX }, allow_blank: true
   validates :timezone, inclusion: { in: ActiveSupport::TimeZone::MAPPING.values.uniq }

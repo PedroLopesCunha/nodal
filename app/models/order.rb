@@ -125,6 +125,9 @@ class Order < ApplicationRecord
 
   def place!
     update!(placed_at: Time.current)
+    # The customer ended up taking these products — close any open demand they
+    # satisfy (decision 4: a falta fecha-se sozinha).
+    UnmetDemandRecorder.resolve_for_placed_order(self)
   end
 
   def push_synced?
@@ -165,6 +168,7 @@ class Order < ApplicationRecord
 
       if status.in?(%i[out_of_stock variant_unpublished]) && organisation.cart_stock_policy == "remove"
         changes[:removed] << cart_item_label(item)
+        record_unmet_demand(item, requested: item.quantity, kept: 0, reason: :removed)
         item.destroy!
         next
       end
@@ -182,6 +186,9 @@ class Order < ApplicationRecord
       when :qty_overflow
         available = item.product_variant.stock_quantity.to_i
         if organisation.cart_qty_overflow_policy == "cap" && available >= 1
+          # Record before the update — item.quantity still holds the original
+          # requested amount here; the cap below overwrites it.
+          record_unmet_demand(item, requested: item.quantity, kept: available, reason: :capped)
           item.update!(quantity: available)
           changes[:capped] << cart_item_label(item).merge(to: available)
         else
@@ -503,6 +510,17 @@ class Order < ApplicationRecord
 
   def cart_item_label(item)
     { id: item.id, name: item.product&.name, variant: item.variant_name }
+  end
+
+  def record_unmet_demand(item, requested:, kept:, reason:)
+    UnmetDemandRecorder.record(
+      order:           self,
+      product:         item.product,
+      product_variant: item.product_variant,
+      requested:       requested,
+      kept:            kept,
+      reason:          reason
+    )
   end
 
   def discount_value_valid_for_type

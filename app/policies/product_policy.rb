@@ -9,6 +9,10 @@ class ProductPolicy < ApplicationPolicy
     true
   end
 
+  def stock_control?
+    !pure_sales_rep?
+  end
+
   def generate_catalog?
     true
   end

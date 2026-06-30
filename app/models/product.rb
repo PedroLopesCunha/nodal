@@ -22,6 +22,8 @@ class Product < ApplicationRecord
   belongs_to :category, optional: true  # Legacy direct association
   has_many :order_items, dependent: :restrict_with_error
   has_many :orders, through: :order_items
+  has_many :unmet_demands, dependent: :destroy
+  has_many :unmet_demand_occurrences, dependent: :destroy
   has_many :customer_product_discounts, dependent: :destroy
   has_many :product_discounts, dependent: :destroy
 

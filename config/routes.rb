@@ -127,6 +127,16 @@ Rails.application.routes.draw do
         resource :customer_assignment, only: [:create]
       end
 
+      # "Faltas" — demand cut from carts by stock policies, surfaced for the BO
+      # team to satisfy / dismiss. See Bo::UnmetDemandsController.
+      resources :unmet_demands, only: [:index] do
+        member do
+          post :satisfy
+          post :substitute
+          post :dismiss
+        end
+      end
+
       # Sales rep impersonation — Member becomes the "current_customer" for a
       # specific empresa to place orders via storefront. See
       # Bo::ImpersonationsController and Storefront::BaseController.
@@ -146,6 +156,7 @@ Rails.application.routes.draw do
         collection do
           get :export
           get :export_variants
+          get :stock_control
           get :generate_catalog
           get :import
           post :import_mapping

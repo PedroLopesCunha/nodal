@@ -267,6 +267,7 @@ pt:
       categories: "Categorias"
       attributes: "Atributos"
       orders: "Encomendas"
+      unmet_demands: "Faltas"
       pricing: "Preços"
       profile: "Perfil"
       team: "Equipa"
@@ -274,6 +275,57 @@ pt:
       log_out: "Sair"
       view_storefront: "Ver Loja"
       tasks: "Tarefas"
+
+    unmet_demands:
+      badge_title: "Faltas por resolver"
+      in_cart_title: "Já está no carrinho do cliente (por finalizar)"
+      stock_unlimited: "Sem controlo de stock / aceita encomenda sem stock"
+      satisfy_backorder_title: "Sem stock suficiente agora — fica em backorder"
+      index:
+        title: "Faltas"
+        subtitle: "Artigos e quantidades que os clientes quiseram mas não levaram, por falta de stock"
+        empty: "Sem faltas registadas. Quando o stock cortar algo de um carrinho, aparece aqui."
+        total_short: "em falta: %{count}"
+      customer_card:
+        title: "Faltas deste cliente"
+        open_customer: "Abrir ficha do cliente"
+      table:
+        product: "Artigo"
+        login: "Login"
+        stock: "Stock"
+        wanted: "Quis"
+        in_cart: "No carrinho"
+        taken: "Levou"
+        shortfall: "Em falta"
+        actions: "Ações"
+      history:
+        title: "Histórico de ocorrências"
+        line: "quis %{wanted} · ficou com %{kept}"
+        empty: "Sem ocorrências registadas."
+      reasons:
+        removed: "Removido"
+        capped: "Cortado"
+      actions:
+        satisfy: "Satisfazer"
+        substitute: "Trocar"
+        dismiss: "Descartar"
+      confirm:
+        satisfy: "Adicionar %{qty}x %{product} ao carrinho deste cliente?"
+        satisfy_backorder: "Não há stock suficiente de %{product}. Adicionar %{qty}x ao carrinho na mesma (backorder)?"
+        dismiss: "Descartar a falta de %{product}? Deixa de aparecer aqui."
+      substitute_modal:
+        title: "Trocar por outro artigo"
+        replacing: "A substituir a falta de:"
+        product: "Artigo substituto"
+        product_prompt: "Escolhe um artigo…"
+        search_placeholder: "Escreve o nome ou o SKU…"
+        invalid: "Escolhe uma variante válida da lista."
+        quantity: "Quantidade"
+      flash:
+        satisfied: "Adicionado %{qty}x %{product} ao carrinho deste cliente. Finaliza em 'Encomendar para este cliente' quando quiseres."
+        substituted: "Trocado: %{from} → %{to}, adicionado ao carrinho deste cliente."
+        satisfy_failed: "Não foi possível gerar o rascunho: %{error}"
+        dismissed: "Falta de %{product} descartada."
 
     # Secção Dashboard
     analytics:
@@ -555,6 +607,32 @@ pt:
 
     # Secção Produtos
     products:
+      tabs:
+        catalog: "Catálogo"
+        stock_control: "Controlo de stock"
+      stock_control:
+        search_placeholder: "Pesquisar por nome ou SKU…"
+        title: "Controlo de stock"
+        subtitle: "Stock real de todas as variantes (limiar de risco: %{threshold})"
+        empty: "Nenhuma variante para mostrar."
+        threshold_hint: "Em risco quando o stock é igual ou inferior a %{threshold}."
+        edit_threshold: "Alterar nas Definições"
+        unmet_title: "Procura em falta — ver Faltas"
+        filter:
+          label: "Mostrar"
+          all: "Todas"
+          risky: "Em risco + Esgotado"
+        status:
+          out_of_stock: "Esgotado"
+          at_risk: "Em risco"
+          ok: "OK"
+          untracked: "Sem controlo"
+        table:
+          product: "Produto"
+          sku: "SKU"
+          stock: "Stock"
+          status: "Status"
+          unmet: "Em falta"
       index:
         title: "Catálogo de Produtos"
         subtitle: "Ver e gerir o seu catálogo de produtos"
@@ -1721,6 +1799,8 @@ pt:
         stock_management: "Gestão de Stock"
         out_of_stock_strategy: "Quando um produto fica sem stock"
         out_of_stock_strategy_hint: "Define o que acontece automaticamente na loja quando o stock chega a zero (via sync ERP ou edição manual). Variantes com 'Acompanhar stock' desativado não são afetadas."
+        low_stock_threshold: "Limiar de stock baixo"
+        low_stock_threshold_hint: "Uma variante fica 'Em risco' quando o stock é igual ou inferior a este número. Usado no separador Controlo de stock."
         out_of_stock_do_nothing: "Apenas registar stock"
         out_of_stock_deactivate: "Mostrar badge 'Sem Stock'"
         out_of_stock_hide: "Ocultar da loja"
