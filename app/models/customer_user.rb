@@ -12,6 +12,8 @@ class CustomerUser < ApplicationRecord
   belongs_to :customer
   belongs_to :organisation
   has_many :orders, dependent: :nullify
+  has_many :unmet_demands, dependent: :destroy
+  has_many :unmet_demand_occurrences, dependent: :destroy
   has_many :quick_access_tokens, dependent: :destroy
   has_many :login_events, class_name: "CustomerUserLoginEvent", dependent: :nullify
 

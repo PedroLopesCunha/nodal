@@ -7,6 +7,8 @@ class ProductVariant < ApplicationRecord
   has_many :variant_attribute_values, dependent: :destroy
   has_many :attribute_values, through: :variant_attribute_values, source: :product_attribute_value
   has_many :order_items, dependent: :restrict_with_error
+  has_many :unmet_demands, dependent: :nullify
+  has_many :unmet_demand_occurrences, dependent: :nullify
 
   has_one_attached :photo
 
@@ -97,7 +99,9 @@ class ProductVariant < ApplicationRecord
   end
 
   def option_values_string
-    attribute_values.joins(:product_attribute).order('product_attributes.position').map(&:value).join(' / ')
+    # Sort in Ruby off the (often preloaded) association rather than .joins/.order,
+    # which would fire a fresh query per variant and defeat eager loading.
+    attribute_values.sort_by { |av| av.product_attribute.position }.map(&:value).join(' / ')
   end
 
   # Sort key for natural ordering by option name: numeric chunks compare
@@ -118,6 +122,11 @@ class ProductVariant < ApplicationRecord
     else
       "#{product.name} - #{option_values_string}"
     end
+  end
+
+  # Disambiguating label for pickers: full variant name plus SKU.
+  def picker_label
+    sku.present? ? "#{display_name} — #{sku}" : display_name
   end
 
   def has_custom_discount?

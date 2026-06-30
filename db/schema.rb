@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2026_06_23_120000) do
+ActiveRecord::Schema[7.1].define(version: 2026_06_30_130000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_trgm"
   enable_extension "plpgsql"
@@ -971,6 +971,59 @@ ActiveRecord::Schema[7.1].define(version: 2026_06_23_120000) do
     t.index ["key"], name: "index_solid_queue_semaphores_on_key", unique: true
   end
 
+  create_table "unmet_demand_occurrences", force: :cascade do |t|
+    t.bigint "unmet_demand_id"
+    t.bigint "organisation_id", null: false
+    t.bigint "customer_id", null: false
+    t.bigint "customer_user_id", null: false
+    t.bigint "product_id", null: false
+    t.bigint "product_variant_id"
+    t.integer "requested_quantity", null: false
+    t.integer "kept_quantity", default: 0, null: false
+    t.string "reason", null: false
+    t.datetime "occurred_at", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["customer_id"], name: "index_unmet_demand_occurrences_on_customer_id"
+    t.index ["customer_user_id", "product_id", "product_variant_id"], name: "index_unmet_demand_occurrences_on_login_product_variant"
+    t.index ["customer_user_id"], name: "index_unmet_demand_occurrences_on_customer_user_id"
+    t.index ["organisation_id"], name: "index_unmet_demand_occurrences_on_organisation_id"
+    t.index ["product_id"], name: "index_unmet_demand_occurrences_on_product_id"
+    t.index ["product_variant_id"], name: "index_unmet_demand_occurrences_on_product_variant_id"
+    t.index ["unmet_demand_id"], name: "index_unmet_demand_occurrences_on_unmet_demand_id"
+  end
+
+  create_table "unmet_demands", force: :cascade do |t|
+    t.bigint "organisation_id", null: false
+    t.bigint "customer_id", null: false
+    t.bigint "customer_user_id", null: false
+    t.bigint "product_id", null: false
+    t.bigint "product_variant_id"
+    t.bigint "order_id"
+    t.bigint "substitute_product_id"
+    t.bigint "resolved_by_member_id"
+    t.integer "requested_quantity", null: false
+    t.integer "fulfilled_quantity", default: 0, null: false
+    t.string "reason", null: false
+    t.string "status", default: "open", null: false
+    t.string "resolution"
+    t.datetime "first_seen_at", null: false
+    t.datetime "last_seen_at", null: false
+    t.datetime "resolved_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index "customer_user_id, product_id, COALESCE(product_variant_id, (0)::bigint)", name: "index_unmet_demands_open_uniqueness", unique: true, where: "((status)::text = 'open'::text)"
+    t.index ["customer_id", "status"], name: "index_unmet_demands_on_customer_id_and_status"
+    t.index ["customer_id"], name: "index_unmet_demands_on_customer_id"
+    t.index ["customer_user_id"], name: "index_unmet_demands_on_customer_user_id"
+    t.index ["order_id"], name: "index_unmet_demands_on_order_id"
+    t.index ["organisation_id", "status"], name: "index_unmet_demands_on_organisation_id_and_status"
+    t.index ["organisation_id"], name: "index_unmet_demands_on_organisation_id"
+    t.index ["product_id"], name: "index_unmet_demands_on_product_id"
+    t.index ["product_variant_id"], name: "index_unmet_demands_on_product_variant_id"
+    t.index ["substitute_product_id"], name: "index_unmet_demands_on_substitute_product_id"
+  end
+
   create_table "variant_attribute_values", force: :cascade do |t|
     t.bigint "product_variant_id", null: false
     t.bigint "product_attribute_value_id", null: false
@@ -1072,6 +1125,19 @@ ActiveRecord::Schema[7.1].define(version: 2026_06_23_120000) do
   add_foreign_key "solid_queue_ready_executions", "solid_queue_jobs", column: "job_id", on_delete: :cascade
   add_foreign_key "solid_queue_recurring_executions", "solid_queue_jobs", column: "job_id", on_delete: :cascade
   add_foreign_key "solid_queue_scheduled_executions", "solid_queue_jobs", column: "job_id", on_delete: :cascade
+  add_foreign_key "unmet_demand_occurrences", "customer_users"
+  add_foreign_key "unmet_demand_occurrences", "customers"
+  add_foreign_key "unmet_demand_occurrences", "organisations"
+  add_foreign_key "unmet_demand_occurrences", "product_variants"
+  add_foreign_key "unmet_demand_occurrences", "products"
+  add_foreign_key "unmet_demand_occurrences", "unmet_demands", on_delete: :nullify
+  add_foreign_key "unmet_demands", "customer_users"
+  add_foreign_key "unmet_demands", "customers"
+  add_foreign_key "unmet_demands", "orders", on_delete: :nullify
+  add_foreign_key "unmet_demands", "organisations"
+  add_foreign_key "unmet_demands", "product_variants"
+  add_foreign_key "unmet_demands", "products"
+  add_foreign_key "unmet_demands", "products", column: "substitute_product_id", on_delete: :nullify
   add_foreign_key "variant_attribute_values", "product_attribute_values"
   add_foreign_key "variant_attribute_values", "product_variants"
 end
