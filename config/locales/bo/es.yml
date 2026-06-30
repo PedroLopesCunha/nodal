@@ -536,6 +536,32 @@ es:
 
     # Sección Productos
     products:
+      tabs:
+        catalog: "Catálogo"
+        stock_control: "Control de stock"
+      stock_control:
+        search_placeholder: "Buscar por nombre o SKU…"
+        title: "Control de stock"
+        subtitle: "Stock real de todas las variantes (umbral de riesgo: %{threshold})"
+        empty: "No hay variantes para mostrar."
+        threshold_hint: "En riesgo cuando el stock es igual o inferior a %{threshold}."
+        edit_threshold: "Cambiar en Configuración"
+        unmet_title: "Demanda no satisfecha — ver Faltantes"
+        filter:
+          label: "Mostrar"
+          all: "Todas"
+          risky: "En riesgo + Agotado"
+        status:
+          out_of_stock: "Agotado"
+          at_risk: "En riesgo"
+          ok: "OK"
+          untracked: "Sin control"
+        table:
+          product: "Producto"
+          sku: "SKU"
+          stock: "Stock"
+          status: "Estado"
+          unmet: "Falta"
       index:
         title: "Catálogo de Productos"
         subtitle: "Ver y gestionar su catálogo de productos"

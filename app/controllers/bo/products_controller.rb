@@ -240,6 +240,47 @@ class Bo::ProductsController < Bo::BaseController
     @last_product_sync = current_organisation.erp_sync_logs.for_entity('products').completed.recent.first if current_organisation.erp_configuration&.enabled?
   end
 
+  # "Controlo de stock" tab — org-wide variant stock list with a risk status
+  # (out / at-risk vs the org threshold) and the open unmet demand per variant.
+  def stock_control
+    authorize Product, :stock_control?
+    @threshold = current_organisation.low_stock_threshold
+    @stock_status = %w[out_of_stock at_risk risky].include?(params[:stock_status]) ? params[:stock_status] : nil
+    @query = params[:query].to_s.strip
+
+    # real_units already joins :product, so products.* is available for
+    # searching/sorting; the includes preload the option values for the label.
+    scope = current_organisation.product_variants.real_units
+              .includes(:product, attribute_values: :product_attribute)
+    scope = case @stock_status
+            when "out_of_stock" then scope.stock_out
+            when "at_risk"      then scope.stock_at_risk(@threshold)
+            when "risky"        then scope.stock_low_or_out(@threshold)
+            else scope
+            end
+    if @query.present?
+      scope = scope.where("products.name ILIKE :q OR product_variants.sku ILIKE :q", q: "%#{@query}%")
+    end
+
+    @sort_column    = %w[product sku stock].include?(params[:sort]) ? params[:sort] : nil
+    @sort_direction = params[:direction] == "desc" ? "desc" : "asc"
+    scope = scope.order(stock_control_order_sql(@sort_column, @sort_direction))
+
+    respond_to do |format|
+      format.html do
+        @pagy, @variants = pagy(scope)
+        @unmet_by_variant = open_unmet_shortfall_by_variant(@variants.map(&:id))
+      end
+      format.csv do
+        variants = scope.to_a
+        unmet = open_unmet_shortfall_by_variant(variants.map(&:id))
+        send_data stock_control_csv(variants, unmet),
+                  filename: "controlo-stock-#{current_organisation.slug}.csv",
+                  type: "text/csv"
+      end
+    end
+  end
+
   def catalog_selection
     authorize Product, :generate_catalog?
 
@@ -481,6 +522,46 @@ class Bo::ProductsController < Bo::BaseController
   helper_method :filter_params_hash, :sort_link_params, :storefront_state
 
   private
+
+  # Total open unmet demand (Quis − Levou) per variant — the Faltas cross-link
+  # for the stock list. Returns { variant_id => outstanding_shortfall }.
+  def open_unmet_shortfall_by_variant(variant_ids)
+    return {} if variant_ids.blank?
+
+    current_organisation.unmet_demands.open
+      .where(product_variant_id: variant_ids)
+      .group(:product_variant_id)
+      .sum(Arel.sql("requested_quantity - fulfilled_quantity"))
+  end
+
+  # ORDER clause for the stock-control list. @sort_direction is validated to
+  # asc/desc so the interpolation is safe; default floats risk to the top.
+  def stock_control_order_sql(column, direction)
+    dir = direction == "desc" ? "DESC" : "ASC"
+    case column
+    when "product" then Arel.sql("products.name #{dir}")
+    when "sku"     then Arel.sql("product_variants.sku #{dir} NULLS LAST")
+    when "stock"   then Arel.sql("product_variants.stock_quantity #{dir} NULLS LAST")
+    else Arel.sql("(product_variants.track_stock IS TRUE) DESC, product_variants.stock_quantity ASC NULLS LAST")
+    end
+  end
+
+  def stock_control_csv(variants, unmet)
+    CSV.generate(headers: true) do |csv|
+      csv << ["Produto", "Variante", "SKU", "Stock", "Status", "Em falta"]
+      variants.each do |v|
+        status = v.stock_control_status(@threshold)
+        csv << [
+          v.product&.name,
+          v.option_values_string,
+          v.sku,
+          v.track_stock? ? v.stock_quantity.to_i : "∞",
+          I18n.t("bo.products.stock_control.status.#{status}"),
+          unmet[v.id].to_i
+        ]
+      end
+    end
+  end
 
   def exportable_class
     Product

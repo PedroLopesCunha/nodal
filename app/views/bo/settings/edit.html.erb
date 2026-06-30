@@ -363,6 +363,11 @@
                            class: "form-control" %>
               <small class="text-muted"><%= t('bo.settings.edit.out_of_stock_strategy_hint') %></small>
             </div>
+            <div class="col-md-6">
+              <label class="form-label"><%= t('bo.settings.edit.low_stock_threshold') %></label>
+              <%= f.number_field :low_stock_threshold, class: "form-control", min: 0, step: 1 %>
+              <small class="text-muted"><%= t('bo.settings.edit.low_stock_threshold_hint') %></small>
+            </div>
           </div>
         </div>
       </div>

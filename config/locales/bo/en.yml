@@ -610,6 +610,32 @@ en:
 
     # Products section
     products:
+      tabs:
+        catalog: "Catalog"
+        stock_control: "Stock control"
+      stock_control:
+        search_placeholder: "Search by name or SKU…"
+        title: "Stock control"
+        subtitle: "Real stock of every variant (risk threshold: %{threshold})"
+        empty: "No variants to show."
+        threshold_hint: "At risk when stock is at or below %{threshold}."
+        edit_threshold: "Change in Settings"
+        unmet_title: "Unmet demand — see Shortfalls"
+        filter:
+          label: "Show"
+          all: "All"
+          risky: "At risk + Out of stock"
+        status:
+          out_of_stock: "Out of stock"
+          at_risk: "At risk"
+          ok: "OK"
+          untracked: "Untracked"
+        table:
+          product: "Product"
+          sku: "SKU"
+          stock: "Stock"
+          status: "Status"
+          unmet: "Short"
       index:
         title: "Product Catalog"
         subtitle: "View and manage your product catalog"
@@ -1783,6 +1809,8 @@ en:
         stock_management: "Stock Management"
         out_of_stock_strategy: "When a product runs out of stock"
         out_of_stock_strategy_hint: "Defines what happens automatically in the storefront when stock reaches zero (via ERP sync or manual edit). Variants with 'Track stock' disabled are not affected."
+        low_stock_threshold: "Low stock threshold"
+        low_stock_threshold_hint: "A variant is flagged 'At risk' when its stock is at or below this number. Used in the Stock control tab."
         out_of_stock_do_nothing: "Track stock only"
         out_of_stock_deactivate: "Show 'Out of Stock' badge"
         out_of_stock_hide: "Hide from storefront"

@@ -607,6 +607,32 @@ pt:
 
     # Secção Produtos
     products:
+      tabs:
+        catalog: "Catálogo"
+        stock_control: "Controlo de stock"
+      stock_control:
+        search_placeholder: "Pesquisar por nome ou SKU…"
+        title: "Controlo de stock"
+        subtitle: "Stock real de todas as variantes (limiar de risco: %{threshold})"
+        empty: "Nenhuma variante para mostrar."
+        threshold_hint: "Em risco quando o stock é igual ou inferior a %{threshold}."
+        edit_threshold: "Alterar nas Definições"
+        unmet_title: "Procura em falta — ver Faltas"
+        filter:
+          label: "Mostrar"
+          all: "Todas"
+          risky: "Em risco + Esgotado"
+        status:
+          out_of_stock: "Esgotado"
+          at_risk: "Em risco"
+          ok: "OK"
+          untracked: "Sem controlo"
+        table:
+          product: "Produto"
+          sku: "SKU"
+          stock: "Stock"
+          status: "Status"
+          unmet: "Em falta"
       index:
         title: "Catálogo de Produtos"
         subtitle: "Ver e gerir o seu catálogo de produtos"
@@ -1773,6 +1799,8 @@ pt:
         stock_management: "Gestão de Stock"
         out_of_stock_strategy: "Quando um produto fica sem stock"
         out_of_stock_strategy_hint: "Define o que acontece automaticamente na loja quando o stock chega a zero (via sync ERP ou edição manual). Variantes com 'Acompanhar stock' desativado não são afetadas."
+        low_stock_threshold: "Limiar de stock baixo"
+        low_stock_threshold_hint: "Uma variante fica 'Em risco' quando o stock é igual ou inferior a este número. Usado no separador Controlo de stock."
         out_of_stock_do_nothing: "Apenas registar stock"
         out_of_stock_deactivate: "Mostrar badge 'Sem Stock'"
         out_of_stock_hide: "Ocultar da loja"
