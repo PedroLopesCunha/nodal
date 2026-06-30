@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2026_06_30_130000) do
+ActiveRecord::Schema[7.1].define(version: 2026_06_30_140000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_trgm"
   enable_extension "plpgsql"
@@ -601,6 +601,7 @@ ActiveRecord::Schema[7.1].define(version: 2026_06_30_130000) do
     t.string "website_url"
     t.decimal "max_discount_percentage", precision: 5, scale: 4
     t.string "campaign_color"
+    t.integer "low_stock_threshold", default: 5, null: false
     t.index ["custom_domain"], name: "index_organisations_on_custom_domain", unique: true, where: "(custom_domain IS NOT NULL)"
     t.index ["default_locale"], name: "index_organisations_on_default_locale"
     t.index ["slug"], name: "index_organisations_on_slug", unique: true

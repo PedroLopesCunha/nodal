@@ -34,6 +34,16 @@ class ProductVariant < ApplicationRecord
   scope :published, -> { where(published: true) }
   scope :default, -> { where(is_default: true) }
 
+  # Stock-control (risk) scopes — tracked variants only; untracked ones sell
+  # without stock so they carry no risk.
+  scope :stock_tracked,    -> { where(track_stock: true) }
+  scope :stock_out,        -> { stock_tracked.where("stock_quantity <= 0") }
+  scope :stock_at_risk,    ->(threshold) { stock_tracked.where("stock_quantity > 0 AND stock_quantity <= ?", threshold) }
+  scope :stock_low_or_out, ->(threshold) { stock_tracked.where("stock_quantity <= ?", threshold) }
+  # The placeholder base variant of a variable product isn't a real sellable
+  # unit — exclude it from stock listings.
+  scope :real_units, -> { joins(:product).where("NOT (product_variants.is_default AND products.has_variants)") }
+
   def self.exportable_columns
     [
       { key: :product_name, label: I18n.t("bo.export.columns.variant.product_name"), default: true,
@@ -127,6 +137,21 @@ class ProductVariant < ApplicationRecord
   # Disambiguating label for pickers: full variant name plus SKU.
   def picker_label
     sku.present? ? "#{display_name} — #{sku}" : display_name
+  end
+
+  # Risk classification for the BO stock-control list.
+  #   :untracked   — sells without stock, no risk
+  #   :out_of_stock — tracked, nothing on hand
+  #   :at_risk     — tracked, at/under the org's low-stock threshold
+  #   :ok          — tracked, comfortably stocked
+  def stock_control_status(threshold)
+    return :untracked unless track_stock?
+
+    qty = stock_quantity.to_i
+    return :out_of_stock if qty <= 0
+    return :at_risk if qty <= threshold.to_i
+
+    :ok
   end
 
   def has_custom_discount?
