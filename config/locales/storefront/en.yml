@@ -158,6 +158,7 @@ en:
         filters_button: "Filters"
         filters_title: "Filters"
         clear_filters: "Clear filters"
+        apply_filters: "Apply filters"
         filters:
           active: "Active filters"
           filter_by: "Filter by"

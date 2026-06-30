@@ -146,6 +146,7 @@ es:
         filters_button: "Filtros"
         filters_title: "Filtros"
         clear_filters: "Limpiar filtros"
+        apply_filters: "Aplicar filtros"
         filters:
           active: "Filtros activos"
           filter_by: "Filtrar por"

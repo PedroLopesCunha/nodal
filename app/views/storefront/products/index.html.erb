@@ -194,10 +194,20 @@
     </h5>
     <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
   </div>
-  <div class="offcanvas-body">
-    <%# Attribute filters %>
-    <% if @available_attributes.present? %>
-      <div class="mb-4">
+  <% has_active_filters = params[:category].present? || Array(params[:queries]).any? || params[:attrs].present? %>
+
+  <% if @available_attributes.present? %>
+    <%# Body scrolls; the Apply/Clear footer stays pinned to the bottom so the
+        customer never has to scroll past the values to find the buttons. %>
+    <%= form_with url: products_path(org_slug: params[:org_slug]), method: :get, class: "mobile-filter-form" do %>
+      <%# Preserve the other active filters so applying attributes keeps them %>
+      <%= hidden_field_tag 'category', params[:category] if params[:category].present? %>
+      <% Array(params[:queries]).reject(&:blank?).each do |q| %>
+        <%= hidden_field_tag 'queries[]', q %>
+      <% end %>
+      <%= hidden_field_tag 'sort', params[:sort] if params[:sort].present? %>
+
+      <div class="offcanvas-body">
         <h6 class="filter-section-title"><%= t('storefront.products.index.filters.filter_by') %></h6>
         <div class="accordion accordion-flush" id="mobileAttributeFilters">
           <% @available_attributes.each_with_index do |attribute, idx| %>
@@ -217,33 +227,21 @@
               <div id="mobileAttr<%= idx %>" class="accordion-collapse collapse">
                 <div class="accordion-body px-0 pt-1 pb-2">
                   <% attribute[:values].each do |value| %>
-                    <%
-                      if value[:selected]
-                        new_slugs = (@current_attrs[attribute[:slug]] || []) - [value[:slug]]
-                        toggle_attrs = @current_attrs.except(attribute[:slug])
-                        toggle_attrs[attribute[:slug]] = new_slugs if new_slugs.any?
-                      else
-                        new_slugs = (@current_attrs[attribute[:slug]] || []) + [value[:slug]]
-                        toggle_attrs = @current_attrs.merge(attribute[:slug] => new_slugs)
-                      end
-                      filter_params = {
-                        org_slug: params[:org_slug],
-                        category: params[:category],
-                        queries: params[:queries],
-                        sort: params[:sort],
-                        attrs: toggle_attrs.presence
-                      }.compact
-                    %>
-                    <%= link_to products_path(**filter_params), class: "d-flex align-items-center gap-2 py-2 text-decoration-none text-body" do %>
+                    <label class="attribute-filter-option d-flex align-items-center gap-2 py-2 text-body">
+                      <input type="checkbox" class="attr-filter-check"
+                             name="attrs[<%= attribute[:slug] %>][]"
+                             value="<%= value[:slug] %>"
+                             <%= 'checked' if value[:selected] %>>
                       <% if value[:color_hex].present? %>
-                        <span class="attribute-color-swatch <%= 'selected' if value[:selected] %>"
+                        <span class="attribute-color-swatch"
                               style="background-color: <%= value[:color_hex] %>;"></span>
                       <% else %>
-                        <i class="fa-<%= value[:selected] ? 'solid' : 'regular' %> fa-square<%= '-check' if value[:selected] %> text-primary"></i>
+                        <i class="fa-regular fa-square attr-icon-unchecked text-primary"></i>
+                        <i class="fa-solid fa-square-check attr-icon-checked text-primary"></i>
                       <% end %>
                       <span class="flex-grow-1"><%= value[:label] %></span>
                       <small class="text-muted">(<%= value[:count] %>)</small>
-                    <% end %>
+                    </label>
                   <% end %>
                 </div>
               </div>
@@ -251,17 +249,26 @@
           <% end %>
         </div>
       </div>
-    <% end %>
 
-    <%# Clear all filters %>
-    <% if params[:category].present? || Array(params[:queries]).any? || params[:attrs].present? %>
-      <div class="pt-3 border-top">
-        <%= link_to products_path(org_slug: params[:org_slug]), class: "btn btn-outline-secondary w-100" do %>
-          <i class="fa-solid fa-times me-2"></i><%= t('storefront.products.index.clear_filters') %>
+      <div class="mobile-filter-footer">
+        <button type="submit" class="btn btn-primary w-100">
+          <i class="fa-solid fa-check me-2"></i><%= t('storefront.products.index.apply_filters') %>
+        </button>
+        <% if has_active_filters %>
+          <%= link_to products_path(org_slug: params[:org_slug]), class: "btn btn-outline-secondary w-100" do %>
+            <i class="fa-solid fa-times me-2"></i><%= t('storefront.products.index.clear_filters') %>
+          <% end %>
         <% end %>
       </div>
     <% end %>
-  </div>
+  <% elsif has_active_filters %>
+    <div class="offcanvas-body"></div>
+    <div class="mobile-filter-footer">
+      <%= link_to products_path(org_slug: params[:org_slug]), class: "btn btn-outline-secondary w-100" do %>
+        <i class="fa-solid fa-times me-2"></i><%= t('storefront.products.index.clear_filters') %>
+      <% end %>
+    </div>
+  <% end %>
 </div>
 
 <%# Search bar / clear filters + product count / sort (desktop) %>

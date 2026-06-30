@@ -102,25 +102,33 @@ class Storefront::ProductsController < Storefront::BaseController
       end
     end
 
-    # Filter products by attribute values (AND across attributes, OR within each attribute)
-    if @current_attrs.any?
-      attr_filtered_ids = nil
-      @current_attrs.each do |attr_slug, value_slugs|
-        ids = products
-          .joins(product_variants: :variant_attribute_values)
-          .joins("INNER JOIN product_attribute_values pav ON pav.id = variant_attribute_values.product_attribute_value_id")
-          .joins("INNER JOIN product_attributes pa ON pa.id = pav.product_attribute_id")
-          .where(product_variants: { published: true })
-          .where("pa.slug = ? AND pav.slug IN (?)", attr_slug, value_slugs)
-          .distinct.pluck(:id)
-        attr_filtered_ids = attr_filtered_ids ? (attr_filtered_ids & ids) : ids
-      end
-      products = products.where(id: attr_filtered_ids || [])
+    # Filter products by attribute values (AND across attributes, OR within each attribute).
+    # Keep the scope *before* attributes are applied: it is the starting point for
+    # recomputing each attribute's available options as an independent facet (below).
+    products_before_attrs = products
+    # Per-attribute matching product IDs, each relative to products_before_attrs.
+    # e.g. { "cor" => [ids with red OR blue], "espessura" => [ids with 10] }
+    attr_match_ids = {}
+    @current_attrs.each do |attr_slug, value_slugs|
+      attr_match_ids[attr_slug] = products_before_attrs
+        .joins(product_variants: :variant_attribute_values)
+        .joins("INNER JOIN product_attribute_values pav ON pav.id = variant_attribute_values.product_attribute_value_id")
+        .joins("INNER JOIN product_attributes pa ON pa.id = pav.product_attribute_id")
+        .where(product_variants: { published: true })
+        .where("pa.slug = ? AND pav.slug IN (?)", attr_slug, value_slugs)
+        .distinct.pluck(:id)
+    end
+    if attr_match_ids.any?
+      # Final result = intersection across attributes (AND between attributes)
+      final_ids = attr_match_ids.values.reduce(:&) || []
+      products = products_before_attrs.where(id: final_ids)
     end
 
     # Collect available attribute filters only when a category is selected
-    # (showing attributes across all categories is confusing — values from unrelated categories mix together)
-    @available_attributes = @current_category ? build_available_attributes(products, @current_attrs) : []
+    # (showing attributes across all categories is confusing — values from unrelated categories mix together).
+    # Facets are independent: each attribute's options are computed from products filtered by
+    # all OTHER selected attributes — so selecting one value never hides its siblings (OR stays usable).
+    @available_attributes = @current_category ? build_available_attributes(products_before_attrs, attr_match_ids) : []
 
     # Sort: explicit query param wins; otherwise fall back to the current
     # category's default (if any), then the organisation's default.
@@ -596,38 +604,59 @@ class Storefront::ProductsController < Storefront::BaseController
     filters
   end
 
-  def build_available_attributes(products, current_attrs)
-    product_ids = products.pluck(:id)
-    return [] if product_ids.empty?
+  def build_available_attributes(base_scope, attr_match_ids)
+    base_ids = base_scope.pluck(:id)
+    return [] if base_ids.empty?
 
-    # Query attribute values present in available variants of these products
+    # Product IDs filtered by all selected attributes EXCEPT `except_slug`.
+    # - For a selected attribute, this drops its own filter so its sibling values stay
+    #   visible (OR within the attribute remains usable).
+    # - For an unselected attribute, nothing is dropped, so its options reflect the
+    #   current selection (AND across attributes).
+    base_id_set = base_ids.to_set
+    ids_excluding = lambda do |except_slug|
+      attr_match_ids.each_with_object(base_id_set.dup) do |(slug, ids), acc|
+        next if slug == except_slug
+        acc.select! { |id| ids.include?(id) }
+      end
+    end
+    # Memoize the allowed-id set per attribute (computed once, reused across its values).
+    allowed_cache = Hash.new { |h, slug| h[slug] = ids_excluding.call(slug) }
+
+    # One query for every (attribute, value, product) tuple in the base scope. We filter
+    # per-attribute in Ruby afterwards so each facet uses its own "all others" set.
     rows = ProductAttributeValue
       .joins(:product_attribute, variant_attribute_values: { product_variant: :product })
-      .where(products: { id: product_ids })
+      .where(products: { id: base_ids })
       .where(product_variants: { published: true })
-      .group("product_attributes.id", "product_attributes.name", "product_attributes.slug", "product_attributes.position",
-             "product_attribute_values.id", "product_attribute_values.value", "product_attribute_values.slug",
-             "product_attribute_values.color_hex", "product_attribute_values.position")
+      .distinct
       .order(Arel.sql("product_attributes.position"))
       .pluck(
         Arel.sql("product_attributes.id"), Arel.sql("product_attributes.name"), Arel.sql("product_attributes.slug"),
-        Arel.sql("product_attribute_values.id"), Arel.sql("product_attribute_values.value"), Arel.sql("product_attribute_values.slug"),
+        Arel.sql("product_attributes.position"),
+        Arel.sql("product_attribute_values.value"), Arel.sql("product_attribute_values.slug"),
         Arel.sql("product_attribute_values.color_hex"),
-        Arel.sql("COUNT(DISTINCT products.id)")
+        Arel.sql("products.id")
       )
 
-    # Group into structured data
+    # Group into structured data, counting distinct products per value within that
+    # attribute's allowed set.
     attrs_hash = {}
-    rows.each do |attr_id, attr_name, attr_slug, _val_id, val_label, val_slug, color_hex, count|
-      attrs_hash[attr_id] ||= { name: attr_name, slug: attr_slug, values: [] }
-      attrs_hash[attr_id][:values] << {
+    rows.each do |attr_id, attr_name, attr_slug, attr_position, val_label, val_slug, color_hex, product_id|
+      next unless allowed_cache[attr_slug].include?(product_id)
+
+      attrs_hash[attr_id] ||= { name: attr_name, slug: attr_slug, position: attr_position, values: {} }
+      value = (attrs_hash[attr_id][:values][val_slug] ||= {
         label: val_label,
         slug: val_slug,
         color_hex: color_hex,
-        count: count,
-        selected: current_attrs[attr_slug]&.include?(val_slug) || false
-      }
+        count: 0,
+        selected: @current_attrs[attr_slug]&.include?(val_slug) || false
+      })
+      value[:count] += 1
     end
+    # Flatten value maps back into arrays (preserving the structure views expect).
+    attrs_hash.each_value { |attr| attr[:values] = attr[:values].values }
 
     # Sort values: numeric-first (by numeric value), then alphabetical
     attrs_hash.each_value do |attr|
@@ -642,7 +671,7 @@ class Storefront::ProductsController < Storefront::BaseController
       end
     end
 
-    attrs_hash.values
+    attrs_hash.values.sort_by { |attr| attr[:position] || 0 }
   end
 
   # Per-product card data: the honest breakdown (conditions respected) and an

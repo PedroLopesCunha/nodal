@@ -30,3 +30,28 @@
     box-shadow: 0 0 0 2px var(--bs-primary);
   }
 }
+
+// Apply-on-close checkbox option: the value's checkbox is visually hidden (but
+// still focusable/announced); the swatch or icon pair reflects :checked live so
+// the menu can stay open while several values are ticked before applying.
+.attribute-filter-option {
+  cursor: pointer;
+  margin-bottom: 0;
+
+  .attr-filter-check {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .attr-icon-checked { display: none; }
+  .attr-filter-check:checked ~ .attr-icon-unchecked { display: none; }
+  .attr-filter-check:checked ~ .attr-icon-checked { display: inline-block; }
+
+  .attr-filter-check:checked ~ .attribute-color-swatch {
+    border-color: var(--bs-primary);
+    box-shadow: 0 0 0 2px var(--bs-primary);
+  }
+}
