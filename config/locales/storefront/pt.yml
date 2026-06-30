@@ -158,6 +158,7 @@ pt:
         filters_button: "Filtros"
         filters_title: "Filtros"
         clear_filters: "Limpar filtros"
+        apply_filters: "Aplicar filtros"
         filters:
           active: "Filtros ativos"
           filter_by: "Filtrar por"
