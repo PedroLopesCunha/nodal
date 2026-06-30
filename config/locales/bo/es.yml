@@ -261,12 +261,64 @@ es:
       categories: "Categorías"
       attributes: "Atributos"
       orders: "Pedidos"
+      unmet_demands: "Faltantes"
       pricing: "Precios"
       profile: "Perfil"
       team: "Equipo"
       settings: "Configuración"
       log_out: "Salir"
       view_storefront: "Ver Tienda"
+
+    unmet_demands:
+      badge_title: "Faltantes sin resolver"
+      in_cart_title: "Ya está en el carrito del cliente (sin finalizar)"
+      stock_unlimited: "Sin control de stock / acepta pedido sin stock"
+      satisfy_backorder_title: "No hay stock suficiente ahora — queda en backorder"
+      index:
+        title: "Faltantes"
+        subtitle: "Artículos y cantidades que los clientes quisieron pero no se llevaron, por falta de stock"
+        empty: "Sin faltantes registrados. Cuando el stock recorte algo de un carrito, aparecerá aquí."
+        total_short: "falta: %{count}"
+      customer_card:
+        title: "Faltantes de este cliente"
+        open_customer: "Abrir ficha del cliente"
+      table:
+        product: "Artículo"
+        login: "Login"
+        stock: "Stock"
+        wanted: "Quiso"
+        in_cart: "En carrito"
+        taken: "Se llevó"
+        shortfall: "Falta"
+        actions: "Acciones"
+      history:
+        title: "Historial de ocurrencias"
+        line: "quiso %{wanted} · se quedó con %{kept}"
+        empty: "Sin ocurrencias registradas."
+      reasons:
+        removed: "Eliminado"
+        capped: "Recortado"
+      actions:
+        satisfy: "Satisfacer"
+        substitute: "Cambiar"
+        dismiss: "Descartar"
+      confirm:
+        satisfy: "¿Añadir %{qty}x %{product} al carrito de este cliente?"
+        satisfy_backorder: "No hay stock suficiente de %{product}. ¿Añadir %{qty}x al carrito igualmente (backorder)?"
+        dismiss: "¿Descartar el faltante de %{product}? Dejará de aparecer aquí."
+      substitute_modal:
+        title: "Cambiar por otro artículo"
+        replacing: "Sustituyendo el faltante de:"
+        product: "Artículo sustituto"
+        product_prompt: "Elige un artículo…"
+        search_placeholder: "Escribe el nombre o el SKU…"
+        invalid: "Elige una variante válida de la lista."
+        quantity: "Cantidad"
+      flash:
+        satisfied: "Añadido %{qty}x %{product} al carrito de este cliente. Finalízalo en 'Pedir para este cliente' cuando quieras."
+        substituted: "Cambiado: %{from} → %{to}, añadido al carrito de este cliente."
+        satisfy_failed: "No se pudo generar el borrador: %{error}"
+        dismissed: "Faltante de %{product} descartado."
 
     # Sección Panel
     dashboards:

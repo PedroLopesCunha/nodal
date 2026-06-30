@@ -270,6 +270,7 @@ en:
       categories: "Categories"
       attributes: "Attributes"
       orders: "Orders"
+      unmet_demands: "Shortfalls"
       pricing: "Pricing"
       profile: "Profile"
       team: "Team"
@@ -277,6 +278,57 @@ en:
       log_out: "Log out"
       view_storefront: "View Storefront"
       tasks: "Tasks"
+
+    unmet_demands:
+      badge_title: "Unresolved shortfalls"
+      in_cart_title: "Already in the customer's cart (not yet placed)"
+      stock_unlimited: "Stock not tracked / accepts backorder"
+      satisfy_backorder_title: "Not enough stock right now — will backorder"
+      index:
+        title: "Shortfalls"
+        subtitle: "Items and quantities customers wanted but couldn't take, due to stock"
+        empty: "No shortfalls yet. When stock trims something from a cart, it shows up here."
+        total_short: "short: %{count}"
+      customer_card:
+        title: "This customer's shortfalls"
+        open_customer: "Open customer"
+      table:
+        product: "Item"
+        login: "Login"
+        stock: "Stock"
+        wanted: "Wanted"
+        in_cart: "In cart"
+        taken: "Taken"
+        shortfall: "Short"
+        actions: "Actions"
+      history:
+        title: "Occurrence history"
+        line: "wanted %{wanted} · kept %{kept}"
+        empty: "No occurrences recorded."
+      reasons:
+        removed: "Removed"
+        capped: "Capped"
+      actions:
+        satisfy: "Fulfil"
+        substitute: "Swap"
+        dismiss: "Dismiss"
+      confirm:
+        satisfy: "Add %{qty}x %{product} to this customer's cart?"
+        satisfy_backorder: "Not enough stock of %{product}. Add %{qty}x to the cart anyway (backorder)?"
+        dismiss: "Dismiss the shortfall for %{product}? It will stop showing here."
+      substitute_modal:
+        title: "Swap for another item"
+        replacing: "Replacing the shortfall for:"
+        product: "Substitute item"
+        product_prompt: "Choose an item…"
+        search_placeholder: "Type the name or SKU…"
+        invalid: "Pick a valid variant from the list."
+        quantity: "Quantity"
+      flash:
+        satisfied: "Added %{qty}x %{product} to this customer's cart. Finish it via 'Order for this customer' whenever you like."
+        substituted: "Swapped: %{from} → %{to}, added to this customer's cart."
+        satisfy_failed: "Couldn't generate the draft: %{error}"
+        dismissed: "Shortfall for %{product} dismissed."
 
     # Dashboard section
     analytics:
