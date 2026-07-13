@@ -15,7 +15,10 @@ class GenerateCatalogJob < ApplicationJob
     if product_ids.present?
       products = products.where(id: product_ids)
     elsif category_ids.present?
-      product_ids_from_cats = CategoryProduct.where(category_id: category_ids).select(:product_id)
+      # Expand to the full subtree so products in nested subcategories are included
+      all_category_ids = organisation.categories.where(id: category_ids)
+                                     .flat_map(&:subtree_ids).uniq
+      product_ids_from_cats = CategoryProduct.where(category_id: all_category_ids).select(:product_id)
       products = products.where(id: product_ids_from_cats)
     end
 

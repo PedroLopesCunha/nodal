@@ -75,25 +75,23 @@ export default class extends Controller {
     }
   }
 
-  // Toggle category selection
+  // Toggle category selection — cascades to all descendant categories and products
   toggleCategory(event) {
     const checkbox = event.currentTarget
-    const categoryId = checkbox.value
     const container = checkbox.closest("[data-catalog-role='category-row']")
+    const checked = checkbox.checked
 
-    if (checkbox.checked) {
-      this.selectedCategories.add(categoryId)
-      container.querySelectorAll(".product-checkbox").forEach(cb => {
-        cb.checked = true
-        this.selectedProducts.add(cb.value)
-      })
-    } else {
-      this.selectedCategories.delete(categoryId)
-      container.querySelectorAll(".product-checkbox").forEach(cb => {
-        cb.checked = false
-        this.selectedProducts.delete(cb.value)
-      })
-    }
+    // Descendant category checkboxes include the container's own checkbox (harmless/idempotent)
+    container.querySelectorAll(".category-checkbox").forEach(cb => {
+      cb.checked = checked
+      if (checked) this.selectedCategories.add(cb.value)
+      else this.selectedCategories.delete(cb.value)
+    })
+    container.querySelectorAll(".product-checkbox").forEach(cb => {
+      cb.checked = checked
+      if (checked) this.selectedProducts.add(cb.value)
+      else this.selectedProducts.delete(cb.value)
+    })
     this.updateCounts()
   }
 
