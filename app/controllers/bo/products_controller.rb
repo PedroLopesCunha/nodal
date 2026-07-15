@@ -247,6 +247,7 @@ class Bo::ProductsController < Bo::BaseController
     @threshold = current_organisation.low_stock_threshold
     @stock_status = %w[out_of_stock at_risk risky].include?(params[:stock_status]) ? params[:stock_status] : nil
     @query = params[:query].to_s.strip
+    @categories = current_organisation.categories.kept.sorted_by_full_path
 
     # real_units already joins :product, so products.* is available for
     # searching/sorting; the includes preload the option values for the label.
@@ -260,6 +261,17 @@ class Bo::ProductsController < Bo::BaseController
             end
     if @query.present?
       scope = scope.where("products.name ILIKE :q OR product_variants.sku ILIKE :q", q: "%#{@query}%")
+    end
+
+    if params[:category_id] == "none"
+      product_ids_with_category = CategoryProduct.select(:product_id)
+      scope = scope.where.not(product_id: product_ids_with_category)
+    elsif params[:category_id].present?
+      @current_category = current_organisation.categories.kept.find_by(id: params[:category_id])
+      if @current_category
+        product_ids_in_category = CategoryProduct.where(category_id: @current_category.subtree_ids).select(:product_id)
+        scope = scope.where(product_id: product_ids_in_category)
+      end
     end
 
     @sort_column    = %w[product sku stock].include?(params[:sort]) ? params[:sort] : nil
