@@ -80,6 +80,10 @@
             <small class="text-muted d-block"><%= t('bo.products.form.unit_description') %></small>
             <strong><%= @product.unit_description || '-' %></strong>
           </div>
+          <div class="col-md-6 mb-3">
+            <small class="text-muted d-block"><%= t('bo.products.form.supplier') %></small>
+            <strong><%= @product.supplier.presence || '-' %></strong>
+          </div>
         </div>
 
         <div class="row">

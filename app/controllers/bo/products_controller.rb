@@ -235,6 +235,7 @@ class Bo::ProductsController < Bo::BaseController
 
     # Load categories for filter dropdown
     @categories = current_organisation.categories.kept.sorted_by_full_path
+    @suppliers = current_organisation.products.where.not(supplier: [nil, ""]).distinct.pluck(:supplier).sort_by(&:downcase)
 
     # Load last ERP product sync log (if ERP enabled)
     @last_product_sync = current_organisation.erp_sync_logs.for_entity('products').completed.recent.first if current_organisation.erp_configuration&.enabled?
@@ -598,7 +599,7 @@ class Bo::ProductsController < Bo::BaseController
   def filter_params_hash
     { query: params[:query], category_id: params[:category_id], product_type: params[:product_type],
       price_status: params[:price_status], status: params[:status], storefront: params[:storefront],
-      sort: params[:sort], direction: params[:direction], page: params[:page] }.compact_blank
+      supplier: params[:supplier], sort: params[:sort], direction: params[:direction], page: params[:page] }.compact_blank
   end
 
   def sort_link_params(column)
@@ -639,6 +640,12 @@ class Bo::ProductsController < Bo::BaseController
         product_ids_in_category = CategoryProduct.where(category_id: all_category_ids).select(:product_id)
         scope = scope.where(id: product_ids_in_category)
       end
+    end
+
+    if params[:supplier] == "none"
+      scope = scope.where(supplier: [nil, ""])
+    elsif params[:supplier].present?
+      scope = scope.where(supplier: params[:supplier])
     end
 
     if params[:product_type].present?
