@@ -551,6 +551,8 @@ es:
           label: "Mostrar"
           all: "Todas"
           risky: "En riesgo + Agotado"
+          all_suppliers: "Todos los proveedores"
+          no_supplier: "Sin proveedor"
         status:
           out_of_stock: "Agotado"
           at_risk: "En riesgo"
@@ -559,6 +561,7 @@ es:
         table:
           product: "Producto"
           sku: "SKU"
+          supplier: "Proveedor"
           stock: "Stock"
           status: "Estado"
           unmet: "Falta"
@@ -650,6 +653,8 @@ es:
         sku: "SKU"
         sku_placeholder: "Introduzca el código SKU"
         sku_hint: "Identificador único para gestión de inventario"
+        supplier: "Proveedor"
+        supplier_hint: "Rellenado automáticamente por la sincronización ERP cuando está vacío"
         category: "Categoría"
         categories: "Categorías"
         select_category: "Seleccione una categoría"
@@ -677,6 +682,7 @@ es:
           name: "Introduzca el nombre del producto"
           product_name: "Introduzca el nombre del producto"
           sku: "Introduzca el código SKU"
+          supplier: "ej. Proveedor S.L."
           description: "Introduzca la descripción del producto"
           slug: "auto-generado-del-nombre"
           unit_description: "ej: por kg, por caja"

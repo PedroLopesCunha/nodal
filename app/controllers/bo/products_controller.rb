@@ -248,6 +248,7 @@ class Bo::ProductsController < Bo::BaseController
     @stock_status = %w[out_of_stock at_risk risky].include?(params[:stock_status]) ? params[:stock_status] : nil
     @query = params[:query].to_s.strip
     @categories = current_organisation.categories.kept.sorted_by_full_path
+    @suppliers = current_organisation.products.where.not(supplier: [nil, ""]).distinct.pluck(:supplier).sort_by(&:downcase)
 
     # real_units already joins :product, so products.* is available for
     # searching/sorting; the includes preload the option values for the label.
@@ -272,6 +273,12 @@ class Bo::ProductsController < Bo::BaseController
         product_ids_in_category = CategoryProduct.where(category_id: @current_category.subtree_ids).select(:product_id)
         scope = scope.where(product_id: product_ids_in_category)
       end
+    end
+
+    if params[:supplier] == "none"
+      scope = scope.where(products: { supplier: [nil, ""] })
+    elsif params[:supplier].present?
+      scope = scope.where(products: { supplier: params[:supplier] })
     end
 
     @sort_column    = %w[product sku stock].include?(params[:sort]) ? params[:sort] : nil
@@ -560,13 +567,14 @@ class Bo::ProductsController < Bo::BaseController
 
   def stock_control_csv(variants, unmet)
     CSV.generate(headers: true) do |csv|
-      csv << ["Produto", "Variante", "SKU", "Stock", "Status", "Em falta"]
+      csv << ["Produto", "Variante", "SKU", "Fornecedor", "Stock", "Status", "Em falta"]
       variants.each do |v|
         status = v.stock_control_status(@threshold)
         csv << [
           v.product&.name,
           v.option_values_string,
           v.sku,
+          v.product&.supplier,
           v.track_stock? ? v.stock_quantity.to_i : "∞",
           I18n.t("bo.products.stock_control.status.#{status}"),
           unmet[v.id].to_i
@@ -675,7 +683,7 @@ class Bo::ProductsController < Bo::BaseController
   end
 
   def product_params
-    params.require(:product).permit(:name, :slug, :sku, :description, :rich_description, :price, :unit_description, :min_quantity, :min_quantity_type, :min_quantity_scope, :published, :price_on_request, :category_id, :add_to_cart_mode, category_ids: [], photos: [])
+    params.require(:product).permit(:name, :slug, :sku, :description, :rich_description, :price, :unit_description, :min_quantity, :min_quantity_type, :min_quantity_scope, :published, :price_on_request, :category_id, :add_to_cart_mode, :supplier, category_ids: [], photos: [])
   end
 
   def parse_uploaded_file(uploaded_file)

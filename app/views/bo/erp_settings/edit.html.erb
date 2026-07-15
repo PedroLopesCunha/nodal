@@ -289,7 +289,7 @@
             <% orders_mappings = field_mappings['orders'] || {} %>
             <% order_items_mappings = field_mappings['order_items'] || {} %>
 
-            <% %w[external_id name sku description unit_price available stock_quantity].each do |field| %>
+            <% %w[external_id name sku description unit_price available stock_quantity supplier].each do |field| %>
               <%= hidden_field_tag "erp_configuration[credentials][field_mappings][products][#{field}]",
                                     products_mappings[field],
                                     data: { erp_settings_target: "productMapping", field: field } %>

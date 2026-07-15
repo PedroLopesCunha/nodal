@@ -36,7 +36,8 @@ export default class extends Controller {
     { key: 'description', label: 'Description', required: false, description: 'Product description' },
     { key: 'unit_price', label: 'Unit Price', required: false, description: 'Price (will be converted to cents)' },
     { key: 'available', label: 'Available', required: false, description: 'Availability status (boolean)' },
-    { key: 'stock_quantity', label: 'Stock Quantity', required: false, description: 'Stock quantity (integer)' }
+    { key: 'stock_quantity', label: 'Stock Quantity', required: false, description: 'Stock quantity (integer)' },
+    { key: 'supplier', label: 'Supplier', required: false, description: 'Supplier / brand — fill-if-blank: only set when Nodal field is empty' }
   ]
 
   static customerFields = [

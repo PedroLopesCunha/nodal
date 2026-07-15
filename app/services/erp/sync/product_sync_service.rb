@@ -58,7 +58,8 @@ module Erp
       def create_product_with_variant(data, external_id)
         product = organisation.products.new(
           name: data[:name] || external_id,
-          description: data[:description]
+          description: data[:description],
+          supplier: data[:supplier].to_s.strip.presence
         )
         generate_slug(product)
         product.save!
@@ -72,6 +73,15 @@ module Erp
         record_changes(external_id, 'Product', 'created', product)
         sync_log.increment_created!
         variant
+      end
+
+      # Fill-if-blank: set the product's supplier from the ERP only when Nodal
+      # doesn't already have one. A manual value in the BO always wins.
+      def apply_product_supplier(product, data)
+        value = data[:supplier].to_s.strip
+        return if value.blank? || product.supplier.present?
+
+        product.update_column(:supplier, value)
       end
 
       def find_variant_by_external_id(external_id)
@@ -92,6 +102,10 @@ module Erp
         attributes_changed = variant.changed?
 
         update_stock(variant, data) if data[:stock_quantity].present?
+
+        # Supplier is product-level and Nodal-managed: the ERP only fills it in
+        # when it's still blank, never overwriting a value set by hand.
+        apply_product_supplier(variant.product, data)
 
         if variant.changed?
           action = attributes_changed ? 'updated' : 'stock_updated'

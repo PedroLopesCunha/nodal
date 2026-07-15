@@ -622,6 +622,8 @@ pt:
           label: "Mostrar"
           all: "Todas"
           risky: "Em risco + Esgotado"
+          all_suppliers: "Todos os fornecedores"
+          no_supplier: "Sem fornecedor"
         status:
           out_of_stock: "Esgotado"
           at_risk: "Em risco"
@@ -630,6 +632,7 @@ pt:
         table:
           product: "Produto"
           sku: "SKU"
+          supplier: "Fornecedor"
           stock: "Stock"
           status: "Status"
           unmet: "Em falta"
@@ -755,6 +758,8 @@ pt:
         sku: "SKU"
         sku_placeholder: "Introduza o código SKU"
         sku_hint: "Identificador único para gestão de inventário"
+        supplier: "Fornecedor"
+        supplier_hint: "Preenchido automaticamente pela sincronização ERP quando está vazio"
         description: "Descrição"
         description_hint: "Uma breve descrição deste produto"
         category: "Categoria"
@@ -803,6 +808,7 @@ pt:
           name: "Introduza o nome do produto"
           product_name: "Introduza o nome do produto"
           sku: "Introduza o código SKU"
+          supplier: "ex: Fornecedor Lda."
           description: "Introduza a descrição do produto"
           slug: "auto-gerado-do-nome"
           unit_description: "ex: por kg, por caixa"
