@@ -403,6 +403,7 @@ module Erp
           unit_price_cents: parse_price(get_mapped_value(row, mappings, :unit_price)),
           available: parse_boolean(get_mapped_value(row, mappings, :available)),
           stock_quantity: parse_integer(get_mapped_value(row, mappings, :stock_quantity)),
+          supplier: get_mapped_value(row, mappings, :supplier),
           raw_data: row
         }.compact
       end

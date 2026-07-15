@@ -102,6 +102,15 @@
           </select>
         </div>
         <div class="col">
+          <select name="supplier" class="form-select form-select-sm" onchange="this.form.submit()" data-controller="tom-select">
+            <option value=""><%= t('bo.products.stock_control.filter.all_suppliers') %></option>
+            <option value="none" <%= 'selected' if params[:supplier] == 'none' %>><%= t('bo.products.stock_control.filter.no_supplier') %></option>
+            <% @suppliers.each do |supplier| %>
+              <option value="<%= supplier %>" <%= 'selected' if params[:supplier] == supplier %>><%= supplier %></option>
+            <% end %>
+          </select>
+        </div>
+        <div class="col">
           <select name="product_type" class="form-select form-select-sm" onchange="this.form.submit()">
             <option value=""><%= t('bo.products.index.filters.all_types') %></option>
             <option value="simple" <%= 'selected' if params[:product_type] == 'simple' %>><%= t('bo.products.index.table.simple') %></option>
@@ -152,6 +161,11 @@
     <% elsif @current_category %>
       <%= link_to bo_products_path(params[:org_slug], filter_params_hash.except(:category_id, :page)), class: "badge bg-secondary text-decoration-none" do %>
         <%= @current_category.name %> <i class="fa-solid fa-xmark ms-1"></i>
+      <% end %>
+    <% end %>
+    <% if params[:supplier].present? %>
+      <%= link_to bo_products_path(params[:org_slug], filter_params_hash.except(:supplier, :page)), class: "badge bg-secondary text-decoration-none" do %>
+        <%= params[:supplier] == 'none' ? t('bo.products.stock_control.filter.no_supplier') : params[:supplier] %> <i class="fa-solid fa-xmark ms-1"></i>
       <% end %>
     <% end %>
     <% if params[:product_type].present? %>

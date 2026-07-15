@@ -49,6 +49,14 @@
           </div>
 
           <div class="row g-3 mt-1">
+            <div class="col-md-4">
+              <label class="form-label"><%= t('bo.products.form.supplier') %></label>
+              <%= f.text_field :supplier, class: "form-control", placeholder: t('bo.products.form.placeholders.supplier') %>
+              <small class="text-muted"><%= t('bo.products.form.supplier_hint') %></small>
+            </div>
+          </div>
+
+          <div class="row g-3 mt-1">
             <div class="col-md-12">
               <label class="form-label"><%= t('bo.products.form.description') %></label>
               <%= f.rich_text_area :rich_description, class: "form-control" %>

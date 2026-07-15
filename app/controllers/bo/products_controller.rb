@@ -235,6 +235,7 @@ class Bo::ProductsController < Bo::BaseController
 
     # Load categories for filter dropdown
     @categories = current_organisation.categories.kept.sorted_by_full_path
+    @suppliers = current_organisation.products.where.not(supplier: [nil, ""]).distinct.pluck(:supplier).sort_by(&:downcase)
 
     # Load last ERP product sync log (if ERP enabled)
     @last_product_sync = current_organisation.erp_sync_logs.for_entity('products').completed.recent.first if current_organisation.erp_configuration&.enabled?
@@ -247,6 +248,8 @@ class Bo::ProductsController < Bo::BaseController
     @threshold = current_organisation.low_stock_threshold
     @stock_status = %w[out_of_stock at_risk risky].include?(params[:stock_status]) ? params[:stock_status] : nil
     @query = params[:query].to_s.strip
+    @categories = current_organisation.categories.kept.sorted_by_full_path
+    @suppliers = current_organisation.products.where.not(supplier: [nil, ""]).distinct.pluck(:supplier).sort_by(&:downcase)
 
     # real_units already joins :product, so products.* is available for
     # searching/sorting; the includes preload the option values for the label.
@@ -260,6 +263,23 @@ class Bo::ProductsController < Bo::BaseController
             end
     if @query.present?
       scope = scope.where("products.name ILIKE :q OR product_variants.sku ILIKE :q", q: "%#{@query}%")
+    end
+
+    if params[:category_id] == "none"
+      product_ids_with_category = CategoryProduct.select(:product_id)
+      scope = scope.where.not(product_id: product_ids_with_category)
+    elsif params[:category_id].present?
+      @current_category = current_organisation.categories.kept.find_by(id: params[:category_id])
+      if @current_category
+        product_ids_in_category = CategoryProduct.where(category_id: @current_category.subtree_ids).select(:product_id)
+        scope = scope.where(product_id: product_ids_in_category)
+      end
+    end
+
+    if params[:supplier] == "none"
+      scope = scope.where(products: { supplier: [nil, ""] })
+    elsif params[:supplier].present?
+      scope = scope.where(products: { supplier: params[:supplier] })
     end
 
     @sort_column    = %w[product sku stock].include?(params[:sort]) ? params[:sort] : nil
@@ -548,13 +568,14 @@ class Bo::ProductsController < Bo::BaseController
 
   def stock_control_csv(variants, unmet)
     CSV.generate(headers: true) do |csv|
-      csv << ["Produto", "Variante", "SKU", "Stock", "Status", "Em falta"]
+      csv << ["Produto", "Variante", "SKU", "Fornecedor", "Stock", "Status", "Em falta"]
       variants.each do |v|
         status = v.stock_control_status(@threshold)
         csv << [
           v.product&.name,
           v.option_values_string,
           v.sku,
+          v.product&.supplier,
           v.track_stock? ? v.stock_quantity.to_i : "∞",
           I18n.t("bo.products.stock_control.status.#{status}"),
           unmet[v.id].to_i
@@ -578,7 +599,7 @@ class Bo::ProductsController < Bo::BaseController
   def filter_params_hash
     { query: params[:query], category_id: params[:category_id], product_type: params[:product_type],
       price_status: params[:price_status], status: params[:status], storefront: params[:storefront],
-      sort: params[:sort], direction: params[:direction], page: params[:page] }.compact_blank
+      supplier: params[:supplier], sort: params[:sort], direction: params[:direction], page: params[:page] }.compact_blank
   end
 
   def sort_link_params(column)
@@ -619,6 +640,12 @@ class Bo::ProductsController < Bo::BaseController
         product_ids_in_category = CategoryProduct.where(category_id: all_category_ids).select(:product_id)
         scope = scope.where(id: product_ids_in_category)
       end
+    end
+
+    if params[:supplier] == "none"
+      scope = scope.where(supplier: [nil, ""])
+    elsif params[:supplier].present?
+      scope = scope.where(supplier: params[:supplier])
     end
 
     if params[:product_type].present?
@@ -663,7 +690,7 @@ class Bo::ProductsController < Bo::BaseController
   end
 
   def product_params
-    params.require(:product).permit(:name, :slug, :sku, :description, :rich_description, :price, :unit_description, :min_quantity, :min_quantity_type, :min_quantity_scope, :published, :price_on_request, :category_id, :add_to_cart_mode, category_ids: [], photos: [])
+    params.require(:product).permit(:name, :slug, :sku, :description, :rich_description, :price, :unit_description, :min_quantity, :min_quantity_type, :min_quantity_scope, :published, :price_on_request, :category_id, :add_to_cart_mode, :supplier, category_ids: [], photos: [])
   end
 
   def parse_uploaded_file(uploaded_file)
