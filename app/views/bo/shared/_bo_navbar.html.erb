@@ -20,7 +20,15 @@
       <% end %>
       <li><%= link_to bo_orders_path, class: "dropdown-item" do %><i class="fa-solid fa-clipboard-list me-2"></i><%= t('bo.sidebar.orders') %><% end %></li>
       <% unless pure_sales_rep? %>
-        <li><%= link_to bo_pricing_path, class: "dropdown-item" do %><i class="fa-solid fa-percent me-2"></i><%= t('bo.sidebar.pricing') %><% end %></li>
+        <li>
+          <%= link_to bo_unmet_demands_path, class: "dropdown-item" do %>
+            <i class="fa-solid fa-cart-flatbed-suitcase me-2"></i><%= t('bo.sidebar.unmet_demands') %>
+            <% if @open_unmet_demands_count && @open_unmet_demands_count > 0 %>
+              <span class="badge rounded-pill bg-warning text-dark ms-2" title="<%= t('bo.unmet_demands.badge_title') %>"><%= @open_unmet_demands_count %></span>
+            <% end %>
+          <% end %>
+        </li>
+        <li><%= link_to bo_pricing_path, class: "dropdown-item" do %><i class="fa-solid fa-tag me-2"></i><%= t('bo.sidebar.pricing') %><% end %></li>
       <% end %>
       <li><hr class="dropdown-divider"></li>
       <li>
