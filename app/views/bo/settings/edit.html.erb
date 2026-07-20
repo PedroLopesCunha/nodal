@@ -588,6 +588,35 @@
             </div>
           </div>
 
+          <div class="row mt-3">
+            <div class="col-md-6">
+              <label class="form-label"><%= t('bo.settings.edit.sale_badge_text') %></label>
+              <%= f.text_field :sale_badge_text,
+                               class: "form-control",
+                               placeholder: t('storefront.products.index.sale_badge') %>
+              <small class="text-muted"><%= t('bo.settings.edit.sale_badge_text_hint') %></small>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label"><%= t('bo.settings.edit.sale_badge_color') %></label>
+              <div class="input-group">
+                <input type="color"
+                       id="sale_badge_color_picker"
+                       value="<%= @organisation.effective_sale_badge_color %>"
+                       class="form-control form-control-color"
+                       data-input-target="organisation_sale_badge_color"
+                       data-action="input->branding-preview#syncFromPicker">
+                <%= f.text_field :sale_badge_color,
+                                 class: "form-control",
+                                 placeholder: "#dc3545",
+                                 data: {
+                                   picker_target: "sale_badge_color_picker",
+                                   action: "input->branding-preview#syncFromInput"
+                                 } %>
+              </div>
+              <small class="text-muted"><%= t('bo.settings.edit.sale_badge_color_hint') %></small>
+            </div>
+          </div>
+
           <div class="mt-4">
             <label class="form-label"><%= t('bo.settings.edit.preview') %></label>
             <div class="border rounded p-3 bg-light">

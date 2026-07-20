@@ -25,6 +25,19 @@ module BrandingHelper
     end
   end
 
+  # Label for the storefront promotion badge: the org's custom text, or the
+  # translated default ("PROMOÇÃO"/"SALE"/"OFERTA") when unset.
+  def sale_badge_label(organisation)
+    organisation&.sale_badge_text.presence || t('storefront.products.index.sale_badge')
+  end
+
+  # Inline style for the promotion badge: the org's colour as background, with a
+  # black/white text colour picked for contrast so it stays readable.
+  def sale_badge_style(organisation)
+    bg = organisation&.effective_sale_badge_color || '#dc3545'
+    "background-color: #{bg}; color: #{contrast_color(bg)};"
+  end
+
   def organisation_favicon_tag(organisation)
     return favicon_link_tag("/favicon.svg", type: "image/svg+xml") unless organisation
 

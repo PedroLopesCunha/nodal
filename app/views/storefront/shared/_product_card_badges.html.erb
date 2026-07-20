@@ -31,7 +31,7 @@
 <% if show_pct || show_promo || unlock %>
   <div class="product-card-badges">
     <% if show_promo %>
-      <span class="badge bg-danger product-card-sale-badge"><%= t('storefront.products.index.sale_badge') %></span>
+      <span class="badge product-card-sale-badge" style="<%= sale_badge_style(current_organisation) %>"><%= sale_badge_label(current_organisation) %></span>
     <% end %>
     <% if show_pct %>
       <span class="badge bg-success product-card-discount-badge">
