@@ -1635,6 +1635,8 @@ es:
         secondary_color: "Color Secundario"
         campaign_color: "Color de Campañas"
         campaign_color_hint: "Color de acento de la entrada \"Campañas\" en la tienda. Por defecto: rojo."
+        show_sale_badge: "Mostrar insignia de promoción"
+        show_sale_badge_hint: "Desactivado oculta la insignia en toda la tienda, sin importar el texto y el color."
         sale_badge_text: "Texto de la insignia de promoción"
         sale_badge_text_hint: "Etiqueta de la insignia en las tarjetas de producto. En blanco usa \"OFERTA\"."
         sale_badge_color: "Color de la insignia de promoción"

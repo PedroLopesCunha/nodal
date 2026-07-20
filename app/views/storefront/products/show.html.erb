@@ -170,11 +170,11 @@
                 <div>
                   <% case discount[:type] %>
                   <% when :product, :variant %>
-                    <span class="badge me-2" style="<%= sale_badge_style(current_organisation) %>"><%= sale_badge_label(current_organisation) %></span>
+                    <% if current_organisation.show_sale_badge %><span class="badge me-2" style="<%= sale_badge_style(current_organisation) %>"><%= sale_badge_label(current_organisation) %></span><% end %>
                     <strong><%= t('storefront.products.show.product_discount') %></strong>
                     <%= render 'storefront/products/discount_condition', discount: discount, live: discount[:source].equal?(@live_discount&.dig(:source)) %>
                   <% when :category %>
-                    <span class="badge me-2" style="<%= sale_badge_style(current_organisation) %>"><%= sale_badge_label(current_organisation) %></span>
+                    <% if current_organisation.show_sale_badge %><span class="badge me-2" style="<%= sale_badge_style(current_organisation) %>"><%= sale_badge_label(current_organisation) %></span><% end %>
                     <strong><%= t('storefront.products.show.category_discount') %></strong>
                     <%= render 'storefront/products/discount_condition', discount: discount, live: discount[:source].equal?(@live_discount&.dig(:source)) %>
                   <% when :customer %>

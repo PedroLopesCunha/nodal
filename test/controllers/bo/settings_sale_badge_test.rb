@@ -41,6 +41,20 @@ class Bo::SettingsSaleBadgeTest < ActionDispatch::IntegrationTest
     assert_equal "#dc3545", @organisation.effective_sale_badge_color
   end
 
+  test "the badge defaults to shown and can be turned off" do
+    assert @organisation.show_sale_badge, "badge should default to shown"
+
+    patch bo_settings_path(org_slug: @organisation.slug), params: {
+      organisation: { show_sale_badge: "0" }
+    }
+    assert_not @organisation.reload.show_sale_badge
+
+    patch bo_settings_path(org_slug: @organisation.slug), params: {
+      organisation: { show_sale_badge: "1" }
+    }
+    assert @organisation.reload.show_sale_badge
+  end
+
   test "an invalid hex colour is rejected" do
     patch bo_settings_path(org_slug: @organisation.slug), params: {
       organisation: { sale_badge_color: "notacolour" }
