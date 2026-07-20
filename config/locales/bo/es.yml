@@ -678,6 +678,8 @@ es:
         set_as_main: "Establecer como foto principal"
         price_on_request: "Precio bajo consulta"
         price_on_request_hint: "Cuando está activado, el precio se oculta y los clientes deben contactarle para obtener precio"
+        hide_sku_on_card: "Ocultar SKU en la tarjeta"
+        hide_sku_on_card_hint: "Oculta el SKU de la tarjeta del listado solo para este producto, incluso con la opción activada en la organización"
         placeholders:
           name: "Introduzca el nombre del producto"
           product_name: "Introduzca el nombre del producto"
@@ -1597,6 +1599,8 @@ es:
         show_related_products_hint: "Mostrar productos relacionados en las páginas de producto"
         show_product_sku: "Mostrar SKU del producto"
         show_product_sku_hint: "Mostrar el código SKU en la página del producto"
+        show_product_sku_on_card: "Mostrar SKU en las tarjetas"
+        show_product_sku_on_card_hint: "Mostrar el SKU en las tarjetas del listado de la tienda. Se puede desactivar por producto."
         show_product_min_quantity: "Mostrar cantidad mínima de pedido"
         show_product_min_quantity_hint: "Mostrar la cantidad mínima de pedido en la página del producto"
         show_product_category: "Mostrar categoría del producto"
