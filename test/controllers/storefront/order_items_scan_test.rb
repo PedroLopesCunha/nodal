@@ -51,6 +51,36 @@ class Storefront::OrderItemsScanTest < ActionDispatch::IntegrationTest
     assert_equal 1, cart.order_items.where(product_variant: @variant).sum(:quantity)
   end
 
+  test "scanning tolerates keyboard-layout punctuation swaps (dash typed as apostrophe)" do
+    dashed = @product.product_variants.create!(
+      organisation: @org, name: "Kubrix", sku: "KBX-CB-003",
+      unit_price_cents: 500, unit_price_currency: "EUR",
+      published: true, available: true, is_default: false
+    )
+
+    # A PT-layout scanner turns "-" into "'": KBX-CB-003 arrives as KBX'CB'003.
+    post scan_order_items_path(org_slug: @org.slug), params: { code: "KBX'CB'003" }
+
+    item = cart.order_items.find_by(product_variant: dashed)
+    assert item, "expected the dashed SKU to resolve from the apostrophe variant"
+    assert_equal 1, item.quantity
+  end
+
+  test "ambiguous normalized match is treated as not found" do
+    @product.product_variants.create!(organisation: @org, name: "A", sku: "AB-1",
+                                      unit_price_cents: 100, unit_price_currency: "EUR",
+                                      published: true, available: true, is_default: false)
+    @product.product_variants.create!(organisation: @org, name: "B", sku: "AB1",
+                                      unit_price_cents: 100, unit_price_currency: "EUR",
+                                      published: true, available: true, is_default: false)
+
+    # Both normalize to "AB1" — must NOT guess.
+    post scan_order_items_path(org_slug: @org.slug), params: { code: "AB'1" }
+    assert_not_nil flash[:alert]
+    assert_nil cart&.order_items&.find_by("product_variant_id IN (?)",
+               @product.product_variants.where(sku: %w[AB-1 AB1]).pluck(:id))
+  end
+
   test "scanning an unknown code adds nothing and flashes an alert" do
     post scan_order_items_path(org_slug: @org.slug), params: { code: "DOES-NOT-EXIST" }
     assert_redirected_to cart_path(org_slug: @org.slug)

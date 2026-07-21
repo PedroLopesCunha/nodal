@@ -138,10 +138,7 @@ class Storefront::OrderItemsController < Storefront::BaseController
       redirect_to(cart_path(org_slug: params[:org_slug])) and return
     end
 
-    @variant = current_organisation.product_variants
-                 .joins(:product)
-                 .where(products: { published: true })
-                 .find_by(sku: code)
+    @variant = resolve_scanned_variant(code)
 
     unless @variant
       skip_authorization
@@ -181,6 +178,33 @@ class Storefront::OrderItemsController < Storefront::BaseController
   end
 
   private
+
+  # Resolve a scanned code to a published variant. Exact SKU first (uses the
+  # unique index); on a miss, fall back to an alphanumeric-only comparison.
+  # Why: barcode scanners on a keyboard layout that differs from the OS emit
+  # punctuation wrong — on a Portuguese Mac the "-" key types "'", so a SKU
+  # "KBX-CB-003" arrives as "KBX'CB'003". Stripping non-alphanumerics on both
+  # sides sidesteps any such substitution. The fallback is accepted only when it
+  # resolves to exactly one variant, so an ambiguous strip never adds the wrong
+  # item (returns nil → "not found").
+  def resolve_scanned_variant(code)
+    scope = current_organisation.product_variants
+              .joins(:product)
+              .where(products: { published: true })
+
+    exact = scope.find_by(sku: code)
+    return exact if exact
+
+    normalized = code.gsub(/[^0-9A-Za-z]/, "").upcase
+    return nil if normalized.blank?
+
+    matches = scope.where(
+      "upper(regexp_replace(product_variants.sku, '[^0-9A-Za-z]', '', 'g')) = ?",
+      normalized
+    ).limit(2).to_a
+
+    matches.size == 1 ? matches.first : nil
+  end
 
   # Listing context (category, search, page, attribute filters) carried through
   # add/bulk_add so the product page — and its "back to products" link — return
