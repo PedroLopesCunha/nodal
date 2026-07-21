@@ -29,12 +29,16 @@ class Bo::BaseController < ApplicationController
   # Controllers a pure rep should never see in the BO (catalog admin,
   # discount rules, team management, org settings, etc.). Action-level
   # exceptions (e.g. team_members self-edit) are handled in the method below.
+  # NOTE: `background_tasks` is deliberately NOT listed here. Pure reps need to
+  # reach the progress/download page for catalogs they generate. Access is
+  # gated to their OWN tasks in redirect_pure_rep_from_admin_only_pages below,
+  # because BackgroundTaskPolicy#show? is only org-scoped, not member-scoped.
   PURE_REP_DENIED_CONTROLLERS = %w[
     products categories product_attributes product_variants
     pricing customer_product_discounts product_discounts
     customer_discounts order_discounts promo_codes
     customer_categories unmet_demands
-    settings erp_settings homepage_settings email_settings background_tasks
+    settings erp_settings homepage_settings email_settings
   ].freeze
 
   # A member whose only function is selling — role: member with the sales_rep
@@ -77,6 +81,14 @@ class Bo::BaseController < ApplicationController
         editing_own = action_name.in?(%w[edit update]) &&
                       params[:id].to_s == current_org_member&.id.to_s
         !editing_own
+      elsif controller_name == "background_tasks"
+        # Reps may only view/download the tasks THEY created (e.g. catalogs).
+        # BackgroundTaskPolicy#show? is org-scoped, not member-scoped, so we
+        # gate ownership here to stop a rep reading another member's export.
+        own_task = action_name.in?(%w[show download]) &&
+                   current_organisation.background_tasks
+                     .exists?(id: params[:id], member_id: current_member&.id)
+        !own_task
       else
         false
       end

@@ -145,6 +145,12 @@ Rails.application.routes.draw do
       # Personal carteira page for OrgMembers with is_sales_rep: true.
       namespace :sales_rep do
         get :carteira, to: "carteira#index"
+
+        # Reps generate product catalog PDFs from their own page. Reuses
+        # GenerateCatalogJob + CatalogPdfService; no admin products access.
+        get  :catalog,           to: "catalog#new"
+        post :catalog,           to: "catalog#create", as: nil
+        get  :catalog_selection, to: "catalog#selection"
       end
       resources :customer_categories, except: [:index, :show] do
         member do

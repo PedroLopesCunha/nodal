@@ -1,7 +1,11 @@
 <div class="modal fade" id="catalogModal" tabindex="-1" aria-labelledby="catalogModalLabel" aria-hidden="true">
   <div class="modal-dialog">
     <div class="modal-content">
-      <%= form_with url: generate_catalog_bo_products_path(params[:org_slug]), method: :get, data: { turbo: false } do %>
+      <%# generate_url / method default to the admin products flow; the sales_rep
+          catalog page overrides them to post to its own namespace. %>
+      <% generate_url = local_assigns.fetch(:generate_url) { generate_catalog_bo_products_path(params[:org_slug]) } %>
+      <% generate_method = local_assigns.fetch(:generate_method, :get) %>
+      <%= form_with url: generate_url, method: generate_method, data: { turbo: false } do %>
         <div data-catalog-target="hiddenFields"></div>
 
         <div class="modal-header">

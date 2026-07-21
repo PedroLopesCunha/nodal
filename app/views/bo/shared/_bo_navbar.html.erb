@@ -12,6 +12,7 @@
       <% end %>
       <% if sales_rep_capability? %>
         <li><%= link_to bo_sales_rep_carteira_path, class: "dropdown-item" do %><i class="fa-solid fa-briefcase me-2"></i>A minha carteira<% end %></li>
+        <li><%= link_to bo_sales_rep_catalog_path, class: "dropdown-item" do %><i class="fa-solid fa-file-pdf me-2"></i>Gerar catálogo<% end %></li>
       <% end %>
       <% unless pure_sales_rep? %>
         <li><%= link_to bo_products_path, class: "dropdown-item" do %><i class="fa-solid fa-box me-2"></i><%= t('bo.sidebar.products') %><% end %></li>

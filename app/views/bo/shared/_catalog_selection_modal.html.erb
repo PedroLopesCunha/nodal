@@ -11,7 +11,7 @@
       <div class="modal-body">
         <turbo-frame id="catalog_selection"
                      data-catalog-target="selectionFrame"
-                     data-src="<%= catalog_selection_bo_products_path(params[:org_slug]) %>">
+                     data-src="<%= local_assigns.fetch(:selection_url) { catalog_selection_bo_products_path(params[:org_slug]) } %>">
           <div class="text-center py-4">
             <div class="spinner-border spinner-border-sm text-muted" role="status"></div>
             <p class="text-muted small mt-2"><%= t('bo.common.loading', default: 'Loading...') %></p>
