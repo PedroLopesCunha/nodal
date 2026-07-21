@@ -57,6 +57,14 @@
     .variant-table .variant-thumb { width: 20px; height: 20px; border-radius: 3px; }
     .variant-table .sku-code { font-family: monospace; color: #d63384; font-size: 11px; }
 
+    /* Scan barcodes (Code128 of the SKU) */
+    .barcode { display: block; }
+    .barcode svg { height: 15px; width: auto; max-width: 110px; }
+    .variant-table .barcode-cell { width: 120px; }
+    .variant-row .barcode { flex-shrink: 0; }
+    .product-barcode { margin-top: 4px; }
+    .barcode-sku { font-family: monospace; font-size: 8px; color: #666; text-align: center; letter-spacing: 1px; }
+
     /* Footer */
     .page-footer { position: fixed; bottom: 0; left: 0; right: 0; text-align: center; font-size: 9px; color: #bbb; padding: 10px; }
   </style>
@@ -68,7 +76,8 @@
       show_description: @show_description, show_variants: @show_variants,
       show_variant_sku: @show_variant_sku, show_variant_price: @show_variant_price,
       show_variant_photo: @show_variant_photo, only_available_variants: @only_available_variants,
-      card_attributes: @card_attributes, card_attribute_data: @card_attribute_data
+      card_attributes: @card_attributes, card_attribute_data: @card_attribute_data,
+      show_barcode: @show_barcode
     }
   %>
   <% if @group_by_category && @grouped %>

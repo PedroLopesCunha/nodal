@@ -33,6 +33,12 @@
           <span>A minha carteira</span>
         <% end %>
       </li>
+      <li class="bo-sidebar-item <%= 'active' if controller_name == 'catalog' %>">
+        <%= link_to bo_sales_rep_catalog_path do %>
+          <i class="fa-solid fa-file-pdf"></i>
+          <span>Gerar catálogo</span>
+        <% end %>
+      </li>
     <% end %>
     <% unless pure_sales_rep? %>
       <li class="bo-sidebar-item <%= 'active' if controller_name == 'products' %>">

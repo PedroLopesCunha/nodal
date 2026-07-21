@@ -1,9 +1,10 @@
+<% selection_url = local_assigns.fetch(:selection_url) { catalog_selection_bo_products_path(params[:org_slug]) } %>
 <turbo-frame id="catalog_selection">
   <%# Search form %>
   <div class="mb-3">
     <div class="input-group input-group-sm">
       <span class="input-group-text bg-white"><i class="fa-solid fa-magnifying-glass text-muted"></i></span>
-      <%= form_with url: catalog_selection_bo_products_path(params[:org_slug]), method: :get, data: { turbo_frame: "catalog_selection" }, local: false, class: "flex-grow-1 d-flex" do %>
+      <%= form_with url: selection_url, method: :get, data: { turbo_frame: "catalog_selection" }, local: false, class: "flex-grow-1 d-flex" do %>
         <input type="text" name="query" class="form-control border-start-0"
                value="<%= params[:query] %>"
                placeholder="<%= t('bo.catalog.selection.search_placeholder') %>"
@@ -11,7 +12,7 @@
                data-action="input->catalog#debouncedSearch"
                autocomplete="off">
         <% if params[:query].present? %>
-          <a href="<%= catalog_selection_bo_products_path(params[:org_slug]) %>"
+          <a href="<%= selection_url %>"
              data-turbo-frame="catalog_selection"
              class="btn btn-outline-secondary btn-sm">
             <i class="fa-solid fa-times"></i>

@@ -53,6 +53,9 @@ scope module: :storefront do
   # Order items (add/update/remove from cart)
   resources :order_items, only: [:create, :update, :destroy] do
     post :bulk_add, on: :collection
+    # Scan-to-cart: resolve a scanned barcode (variant SKU) and add it to the
+    # current cart. Used by sales reps on the cart page during impersonation.
+    post :scan, on: :collection
   end
 
   # Order history (placed orders only)

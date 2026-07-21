@@ -97,6 +97,7 @@ GEM
       activerecord (>= 5.2.6)
     autoprefixer-rails (10.4.21.0)
       execjs (~> 2)
+    barby (0.7.0)
     base64 (0.3.0)
     bcrypt (3.1.20)
     benchmark (0.5.0)
@@ -477,6 +478,7 @@ DEPENDENCIES
   acts_as_list
   ancestry
   autoprefixer-rails
+  barby (~> 0.7)
   bootsnap
   bootstrap (~> 5.3)
   capybara

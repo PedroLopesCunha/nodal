@@ -1,3 +1,4 @@
+<% show_barcode = local_assigns.fetch(:show_barcode, false) %>
 <div class="product-card">
   <% if image_map[product.id] %>
     <img src="<%= image_map[product.id] %>" class="product-card-img" />
@@ -36,6 +37,9 @@
         </div>
       <% end %>
     <% end %>
+    <% if show_barcode && !product.has_variants? && product.sku.present? && (svg = catalog_barcode_svg(product.sku)) %>
+      <div class="product-barcode"><span class="barcode"><%= svg %></span></div>
+    <% end %>
     <% if show_variants && product.has_variants? %>
       <% variants = product.product_variants.reject(&:is_default?).select(&:published?) %>
       <% variants = variants.select(&:available?) if only_available_variants %>
@@ -57,6 +61,9 @@
               <% end %>
               <% if show_variant_price %>
                 <span class="variant-price"><%= variant.price&.format %></span>
+              <% end %>
+              <% if show_barcode && variant.sku.present? && (svg = catalog_barcode_svg(variant.sku)) %>
+                <span class="barcode"><%= svg %></span>
               <% end %>
             </div>
           <% end %>
