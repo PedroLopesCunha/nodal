@@ -1,3 +1,4 @@
+<% show_barcode = local_assigns.fetch(:show_barcode, false) %>
 <div class="product-list-item">
   <% if image_map[product.id] %>
     <img src="<%= image_map[product.id] %>" class="product-list-img" />
@@ -40,6 +41,7 @@
               <th><%= t('bo.catalog.pdf.variant') %></th>
               <% if show_variant_sku %><th>SKU</th><% end %>
               <% if show_variant_price %><th class="text-end"><%= t('bo.catalog.pdf.price_label') %></th><% end %>
+              <% if show_barcode %><th class="barcode-cell"><%= t('bo.catalog.pdf.barcode_label') %></th><% end %>
             </tr>
           </thead>
           <tbody>
@@ -58,11 +60,21 @@
                 <td><%= variant.option_values_string.presence || variant.name %></td>
                 <% if show_variant_sku %><td class="sku-code"><%= variant.sku %></td><% end %>
                 <% if show_variant_price %><td class="text-end fw-bold"><%= variant.price&.format %></td><% end %>
+                <% if show_barcode %>
+                  <td class="barcode-cell">
+                    <% if variant.sku.present? && (svg = catalog_barcode_svg(variant.sku)) %>
+                      <span class="barcode"><%= svg %></span>
+                    <% end %>
+                  </td>
+                <% end %>
               </tr>
             <% end %>
           </tbody>
         </table>
       <% end %>
+    <% end %>
+    <% if show_barcode && !product.has_variants? && product.sku.present? && (svg = catalog_barcode_svg(product.sku)) %>
+      <div class="product-barcode"><span class="barcode"><%= svg %></span></div>
     <% end %>
   </div>
   <% if show_prices && !product.has_variants? %>

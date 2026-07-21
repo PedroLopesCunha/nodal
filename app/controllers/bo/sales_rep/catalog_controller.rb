@@ -58,6 +58,7 @@ module Bo
           "catalog_title" => params[:catalog_title],
           "show_prices" => params[:show_prices],
           "show_sku" => params[:show_sku],
+          "show_barcode" => params[:show_barcode],
           "show_description" => params[:show_description],
           "show_variants" => params[:show_variants],
           "show_variant_sku" => params[:show_variant_sku],

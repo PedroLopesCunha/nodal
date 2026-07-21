@@ -71,6 +71,11 @@
               <%= label_tag :catalog_show_sku, t('bo.catalog.show_sku'), class: "form-check-label" %>
             </div>
             <div class="form-check mb-1">
+              <%= check_box_tag :show_barcode, "1", false, class: "form-check-input", id: "catalog_show_barcode" %>
+              <%= label_tag :catalog_show_barcode, t('bo.catalog.show_barcode'), class: "form-check-label" %>
+              <div class="form-text small ms-0"><%= t('bo.catalog.show_barcode_hint') %></div>
+            </div>
+            <div class="form-check mb-1">
               <%= check_box_tag :show_description, "1", false, class: "form-check-input", id: "catalog_show_description" %>
               <%= label_tag :catalog_show_description, t('bo.catalog.show_description'), class: "form-check-label" %>
             </div>

@@ -203,6 +203,7 @@ class CatalogPdfService
       show_variant_sku: @options["show_variant_sku"] == "1",
       show_variant_price: @options["show_variant_price"] == "1",
       show_variant_photo: @show_variant_photo,
+      show_barcode: @options["show_barcode"] == "1",
       only_available_variants: @only_available_variants,
       card_attributes: card_attributes,
       card_attribute_data: card_attribute_data,

@@ -126,6 +126,60 @@ class Storefront::OrderItemsController < Storefront::BaseController
     end
   end
 
+  # Scan-to-cart: resolve a scanned barcode (a variant SKU, org-unique) and add
+  # one unit to the current cart. Repeated scans of the same code increment the
+  # line — same find/increment behaviour as #create. Redirects back to the cart
+  # so the whole cart re-renders (totals, nudges, discounts) with no duplicated
+  # pricing logic. Used by sales reps during impersonation.
+  def scan
+    code = params[:code].to_s.strip
+    if code.blank?
+      skip_authorization
+      redirect_to(cart_path(org_slug: params[:org_slug])) and return
+    end
+
+    @variant = current_organisation.product_variants
+                 .joins(:product)
+                 .where(products: { published: true })
+                 .find_by(sku: code)
+
+    unless @variant
+      skip_authorization
+      redirect_to cart_path(org_slug: params[:org_slug]),
+                  alert: t('storefront.carts.show.scan.not_found', code: code)
+      return
+    end
+
+    @product = @variant.product
+
+    if @product.price_on_request?
+      skip_authorization
+      redirect_to cart_path(org_slug: params[:org_slug]),
+                  alert: t('storefront.carts.show.scan.not_purchasable', name: @product.name)
+      return
+    end
+
+    @order = current_cart
+    @order_item = @order.order_items.find_by(product: @product, product_variant: @variant)
+
+    if @order_item
+      @order_item.quantity += 1
+    else
+      @order_item = @order.order_items.build(product: @product, product_variant: @variant, quantity: 1)
+    end
+
+    authorize @order_item, :create?
+
+    if @order_item.save
+      label = @variant.option_values_string.presence || @variant.sku
+      redirect_to cart_path(org_slug: params[:org_slug]),
+                  notice: t('storefront.carts.show.scan.added', name: @product.name, variant: label)
+    else
+      redirect_to cart_path(org_slug: params[:org_slug]),
+                  alert: @order_item.errors.full_messages.join(", ")
+    end
+  end
+
   private
 
   # Listing context (category, search, page, attribute filters) carried through

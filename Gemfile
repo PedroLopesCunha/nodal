@@ -110,6 +110,10 @@ gem 'grover', '~> 1.1'
 # QR code generation (used only by QuickAccessPdfRenderer).
 gem 'rqrcode', '~> 2.2', require: false
 
+# Code128 barcode generation for the catalog PDF (scan-to-cart). Rendered as
+# inline SVG in the catalog templates; required lazily by CatalogHelper.
+gem 'barby', '~> 0.7', require: false
+
 # PDF merging for chunked catalog generation — only by CatalogPdfService.
 gem 'combine_pdf', '~> 1.0', require: false
 

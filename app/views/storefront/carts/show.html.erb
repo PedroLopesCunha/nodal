@@ -16,6 +16,10 @@
   </div>
 <% end %>
 
+<% if impersonating? %>
+  <%= render "storefront/carts/scan_bar" %>
+<% end %>
+
 <% if @order.order_items.empty? %>
   <div class="row g-4">
     <div class="col-lg-8">
