@@ -30,7 +30,7 @@ class Bo::SettingsController < Bo::BaseController
       :instagram_url, :facebook_url, :linkedin_url, :website_url,
       :storefront_title, :storefront_description, :favicon, :taxpayer_id, :show_related_products, :out_of_stock_strategy, :low_stock_threshold,
       :cart_stock_policy, :cart_qty_overflow_policy, :checkout_stock_policy, :cart_price_change_policy, :max_discount_percentage,
-      :show_product_sku, :show_product_min_quantity, :show_product_category, :show_product_availability, :show_scroll_to_top,
+      :show_product_sku, :show_product_sku_on_card, :show_product_min_quantity, :show_product_category, :show_product_availability, :show_scroll_to_top,
       :default_product_sort,
       :terms_and_conditions, :privacy_policy,
       :order_cutoff_time, :lead_time_days, :timezone, :quick_access_token_ttl_days,

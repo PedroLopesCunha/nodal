@@ -283,6 +283,14 @@
           <small class="text-muted d-block mb-3"><%= t('bo.settings.edit.show_product_sku_hint') %></small>
 
           <div class="form-check form-switch">
+            <%= f.check_box :show_product_sku_on_card, class: "form-check-input", role: "switch" %>
+            <label class="form-check-label" for="organisation_show_product_sku_on_card">
+              <%= t('bo.settings.edit.show_product_sku_on_card') %>
+            </label>
+          </div>
+          <small class="text-muted d-block mb-3"><%= t('bo.settings.edit.show_product_sku_on_card_hint') %></small>
+
+          <div class="form-check form-switch">
             <%= f.check_box :show_product_min_quantity, class: "form-check-input", role: "switch" %>
             <label class="form-check-label" for="organisation_show_product_min_quantity">
               <%= t('bo.settings.edit.show_product_min_quantity') %>

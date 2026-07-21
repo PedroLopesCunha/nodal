@@ -174,6 +174,12 @@
             <label class="form-check-label" for="priceOnRequestSwitch"><%= t('bo.products.form.price_on_request') %></label>
           </div>
           <small class="text-muted"><%= t('bo.products.form.price_on_request_hint') %></small>
+
+          <div class="form-check form-switch mt-3">
+            <%= f.check_box :hide_sku_on_card, class: "form-check-input", role: "switch", id: "hideSkuOnCardSwitch" %>
+            <label class="form-check-label" for="hideSkuOnCardSwitch"><%= t('bo.products.form.hide_sku_on_card') %></label>
+          </div>
+          <small class="text-muted"><%= t('bo.products.form.hide_sku_on_card_hint') %></small>
         </div>
       </div>
     </div>

@@ -345,8 +345,14 @@
                   <% end %>
                 </div>
                 <div class="card-body">
-                  <% if product.primary_category&.name.present? %>
-                    <span class="product-card-category"><%= product.primary_category.name %></span>
+                  <% show_card_sku = product.show_sku_on_card? && product.sku.present? %>
+                  <% if product.primary_category&.name.present? || show_card_sku %>
+                    <div class="d-flex justify-content-between align-items-center gap-2">
+                      <span class="product-card-category"><%= product.primary_category&.name %></span>
+                      <% if show_card_sku %>
+                        <span class="product-card-sku text-muted small text-nowrap ms-auto">SKU: <%= product.sku %></span>
+                      <% end %>
+                    </div>
                   <% end %>
                   <h5 class="product-card-title"><%= product.name %></h5>
                   <% if @card_attributes&.any? && @card_attribute_data %>

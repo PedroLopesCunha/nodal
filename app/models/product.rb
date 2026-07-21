@@ -169,6 +169,12 @@ class Product < ApplicationRecord
     organisation.show_related_products? && !hide_related_products?
   end
 
+  # Whether to print this product's SKU on storefront listing cards: the org
+  # opts in, and the product hasn't individually suppressed it.
+  def show_sku_on_card?
+    organisation.show_product_sku_on_card? && !hide_sku_on_card?
+  end
+
   def discounted_price_for(discount)
     return price unless discount
     price - (price * discount.discount_value)
