@@ -33,6 +33,8 @@ class OrderItem < ApplicationRecord
         value: ->(r) { r.discount_percentage.to_f > 0 ? "#{(r.discount_percentage * 100).round(1)}%" : nil } },
       { key: :total, label: I18n.t("bo.export.columns.order_item.total"), default: true,
         value: ->(r) { r.total_price.format } },
+      { key: :note, label: I18n.t("bo.export.columns.order_item.note"), default: false,
+        value: ->(r) { r.note.presence } },
       { key: :order_status, label: I18n.t("bo.export.columns.order_item.order_status"), default: false,
         value: ->(r) { r.order.status&.titleize } },
       { key: :payment_status, label: I18n.t("bo.export.columns.order_item.payment_status"), default: false,
@@ -44,6 +46,7 @@ class OrderItem < ApplicationRecord
   validates :unit_price, presence: true, numericality: { greater_than_or_equal_to: 0 }
   validates :discount_percentage, numericality: { greater_than_or_equal_to: 0,
      less_than_or_equal_to: 1 }, allow_nil: true
+  validates :note, length: { maximum: 500 }, allow_blank: true
   validate :variant_belongs_to_product
   validate :variant_is_purchasable, on: :create
   # Only enforced on customer-initiated add/edit (:create, :customer_change),

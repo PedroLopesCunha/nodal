@@ -66,6 +66,20 @@ class OrderItemTest < ActiveSupport::TestCase
     assert_equal 1000, item.unit_price
   end
 
+  test "note is optional and persists" do
+    item = @order.order_items.create!(product: @product, quantity: 1, note: "Entregar sem embalagem")
+    assert_equal "Entregar sem embalagem", item.reload.note
+
+    blank = @order.order_items.new(product: @product, quantity: 1)
+    assert blank.valid?, "note should be optional"
+  end
+
+  test "note is rejected beyond 500 characters" do
+    item = @order.order_items.new(product: @product, quantity: 1, note: "a" * 501)
+    assert_not item.valid?
+    assert_includes item.errors.attribute_names, :note
+  end
+
   test "stock_status is purchasable when quantity fits the enforced stock" do
     @product.default_variant.update!(track_stock: true, stock_quantity: 10, stock_policy: "show_badge")
     item = @order.order_items.create!(product: @product, quantity: 3)

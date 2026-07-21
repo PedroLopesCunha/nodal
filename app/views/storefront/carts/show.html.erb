@@ -107,6 +107,7 @@
                         <% badge = cart_stock_badge(item) %>
                         <% if badge %><div class="mt-1"><%= badge %></div><% end %>
                         <%= render "storefront/carts/min_quantity_warning", shortfall: @min_quantity_shortfall_by_product_id[item.product_id] %>
+                        <%= render "storefront/carts/note_editor", item: item %>
                       </div>
                     </div>
                   </td>
@@ -224,6 +225,10 @@
                       <i class="fa-solid fa-trash"></i>
                     <% end %>
                   </div>
+                </div>
+                <%# Line 2.5: per-line note %>
+                <div class="mt-1" style="padding-left: 56px;">
+                  <%= render "storefront/carts/note_editor", item: item %>
                 </div>
                 <%# Line 3: "add N units to unlock" (only when close to a discount) %>
                 <% nudge = @nudge_by_variant_id&.dig(item.product_variant_id) || @nudge_by_product_id&.dig(item.product_id) %>

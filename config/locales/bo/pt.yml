@@ -222,6 +222,7 @@ pt:
           unit_price: "Preço Unitário"
           discount: "Desconto"
           total: "Total"
+          note: "Observação"
           order_status: "Estado da Encomenda"
           payment_status: "Estado do Pagamento"
         variant:
@@ -1265,6 +1266,7 @@ pt:
         add_item: "Adicionar Item"
         order_items: "Itens da Encomenda"
         select_product: "Selecione um produto"
+        note_placeholder: "Observação para este artigo"
         quantity: "Quantidade"
         discount_type: "Tipo de Desconto"
         select_type: "Selecione o Tipo"

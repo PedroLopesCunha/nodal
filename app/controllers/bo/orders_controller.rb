@@ -178,7 +178,7 @@ class Bo::OrdersController < Bo::BaseController
   def order_params
     params.require(:order).permit(
       :customer_id, :status, :payment_status, :receive_on, :notes,
-      order_items_attributes: [:id, :product_id, :quantity, :price, :discount_percentage, :_destroy]
+      order_items_attributes: [:id, :product_id, :quantity, :price, :discount_percentage, :note, :_destroy]
     )
   end
 

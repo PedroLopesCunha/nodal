@@ -217,6 +217,7 @@ es:
           unit_price: "Precio Unitario"
           discount: "Descuento"
           total: "Total"
+          note: "Nota"
           order_status: "Estado del Pedido"
           payment_status: "Estado de Pago"
         variant:
@@ -1121,6 +1122,7 @@ es:
         add_item: "Añadir Artículo"
         order_items: "Artículos del Pedido"
         select_product: "Seleccione un producto"
+        note_placeholder: "Nota para este artículo"
         quantity: "Cantidad"
         discount_type: "Tipo de Descuento"
         select_type: "Seleccione Tipo"

@@ -293,6 +293,8 @@ es:
         confirm_remove_item: "¿Eliminar este artículo?"
         confirm_clear_cart: "¿Está seguro de que desea vaciar el carrito?"
         remove_item: "Eliminar"
+        add_note: "Añadir nota"
+        note_placeholder: "Nota para este artículo (p. ej.: entregar sin embalaje)"
         you_might_like: "También te puede gustar"
         scan:
           title: "Escanear código de barras"

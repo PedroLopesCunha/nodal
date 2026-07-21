@@ -305,6 +305,8 @@ pt:
         confirm_remove_item: "Remover este item?"
         confirm_clear_cart: "Tem a certeza que deseja limpar o carrinho?"
         remove_item: "Remover"
+        add_note: "Adicionar observação"
+        note_placeholder: "Observação para este artigo (ex.: entregar sem embalagem)"
         you_might_like: "Também pode gostar"
         scan:
           title: "Scanear código de barras"
