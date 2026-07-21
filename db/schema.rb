@@ -602,6 +602,9 @@ ActiveRecord::Schema[7.1].define(version: 2026_07_20_150000) do
     t.decimal "max_discount_percentage", precision: 5, scale: 4
     t.string "campaign_color"
     t.integer "low_stock_threshold", default: 5, null: false
+    t.string "sale_badge_text"
+    t.string "sale_badge_color"
+    t.boolean "show_sale_badge", default: true, null: false
     t.boolean "show_product_sku_on_card", default: false, null: false
     t.index ["custom_domain"], name: "index_organisations_on_custom_domain", unique: true, where: "(custom_domain IS NOT NULL)"
     t.index ["default_locale"], name: "index_organisations_on_default_locale"

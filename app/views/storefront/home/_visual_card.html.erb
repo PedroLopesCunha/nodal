@@ -17,7 +17,7 @@
 <% show_sale_badge = local_assigns.fetch(:show_sale_badge, true) %>
 <%
   pct = discount_info && discount_info[:has_discount] ? discount_info[:effective_discount][:percentage].to_f : 0
-  has_promo_badge = show_sale_badge && discount_info && discount_info[:all_discounts]&.any? { |d| d[:type] == :product || d[:type] == :category }
+  has_promo_badge = show_sale_badge && current_organisation&.show_sale_badge && discount_info && discount_info[:all_discounts]&.any? { |d| d[:type] == :product || d[:type] == :category }
   show_pct_badge = show_discount_badge && pct.finite? && pct > 0
 %>
 <%= link_to link_path, class: "text-decoration-none" do %>
@@ -25,7 +25,7 @@
     <% if has_promo_badge || show_pct_badge %>
       <div class="home-visual-card__badges">
         <% if has_promo_badge %>
-          <span class="home-visual-card__sale-badge"><%= t('storefront.products.index.sale_badge') %></span>
+          <span class="home-visual-card__sale-badge" style="<%= sale_badge_style(current_organisation) %>"><%= sale_badge_label(current_organisation) %></span>
         <% end %>
         <% if show_pct_badge %>
           <span class="home-visual-card__discount-badge">-<%= (pct * 100).round(0) %>%</span>
