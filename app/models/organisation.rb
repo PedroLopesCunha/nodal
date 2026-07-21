@@ -65,6 +65,7 @@ class Organisation < ApplicationRecord
   validates :primary_color, format: { with: HEX_COLOR_REGEX }, allow_blank: true
   validates :secondary_color, format: { with: HEX_COLOR_REGEX }, allow_blank: true
   validates :campaign_color, format: { with: HEX_COLOR_REGEX }, allow_blank: true
+  validates :sale_badge_color, format: { with: HEX_COLOR_REGEX }, allow_blank: true
   validates :email_reply_to, format: { with: URI::MailTo::EMAIL_REGEXP }, allow_blank: true
   validates :lead_time_days, numericality: { greater_than_or_equal_to: 0, only_integer: true }
   validates :low_stock_threshold, numericality: { greater_than_or_equal_to: 0, only_integer: true }
@@ -155,6 +156,13 @@ class Organisation < ApplicationRecord
   # Accent colour for the storefront "Campanhas" entry; red by default.
   def effective_campaign_color
     campaign_color.presence || '#dc3545'
+  end
+
+  # Background colour for the storefront promotion ("PROMOÇÃO/SALE") badge; red
+  # by default. Independent of campaign_color so the badge and the "Campanhas"
+  # accent can be coloured separately.
+  def effective_sale_badge_color
+    sale_badge_color.presence || '#dc3545'
   end
 
   def display_contact_address
