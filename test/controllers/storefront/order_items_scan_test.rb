@@ -81,6 +81,25 @@ class Storefront::OrderItemsScanTest < ActionDispatch::IntegrationTest
                @product.product_variants.where(sku: %w[AB-1 AB1]).pluck(:id))
   end
 
+  test "scanning a product with a per-variant minimum seeds the line at the minimum" do
+    bricks = Product.create!(organisation: @org, name: "Hollow Brick", sku: "BRICK",
+                             published: true, available: true,
+                             min_quantity: 5, min_quantity_type: "m²", min_quantity_scope: "per_variant")
+    v = bricks.product_variants.create!(organisation: @org, name: "Std", sku: "BRICK-STD",
+                                        unit_price_cents: 300, unit_price_currency: "EUR",
+                                        published: true, available: true, is_default: false, track_stock: false)
+
+    # First scan must seed at the minimum (5), not 1, or the save would fail.
+    post scan_order_items_path(org_slug: @org.slug), params: { code: "BRICK-STD" }
+    item = cart.order_items.find_by(product_variant: v)
+    assert item, "expected the min-quantity product to be added"
+    assert_equal 5, item.quantity
+
+    # Subsequent scans increment by one.
+    post scan_order_items_path(org_slug: @org.slug), params: { code: "BRICK-STD" }
+    assert_equal 6, item.reload.quantity
+  end
+
   test "scanning an unknown code adds nothing and flashes an alert" do
     post scan_order_items_path(org_slug: @org.slug), params: { code: "DOES-NOT-EXIST" }
     assert_redirected_to cart_path(org_slug: @org.slug)

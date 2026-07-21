@@ -162,7 +162,12 @@ class Storefront::OrderItemsController < Storefront::BaseController
     if @order_item
       @order_item.quantity += 1
     else
-      @order_item = @order.order_items.build(product: @product, product_variant: @variant, quantity: 1)
+      # First scan seeds the line at the product's minimum (like the product
+      # page pre-fills), so a per-variant min_quantity doesn't reject the add.
+      # quantity_input_min is 1 for normal/combined-scope products.
+      @order_item = @order.order_items.build(
+        product: @product, product_variant: @variant, quantity: @product.quantity_input_min
+      )
     end
 
     authorize @order_item, :create?
