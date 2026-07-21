@@ -1,4 +1,6 @@
 pt:
+  orders:
+    item_note_label: "Obs."
   flash:
     success: "Sucesso"
     error: "Erro"

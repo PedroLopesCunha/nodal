@@ -55,6 +55,9 @@
                         <small class="text-primary"><%= item.product_variant.sku.presence || item.product_variant.option_values_string %></small><br>
                       <% end %>
                       <small class="text-muted">SKU: <%= item.product_variant&.sku.presence || item.product.sku || '-' %></small>
+                      <% if item.note.present? %>
+                        <small class="d-block text-muted fst-italic"><i class="fa-solid fa-pen-to-square me-1"></i><%= item.note %></small>
+                      <% end %>
                     </div>
                   </div>
                 </td>
