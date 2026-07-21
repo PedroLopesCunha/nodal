@@ -226,6 +226,6 @@ class Storefront::OrderItemsController < Storefront::BaseController
   end
 
   def order_item_params
-    params.require(:order_item).permit(:quantity)
+    params.require(:order_item).permit(:quantity, :note)
   end
 end

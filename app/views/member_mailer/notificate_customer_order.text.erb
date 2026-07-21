@@ -34,7 +34,8 @@ ITEMS
 -----
 <% @order.order_items.each do |item| %>
 - <%= item.product.name %> x<%= item.quantity %> @ <%= humanized_money_with_symbol(item.price) %> = <%= humanized_money_with_symbol(item.total_price) %>
-<% end %>
+<% if item.note.present? %>  <%= t('orders.item_note_label') %>: <%= item.note %>
+<% end %><% end %>
 
 ORDER SUMMARY
 -------------

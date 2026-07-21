@@ -1,4 +1,6 @@
 en:
+  orders:
+    item_note_label: "Note"
   flash:
     success: "Success"
     error: "Error"

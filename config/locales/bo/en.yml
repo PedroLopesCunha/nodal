@@ -225,6 +225,7 @@ en:
           unit_price: "Unit Price"
           discount: "Discount"
           total: "Total"
+          note: "Note"
           order_status: "Order Status"
           payment_status: "Payment Status"
         variant:
@@ -1283,6 +1284,7 @@ en:
         add_item: "Add Item"
         order_items: "Order Items"
         select_product: "Select a product"
+        note_placeholder: "Note for this item"
         quantity: "Quantity"
         discount_type: "Discount Type"
         select_type: "Select Type"

@@ -305,6 +305,8 @@ en:
         confirm_remove_item: "Remove this item?"
         confirm_clear_cart: "Are you sure you want to clear your cart?"
         remove_item: "Remove"
+        add_note: "Add a note"
+        note_placeholder: "Note for this item (e.g. deliver without packaging)"
         you_might_like: "You might also like"
         scan:
           title: "Scan barcode"

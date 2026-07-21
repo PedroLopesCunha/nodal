@@ -8,7 +8,8 @@ Em caso de dúvida, contacte directamente <%= @placed_by_rep.email %>.
 Your order is confirmed. You ordered:
 <% @order.order_items.each do |item| %>
 - <%= item.product.name %><% if item.product_variant.present? && item.product.variable? %> (<%= item.product_variant.sku.presence || item.product_variant.option_values_string %>)<% end %> x<%= item.quantity %> — <%= item.total_price.format %><% if item.discount_percentage && item.discount_percentage > 0 %> (-<%= (item.discount_percentage * 100).round(0) %>%)<% end %>
-<% end %>
+<% if item.note.present? %>  <%= t('orders.item_note_label') %>: <%= item.note %>
+<% end %><% end %>
 
 Subtotal: <%= @order.total_amount.format %>
 <% if @order.has_auto_discount_snapshot? %>
