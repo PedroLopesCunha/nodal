@@ -309,7 +309,7 @@ class Bo::ProductsController < Bo::BaseController
     if params[:query].present?
       scope = current_organisation.products.includes(:categories, :product_variants)
       exact_ids = scope.left_joins(:categories, :product_variants).where(
-        "unaccent(products.name) ILIKE unaccent(:q) OR unaccent(products.sku) ILIKE unaccent(:q) OR unaccent(categories.name) ILIKE unaccent(:q) OR unaccent(product_variants.sku) ILIKE unaccent(:q)",
+        "unaccent(products.name) ILIKE unaccent(:q) OR unaccent(products.description) ILIKE unaccent(:q) OR unaccent(products.sku) ILIKE unaccent(:q) OR unaccent(categories.name) ILIKE unaccent(:q) OR unaccent(product_variants.sku) ILIKE unaccent(:q)",
         q: "%#{params[:query]}%"
       ).select("products.id").distinct
       fuzzy_ids = scope.left_joins(:categories).where(
@@ -324,6 +324,43 @@ class Bo::ProductsController < Bo::BaseController
     end
 
     render partial: "catalog_selection_content", formats: [:html]
+  end
+
+  # Design sandbox for the premium ("lookbook") catalog. Renders the premium
+  # template as plain HTML (no PDF) with real products so we can iterate on the
+  # visual design in-browser. Switch styles with ?style=editorial|grid|classic.
+  # Not wired into GenerateCatalogJob yet — this is preview-only.
+  def catalog_preview
+    authorize Product, :generate_catalog?
+
+    scope = current_organisation.products
+                                .where(published: true, available: true)
+                                .includes(:categories, product_variants: :product)
+                                .with_attached_photos
+
+    if params[:category_id].present?
+      category = current_organisation.categories.find_by(id: params[:category_id])
+      scope = scope.joins(:category_products).where(category_products: { category_id: category.subtree_ids }) if category
+    end
+
+    limit = params.fetch(:limit, 12).to_i.clamp(1, 60)
+    @products = scope.order(:name).limit(limit).select(&:photo_attached?).presence ||
+                scope.order(:name).limit(limit).to_a
+
+    @style = params[:style].presence_in(%w[spread cards editorial grid classic]) || "spread"
+    @orientation = params[:orient].presence_in(%w[landscape portrait]) || "landscape"
+    @catalog_title = params[:title].presence || "Coleção"
+    @catalog_subtitle = params[:subtitle].presence
+    @client_name = params[:client].presence
+    @observations = params[:observations].presence
+    @show_prices = params[:show_prices] != "0"
+    @show_barcode = params[:show_barcode] == "1"
+    @organisation = current_organisation
+    @catalog_host = request.base_url
+
+    I18n.with_locale(@organisation.default_locale.presence || I18n.default_locale) do
+      render template: "shared/catalog/premium_preview", layout: false
+    end
   end
 
   def generate_catalog
@@ -343,6 +380,10 @@ class Bo::ProductsController < Bo::BaseController
       "show_variant_price" => params[:show_variant_price],
       "show_variant_photo" => params[:show_variant_photo],
       "catalog_layout" => params[:catalog_layout],
+      "catalog_style" => params[:catalog_style],
+      "premium_layout" => params[:premium_layout],
+      "orientation" => params[:orientation],
+      "catalog_subtitle" => params[:catalog_subtitle],
       "group_by_category" => params[:group_by_category],
       "client_name" => params[:client_name],
       "observations" => params[:observations],

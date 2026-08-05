@@ -1,3 +1,35 @@
+<%# Cap the modal-content to the viewport height (vh-based, so it doesn't depend
+    on the parent .modal having height:100%) and let the body flex-scroll. Header
+    and footer stay pinned. !important defeats whatever overrides the Bootstrap
+    scrollable rules on desktop. %>
+<style>
+  #catalogModal .modal-dialog {
+    max-height: calc(100vh - 2rem) !important;
+    margin: 1rem auto !important;
+  }
+  #catalogModal .modal-content {
+    max-height: calc(100vh - 2rem) !important;
+    display: flex !important;
+    flex-direction: column !important;
+    overflow: hidden !important;
+  }
+  /* The form wraps modal-body + modal-footer, so it must be the flex column
+     that fills the content and lets the body scroll. */
+  #catalogModal .modal-content > form {
+    display: flex !important;
+    flex-direction: column !important;
+    flex: 1 1 auto !important;
+    min-height: 0 !important;
+    overflow: hidden !important;
+  }
+  #catalogModal .modal-header,
+  #catalogModal .modal-footer { flex: 0 0 auto !important; }
+  #catalogModal .modal-body {
+    flex: 1 1 auto !important;
+    min-height: 0 !important;
+    overflow-y: auto !important;
+  }
+</style>
 <div class="modal fade" id="catalogModal" tabindex="-1" aria-labelledby="catalogModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-xl modal-dialog-scrollable">
     <div class="modal-content">
@@ -16,6 +48,44 @@
         </div>
 
         <div class="modal-body">
+          <!-- Catalog style: functional vs premium -->
+          <div class="mb-3 p-3 border rounded bg-light">
+            <label class="form-label fw-semibold d-block mb-2">Estilo do catálogo</label>
+            <div class="d-flex gap-4">
+              <div class="form-check">
+                <%= radio_button_tag :catalog_style, "functional", true, id: "style_functional", class: "form-check-input", data: { action: "change->catalog#applyStyle" } %>
+                <%= label_tag :style_functional, "Funcional", class: "form-check-label fw-semibold" %>
+                <div class="small text-muted">Grelha/lista compacta, variantes, códigos de barras.</div>
+              </div>
+              <div class="form-check">
+                <%= radio_button_tag :catalog_style, "premium", false, id: "style_premium", class: "form-check-input", data: { action: "change->catalog#applyStyle" } %>
+                <%= label_tag :style_premium, "Premium (exposição)", class: "form-check-label fw-semibold" %>
+                <div class="small text-muted">Capa, fotos grandes, ar de catálogo de loja.</div>
+              </div>
+            </div>
+
+            <div class="row g-2 mt-2 d-none" data-catalog-target="premiumOnly">
+              <div class="col-md-4">
+                <label class="form-label small fw-semibold mb-1">Layout</label>
+                <select name="premium_layout" class="form-select form-select-sm">
+                  <option value="cards">3 produtos por página</option>
+                  <option value="spread">1 produto por página</option>
+                </select>
+              </div>
+              <div class="col-md-4">
+                <label class="form-label small fw-semibold mb-1">Orientação</label>
+                <select name="orientation" class="form-select form-select-sm">
+                  <option value="landscape">Horizontal</option>
+                  <option value="portrait">Vertical</option>
+                </select>
+              </div>
+              <div class="col-md-4">
+                <label class="form-label small fw-semibold mb-1">Subtítulo da capa</label>
+                <%= text_field_tag :catalog_subtitle, nil, class: "form-control form-control-sm", placeholder: "ex.: Prata 925" %>
+              </div>
+            </div>
+          </div>
+
           <div class="row">
             <!-- Title -->
             <div class="col-md-6 mb-3">
@@ -37,7 +107,7 @@
 
           <!-- Layout & Sort -->
           <div class="row mb-3">
-            <div class="col-6">
+            <div class="col-6" data-catalog-target="functionalOnly">
               <label class="form-label fw-semibold"><%= t('bo.catalog.layout') %></label>
               <div class="d-flex gap-3">
                 <div class="form-check">
@@ -80,7 +150,7 @@
               <%= check_box_tag :show_description, "1", false, class: "form-check-input", id: "catalog_show_description" %>
               <%= label_tag :catalog_show_description, t('bo.catalog.show_description'), class: "form-check-label" %>
             </div>
-            <div class="form-check mb-1">
+            <div class="form-check mb-1" data-catalog-target="functionalOnly">
               <%= check_box_tag :group_by_category, "1", true, class: "form-check-input", id: "catalog_group_by_category" %>
               <%= label_tag :catalog_group_by_category, t('bo.catalog.group_by_category'), class: "form-check-label" %>
             </div>
@@ -92,7 +162,7 @@
           </div>
 
           <!-- Variant Details -->
-          <div class="col-md-6 mb-3">
+          <div class="col-md-6 mb-3" data-catalog-target="functionalOnly">
             <label class="form-label fw-semibold"><%= t('bo.catalog.variant_details') %></label>
             <div class="form-check mb-1">
               <%= check_box_tag :show_variants, "1", true, class: "form-check-input", id: "catalog_show_variants" %>

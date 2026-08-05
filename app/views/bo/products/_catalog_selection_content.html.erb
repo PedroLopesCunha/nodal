@@ -1,27 +1,6 @@
-<% selection_url = local_assigns.fetch(:selection_url) { catalog_selection_bo_products_path(params[:org_slug]) } %>
+<%# Only the results/tree live inside the frame now — the search input is static
+    in the modal (see _catalog_selection_modal) so typing never re-renders it. %>
 <turbo-frame id="catalog_selection">
-  <%# Search form %>
-  <div class="mb-3">
-    <div class="input-group input-group-sm">
-      <span class="input-group-text bg-white"><i class="fa-solid fa-magnifying-glass text-muted"></i></span>
-      <%= form_with url: selection_url, method: :get, data: { turbo_frame: "catalog_selection" }, local: false, class: "flex-grow-1 d-flex" do %>
-        <input type="text" name="query" class="form-control border-start-0"
-               value="<%= params[:query] %>"
-               placeholder="<%= t('bo.catalog.selection.search_placeholder') %>"
-               data-catalog-target="searchInput"
-               data-action="input->catalog#debouncedSearch"
-               autocomplete="off">
-        <% if params[:query].present? %>
-          <a href="<%= selection_url %>"
-             data-turbo-frame="catalog_selection"
-             class="btn btn-outline-secondary btn-sm">
-            <i class="fa-solid fa-times"></i>
-          </a>
-        <% end %>
-      <% end %>
-    </div>
-  </div>
-
   <%# Select/Deselect all %>
   <div class="mb-2 d-flex gap-3">
     <a href="#" class="small text-decoration-none" data-action="click->catalog#selectAllVisible"><%= t('bo.export.select_all') %></a>

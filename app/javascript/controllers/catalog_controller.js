@@ -5,7 +5,8 @@ export default class extends Controller {
     "searchInput", "selectionFrame",
     "categoryCount", "productCount",
     "settingsCategoryCount", "settingsProductCount",
-    "hiddenFields"
+    "hiddenFields",
+    "functionalOnly", "premiumOnly"
   ]
 
   connect() {
@@ -13,6 +14,7 @@ export default class extends Controller {
     this.selectedProducts = new Set()
     this.searchTimeout = null
     this.updateCounts()
+    this.applyStyle()
 
     // Re-apply checkbox states after turbo frame loads
     document.addEventListener("turbo:frame-load", this.handleFrameLoad)
@@ -26,8 +28,27 @@ export default class extends Controller {
   handleFrameLoad = (event) => {
     if (event.target.id === "catalog_selection") {
       this.restoreSelections()
-      this.restoreSearchFocus()
+      // The input keeps its VALUE (it lives outside the frame), but Turbo's frame
+      // navigation blurs the active element — restore focus so continuous typing
+      // isn't interrupted. Only when the user is actually searching (has a value),
+      // so we don't steal focus on the initial browse load.
+      if (this.hasSearchInputTarget && this.searchInputTarget.value) {
+        const input = this.searchInputTarget
+        input.focus()
+        input.setSelectionRange(input.value.length, input.value.length)
+      }
     }
+  }
+
+  // Clear the (static) search box and reload the browse tree.
+  clearSearch(event) {
+    event.preventDefault()
+    if (!this.hasSearchInputTarget) return
+    const input = this.searchInputTarget
+    input.value = ""
+    const form = input.closest("form")
+    if (form) form.requestSubmit()
+    input.focus()
   }
 
   restoreSelections() {
@@ -43,13 +64,12 @@ export default class extends Controller {
     this.updateCounts()
   }
 
-  restoreSearchFocus() {
-    if (!this.hasSearchInputTarget) return
-    const input = this.searchInputTarget
-    if (input.value) {
-      input.focus()
-      input.setSelectionRange(input.value.length, input.value.length)
-    }
+  // Show only the options that apply to the chosen catalog style.
+  applyStyle() {
+    const checked = this.element.querySelector('input[name="catalog_style"]:checked')
+    const premium = checked ? checked.value === "premium" : false
+    this.premiumOnlyTargets.forEach(el => el.classList.toggle("d-none", !premium))
+    this.functionalOnlyTargets.forEach(el => el.classList.toggle("d-none", premium))
   }
 
   // Debounced search — submits the form after 300ms

@@ -41,7 +41,7 @@
       <div class="product-barcode"><span class="barcode"><%= svg %></span></div>
     <% end %>
     <% if show_variants && product.has_variants? %>
-      <% variants = product.product_variants.reject(&:is_default?).select(&:published?) %>
+      <% variants = product.product_variants.reject(&:is_default?).select(&:published?).sort_by(&:natural_sort_key) %>
       <% variants = variants.select(&:available?) if only_available_variants %>
       <% if variants.any? %>
         <div class="product-card-variants-detail">
