@@ -31,7 +31,7 @@
       <% end %>
     <% end %>
     <% if show_variants && product.has_variants? %>
-      <% variants = product.product_variants.reject(&:is_default?).select(&:published?) %>
+      <% variants = product.product_variants.reject(&:is_default?).select(&:published?).sort_by(&:natural_sort_key) %>
       <% variants = variants.select(&:available?) if only_available_variants %>
       <% if variants.any? %>
         <table class="variant-table">
