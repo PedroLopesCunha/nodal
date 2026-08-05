@@ -49,27 +49,65 @@ class CatalogPdfService
     @options["catalog_style"].to_s == "premium"
   end
 
-  # Premium ("lookbook") catalog. Reuses the shared/catalog/premium_preview
-  # template that drives the in-browser preview, rendered in PDF mode: images
-  # inlined as base64, org locale, A4 landscape/portrait with zero margins
-  # (the template ships its own header/footer bars).
-  def generate_premium(&progress_callback)
-    progress_callback&.call(0, 1)
+  # How many product PAGES to render per Grover call. Each chunk builds only its
+  # own images (base64) and frees them before the next, so headless Chrome never
+  # holds the whole catalog at once — this is what keeps the functional catalog
+  # inside the dyno's memory, and the premium one now matches it.
+  PREMIUM_PAGES_PER_CHUNK = 4
 
-    image_map = build_premium_image_map(@products)
-    logo_data = download_logo
+  # Premium ("lookbook") catalog, rendered in memory-bounded chunks:
+  # cover -> product pages in chunks (images freed between chunks) -> back cover,
+  # then merged. Reuses shared/catalog/premium_preview via @pdf_section.
+  def generate_premium(&progress_callback)
     orientation = @options["orientation"] == "portrait" ? "portrait" : "landscape"
     style = @options["premium_layout"] == "spread" ? "spread" : "cards"
+    per_page = premium_per_page(style, orientation)
+    chunks = @products.each_slice(per_page * PREMIUM_PAGES_PER_CHUNK).to_a
 
+    logo_data = download_logo
+    total_steps = chunks.size + 2
+    progress_callback&.call(0, total_steps)
+
+    pdfs = []
+    pdfs << render_premium_section("cover", [], style, orientation, {}, logo_data, 0)
+    progress_callback&.call(1, total_steps)
+
+    page_offset = 0
+    chunks.each_with_index do |chunk, index|
+      image_map = build_premium_image_map(chunk)
+      pdfs << render_premium_section("pages", chunk, style, orientation, image_map, logo_data, page_offset)
+      image_map.clear
+      page_offset += style == "spread" ? chunk.size : (chunk.size.to_f / per_page).ceil
+      progress_callback&.call(index + 2, total_steps)
+    end
+
+    if @options["observations"].present? || @organisation.has_contact_info?
+      pdfs << render_premium_section("back", [], style, orientation, {}, logo_data, 0)
+    end
+    progress_callback&.call(total_steps, total_steps)
+
+    merge_pdfs(pdfs.compact)
+  end
+
+  def premium_per_page(style, orientation)
+    return 1 if style == "spread"
+    orientation == "portrait" ? 4 : 3
+  end
+
+  # Renders one section of the premium catalog ("cover" | "pages" | "back") to a
+  # PDF binary. Only "pages" receives products + an image_map.
+  def render_premium_section(section, products, style, orientation, image_map, logo_data, page_offset)
     html = I18n.with_locale(@organisation.default_locale.presence || I18n.locale) do
       @renderer.render(
         template: "shared/catalog/premium_preview",
         layout: false,
         assigns: {
-          products: @products,
+          products: products,
           style: style,
           orientation: orientation,
           pdf_mode: true,
+          pdf_section: section,
+          page_offset: page_offset,
           catalog_title: catalog_title,
           catalog_subtitle: @options["catalog_subtitle"].presence,
           client_name: @options["client_name"].presence,
@@ -84,11 +122,7 @@ class CatalogPdfService
         }
       )
     end
-
-    image_map.clear
-    pdf = render_premium_pdf_with_retry(html, orientation)
-    progress_callback&.call(1, 1)
-    pdf
+    render_premium_pdf_with_retry(html, orientation)
   end
 
   def build_premium_image_map(products)
@@ -96,7 +130,7 @@ class CatalogPdfService
     products.each do |product|
       att = product.photo_attached? ? product.photo : product.display_photo
       next unless att
-      data = download_image(att, limit: [1000, 1000])
+      data = download_image(att, limit: [800, 800])
       map[product.id] = data if data
     end
     map

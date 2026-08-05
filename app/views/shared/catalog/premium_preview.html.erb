@@ -335,7 +335,8 @@
   </div>
   <% end %>
 
-  <% if %w[spread cards].include?(@style) %>
+  <% page_offset = @page_offset.to_i %>
+  <% if %w[spread cards].include?(@style) && [nil, "cover"].include?(@pdf_section) %>
     <%# ---------- PREMIUM COVER ---------- %>
     <div class="sheet <%= orientation %>">
       <div class="pcover">
@@ -352,6 +353,7 @@
     </div>
   <% end %>
 
+  <% if [nil, "pages"].include?(@pdf_section) %>
   <% if @style == "cards" %>
     <%# ---------- CARDS (3 / page — floating gallery, QR in footer) ---------- %>
     <% per_page = orientation == "portrait" ? 4 : 3 %>
@@ -372,7 +374,7 @@
             <div class="sp-pageno">
               <span class="sect"><%= page_category.to_s.upcase %></span>
               <span class="bar"></span>
-              <span class="num"><%= format('%02d', page_i + 1) %></span>
+              <span class="num"><%= format('%02d', page_offset + page_i + 1) %></span>
             </div>
           </div>
 
@@ -444,7 +446,7 @@
             <div class="sp-pageno">
               <span class="sect"><%= (cat_for.call(product) || @catalog_title).to_s.upcase %></span>
               <span class="bar"></span>
-              <span class="num"><%= format('%02d', i + 1) %></span>
+              <span class="num"><%= format('%02d', page_offset + i + 1) %></span>
             </div>
           </div>
 
@@ -617,8 +619,9 @@
       </div>
     <% end %>
   <% end %>
+  <% end %>
 
-  <% if %w[spread cards].include?(@style) && (@observations.present? || @organisation.has_contact_info?) %>
+  <% if %w[spread cards].include?(@style) && [nil, "back"].include?(@pdf_section) && (@observations.present? || @organisation.has_contact_info?) %>
     <%# ---------- PREMIUM BACK COVER (observations + contacts) ---------- %>
     <div class="sheet <%= orientation %>">
       <div class="pback">
