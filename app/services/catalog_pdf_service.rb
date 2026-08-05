@@ -18,6 +18,8 @@ class CatalogPdfService
   end
 
   def generate(&progress_callback)
+    return generate_premium(&progress_callback) if premium?
+
     chunks = @products.each_slice(CHUNK_SIZE).to_a
     total_steps = chunks.size + 2 # cover + chunks + contact
     progress_callback&.call(0, total_steps)
@@ -42,6 +44,97 @@ class CatalogPdfService
   end
 
   private
+
+  def premium?
+    @options["catalog_style"].to_s == "premium"
+  end
+
+  # Premium ("lookbook") catalog. Reuses the shared/catalog/premium_preview
+  # template that drives the in-browser preview, rendered in PDF mode: images
+  # inlined as base64, org locale, A4 landscape/portrait with zero margins
+  # (the template ships its own header/footer bars).
+  def generate_premium(&progress_callback)
+    progress_callback&.call(0, 1)
+
+    image_map = build_premium_image_map(@products)
+    logo_data = download_logo
+    orientation = @options["orientation"] == "portrait" ? "portrait" : "landscape"
+    style = @options["premium_layout"] == "spread" ? "spread" : "cards"
+
+    html = I18n.with_locale(@organisation.default_locale.presence || I18n.locale) do
+      @renderer.render(
+        template: "shared/catalog/premium_preview",
+        layout: false,
+        assigns: {
+          products: @products,
+          style: style,
+          orientation: orientation,
+          pdf_mode: true,
+          catalog_title: catalog_title,
+          catalog_subtitle: @options["catalog_subtitle"].presence,
+          client_name: @options["client_name"].presence,
+          observations: @options["observations"].presence,
+          show_prices: @options["show_prices"] != "0",
+          show_sku: @options.fetch("show_sku", "1") == "1",
+          show_barcode: @options["show_barcode"] == "1",
+          organisation: @organisation,
+          catalog_host: @catalog_host,
+          image_map: image_map,
+          logo_data: logo_data
+        }
+      )
+    end
+
+    image_map.clear
+    pdf = render_premium_pdf_with_retry(html, orientation)
+    progress_callback&.call(1, 1)
+    pdf
+  end
+
+  def build_premium_image_map(products)
+    map = {}
+    products.each do |product|
+      att = product.photo_attached? ? product.photo : product.display_photo
+      next unless att
+      data = download_image(att, limit: [1000, 1000])
+      map[product.id] = data if data
+    end
+    map
+  end
+
+  def render_premium_pdf_with_retry(html, orientation)
+    retries = 0
+    begin
+      Grover.new(html, **premium_grover_options(orientation)).to_pdf
+    rescue StandardError => e
+      retries += 1
+      if retries <= MAX_RETRIES
+        Rails.logger.warn("[CatalogPDF] Premium render failed (attempt #{retries}): #{e.message}")
+        sleep(retries * 2)
+        retry
+      end
+      raise
+    end
+  end
+
+  def premium_grover_options(orientation)
+    {
+      format: "A4",
+      landscape: orientation != "portrait",
+      print_background: true,
+      prefer_css_page_size: true,
+      margin: { top: "0", bottom: "0", left: "0", right: "0" },
+      wait_until: "networkidle0",
+      timeout: GROVER_TIMEOUT,
+      launch_args: [
+        "--no-sandbox",
+        "--disable-setuid-sandbox",
+        "--disable-dev-shm-usage",
+        "--disable-gpu"
+      ],
+      executable_path: chrome_path
+    }.compact
+  end
 
   def generate_cover_pdf
     logo_data = download_logo
@@ -115,8 +208,8 @@ class CatalogPdfService
     map
   end
 
-  def download_image(attachment, small: false)
-    limit = small ? [100, 100] : [400, 400]
+  def download_image(attachment, small: false, limit: nil)
+    limit ||= small ? [100, 100] : [400, 400]
     variant = attachment.variant(resize_to_limit: limit)
     variant.processed
     data = variant.download

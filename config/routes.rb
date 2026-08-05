@@ -164,6 +164,7 @@ Rails.application.routes.draw do
           get :export_variants
           get :stock_control
           get :generate_catalog
+          get :catalog_preview
           get :import
           post :import_mapping
           post :import_process

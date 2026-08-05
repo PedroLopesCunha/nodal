@@ -5,7 +5,8 @@ export default class extends Controller {
     "searchInput", "selectionFrame",
     "categoryCount", "productCount",
     "settingsCategoryCount", "settingsProductCount",
-    "hiddenFields"
+    "hiddenFields",
+    "functionalOnly", "premiumOnly"
   ]
 
   connect() {
@@ -13,6 +14,7 @@ export default class extends Controller {
     this.selectedProducts = new Set()
     this.searchTimeout = null
     this.updateCounts()
+    this.applyStyle()
 
     // Re-apply checkbox states after turbo frame loads
     document.addEventListener("turbo:frame-load", this.handleFrameLoad)
@@ -50,6 +52,14 @@ export default class extends Controller {
       input.focus()
       input.setSelectionRange(input.value.length, input.value.length)
     }
+  }
+
+  // Show only the options that apply to the chosen catalog style.
+  applyStyle() {
+    const checked = this.element.querySelector('input[name="catalog_style"]:checked')
+    const premium = checked ? checked.value === "premium" : false
+    this.premiumOnlyTargets.forEach(el => el.classList.toggle("d-none", !premium))
+    this.functionalOnlyTargets.forEach(el => el.classList.toggle("d-none", premium))
   }
 
   // Debounced search — submits the form after 300ms
