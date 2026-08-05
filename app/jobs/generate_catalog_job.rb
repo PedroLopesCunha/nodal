@@ -3,6 +3,13 @@ class GenerateCatalogJob < ApplicationJob
 
   queue_as :default
 
+  # Grover/Chrome is memory-heavy. On the current (memory-tight) dyno, two
+  # catalog renders at once exhaust memory (R14 -> R15 -> crash). Serialize so
+  # only ONE catalog is generated at a time across the whole app; the rest wait.
+  # `duration` releases the slot if a job dies without cleaning up, so the queue
+  # never deadlocks.
+  limits_concurrency to: 1, key: ->(*_args) { "catalog_generation" }, duration: 15.minutes
+
   def perform(task_id, organisation_id:, product_ids: nil, category_ids: nil, options: {})
     find_task(task_id)
     organisation = Organisation.find(organisation_id)
