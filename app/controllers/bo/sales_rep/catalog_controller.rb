@@ -27,7 +27,7 @@ module Bo
         if params[:query].present?
           scope = current_organisation.products.includes(:categories, :product_variants)
           exact_ids = scope.left_joins(:categories, :product_variants).where(
-            "unaccent(products.name) ILIKE unaccent(:q) OR unaccent(products.sku) ILIKE unaccent(:q) OR unaccent(categories.name) ILIKE unaccent(:q) OR unaccent(product_variants.sku) ILIKE unaccent(:q)",
+            "unaccent(products.name) ILIKE unaccent(:q) OR unaccent(products.description) ILIKE unaccent(:q) OR unaccent(products.sku) ILIKE unaccent(:q) OR unaccent(categories.name) ILIKE unaccent(:q) OR unaccent(product_variants.sku) ILIKE unaccent(:q)",
             q: "%#{params[:query]}%"
           ).select("products.id").distinct
           fuzzy_ids = scope.left_joins(:categories).where(
