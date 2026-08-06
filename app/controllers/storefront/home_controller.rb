@@ -3,10 +3,13 @@ class Storefront::HomeController < Storefront::BaseController
 
   def show
     @banners = current_organisation.homepage_banners.active.by_position.includes(image_attachment: :blob)
+    # A hidden category stays out of the homepage cards too, even if it was
+    # featured before being unpublished.
     @featured_categories = current_organisation.homepage_featured_categories
                              .order(:position)
                              .includes(category: { photo_attachment: :blob })
                              .map(&:category)
+                             .select { |c| c&.published? }
     @featured_products = load_featured_products
     @special_price_products = load_special_price_products
     @frequent_products = load_frequent_products

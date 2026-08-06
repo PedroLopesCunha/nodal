@@ -16,7 +16,7 @@
   <%= link_to products_path(**link_params),
       class: "category-link #{'active' if is_selected}",
       data: has_children ? { action: "click->storefront-category-tree#toggleFromLink", storefront_category_tree_target: "parentLink" } : {} do %>
-    <span class="category-link-name"><%= category.name %></span>
+    <span class="category-link-name" style="<%= category.nav_style %>"><%= category.name %></span>
     <span class="category-link-right">
       <span class="category-count"><%= count %></span>
       <% if has_children %>

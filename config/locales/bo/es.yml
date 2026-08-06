@@ -896,6 +896,17 @@ es:
         icon: "Icono"
         icon_hint: "Clase FontAwesome (ej: fa-solid fa-folder)"
         color: "Color"
+        color_hint: "Color del nombre de la categoría en la navegación de la tienda."
+        color_clear: "Limpiar color"
+        nav_emphasis: "Destaque en la navegación"
+        nav_bold: "Negrita"
+        nav_italic: "Cursiva"
+        nav_emphasis_hint: "Se aplica al menú lateral y a las pestañas en el móvil."
+        nav_preview: "Vista previa"
+        nav_preview_placeholder: "Nombre de la categoría"
+        visibility: "Visibilidad"
+        published: "Visible en la tienda"
+        published_hint: "Al desactivarlo, la categoría desaparece del menú de la tienda. Sus productos siguen a la venta y accesibles por búsqueda o por otras categorías."
         statistics: "Estadísticas"
         placeholders:
           name: "Ingresa nombre de categoría"
@@ -918,6 +929,8 @@ es:
       depth_warning: "Anidamiento profundo"
       products_in_category: "Productos en esta categoría y subcategorías"
       has_children_hint: "No se puede eliminar categoría con subcategorías"
+      hidden: "Oculta"
+      hidden_hint: "No aparece en el menú de la tienda. Sus productos siguen a la venta."
 
     # Sección Atributos de Producto
     product_attributes:

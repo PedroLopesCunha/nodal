@@ -1024,6 +1024,17 @@ pt:
         icon: "Ícone"
         icon_hint: "Classe FontAwesome (ex: fa-solid fa-folder)"
         color: "Cor"
+        color_hint: "Cor do nome da categoria na navegação da loja."
+        color_clear: "Limpar cor"
+        nav_emphasis: "Destaque na navegação"
+        nav_bold: "Negrito"
+        nav_italic: "Itálico"
+        nav_emphasis_hint: "Aplica-se ao menu lateral e aos separadores no telemóvel."
+        nav_preview: "Pré-visualização"
+        nav_preview_placeholder: "Nome da categoria"
+        visibility: "Visibilidade"
+        published: "Visível na loja"
+        published_hint: "Desligado, a categoria desaparece do menu da loja. Os produtos continuam à venda e acessíveis por pesquisa ou por outras categorias."
         statistics: "Estatísticas"
         placeholders:
           name: "Introduza o nome da categoria"
@@ -1046,6 +1057,8 @@ pt:
       depth_warning: "Aninhamento profundo"
       products_in_category: "Produtos nesta categoria e subcategorias"
       has_children_hint: "Não é possível eliminar categoria com subcategorias"
+      hidden: "Oculta"
+      hidden_hint: "Não aparece no menu da loja. Os produtos continuam à venda."
 
     # Secção Atributos de Produto
     product_attributes:

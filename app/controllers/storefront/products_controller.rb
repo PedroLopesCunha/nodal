@@ -12,8 +12,11 @@ class Storefront::ProductsController < Storefront::BaseController
                                    .or(base_products.where(id: keep_visible_ids))
     end
 
-    # Load categories tree for sidebar (eager load full tree to avoid N+1)
-    @all_kept_categories = current_organisation.categories.kept.by_position.to_a
+    # Load categories tree for sidebar (eager load full tree to avoid N+1).
+    # Unpublished categories drop out of the navigation entirely; their children
+    # disappear with them, since the tree is only ever walked down from a root
+    # that made it into this list.
+    @all_kept_categories = current_organisation.categories.visible.by_position.to_a
     @categories = @all_kept_categories.select { |c| c.ancestry.nil? }
 
     # Precompute product counts and children lookup (2 queries instead of N+1).
@@ -37,7 +40,11 @@ class Storefront::ProductsController < Storefront::BaseController
     # Children lookup to avoid N+1 in tree rendering
     @category_children = @all_kept_categories.group_by(&:parent_id)
 
-    # Parse single selected category (accepts id or slug)
+    # Parse single selected category (accepts id or slug).
+    # Deliberately still `kept` rather than `visible`: hiding a category removes
+    # it from the navigation, it does not lock its products away. A direct link
+    # keeps working, which is what makes it useful for previewing work in
+    # progress before publishing it.
     if params[:category].present?
       cat_param = params[:category]
       @current_category = if cat_param.to_s =~ /\A\d+\z/
