@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2026_07_21_090000) do
+ActiveRecord::Schema[7.1].define(version: 2026_08_06_151804) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_trgm"
   enable_extension "plpgsql"
@@ -102,9 +102,13 @@ ActiveRecord::Schema[7.1].define(version: 2026_07_21_090000) do
     t.jsonb "metadata", default: {}
     t.string "slug"
     t.string "default_product_sort"
+    t.boolean "published", default: true, null: false
+    t.boolean "nav_bold", default: false, null: false
+    t.boolean "nav_italic", default: false, null: false
     t.index ["ancestry"], name: "index_categories_on_ancestry"
     t.index ["discarded_at"], name: "index_categories_on_discarded_at"
     t.index ["organisation_id", "ancestry", "position"], name: "index_categories_on_organisation_id_and_ancestry_and_position"
+    t.index ["organisation_id", "published"], name: "index_categories_on_organisation_id_and_published"
     t.index ["organisation_id", "slug"], name: "index_categories_on_organisation_id_and_slug", unique: true
     t.index ["organisation_id"], name: "index_categories_on_organisation_id"
   end

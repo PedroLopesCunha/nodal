@@ -70,7 +70,8 @@
         <% cat_params = { org_slug: params[:org_slug], category: category.id, queries: params[:queries], promo: 1 } %>
         <% cat_params[:sort] = params[:sort] if params[:sort].present? %>
         <%= link_to products_path(**cat_params),
-            class: "mobile-category-chip #{'active' if @current_category&.id == category.id}" do %>
+            class: "mobile-category-chip #{'active' if @current_category&.id == category.id}",
+            style: category.nav_style do %>
           <%= category.name %>
         <% end %>
       <% end %>
@@ -104,14 +105,15 @@
       <%# Non-clickable label for the current category when drilling into its
           children, so you keep the context without it looking tappable. %>
       <% if chip_current_label %>
-        <span class="mobile-category-chip mobile-category-chip--current"><%= chip_current_label.name %></span>
+        <span class="mobile-category-chip mobile-category-chip--current" style="<%= chip_current_label.nav_style %>"><%= chip_current_label.name %></span>
       <% end %>
 
       <% chip_categories.each do |category| %>
         <% cat_params = { org_slug: params[:org_slug], category: category.id, queries: params[:queries] } %>
         <% cat_params[:sort] = params[:sort] if params[:sort].present? %>
         <%= link_to products_path(**cat_params),
-            class: "mobile-category-chip #{'active' if @current_category&.id == category.id}" do %>
+            class: "mobile-category-chip #{'active' if @current_category&.id == category.id}",
+            style: category.nav_style do %>
           <%= category.name %>
         <% end %>
       <% end %>

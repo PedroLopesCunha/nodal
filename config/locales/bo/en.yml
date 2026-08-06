@@ -1042,6 +1042,17 @@ en:
         icon: "Icon"
         icon_hint: "FontAwesome class (e.g., fa-solid fa-folder)"
         color: "Color"
+        color_hint: "Colour of the category name in the storefront navigation."
+        color_clear: "Clear colour"
+        nav_emphasis: "Navigation emphasis"
+        nav_bold: "Bold"
+        nav_italic: "Italic"
+        nav_emphasis_hint: "Applies to the sidebar and the mobile chips."
+        nav_preview: "Preview"
+        nav_preview_placeholder: "Category name"
+        visibility: "Visibility"
+        published: "Visible in the storefront"
+        published_hint: "When off, the category disappears from the storefront menu. Its products stay on sale and reachable through search or other categories."
         statistics: "Statistics"
         placeholders:
           name: "Enter category name"
@@ -1064,6 +1075,8 @@ en:
       depth_warning: "Deep nesting"
       products_in_category: "Products in this category and subcategories"
       has_children_hint: "Cannot delete category with subcategories"
+      hidden: "Hidden"
+      hidden_hint: "Does not appear in the storefront menu. Its products stay on sale."
 
     # Product Attributes section
     product_attributes:

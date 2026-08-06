@@ -122,7 +122,7 @@ class Storefront::ShoppingListsController < Storefront::BaseController
       end
     end
 
-    @categories = current_organisation.categories.kept.roots.by_position
+    @categories = current_organisation.categories.visible.roots.by_position
     @pagy, @products = pagy(base_products.order(:name), items: 10)
 
     render partial: "product_picker", locals: { shopping_list: @shopping_list, products: @products, categories: @categories, pagy: @pagy }

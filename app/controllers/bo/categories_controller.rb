@@ -107,6 +107,7 @@ class Bo::CategoriesController < Bo::BaseController
   end
 
   def category_params
-    params.require(:category).permit(:name, :description, :color, :parent_id, :slug, :metadata, :photo, :default_product_sort)
+    params.require(:category).permit(:name, :description, :color, :parent_id, :slug, :metadata, :photo,
+                                     :default_product_sort, :published, :nav_bold, :nav_italic)
   end
 end
