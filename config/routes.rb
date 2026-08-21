@@ -100,6 +100,7 @@ Rails.application.routes.draw do
           get :download_pdf
           patch :apply_discount
           delete :remove_discount
+          patch :set_shipping
           post :retry_push
         end
       end

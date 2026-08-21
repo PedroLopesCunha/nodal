@@ -48,6 +48,7 @@ class Order < ApplicationRecord
 
   before_validation :generate_order_number, on: :create
   before_validation :update_tax, on: :update
+  before_save :settle_pending_shipping
 
   after_commit :enqueue_erp_push, if: :should_enqueue_erp_push?
 
@@ -311,7 +312,8 @@ class Order < ApplicationRecord
     validate_minimum_quantities!
     validate_pricing_acknowledged!
     self.tax_amount = calculated_tax
-    self.shipping_amount = calculated_shipping
+    self.shipping_pending = deferred_shipping?
+    self.shipping_amount = shipping_pending ? nil : calculated_shipping
     snapshot_auto_discount!
     snapshot_promo_code!
 
@@ -376,11 +378,41 @@ class Order < ApplicationRecord
     delivery_method == "delivery"
   end
 
-  # Calculate shipping based on delivery method and organisation's shipping cost
+  # Calculate shipping based on delivery method and organisation's shipping cost.
+  # Under the "calculated on dispatch" mode there is no amount to charge yet, so
+  # this is zero and the order carries shipping_pending? instead — the caller is
+  # expected to show "to be calculated" rather than a misleading free shipping.
   def calculated_shipping
     return Money.new(0, organisation.currency) if pickup?
     return Money.new(0, organisation.currency) if qualifies_for_free_shipping?
+    return Money.new(0, organisation.currency) if deferred_shipping?
     organisation.shipping_cost
+  end
+
+  # Does the organisation's current setting defer this order's shipping cost to
+  # dispatch time? Pickup and free-shipping orders are settled at checkout even
+  # in that mode — there is nothing left to calculate.
+  def deferred_shipping?
+    return false unless organisation.shipping_calculated_on_dispatch?
+    return false if pickup?
+    return false if qualifies_for_free_shipping?
+    true
+  end
+
+  # Whether the shipping cost is still to be determined. Placed orders answer
+  # from the snapshot taken at checkout; a cart has no snapshot yet, so it
+  # answers from the organisation's current setting.
+  def shipping_pending?
+    draft? ? deferred_shipping? : shipping_pending
+  end
+
+  # The shipping actually owed on this order. Zero while it is still pending —
+  # never fall back to calculated_shipping in that case, or an order placed
+  # under "calculated on dispatch" would silently grow a flat rate the day the
+  # organisation switches back to fixed shipping.
+  def effective_shipping
+    return Money.new(0, organisation.currency) if shipping_pending?
+    shipping_amount || calculated_shipping
   end
 
   def qualifies_for_free_shipping?
@@ -464,7 +496,7 @@ class Order < ApplicationRecord
 
   # Grand total including tax and shipping
   def grand_total
-    subtotal_after_discount + (tax_amount || calculated_tax) + (shipping_amount || calculated_shipping)
+    subtotal_after_discount + (tax_amount || calculated_tax) + effective_shipping
   end
 
   # Calculate tax based on subtotal after discount
@@ -487,6 +519,17 @@ class Order < ApplicationRecord
   end
 
   private
+
+  # Pricing the shipping is what closes the "to be calculated" state: the moment
+  # an amount lands on the order, it is no longer pending. Reads the column
+  # directly — shipping_pending? falls back to the live rule for carts, and a
+  # cart must stay pending regardless of what it currently holds.
+  def settle_pending_shipping
+    return unless self[:shipping_pending]
+    return unless shipping_amount_cents.present?
+
+    self.shipping_pending = false
+  end
 
   # Order-level discounts compound, each on the already-discounted running
   # total: gross -> auto tier -> promo code -> manual discount.

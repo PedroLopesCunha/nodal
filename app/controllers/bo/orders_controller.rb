@@ -1,7 +1,7 @@
 class Bo::OrdersController < Bo::BaseController
   include Exportable
 
-  before_action :set_order, only: [:show, :edit, :update, :destroy, :apply_discount, :remove_discount, :download_pdf, :retry_push]
+  before_action :set_order, only: [:show, :edit, :update, :destroy, :apply_discount, :remove_discount, :set_shipping, :download_pdf, :retry_push]
 
   def index
     @orders = apply_order_filters(policy_scope(current_organisation.orders.placed).includes(:customer, :customer_user, :placed_by, :order_items))
@@ -79,6 +79,27 @@ class Bo::OrdersController < Bo::BaseController
     @order.update(discount_type: nil, discount_value: nil, discount_reason: nil, applied_by: nil)
     redirect_to bo_order_path(org_slug: @current_organisation.slug, id: @order.id),
                 notice: "Discount removed."
+  end
+
+  # Prices the shipping on an order that was placed while the real cost was
+  # still unknown. Clearing the field puts the order back into "to be
+  # calculated" so a wrong number is never stuck on the order.
+  def set_shipping
+    authorize @order
+    amount = params.dig(:order, :shipping_amount).presence
+
+    if amount.nil?
+      @order.update!(shipping_amount: nil, shipping_pending: true)
+      notice = t('bo.orders.shipping.cleared', default: "Shipping cost cleared.")
+    else
+      @order.update!(shipping_amount: amount)
+      notice = t('bo.orders.shipping.saved', default: "Shipping cost saved.")
+    end
+
+    redirect_to bo_order_path(org_slug: @current_organisation.slug, id: @order.id), notice: notice
+  rescue ActiveRecord::RecordInvalid => e
+    redirect_to bo_order_path(org_slug: @current_organisation.slug, id: @order.id),
+                alert: e.record.errors.full_messages.to_sentence
   end
 
   def download_pdf

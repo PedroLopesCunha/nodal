@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2026_08_06_151804) do
+ActiveRecord::Schema[7.1].define(version: 2026_08_21_100000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_trgm"
   enable_extension "plpgsql"
@@ -505,6 +505,7 @@ ActiveRecord::Schema[7.1].define(version: 2026_08_06_151804) do
     t.bigint "placed_by_id"
     t.bigint "sales_rep_id"
     t.datetime "pricing_changed_at"
+    t.boolean "shipping_pending", default: false, null: false
     t.index ["applied_by_id"], name: "index_orders_on_applied_by_id"
     t.index ["billing_address_id"], name: "index_orders_on_billing_address_id"
     t.index ["customer_id"], name: "index_orders_on_customer_id"
@@ -611,6 +612,7 @@ ActiveRecord::Schema[7.1].define(version: 2026_08_06_151804) do
     t.string "sale_badge_color"
     t.boolean "show_sale_badge", default: true, null: false
     t.boolean "show_product_sku_on_card", default: false, null: false
+    t.string "shipping_mode", default: "fixed", null: false
     t.index ["custom_domain"], name: "index_organisations_on_custom_domain", unique: true, where: "(custom_domain IS NOT NULL)"
     t.index ["default_locale"], name: "index_organisations_on_default_locale"
     t.index ["slug"], name: "index_organisations_on_slug", unique: true

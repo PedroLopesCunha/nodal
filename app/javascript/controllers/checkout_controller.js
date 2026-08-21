@@ -3,7 +3,8 @@ import { Controller } from "@hotwired/stimulus"
 // Connects to data-controller="checkout"
 export default class extends Controller {
     static targets = [
-        "shippingAmount", "totalAmount", "shippingAddressSection",
+        "shippingAmount", "totalAmount", "totalLabel", "totalRow",
+        "shippingNotice", "shippingAddressSection",
         "shippingSelector", "sameAsBillingOption", "dateLabel",
         "newShippingAddressForm", "deliveryShippingCost", "dateField"
     ]
@@ -17,11 +18,16 @@ export default class extends Controller {
         deliveryLabel: String,
         pickupLabel: String,
         deliveryDays: Array,
-        earliestDate: String
+        earliestDate: String,
+        shippingDeferred: Boolean,
+        shippingPendingLabel: String,
+        totalLabel: String,
+        totalWithoutShippingLabel: String
     }
 
     connect() {
         this.toggleShippingAddress()
+        if (this.shippingDeferredValue) this.updateTotal()
     }
 
     qualifiesForFreeShipping() {
@@ -30,14 +36,35 @@ export default class extends Controller {
                this.subtotalValue >= this.freeShippingThresholdValue
     }
 
+    // Mirrors Order#deferred_shipping? — pickup and free shipping are settled
+    // here and now even when the organisation prices shipping at dispatch.
+    shippingIsPending(isPickup, qualifiesForFree) {
+        return this.shippingDeferredValue && !isPickup && !qualifiesForFree
+    }
+
     updateTotal() {
         const isPickup = document.getElementById("delivery_method_pickup").checked
         const qualifiesForFree = this.qualifiesForFreeShipping()
-        const shipping = isPickup || qualifiesForFree ? 0 : this.shippingCostValue
+        const pending = this.shippingIsPending(isPickup, qualifiesForFree)
+        const shipping = isPickup || qualifiesForFree || pending ? 0 : this.shippingCostValue
         const total = this.subtotalValue + this.taxValue + shipping
 
-        if (this.hasShippingAmountTarget) this.shippingAmountTarget.textContent = this.formatCurrency(shipping)
+        if (this.hasShippingAmountTarget) {
+            this.shippingAmountTarget.textContent = pending
+                ? this.shippingPendingLabelValue
+                : this.formatCurrency(shipping)
+        }
         if (this.hasTotalAmountTarget) this.totalAmountTarget.textContent = this.formatCurrency(total)
+        if (this.hasTotalLabelTarget) {
+            this.totalLabelTarget.textContent = pending
+                ? this.totalWithoutShippingLabelValue
+                : this.totalLabelValue
+        }
+        if (this.hasShippingNoticeTarget) this.shippingNoticeTarget.classList.toggle("d-none", !pending)
+        if (this.hasTotalRowTarget) {
+            this.totalRowTarget.classList.toggle("mb-2", pending)
+            this.totalRowTarget.classList.toggle("mb-4", !pending)
+        }
     }
 
     toggleShippingAddress() {
