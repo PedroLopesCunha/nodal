@@ -12,6 +12,10 @@
      data-checkout-currency-symbol-value="<%= @current_organisation.currency_symbol %>"
      data-checkout-free-shipping-threshold-value="<%= @current_organisation.free_shipping_threshold_cents || 0 %>"
      data-checkout-free-shipping-enabled-value="<%= @current_organisation.free_shipping_enabled? %>"
+     data-checkout-shipping-deferred-value="<%= @current_organisation.shipping_calculated_on_dispatch? %>"
+     data-checkout-shipping-pending-label-value="<%= t('storefront.checkouts.show.summary.shipping_pending') %>"
+     data-checkout-total-label-value="<%= t('storefront.checkouts.show.summary.total') %>"
+     data-checkout-total-without-shipping-label-value="<%= t('storefront.checkouts.show.summary.total_without_shipping') %>"
      data-checkout-delivery-label-value="<%= t('storefront.checkouts.show.delivery_date.title') %>"
      data-checkout-pickup-label-value="<%= t('storefront.checkouts.show.delivery_date.pickup_title') %>"
      data-checkout-delivery-days-value="<%= current_organisation.delivery_wdays.to_json %>"
@@ -158,8 +162,12 @@
                 <% if show_prices? %>
                   <span data-checkout-target="deliveryShippingCost">
                     <% if @order.qualifies_for_free_shipping? %>
-                      <span class="text-decoration-line-through text-muted small me-1"><%= money_amount(@current_organisation.shipping_cost) %></span>
+                      <% unless @current_organisation.shipping_calculated_on_dispatch? %>
+                        <span class="text-decoration-line-through text-muted small me-1"><%= money_amount(@current_organisation.shipping_cost) %></span>
+                      <% end %>
                       <span class="fw-medium text-success"><%= t('storefront.checkouts.show.delivery_method.free') %></span>
+                    <% elsif @current_organisation.shipping_calculated_on_dispatch? %>
+                      <span class="fw-medium text-muted"><%= t('storefront.checkouts.show.summary.shipping_pending') %></span>
                     <% else %>
                       <span class="fw-medium"><%= money_amount(@current_organisation.shipping_cost) %></span>
                     <% end %>
@@ -399,14 +407,28 @@
 
           <div class="d-flex justify-content-between mb-2">
             <span class="text-muted"><%= t('storefront.checkouts.show.summary.shipping') %></span>
-            <span data-checkout-target="shippingAmount"><%= money_amount(@order.calculated_shipping) %></span>
+            <span data-checkout-target="shippingAmount">
+              <% if @order.shipping_pending? %>
+                <span class="text-muted"><%= t('storefront.checkouts.show.summary.shipping_pending') %></span>
+              <% else %>
+                <%= money_amount(@order.calculated_shipping) %>
+              <% end %>
+            </span>
           </div>
 
           <hr>
 
-          <div class="d-flex justify-content-between mb-4">
-            <span class="fw-bold"><%= t('storefront.checkouts.show.summary.total') %></span>
+          <%# Bottom margin lives on whichever element ends the block, so the gap
+              above the confirm button stays the same with or without the notice. %>
+          <div class="d-flex justify-content-between <%= @order.shipping_pending? ? 'mb-2' : 'mb-4' %>" data-checkout-target="totalRow">
+            <span class="fw-bold" data-checkout-target="totalLabel">
+              <%= @order.shipping_pending? ? t('storefront.checkouts.show.summary.total_without_shipping') : t('storefront.checkouts.show.summary.total') %>
+            </span>
             <span class="fw-bold fs-5" data-checkout-target="totalAmount"><%= money_amount(@order.grand_total) %></span>
+          </div>
+
+          <div class="text-muted small mb-4 <%= 'd-none' unless @order.shipping_pending? %>" data-checkout-target="shippingNotice">
+            <i class="fa-solid fa-circle-info me-1"></i><%= t('storefront.checkouts.show.summary.shipping_pending_notice') %>
           </div>
         <% else %>
           <div class="text-muted small mb-3">

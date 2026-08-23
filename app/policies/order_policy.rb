@@ -60,6 +60,13 @@ class OrderPolicy < ApplicationPolicy
     member_of_organisation?
   end
 
+  # Pricing the shipping is a back-office job: reps quote, they don't invoice.
+  def set_shipping?
+    return false if pure_sales_rep?
+
+    member_of_organisation?
+  end
+
   def retry_push?
     return false if pure_sales_rep?
 

@@ -197,13 +197,19 @@
 
     <div class="summary-row">
       <span class="text-muted"><%= t('storefront.orders.pdf.shipping') %></span>
-      <span><%= humanized_money_with_symbol(@order.shipping_amount || @order.calculated_shipping) %></span>
+      <span><%= @order.shipping_pending? ? t('mailers.common.shipping_pending') : humanized_money_with_symbol(@order.effective_shipping) %></span>
     </div>
 
     <div class="summary-row total">
-      <span><%= t('storefront.orders.pdf.grand_total') %></span>
+      <span><%= @order.shipping_pending? ? t('mailers.common.total_without_shipping') : t('storefront.orders.pdf.grand_total') %></span>
       <span><%= humanized_money_with_symbol(@order.grand_total) %></span>
     </div>
+
+    <% if @order.shipping_pending? %>
+      <div class="text-muted" style="margin-top: 8px; font-size: 11px;">
+        <%= t('mailers.common.shipping_pending_notice') %>
+      </div>
+    <% end %>
   </div>
 
   <% if @order.notes.present? %>

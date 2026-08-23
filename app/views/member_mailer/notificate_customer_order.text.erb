@@ -52,8 +52,15 @@ humanized_money_with_symbol(@order.order_discount_amount) %>
 Promo Code (<%= @order.promo_code.code %>): -<%= humanized_money_with_symbol(@order.promo_code_discount) %>
 <% end %>
 Tax: <%= humanized_money_with_symbol(@order.tax_amount || @order.calculated_tax) %>
-Shipping: <%= humanized_money_with_symbol(@order.shipping_amount || @order.calculated_shipping) %>
-Grand Total: <%= humanized_money_with_symbol(@order.grand_total) %>
+<% if @order.shipping_pending? %>
+<%= t('mailers.common.shipping') %>: <%= t('mailers.common.shipping_pending') %>
+<%= t('mailers.common.total_without_shipping') %>: <%= humanized_money_with_symbol(@order.grand_total) %>
+
+<%= t('mailers.common.shipping_pending_action') %>
+<% else %>
+<%= t('mailers.common.shipping') %>: <%= humanized_money_with_symbol(@order.effective_shipping) %>
+<%= t('mailers.common.total') %>: <%= humanized_money_with_symbol(@order.grand_total) %>
+<% end %>
 
 NOTES
 -----

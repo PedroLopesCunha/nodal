@@ -220,13 +220,22 @@
         <div class="card-body">
           <h5 class="card-title mb-4"><%= t('bo.settings.edit.commerce_settings') %></h5>
 
-          <div class="row g-3">
+          <div class="row g-3" data-controller="shipping-mode">
             <div class="col-md-6">
               <label class="form-label"><%= t('bo.settings.edit.tax_rate') %></label>
               <%= f.number_field :tax_rate, class: "form-control", step: 0.01, min: 0, max: 1, placeholder: t('bo.settings.edit.tax_rate_placeholder') %>
               <small class="text-muted"><%= t('bo.settings.edit.tax_rate_hint') %></small>
             </div>
             <div class="col-md-6">
+              <label class="form-label"><%= t('bo.settings.edit.shipping_mode') %></label>
+              <%= f.select :shipping_mode,
+                    Organisation::SHIPPING_MODES.map { |m| [t("bo.settings.edit.shipping_modes.#{m}"), m] },
+                    {},
+                    class: "form-select",
+                    data: { shipping_mode_target: "select", action: "shipping-mode#toggle" } %>
+              <small class="text-muted"><%= t('bo.settings.edit.shipping_mode_hint') %></small>
+            </div>
+            <div class="col-md-6" data-shipping-mode-target="fixedCost">
               <label class="form-label"><%= t('bo.settings.edit.shipping_cost') %></label>
               <%= f.number_field :shipping_cost, class: "form-control", step: 0.01, min: 0, placeholder: t('bo.settings.edit.shipping_cost_placeholder') %>
               <small class="text-muted"><%= t('bo.settings.edit.shipping_cost_hint', currency: @organisation.shipping_cost_currency) %></small>

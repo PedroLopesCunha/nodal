@@ -222,19 +222,34 @@
             </span>
           </td>
           <td align="right" style="padding: 8px 20px;">
-            <span style="font-size: 14px; color: #1a1a1a;"><%= (@order.shipping_amount || @order.calculated_shipping).format %></span>
+            <% if @order.shipping_pending? %>
+              <span style="font-size: 14px; color: #6b7177; font-style: italic;"><%= t('mailers.common.shipping_pending') %></span>
+            <% else %>
+              <span style="font-size: 14px; color: #1a1a1a;"><%= @order.effective_shipping.format %></span>
+            <% end %>
           </td>
         </tr>
 
         <!-- Grand Total -->
         <tr>
           <td style="padding: 16px 20px; border-top: 1px solid #e5e5e5;">
-            <span style="font-size: 16px; font-weight: 700; color: #1a1a1a;"><%= t('mailers.common.total') %></span>
+            <span style="font-size: 16px; font-weight: 700; color: #1a1a1a;">
+              <%= @order.shipping_pending? ? t('mailers.common.total_without_shipping') : t('mailers.common.total') %>
+            </span>
           </td>
           <td align="right" style="padding: 16px 20px; border-top: 1px solid #e5e5e5;">
             <span style="font-size: 20px; font-weight: 700; color: #008060;"><%= @order.grand_total.format %></span>
           </td>
         </tr>
+
+        <%# Internal email: this is a to-do, not just a caveat. %>
+        <% if @order.shipping_pending? %>
+          <tr>
+            <td colspan="2" style="padding: 0 20px 16px 20px;">
+              <span style="font-size: 13px; color: #b45309; line-height: 1.5;"><%= t('mailers.common.shipping_pending_action') %></span>
+            </td>
+          </tr>
+        <% end %>
       </table>
     </td>
   </tr>

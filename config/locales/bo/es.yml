@@ -1038,6 +1038,13 @@ es:
 
     # Sección Pedidos
     orders:
+      shipping:
+        pending: "Por calcular"
+        total_without_shipping: "Total (sin envío)"
+        set_label: "Envío de este pedido"
+        set_hint: 'Déjalo en blanco para volver a "por calcular". Al guardar, el total del pedido se cierra y el cliente ve el importe.'
+        saved: "Gastos de envío guardados."
+        cleared: 'Gastos de envío restablecidos a "por calcular".'
       index:
         title: "Pedidos"
         subtitle: "Seguir y gestionar todos los pedidos"
@@ -1605,6 +1612,11 @@ es:
         shipping_cost: "Coste de Envío Predeterminado"
         shipping_cost_placeholder: "15.00"
         shipping_cost_hint: "En %{currency}"
+        shipping_mode: "Modo de Envío"
+        shipping_mode_hint: "Define si el cliente ve un importe de envío en el checkout o si se calcula al preparar el pedido."
+        shipping_modes:
+          fixed: "Importe fijo en el checkout"
+          calculated_on_dispatch: "Calculados antes del envío"
         free_shipping_threshold: "Límite para Envío Gratis"
         free_shipping_threshold_placeholder: "100.00"
         free_shipping_threshold_hint: "Pedidos por encima de este importe tienen envío gratis. Dejar vacío para desactivar."

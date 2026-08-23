@@ -7,6 +7,7 @@ class Organisation < ApplicationRecord
   CART_QTY_OVERFLOW_POLICIES = %w[allow warn cap].freeze
   CHECKOUT_STOCK_POLICIES = %w[allow warn block].freeze
   CART_PRICE_CHANGE_POLICIES = %w[silent notify confirm].freeze
+  SHIPPING_MODES = %w[fixed calculated_on_dispatch].freeze
   HEX_COLOR_REGEX = /\A#[0-9A-Fa-f]{6}\z/
   CUTOFF_TIME_REGEX = /\A([01]\d|2[0-3]):[0-5]\d\z/
   CUSTOM_DOMAIN_REGEX = /\A(?:[a-z0-9](?:[a-z0-9\-]{0,61}[a-z0-9])?\.)+[a-z]{2,}\z/
@@ -58,6 +59,7 @@ class Organisation < ApplicationRecord
   validates :default_locale, inclusion: { in: I18n.available_locales.map(&:to_s) }
   validates :out_of_stock_strategy, inclusion: { in: OUT_OF_STOCK_STRATEGIES }
   validates :cart_stock_policy, inclusion: { in: CART_STOCK_POLICIES }
+  validates :shipping_mode, inclusion: { in: SHIPPING_MODES }
   validates :cart_qty_overflow_policy, inclusion: { in: CART_QTY_OVERFLOW_POLICIES }
   validates :checkout_stock_policy, inclusion: { in: CHECKOUT_STOCK_POLICIES }
   validates :cart_price_change_policy, inclusion: { in: CART_PRICE_CHANGE_POLICIES }
@@ -135,6 +137,13 @@ class Organisation < ApplicationRecord
 
   def hide_out_of_stock?
     out_of_stock_strategy == 'hide'
+  end
+
+  # When true the organisation does not charge a flat rate at checkout: the
+  # real shipping cost is only known once the order is packed, so it is left
+  # out of the customer's total and filled in from the back office later.
+  def shipping_calculated_on_dispatch?
+    shipping_mode == "calculated_on_dispatch"
   end
 
   def free_shipping_enabled?

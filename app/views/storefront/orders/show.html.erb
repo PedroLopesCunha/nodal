@@ -132,16 +132,26 @@
                 <span><%= money_amount(@order.tax_amount) %></span>
               </div>
             <% end %>
-            <% if @order.shipping_amount.present? %>
+            <% if @order.shipping_pending? %>
+              <div class="d-flex justify-content-between mb-2">
+                <span class="text-muted"><%= t('storefront.orders.show.summary.shipping') %></span>
+                <span class="text-muted"><%= t('storefront.checkouts.show.summary.shipping_pending') %></span>
+              </div>
+            <% elsif @order.shipping_amount.present? %>
               <div class="d-flex justify-content-between mb-2">
                 <span class="text-muted"><%= t('storefront.orders.show.summary.shipping') %></span>
                 <span><%= money_amount(@order.shipping_amount) %></span>
               </div>
             <% end %>
             <div class="d-flex justify-content-between fw-bold border-top pt-2">
-              <span><%= t('storefront.orders.show.summary.total') %></span>
+              <span><%= @order.shipping_pending? ? t('storefront.checkouts.show.summary.total_without_shipping') : t('storefront.orders.show.summary.total') %></span>
               <span><%= money_amount(@order.grand_total) %></span>
             </div>
+            <% if @order.shipping_pending? %>
+              <div class="text-muted small mt-2">
+                <i class="fa-solid fa-circle-info me-1"></i><%= t('storefront.checkouts.show.summary.shipping_pending_notice') %>
+              </div>
+            <% end %>
           </div>
         </div>
         <% end %>

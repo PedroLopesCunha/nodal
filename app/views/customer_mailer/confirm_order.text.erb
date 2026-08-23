@@ -22,7 +22,14 @@ Discount (<%= @order.order_discount_display %>): -<%= @order.order_discount_amou
 Promo Code (<%= @order.promo_code.code %>): -<%= @order.promo_code_discount.format %>
 <% end %>
 Tax (<%= (@order.organisation.tax_rate * 100).round(1) %>%): <%= (@order.tax_amount || @order.calculated_tax).format %>
-Shipping: <%= (@order.shipping_amount || @order.calculated_shipping).format %>
-Total: <%= @order.grand_total.format %>
+<% if @order.shipping_pending? %>
+<%= t('mailers.common.shipping') %>: <%= t('mailers.common.shipping_pending') %>
+<%= t('mailers.common.total_without_shipping') %>: <%= @order.grand_total.format %>
+
+<%= t('mailers.common.shipping_pending_notice') %>
+<% else %>
+<%= t('mailers.common.shipping') %>: <%= @order.effective_shipping.format %>
+<%= t('mailers.common.total') %>: <%= @order.grand_total.format %>
+<% end %>
 
 Order #<%= @order.order_number %>
