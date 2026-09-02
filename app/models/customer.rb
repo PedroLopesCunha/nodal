@@ -56,6 +56,12 @@ class Customer < ApplicationRecord
   # `external_id` and ErpRetryPendingOrdersJob retries the push).
   scope :pending_erp_sync, -> { where(external_id: nil).where.not(created_by_member_id: nil) }
 
+  # Empresas the ERP has no email address for. They are real customers a rep
+  # visits and sells to — they just can't be invited to the storefront until
+  # someone collects an address. The column is NOT NULL (default ""), so blank
+  # is "" in practice; nil is matched defensively.
+  scope :without_email, -> { where(email: [nil, ""]) }
+
   # When a customer transitions from "no ERP id" to "has ERP id" — typically
   # because ERP sync just reconciled a rep-created empresa — kick off the
   # retry job so any orders that were held back (push_status: pending due to
@@ -65,8 +71,10 @@ class Customer < ApplicationRecord
   # When a Member creates a customer in the BO (rep prospecting, or admin
   # bulk entry), seed a stub CustomerUser so impersonation has a login to
   # hang the cart and order on. Mirrors the ERP-sync `mirror_customer_user_stub`
-  # pattern; skipped when there's no usable email since CustomerUser requires
-  # one. ERP-imported customers are handled separately by the sync service.
+  # pattern. Only seeds when there's an email worth carrying — an emailless
+  # empresa gets its shell on demand the first time a rep impersonates it, so
+  # nothing is lost by waiting. ERP-imported customers are handled separately
+  # by the sync service.
   after_create :seed_stub_customer_user, if: -> { created_by_member_id.present? && email.present? }
 
   def retry_pending_orders_after_erp_sync
@@ -76,20 +84,39 @@ class Customer < ApplicationRecord
     ErpRetryPendingOrdersJob.perform_later(id)
   end
 
+  # A stub with a blank email is legitimate: it's a rep-only shell that lets an
+  # empresa without an email hold a cart and orders (orders.customer_user_id is
+  # NOT NULL). It can never sign in — no email, no password — see
+  # CustomerUser#active_for_authentication?.
   def seed_stub_customer_user
     return if customer_users.exists?
 
-    customer_users.create!(
-      organisation_id: organisation_id,
-      email: email,
-      contact_name: contact_name,
-      contact_phone: contact_phone,
-      active: true
-    )
-  rescue ActiveRecord::RecordInvalid => e
+    # Savepoint: via the after_create callback this runs inside the Customer's
+    # own save transaction, and a database-level failure below would otherwise
+    # leave that transaction aborted — the Customer insert would fail with
+    # PG::InFailedSqlTransaction instead of the record simply saving without a
+    # stub. requires_new keeps the damage inside the savepoint.
+    self.class.transaction(requires_new: true) do
+      customer_users.create!(
+        organisation_id: organisation_id,
+        email: email,
+        contact_name: contact_name,
+        contact_phone: contact_phone,
+        active: true
+      )
+    end
+    # Catches database-level failures too (RecordNotUnique on an address another
+    # login in the org already holds, NotNullViolation), not just model
+    # validations — callers such as Bo::ImpersonationsController rely on this
+    # returning instead of 500ing, and fall back to their own message.
+  rescue ActiveRecord::ActiveRecordError => e
     Rails.logger.warn(
       "[Customer ##{id}] stub CustomerUser creation skipped: #{e.message}"
     )
+  end
+
+  def missing_email?
+    email.blank?
   end
 
   def mailable?

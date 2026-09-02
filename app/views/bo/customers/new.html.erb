@@ -54,8 +54,12 @@
               <%= f.text_field :contact_name, class: "form-control", placeholder: t('bo.customers.form.contact_name_placeholder'), required: true %>
             </div>
             <div class="col-md-6">
-              <label class="form-label"><%= t('bo.customers.form.email') %> <span class="text-danger">*</span></label>
-              <%= f.email_field :email, class: "form-control", placeholder: t('bo.customers.form.email_placeholder'), required: true %>
+              <%# Optional: a rep meeting a client on the road often has no address
+                  to give yet, and the ERP imports plenty of empresas without one.
+                  Nothing below this form requires it — the model validates format
+                  only, and blank emails are exempt from the unique index. %>
+              <label class="form-label"><%= t('bo.customers.form.email') %></label>
+              <%= f.email_field :email, class: "form-control", placeholder: t('bo.customers.form.email_placeholder') %>
             </div>
           </div>
 

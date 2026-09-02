@@ -399,6 +399,8 @@ pt:
         stale_pending_users_hint: "Empresas com convite enviado há mais de 7 dias sem ser aceite — vale a pena seguir."
         uninvited_users: "Por convidar"
         uninvited_users_hint: "Empresas ainda sem qualquer convite enviado."
+        no_email_users: "Sem email"
+        no_email_users_hint: "Empresas sem endereço de email — não podem ser convidadas para a loja. Contactar por telefone ou visita."
         online_now: "Online agora"
         online_now_hint: "Empresas com pelo menos um login activo na loja agora (request nos últimos 5 minutos)."
         active_week: "Ativos esta semana"

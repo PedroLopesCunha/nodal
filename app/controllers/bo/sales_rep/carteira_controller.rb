@@ -54,7 +54,8 @@ module Bo
                            .where(customer_assignments: { org_member_id: current_org_member.id })
         @carteira_kpis = ::Dashboard::Metrics
           .customer_health(organisation: current_organisation, customers_scope: carteira_scope)
-          .slice(:total_customers, :active_users, :pending_users, :stale_pending_users, :uninvited_users)
+          .slice(:total_customers, :active_users, :pending_users, :stale_pending_users, :uninvited_users,
+                 :no_email_users)
 
         load_kpis_and_open_carts
       end
@@ -115,6 +116,10 @@ module Bo
               AND NOT EXISTS (SELECT 1 FROM customer_users cu WHERE cu.customer_id = customers.id AND cu.active = TRUE)
             )
           SQL
+        when "no_email"
+          # The rep's call/visit list: empresas the ERP has no address for, so
+          # they can't be invited yet. Still sellable through impersonation.
+          scope = scope.without_email
         end
 
         case params[:erp_status]

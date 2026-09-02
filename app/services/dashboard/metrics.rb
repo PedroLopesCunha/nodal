@@ -278,6 +278,9 @@ module Dashboard
                                       .where.not(id: accepted_customer_ids)
                                       .distinct.count,
         uninvited_users:     customers.where(active: true).where.not(id: invited_customer_ids).count,
+        # Can't be invited at all until someone collects an address — the rep's
+        # call/visit list, not a subset of the invitation funnel above.
+        no_email_users:      customers.where(active: true).without_email.count,
         online_now:          customers.joins(:customer_users)
                                       .where("customer_users.last_seen_at >= ?", 5.minutes.ago)
                                       .distinct.count,

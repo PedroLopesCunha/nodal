@@ -402,6 +402,8 @@ en:
         stale_pending_users_hint: "Companies with an invite sent more than 7 days ago and still unaccepted — worth a follow-up."
         uninvited_users: "Not invited"
         uninvited_users_hint: "Companies with no invite sent yet."
+        no_email_users: "No email"
+        no_email_users_hint: "Companies with no email address — they can't be invited to the store. Reach them by phone or a visit."
         online_now: "Online now"
         online_now_hint: "Companies with at least one login active in the store right now (request in the last 5 minutes)."
         active_week: "Active this week"

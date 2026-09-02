@@ -108,6 +108,7 @@
               <option value="pending" <%= 'selected' if params[:status] == 'pending' %>>Pendente (convidado)</option>
               <option value="not_invited" <%= 'selected' if params[:status] == 'not_invited' %>>Sem login criado</option>
               <option value="inactive" <%= 'selected' if params[:status] == 'inactive' %>>Inativo</option>
+              <option value="no_email" <%= 'selected' if params[:status] == 'no_email' %>>Sem email</option>
             </select>
           </div>
           <% if erp_customer_sync_enabled? %>
@@ -138,7 +139,8 @@
             "active" => "Activo",
             "pending" => "Pendente convite",
             "not_invited" => "Sem login",
-            "inactive" => "Inativo"
+            "inactive" => "Inativo",
+            "no_email" => "Sem email"
           }[params[:status]] || params[:status]
         %>
         <%= link_to bo_sales_rep_carteira_path(org_slug: current_organisation.slug, **carteira_filter_params_hash.except(:status, :page)), class: "badge bg-secondary text-decoration-none" do %>
@@ -209,7 +211,11 @@
               <tr class="carteira-row" data-href="<%= bo_customer_path(org_slug: current_organisation.slug, id: customer.id) %>" style="cursor: pointer;">
                 <td>
                   <div class="fw-semibold"><%= customer.contact_name %></div>
-                  <small class="text-muted"><%= customer.email %></small>
+                  <% if customer.missing_email? %>
+                    <%= render "bo/customers/no_email_badge" %>
+                  <% else %>
+                    <small class="text-muted"><%= customer.email %></small>
+                  <% end %>
                 </td>
                 <td>
                   <div><%= customer.company_name %></div>
