@@ -242,11 +242,17 @@ module Erp
         customer.assign_attributes(
           company_name: data[:company_name],
           contact_name: data[:contact_name],
-          email: data[:email],
           contact_phone: data[:phone],
           taxpayer_id: data[:taxpayer_id],
           active: data[:active]
         )
+
+        # `customers.email` is NOT NULL (default ""), and the adapter drops the
+        # key altogether when the ERP column is NULL — passing nil straight
+        # through would hit a NotNullViolation. A blank from the ERP means "no
+        # data", not "clear it", so an address already typed in the BO survives:
+        # it is the seed for inviting a login later.
+        customer.email = data[:email].to_s if data[:email].present? || customer.email.blank?
       end
 
       def record_changes(external_id, action, customer, changes_snapshot = nil)

@@ -127,6 +127,7 @@
                   <option value="pending_erp_sync" <%= 'selected' if params[:status] == 'pending_erp_sync' %>>Por sincronizar com ERP</option>
                 <% end %>
                 <option value="no_rep" <%= 'selected' if params[:status] == 'no_rep' %>>Sem vendedor atribuído</option>
+                <option value="no_email" <%= 'selected' if params[:status] == 'no_email' %>>Sem email</option>
               </select>
             </div>
             <% if @customer_categories.any? %>
@@ -159,6 +160,7 @@
                 case params[:status]
                 when 'pending_erp_sync' then 'Por sincronizar com ERP'
                 when 'no_rep' then 'Sem vendedor'
+                when 'no_email' then 'Sem email'
                 else t("bo.common.statuses.#{params[:status]}")
                 end
             %>
@@ -237,7 +239,11 @@
               </td>
               <td><%= customer.company_name %></td>
               <td>
-                <div><%= customer.email %></div>
+                <% if customer.missing_email? %>
+                  <%= render "bo/customers/no_email_badge" %>
+                <% else %>
+                  <div><%= customer.email %></div>
+                <% end %>
                 <small class="text-muted"><%= customer.contact_phone %></small>
               </td>
               <td>

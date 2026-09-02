@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2026_08_21_100000) do
+ActiveRecord::Schema[7.1].define(version: 2026_09_02_110000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_trgm"
   enable_extension "plpgsql"
@@ -235,7 +235,7 @@ ActiveRecord::Schema[7.1].define(version: 2026_08_21_100000) do
     t.datetime "updated_at", null: false
     t.datetime "last_seen_at"
     t.index ["customer_id"], name: "index_customer_users_on_customer_id"
-    t.index ["email", "organisation_id"], name: "index_customer_users_on_email_and_organisation_id", unique: true
+    t.index ["email", "organisation_id"], name: "index_customer_users_on_email_and_organisation_id", unique: true, where: "((email)::text <> ''::text)"
     t.index ["invitation_token"], name: "index_customer_users_on_invitation_token", unique: true
     t.index ["invited_by_id"], name: "index_customer_users_on_invited_by_id"
     t.index ["invited_by_type", "invited_by_id"], name: "index_customer_users_on_invited_by_type_and_invited_by_id"
@@ -283,7 +283,7 @@ ActiveRecord::Schema[7.1].define(version: 2026_08_21_100000) do
     t.bigint "created_by_member_id"
     t.index ["created_by_member_id"], name: "index_customers_on_created_by_member_id"
     t.index ["customer_category_id"], name: "index_customers_on_customer_category_id"
-    t.index ["email", "organisation_id"], name: "index_customers_on_email_and_organisation_id", unique: true
+    t.index ["email", "organisation_id"], name: "index_customers_on_email_and_organisation_id", unique: true, where: "((email)::text <> ''::text)"
     t.index ["invitation_token"], name: "index_customers_on_invitation_token", unique: true
     t.index ["invited_by_id"], name: "index_customers_on_invited_by_id"
     t.index ["invited_by_type", "invited_by_id"], name: "index_customers_on_invited_by"

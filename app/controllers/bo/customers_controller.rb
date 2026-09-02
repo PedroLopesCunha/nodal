@@ -13,7 +13,8 @@ class Bo::CustomersController < Bo::BaseController
     if @tab == 'customers'
       @invitation_kpis = Dashboard::Metrics
         .customer_health(organisation: current_organisation)
-        .slice(:total_customers, :active_users, :pending_users, :stale_pending_users, :uninvited_users)
+        .slice(:total_customers, :active_users, :pending_users, :stale_pending_users, :uninvited_users,
+               :no_email_users)
     end
   end
 
@@ -244,6 +245,10 @@ class Bo::CustomersController < Bo::BaseController
       scope = scope.pending_erp_sync if erp_customer_sync_enabled?
     when "no_rep"
       scope = scope.left_joins(:customer_assignment).where(customer_assignments: { id: nil })
+    when "no_email"
+      # The rep's call/visit list: empresas that can't be invited until someone
+      # collects an address. They can still be sold to via impersonation.
+      scope = scope.without_email
     when "active"
       # Has at least one active login that has accepted its invitation.
       scope = scope.where(active: true)

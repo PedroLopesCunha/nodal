@@ -9,13 +9,17 @@ class Bo::ImpersonationsController < Bo::BaseController
     authorise_rep_for_customer(customer)
 
     # Cart requires a CustomerUser to hang on (orders.customer_user_id NOT NULL).
-    # Seed a stub on demand for older customers that never got one — the model
-    # helper is idempotent and graceful if email is blank.
+    # Seed a stub on demand for customers that never got one — including the
+    # ones the ERP has no email for, which is the whole point: the rep sells to
+    # them on the road and the empresa gets invited later, keeping the order
+    # history on the same login. The helper is idempotent and swallows failures.
     customer.seed_stub_customer_user if customer.customer_users.empty?
 
+    # Safety net: seeding only fails now for genuinely broken data, but never
+    # impersonate without a login — the cart insert would blow up downstream.
     if customer.customer_users.empty?
       redirect_to bo_customer_path(org_slug: current_organisation.slug, id: customer.id),
-                  alert: "Não é possível impersonar este cliente: precisa de pelo menos um login (CustomerUser) ou email válido. Convida um login primeiro."
+                  alert: "Não é possível impersonar este cliente: não foi possível criar-lhe um login. Cria um login manualmente primeiro."
       return
     end
 

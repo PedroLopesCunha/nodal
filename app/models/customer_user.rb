@@ -60,8 +60,13 @@ class CustomerUser < ApplicationRecord
   # Warden re-checks this on every authenticated request, so deactivating a
   # login (or its empresa) takes effect immediately on whatever browser
   # session that user already had open.
+  #
+  # A login with no email is a rep-only shell — it exists so an empresa the ERP
+  # has no address for can still hold a cart and orders. It has no password
+  # either, so Devise would reject it anyway; the explicit check states the
+  # intent instead of leaning on that.
   def active_for_authentication?
-    super && active? && customer&.active?
+    super && active? && customer&.active? && email.present?
   end
 
   def inactive_message
