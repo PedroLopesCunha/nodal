@@ -33,19 +33,26 @@
     <div class="card-body">
       <h5 class="card-title mb-4"><i class="fa-solid fa-clock me-2"></i><%= t('bo.automations.form.when') %></h5>
 
-      <div class="row g-3 align-items-end">
+      <div class="row g-3 align-items-end" data-controller="automation-schedule">
         <div class="col-md-3">
           <label class="form-label"><%= t('bo.automations.form.frequency') %></label>
           <%= f.select :schedule_kind,
                        Automation::SCHEDULE_KINDS.map { |k| [ t("bo.automations.schedule_kinds.#{k}"), k ] },
-                       {}, class: "form-select" %>
+                       {}, class: "form-select",
+                       data: { automation_schedule_target: "kind", action: "change->automation-schedule#update" } %>
         </div>
-        <div class="col-md-3">
+        <div class="col-md-3" data-automation-schedule-target="dayWrapper">
           <label class="form-label"><%= t('bo.automations.form.day') %></label>
-          <%= f.select :schedule_day,
-                       (0..6).map { |d| [ t("date.day_names")[d], d ] },
-                       { include_blank: t('bo.automations.form.day_blank') }, class: "form-select" %>
-          <div class="form-text"><%= t('bo.automations.form.day_hint') %></div>
+          <div data-automation-schedule-target="weekday">
+            <%= f.select :schedule_day,
+                         (0..6).map { |d| [ t("date.day_names")[d], d ] },
+                         {}, class: "form-select" %>
+          </div>
+          <div data-automation-schedule-target="monthday">
+            <%= f.select :schedule_day,
+                         (1..28).map { |d| [ t('bo.automations.form.day_of_month', day: d), d ] },
+                         {}, class: "form-select" %>
+          </div>
         </div>
         <div class="col-md-3">
           <label class="form-label"><%= t('bo.automations.form.hour') %></label>

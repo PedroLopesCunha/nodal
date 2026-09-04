@@ -25,7 +25,7 @@ en:
         when: "When"
         frequency: "Frequency"
         day: "Day"
-        day_blank: "—"
+        day_of_month: "Day %{day}"
         day_hint: "Weekly and monthly only."
         hour: "Hour"
         timezone_hint: "Local time in %{zone}."

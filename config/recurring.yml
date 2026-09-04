@@ -1,3 +1,14 @@
+development:
+  # Only the automation dispatcher runs locally, and every minute rather than
+  # every 15, so a schedule can be tested without waiting a quarter of an hour.
+  # The ERP jobs stay production-only on purpose — nobody wants a dev machine
+  # syncing against the real ERP.
+  automation_dispatch:
+    class: AutomationDispatchJob
+    queue: default
+    schedule: "* * * * *"
+    description: "Fire back-office automations whose next_run_at has come due"
+
 production:
   erp_scheduled_sync_hourly:
     class: ErpScheduledSyncJob
