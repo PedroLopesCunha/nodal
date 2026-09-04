@@ -71,4 +71,87 @@ class StockRulesServiceTest < ActiveSupport::TestCase
 
     assert variant.reload.available, "in-stock tracked variant must become available"
   end
+  # --- StockEvent recording -------------------------------------------------
+
+  test "a variant dropping to zero records an out_of_stock event" do
+    variant = simple_product.default_variant
+    variant.update_columns(track_stock: true, stock_quantity: 5)
+
+    variant.update!(stock_quantity: 0)
+
+    assert_difference -> { StockEvent.count }, 1 do
+      @service.apply_to_variant(variant)
+    end
+
+    event = StockEvent.last
+    assert_equal StockEvent::OUT_OF_STOCK, event.kind
+    assert_equal 5, event.from_quantity
+    assert_equal 0, event.to_quantity
+    assert_equal variant.id, event.product_variant_id
+    assert_equal @organisation.id, event.organisation_id
+    assert_equal "app", event.source
+  end
+
+  test "a variant coming back records a back_in_stock event" do
+    variant = simple_product.default_variant
+    variant.update_columns(track_stock: true, stock_quantity: 0)
+
+    variant.update!(stock_quantity: 8)
+    @service.apply_to_variant(variant)
+
+    assert_equal StockEvent::BACK_IN_STOCK, StockEvent.last.kind
+  end
+
+  test "a sweep with no stock change records nothing" do
+    variant = simple_product.default_variant
+    variant.update_columns(track_stock: true, stock_quantity: 0)
+
+    # What RecalculateStockJob does: apply the rules without any preceding save.
+    assert_no_difference -> { StockEvent.count } do
+      @service.apply_to_variant(variant)
+    end
+  end
+
+  test "a freshly created variant records nothing" do
+    product = simple_product
+    variant = product.product_variants.create!(name: "New", stock_quantity: 10, track_stock: true)
+
+    assert_no_difference -> { StockEvent.count } do
+      @service.apply_to_variant(variant)
+    end
+  end
+
+  test "a non-tracked variant records nothing" do
+    variant = simple_product.default_variant
+    variant.update_columns(track_stock: false, stock_quantity: 5)
+
+    variant.update!(stock_quantity: 0)
+
+    assert_no_difference -> { StockEvent.count } do
+      @service.apply_to_variant(variant)
+    end
+  end
+
+  test "applying the rules twice for the same save records a single event" do
+    variant = simple_product.default_variant
+    variant.update_columns(track_stock: true, stock_quantity: 5)
+
+    variant.update!(stock_quantity: 0)
+
+    assert_difference -> { StockEvent.count }, 1 do
+      @service.apply_to_variant(variant)
+      @service.apply_to_variant(variant)
+    end
+  end
+
+  test "a drop that stays above the threshold records nothing" do
+    variant = simple_product.default_variant
+    variant.update_columns(track_stock: true, stock_quantity: 40)
+
+    variant.update!(stock_quantity: 20)
+
+    assert_no_difference -> { StockEvent.count } do
+      @service.apply_to_variant(variant)
+    end
+  end
 end

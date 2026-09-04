@@ -1,5 +1,14 @@
 en:
   mailers:
+    automation_mailer:
+      digest:
+        subject: "%{name} · %{period} · %{organisation}"
+        week: "Week %{number}"
+        csv_note: "A CSV with the same table is attached, for opening in Excel."
+        period: "Period: %{from} to %{to}"
+        empty: "Nothing to report for this period."
+        count: "%{count} reference(s) in this period."
+        footer: "Automated email sent by %{organisation}."
     common:
       hello: "Hello"
       greeting: "Hello %{name},"

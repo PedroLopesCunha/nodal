@@ -37,7 +37,7 @@ class Bo::BaseController < ApplicationController
     products categories product_attributes product_variants
     pricing customer_product_discounts product_discounts
     customer_discounts order_discounts promo_codes
-    customer_categories unmet_demands
+    customer_categories unmet_demands automations
     settings erp_settings homepage_settings email_settings
   ].freeze
 

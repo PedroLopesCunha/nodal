@@ -1,4 +1,16 @@
 en:
+  automations:
+    columns:
+      sku: "Reference"
+      product: "Product"
+      variant: "Variant"
+      supplier: "Supplier"
+      last_qty: "Stock before"
+      occurred: "Ran out at"
+    reports:
+      out_of_stock_digest:
+        label: "References that ran out during the period"
+        description: "The references that went out of stock during the period, with the quantity they held before running out."
   orders:
     item_note_label: "Note"
   flash:

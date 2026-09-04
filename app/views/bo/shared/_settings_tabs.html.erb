@@ -26,6 +26,12 @@
         <% end %>
       </li>
       <li class="nav-item" role="presentation">
+        <%= link_to bo_automations_path(params[:org_slug]),
+            class: "nav-link rounded-0 py-3 #{'active' if controller_name == 'automations'}" do %>
+          <i class="fa-solid fa-robot me-2"></i><%= t('bo.settings.tabs.automations', default: 'Automations') %>
+        <% end %>
+      </li>
+      <li class="nav-item" role="presentation">
         <%= link_to bo_background_tasks_path(params[:org_slug]),
             class: "nav-link rounded-0 py-3 #{'active' if controller_name == 'background_tasks'}" do %>
           <i class="fa-solid fa-list-check me-2"></i><%= t('bo.settings.tabs.tasks', default: 'Tasks') %>
