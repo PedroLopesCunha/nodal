@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2026_09_04_160000) do
+ActiveRecord::Schema[7.1].define(version: 2026_09_04_170000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_trgm"
   enable_extension "plpgsql"
@@ -83,6 +83,7 @@ ActiveRecord::Schema[7.1].define(version: 2026_09_04_160000) do
     t.text "error_message"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "skip_reason"
     t.index ["automation_id", "created_at"], name: "index_automation_runs_on_automation_id_and_created_at"
     t.index ["automation_id"], name: "index_automation_runs_on_automation_id"
     t.index ["organisation_id"], name: "index_automation_runs_on_organisation_id"

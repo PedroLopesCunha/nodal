@@ -63,6 +63,9 @@ en:
         rows: "Rows"
         sent_to: "Sent to"
         manual: "manual"
+      skip_reason:
+        empty: "Nothing ran out in the period"
+        no_recipients: "No valid recipients"
       status:
         running: "Running"
         completed: "Sent"

@@ -63,6 +63,9 @@ pt:
         rows: "Linhas"
         sent_to: "Enviado a"
         manual: "manual"
+      skip_reason:
+        empty: "Nada esgotou no período"
+        no_recipients: "Sem destinatários válidos"
       status:
         running: "A correr"
         completed: "Enviado"

@@ -44,6 +44,11 @@ module Automations
       variant
     end
 
+    test "a completed run carries no skip reason" do
+      variant_with_rupture
+      assert_nil Runner.new(@automation).call.skip_reason
+    end
+
     test "a run with rows sends one email and completes" do
       variant_with_rupture
 
@@ -66,11 +71,13 @@ module Automations
       assert_not_includes Array(mail.to), "a@exemplo.pt"
     end
 
-    test "an empty period is skipped when skip_if_empty is set" do
+    test "an empty period is skipped, and says so" do
       assert_no_difference -> { ActionMailer::Base.deliveries.size } do
         run = Runner.new(@automation).call
         assert_equal AutomationRun::SKIPPED, run.status
         assert_equal 0, run.rows_count
+        assert_equal AutomationRun::SKIP_EMPTY, run.skip_reason,
+                     "\"skipped\" alone sends the reader to the console to find out why"
       end
     end
 
@@ -88,7 +95,9 @@ module Automations
       @automation.update_column(:recipients, { "org_member_ids" => [ 999_999 ], "external_emails" => [] })
 
       assert_no_difference -> { ActionMailer::Base.deliveries.size } do
-        assert_equal AutomationRun::SKIPPED, Runner.new(@automation.reload).call.status
+        run = Runner.new(@automation.reload).call
+        assert_equal AutomationRun::SKIPPED, run.status
+        assert_equal AutomationRun::SKIP_NO_RECIPIENTS, run.skip_reason
       end
     end
 

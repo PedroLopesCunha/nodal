@@ -98,6 +98,8 @@
                   </span>
                   <% if run.error_message.present? %>
                     <div class="small text-danger"><%= run.error_message %></div>
+                  <% elsif run.skip_reason.present? %>
+                    <div class="small text-muted"><%= t("bo.automations.skip_reason.#{run.skip_reason}") %></div>
                   <% end %>
                 </td>
                 <td class="small text-muted">

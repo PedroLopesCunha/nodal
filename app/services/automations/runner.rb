@@ -29,8 +29,9 @@ module Automations
         rows = report.rows(period)
         recipients = @automation.recipient_emails
 
-        if skip?(rows, recipients)
-          finish(run, AutomationRun::SKIPPED, rows: rows, recipients: recipients)
+        reason = skip_reason(rows, recipients)
+        if reason
+          finish(run, AutomationRun::SKIPPED, rows: rows, recipients: recipients, skip_reason: reason)
         else
           deliver(report, rows, recipients, period)
           finish(run, AutomationRun::COMPLETED, rows: rows, recipients: recipients)
@@ -61,11 +62,11 @@ module Automations
       )
     end
 
-    def skip?(rows, recipients)
-      return true if recipients.empty?
-      return true if rows.empty? && @automation.skip_if_empty?
+    def skip_reason(rows, recipients)
+      return AutomationRun::SKIP_NO_RECIPIENTS if recipients.empty?
+      return AutomationRun::SKIP_EMPTY if rows.empty? && @automation.skip_if_empty?
 
-      false
+      nil
     end
 
     def deliver(report, rows, recipients, period)
@@ -79,12 +80,13 @@ module Automations
       ).digest.deliver_now
     end
 
-    def finish(run, status, rows:, recipients:)
+    def finish(run, status, rows:, recipients:, skip_reason: nil)
       run.update!(
         status: status,
         completed_at: Time.current,
         rows_count: rows.size,
-        recipients_count: status == AutomationRun::COMPLETED ? recipients.size : 0
+        recipients_count: status == AutomationRun::COMPLETED ? recipients.size : 0,
+        skip_reason: skip_reason
       )
     end
 

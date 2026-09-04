@@ -7,6 +7,11 @@ class AutomationRun < ApplicationRecord
   FAILED    = "failed".freeze
   STATUSES  = [ RUNNING, COMPLETED, SKIPPED, FAILED ].freeze
 
+  # Why a run produced no email. "Skipped" on its own sends the reader to the
+  # console to find out; these say it on the page.
+  SKIP_EMPTY          = "empty".freeze
+  SKIP_NO_RECIPIENTS  = "no_recipients".freeze
+
   belongs_to :automation
   belongs_to :organisation
 
