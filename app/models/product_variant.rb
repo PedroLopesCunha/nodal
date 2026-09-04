@@ -9,6 +9,7 @@ class ProductVariant < ApplicationRecord
   has_many :order_items, dependent: :restrict_with_error
   has_many :unmet_demands, dependent: :nullify
   has_many :unmet_demand_occurrences, dependent: :nullify
+  has_many :stock_events, dependent: :destroy
 
   has_one_attached :photo
 

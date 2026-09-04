@@ -36,6 +36,7 @@ class Organisation < ApplicationRecord
   has_many :product_variants, dependent: :destroy
   has_many :orders, dependent: :destroy
   has_many :unmet_demands, dependent: :destroy
+  has_many :stock_events, dependent: :destroy
   has_many :unmet_demand_occurrences, dependent: :destroy
   has_many :customer_product_discounts, dependent: :destroy
   has_many :product_discounts, dependent: :destroy

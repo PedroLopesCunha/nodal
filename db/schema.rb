@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2026_09_02_110000) do
+ActiveRecord::Schema[7.1].define(version: 2026_09_04_120000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_trgm"
   enable_extension "plpgsql"
@@ -985,6 +985,22 @@ ActiveRecord::Schema[7.1].define(version: 2026_09_02_110000) do
     t.index ["key"], name: "index_solid_queue_semaphores_on_key", unique: true
   end
 
+  create_table "stock_events", force: :cascade do |t|
+    t.bigint "organisation_id", null: false
+    t.bigint "product_variant_id", null: false
+    t.string "kind", null: false
+    t.integer "from_quantity"
+    t.integer "to_quantity"
+    t.datetime "occurred_at", null: false
+    t.string "source", default: "app", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["organisation_id", "kind", "occurred_at"], name: "index_stock_events_on_organisation_id_and_kind_and_occurred_at"
+    t.index ["organisation_id"], name: "index_stock_events_on_organisation_id"
+    t.index ["product_variant_id", "occurred_at"], name: "index_stock_events_on_product_variant_id_and_occurred_at"
+    t.index ["product_variant_id"], name: "index_stock_events_on_product_variant_id"
+  end
+
   create_table "unmet_demand_occurrences", force: :cascade do |t|
     t.bigint "unmet_demand_id"
     t.bigint "organisation_id", null: false
@@ -1139,6 +1155,8 @@ ActiveRecord::Schema[7.1].define(version: 2026_09_02_110000) do
   add_foreign_key "solid_queue_ready_executions", "solid_queue_jobs", column: "job_id", on_delete: :cascade
   add_foreign_key "solid_queue_recurring_executions", "solid_queue_jobs", column: "job_id", on_delete: :cascade
   add_foreign_key "solid_queue_scheduled_executions", "solid_queue_jobs", column: "job_id", on_delete: :cascade
+  add_foreign_key "stock_events", "organisations"
+  add_foreign_key "stock_events", "product_variants"
   add_foreign_key "unmet_demand_occurrences", "customer_users"
   add_foreign_key "unmet_demand_occurrences", "customers"
   add_foreign_key "unmet_demand_occurrences", "organisations"
