@@ -282,6 +282,14 @@ Rails.application.routes.draw do
         get :email_logs
       end
 
+      # Automations (scheduled digests)
+      resources :automations do
+        member do
+          post :run_now
+          patch :toggle
+        end
+      end
+
       # Background Tasks
       resources :background_tasks, only: [:index, :show] do
         member do

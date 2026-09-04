@@ -1,0 +1,13 @@
+<% content_for :bo_main_content do %>
+
+<div class="bo-page-header">
+  <h1><%= t('bo.automations.new.title') %></h1>
+  <p class="text-muted mb-0"><%= t('bo.automations.new.subtitle') %></p>
+</div>
+
+<div class="bo-page-body">
+  <%= render "form", automation: @automation,
+             url: bo_automations_path(current_organisation.slug), method: :post %>
+</div>
+
+<% end %>

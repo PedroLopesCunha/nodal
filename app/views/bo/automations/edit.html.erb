@@ -1,0 +1,22 @@
+<% content_for :bo_main_content do %>
+
+<div class="bo-page-header">
+  <div class="d-flex justify-content-between align-items-start">
+    <div>
+      <h1><%= @automation.name %></h1>
+      <p class="text-muted mb-0"><%= t('bo.automations.edit.subtitle') %></p>
+    </div>
+    <div class="bo-page-actions">
+      <%= link_to t('bo.automations.edit.history'),
+                  bo_automation_path(current_organisation.slug, @automation),
+                  class: "btn btn-outline-secondary" %>
+    </div>
+  </div>
+</div>
+
+<div class="bo-page-body">
+  <%= render "form", automation: @automation,
+             url: bo_automation_path(current_organisation.slug, @automation), method: :patch %>
+</div>
+
+<% end %>
