@@ -84,8 +84,44 @@ module Automations
       rupture(mine)
       rupture(theirs)
 
-      rows = report(supplier: "Fornecedor A").rows(@period)
+      rows = report(suppliers: [ "Fornecedor A" ]).rows(@period)
       assert_equal [ "A-1" ], rows.map { |r| r[:sku] }
+    end
+
+    test "several suppliers can be selected at once" do
+      a = product_with(supplier: "Fornecedor A").default_variant
+      b = product_with(supplier: "Fornecedor B").default_variant
+      c = product_with(supplier: "Fornecedor C").default_variant
+      a.update!(sku: "A-1")
+      b.update!(sku: "B-1")
+      [ a, b, c ].each { |v| rupture(v) }
+
+      rows = report(suppliers: [ "Fornecedor A", "Fornecedor B" ]).rows(@period)
+      assert_equal %w[A-1 B-1], rows.map { |r| r[:sku] }.sort
+    end
+
+    test "several categories can be selected at once" do
+      cat_a = Category.create!(organisation: @organisation, name: "Anéis", slug: "a-#{SecureRandom.hex(3)}")
+      cat_b = Category.create!(organisation: @organisation, name: "Brincos", slug: "b-#{SecureRandom.hex(3)}")
+      in_a = product_with
+      in_b = product_with
+      out  = product_with
+      CategoryProduct.create!(category: cat_a, product: in_a)
+      CategoryProduct.create!(category: cat_b, product: in_b)
+      in_a.default_variant.update!(sku: "A-1")
+      in_b.default_variant.update!(sku: "B-1")
+      [ in_a, in_b, out ].each { |p| rupture(p.default_variant) }
+
+      rows = report(category_ids: [ cat_a.id, cat_b.id ]).rows(@period)
+      assert_equal %w[A-1 B-1], rows.map { |r| r[:sku] }.sort
+    end
+
+    test "an empty supplier list means all suppliers" do
+      a = product_with(supplier: "Fornecedor A").default_variant
+      a.update!(sku: "A-1")
+      rupture(a)
+
+      assert_equal 1, report(suppliers: [ "" ]).rows(@period).size
     end
 
     test "the category filter narrows the list" do

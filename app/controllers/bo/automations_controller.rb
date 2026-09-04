@@ -112,7 +112,7 @@ class Bo::AutomationsController < Bo::BaseController
     permitted = params.require(:automation).permit(
       :name, :kind, :active, :schedule_kind, :schedule_day, :schedule_hour, :skip_if_empty,
       :external_emails_text,
-      filters: [ :supplier, { category_ids: [] } ],
+      filters: [ { suppliers: [], category_ids: [] } ],
       recipients: [ { org_member_ids: [] } ]
     )
 
@@ -125,6 +125,7 @@ class Bo::AutomationsController < Bo::BaseController
     permitted[:recipients] = { "org_member_ids" => member_ids, "external_emails" => external }
 
     filters = permitted[:filters]&.to_h || {}
+    filters["suppliers"] = Array(filters["suppliers"]).reject(&:blank?)
     filters["category_ids"] = Array(filters["category_ids"]).reject(&:blank?)
     permitted[:filters] = filters
 

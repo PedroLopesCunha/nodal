@@ -79,16 +79,19 @@ class Bo::AutomationsControllerTest < ActionDispatch::IntegrationTest
     assert_equal 2, automation.external_emails.size
   end
 
-  test "filters are stored and blank category ids dropped" do
+  test "multiple suppliers and categories are stored, blanks dropped" do
     sign_in @owner
 
     post bo_automations_path(org_slug: @organisation.slug), params: {
-      automation: valid_params(filters: { supplier: "Fornecedor A", category_ids: [ "", "7" ] })
+      automation: valid_params(filters: {
+        suppliers: [ "", "Fornecedor A", "Fornecedor B" ],
+        category_ids: [ "", "7", "9" ]
+      })
     }
 
     automation = Automation.last
-    assert_equal "Fornecedor A", automation.filters["supplier"]
-    assert_equal [ "7" ], automation.filters["category_ids"]
+    assert_equal [ "Fornecedor A", "Fornecedor B" ], automation.filters["suppliers"]
+    assert_equal [ "7", "9" ], automation.filters["category_ids"]
   end
 
   test "an invalid automation re-renders instead of blowing up" do

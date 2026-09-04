@@ -7,9 +7,19 @@
       <p class="text-muted mb-0"><%= t('bo.automations.edit.subtitle') %></p>
     </div>
     <div class="bo-page-actions">
+      <%= button_to t('bo.automations.form.delete'),
+                    bo_automation_path(current_organisation.slug, @automation),
+                    method: :delete, class: "btn btn-outline-danger",
+                    form: { class: "d-inline", data: { turbo_confirm: t('bo.automations.form.delete_confirm') } } %>
       <%= link_to t('bo.automations.edit.history'),
                   bo_automation_path(current_organisation.slug, @automation),
                   class: "btn btn-outline-secondary" %>
+      <%= link_to bo_automations_path(current_organisation.slug), class: "btn btn-outline-secondary" do %>
+        <%= t('bo.common.actions.cancel') %>
+      <% end %>
+      <button type="submit" form="automation-form" class="btn btn-primary">
+        <i class="fa-solid fa-check"></i> <%= t('bo.common.actions.save_changes') %>
+      </button>
     </div>
   </div>
 </div>

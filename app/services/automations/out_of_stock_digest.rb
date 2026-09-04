@@ -7,7 +7,7 @@ module Automations
   class OutOfStockDigest < Base
     def self.key = :out_of_stock_digest
 
-    def self.filter_keys = [ :supplier, :category_ids ]
+    def self.filter_keys = [ :suppliers, :category_ids ]
 
     def columns
       [
@@ -28,7 +28,7 @@ module Automations
                           .preload(product_variant: :product)
                           .order(occurred_at: :desc)
 
-      scope = apply_supplier(scope)
+      scope = apply_suppliers(scope)
       scope = apply_categories(scope)
 
       # One line per reference, not per event: a reference that flapped three
@@ -40,11 +40,11 @@ module Automations
 
     private
 
-    def apply_supplier(scope)
-      supplier = filters[:supplier].to_s.strip
-      return scope if supplier.blank?
+    def apply_suppliers(scope)
+      names = Array(filters[:suppliers]).map { |s| s.to_s.strip }.reject(&:blank?)
+      return scope if names.empty?
 
-      scope.where(products: { supplier: supplier })
+      scope.where(products: { supplier: names })
     end
 
     def apply_categories(scope)
