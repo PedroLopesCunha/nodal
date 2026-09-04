@@ -4,10 +4,13 @@ module Automations
   # Reads StockEvent, not the current stock_quantity: a reference that ran out
   # on Monday and was restocked on Wednesday still belongs in Friday's list —
   # a snapshot of today's stock would silently lose it.
+  # NOTE: the filter fields (suppliers, categories) are written by hand in
+  # bo/automations/_form.html.erb and permitted by hand in the controller.
+  # A report needing different filters has to touch both. Worth generalising
+  # once a second report actually wants a different filter — not before, or the
+  # abstraction gets designed from a single example.
   class OutOfStockDigest < Base
     def self.key = :out_of_stock_digest
-
-    def self.filter_keys = [ :suppliers, :category_ids ]
 
     def columns
       [

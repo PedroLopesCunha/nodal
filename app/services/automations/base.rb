@@ -7,10 +7,6 @@ module Automations
       # Registry key, stored in automations.kind.
       def key = raise(NotImplementedError)
 
-      # Filter fields this report accepts. The BO form is generated from this,
-      # so a new report needs no view changes.
-      def filter_keys = []
-
       def label = I18n.t("automations.reports.#{key}.label", default: key.to_s.humanize)
 
       def description = I18n.t("automations.reports.#{key}.description", default: "")
