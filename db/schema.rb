@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2026_09_04_120000) do
+ActiveRecord::Schema[7.1].define(version: 2026_09_04_140000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_trgm"
   enable_extension "plpgsql"
@@ -67,6 +67,45 @@ ActiveRecord::Schema[7.1].define(version: 2026_09_04_120000) do
     t.datetime "updated_at", null: false
     t.boolean "active", default: true, null: false
     t.index ["addressable_type", "addressable_id"], name: "index_addresses_on_addressable"
+  end
+
+  create_table "automation_runs", force: :cascade do |t|
+    t.bigint "automation_id", null: false
+    t.bigint "organisation_id", null: false
+    t.string "status", default: "running", null: false
+    t.boolean "manual", default: false, null: false
+    t.datetime "started_at"
+    t.datetime "completed_at"
+    t.datetime "period_start"
+    t.datetime "period_end"
+    t.integer "rows_count", default: 0, null: false
+    t.integer "recipients_count", default: 0, null: false
+    t.text "error_message"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["automation_id", "created_at"], name: "index_automation_runs_on_automation_id_and_created_at"
+    t.index ["automation_id"], name: "index_automation_runs_on_automation_id"
+    t.index ["organisation_id"], name: "index_automation_runs_on_organisation_id"
+  end
+
+  create_table "automations", force: :cascade do |t|
+    t.bigint "organisation_id", null: false
+    t.string "name", null: false
+    t.string "kind", null: false
+    t.boolean "active", default: true, null: false
+    t.string "schedule_kind", default: "weekly", null: false
+    t.integer "schedule_day"
+    t.integer "schedule_hour", default: 9, null: false
+    t.jsonb "filters", default: {}, null: false
+    t.jsonb "recipients", default: {}, null: false
+    t.boolean "skip_if_empty", default: true, null: false
+    t.datetime "last_run_at"
+    t.datetime "next_run_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["next_run_at"], name: "index_automations_on_next_run_at"
+    t.index ["organisation_id", "active"], name: "index_automations_on_organisation_id_and_active"
+    t.index ["organisation_id"], name: "index_automations_on_organisation_id"
   end
 
   create_table "background_tasks", force: :cascade do |t|
@@ -613,6 +652,7 @@ ActiveRecord::Schema[7.1].define(version: 2026_09_04_120000) do
     t.boolean "show_sale_badge", default: true, null: false
     t.boolean "show_product_sku_on_card", default: false, null: false
     t.string "shipping_mode", default: "fixed", null: false
+    t.boolean "email_automation_enabled", default: true, null: false
     t.index ["custom_domain"], name: "index_organisations_on_custom_domain", unique: true, where: "(custom_domain IS NOT NULL)"
     t.index ["default_locale"], name: "index_organisations_on_default_locale"
     t.index ["slug"], name: "index_organisations_on_slug", unique: true
@@ -1066,6 +1106,9 @@ ActiveRecord::Schema[7.1].define(version: 2026_09_04_120000) do
 
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
+  add_foreign_key "automation_runs", "automations"
+  add_foreign_key "automation_runs", "organisations"
+  add_foreign_key "automations", "organisations"
   add_foreign_key "background_tasks", "members"
   add_foreign_key "background_tasks", "organisations"
   add_foreign_key "categories", "organisations"

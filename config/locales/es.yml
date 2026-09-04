@@ -1,4 +1,16 @@
 es:
+  automations:
+    columns:
+      sku: "Referencia"
+      product: "Artículo"
+      variant: "Variante"
+      supplier: "Proveedor"
+      last_qty: "Stock antes"
+      occurred: "Se agotó el"
+    reports:
+      out_of_stock_digest:
+        label: "Referencias agotadas en el período"
+        description: "Lista de las referencias que se quedaron sin stock durante el período, con el stock que tenían antes de agotarse."
   orders:
     item_note_label: "Nota"
   flash:

@@ -1,5 +1,12 @@
 en:
   mailers:
+    automation_mailer:
+      digest:
+        subject: "%{name} — %{count} reference(s)"
+        period: "Period: %{from} to %{to}"
+        empty: "Nothing to report for this period."
+        count: "%{count} reference(s) in this period."
+        footer: "Automated email sent by %{organisation}."
     common:
       hello: "Hello"
       greeting: "Hello %{name},"

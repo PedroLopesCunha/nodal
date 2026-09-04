@@ -2,6 +2,7 @@ class EmailDeliveryGuard
   EMAIL_TYPE_TOGGLES = {
     "order_confirmation" => :email_order_confirmation_enabled,
     "discount_notification" => :email_discount_notification_enabled,
+    "automation_digest" => :email_automation_enabled,
   }.freeze
 
   AUTH_EMAILS = %w[reset_password team_invitation added_to_organisation].freeze

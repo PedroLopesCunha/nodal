@@ -1,5 +1,12 @@
 pt:
   mailers:
+    automation_mailer:
+      digest:
+        subject: "%{name} — %{count} referência(s)"
+        period: "Período: %{from} a %{to}"
+        empty: "Nada a assinalar neste período."
+        count: "%{count} referência(s) neste período."
+        footer: "Email automático enviado por %{organisation}."
     common:
       hello: "Olá"
       greeting: "Olá %{name},"

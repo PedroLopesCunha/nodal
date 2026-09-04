@@ -19,7 +19,7 @@ module OrgEmailDefaults
       organisation: organisation,
       customer: resolve_customer,
       member: resolve_member,
-      email_type: action_name,
+      email_type: logged_email_type,
       mailer_class: self.class.name,
       recipient_email: recipient.to_s,
       subject: options[:subject],
@@ -29,6 +29,12 @@ module OrgEmailDefaults
     )
   rescue => e
     Rails.logger.error("Failed to log email: #{e.message}")
+  end
+
+  # Mailers whose action name isn't the email type the rest of the app knows
+  # them by (EmailDeliveryGuard keys, BO filters) override this.
+  def logged_email_type
+    action_name
   end
 
   def log_skipped(organisation, email_type, recipient)
