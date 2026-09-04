@@ -6,6 +6,9 @@
 
 <div class="bo-page-header">
   <div class="d-flex align-items-center gap-3">
+    <%= link_to bo_background_tasks_path(params[:org_slug]), class: "text-muted text-decoration-none" do %>
+      <i class="fa-solid fa-arrow-left fa-lg"></i>
+    <% end %>
     <div class="rounded bg-primary d-flex align-items-center justify-content-center text-white" style="width: 60px; height: 60px;">
       <i class="fa-solid fa-gear fa-spin fa-lg" data-task-progress-target="icon"></i>
     </div>

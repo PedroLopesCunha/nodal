@@ -2,12 +2,17 @@
 
 <div class="bo-page-header">
   <div class="d-flex justify-content-between align-items-start">
-    <div>
-      <h1><%= @automation.name %></h1>
-      <p class="text-muted mb-0">
-        <%= @automation.report&.label %> ·
-        <%= automation_schedule_summary(@automation) %>
-      </p>
+    <div class="d-flex align-items-center gap-3">
+      <%= link_to bo_automations_path(current_organisation.slug), class: "text-muted text-decoration-none" do %>
+        <i class="fa-solid fa-arrow-left fa-lg"></i>
+      <% end %>
+      <div>
+        <h1><%= @automation.name %></h1>
+        <p>
+          <%= @automation.report&.label %> ·
+          <%= automation_schedule_summary(@automation) %>
+        </p>
+      </div>
     </div>
     <div class="bo-page-actions">
       <%# The whole point of this button: see the email now instead of waiting
@@ -17,9 +22,10 @@
                     form: { class: "d-inline" } do %>
         <i class="fa-solid fa-paper-plane"></i> <%= t('bo.automations.show.run_now') %>
       <% end %>
-      <%= link_to t('bo.common.actions.edit'),
-                  edit_bo_automation_path(current_organisation.slug, @automation),
-                  class: "btn btn-outline-secondary" %>
+      <%= link_to edit_bo_automation_path(current_organisation.slug, @automation),
+                  class: "btn btn-outline-primary" do %>
+        <i class="fa-solid fa-pen-to-square"></i> <%= t('bo.common.actions.edit') %>
+      <% end %>
     </div>
   </div>
 </div>
