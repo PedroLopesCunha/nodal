@@ -19,7 +19,8 @@ class Bo::AutomationsController < Bo::BaseController
       kind: Automations::Registry.keys.first,
       schedule_kind: "weekly",
       schedule_day: 5,
-      schedule_hour: 9
+      schedule_hour: 9,
+      schedule_minute: 0
     )
     authorize @automation
     load_form_data
@@ -110,7 +111,7 @@ class Bo::AutomationsController < Bo::BaseController
 
   def automation_params
     permitted = params.require(:automation).permit(
-      :name, :kind, :active, :schedule_kind, :schedule_day, :schedule_hour, :skip_if_empty,
+      :name, :kind, :active, :schedule_kind, :schedule_day, :schedule_time, :skip_if_empty,
       :external_emails_text,
       filters: [ { suppliers: [], category_ids: [] } ],
       recipients: [ { org_member_ids: [] } ]

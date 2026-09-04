@@ -110,6 +110,34 @@ class AutomationTest < ActiveSupport::TestCase
     assert_not_includes Automation.due, inactive
   end
 
+  test "the schedule accepts hours and minutes" do
+    automation = build_automation(schedule_time: "09:30")
+    automation.save!
+
+    assert_equal 9, automation.schedule_hour
+    assert_equal 30, automation.schedule_minute
+    assert_equal "09:30", automation.schedule_time
+    assert_equal 30, automation.next_run_at.in_time_zone("Europe/Lisbon").min
+  end
+
+  test "changing only the minutes recomputes next_run_at" do
+    automation = build_automation
+    automation.save!
+    before = automation.next_run_at
+
+    automation.update!(schedule_time: "09:45")
+    assert_not_equal before, automation.next_run_at
+    assert_equal 45, automation.next_run_at.in_time_zone("Europe/Lisbon").min
+  end
+
+  test "the weekly period label carries the week number" do
+    automation = build_automation
+    automation.save!
+
+    period = Time.utc(2026, 8, 31)..Time.utc(2026, 9, 4)
+    assert_match(/36/, automation.period_label(period))
+  end
+
   test "the first period looks back one schedule length" do
     automation = build_automation
     automation.save!

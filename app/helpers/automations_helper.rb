@@ -1,6 +1,6 @@
 module AutomationsHelper
   def automation_schedule_summary(automation)
-    hour = format("%02d:00", automation.schedule_hour)
+    hour = automation.schedule_time
 
     case automation.schedule_kind
     when "daily"

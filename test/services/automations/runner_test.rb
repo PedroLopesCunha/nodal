@@ -154,6 +154,52 @@ module Automations
       assert_no_match(/Stock before/, body)
     end
 
+    test "the digest carries a CSV attachment with the same table" do
+      variant_with_rupture
+
+      Runner.new(@automation).call
+
+      mail = ActionMailer::Base.deliveries.last
+      attachment = mail.attachments.first
+      assert_not_nil attachment, "the reader must be able to open it in a spreadsheet"
+      assert attachment.filename.end_with?(".csv")
+
+      body = attachment.body.decoded.dup.force_encoding(Encoding::BINARY)
+      assert body.start_with?("\xEF\xBB\xBF".b), "needs the BOM or Excel mangles the accents"
+      assert_equal 2, body.lines.size, "header plus one rupture"
+    end
+
+    test "an empty digest carries no attachment" do
+      @automation.update!(skip_if_empty: false)
+
+      Runner.new(@automation).call
+
+      assert_empty ActionMailer::Base.deliveries.last.attachments
+    end
+
+    test "the subject carries the period and the organisation" do
+      variant_with_rupture
+
+      Runner.new(@automation).call
+
+      subject = ActionMailer::Base.deliveries.last.subject
+      assert_match @automation.name, subject
+      assert_match @organisation.name, subject
+      assert_match(/\d+/, subject, "the week number identifies the digest in an inbox")
+    end
+
+    test "rows are grouped by supplier" do
+      variant_with_rupture(supplier: "Zebra")
+      variant_with_rupture(supplier: "Alfa")
+      variant_with_rupture(supplier: "Mimosa")
+
+      Runner.new(@automation).call
+
+      csv = ActionMailer::Base.deliveries.last.attachments.first.body.decoded
+      suppliers = csv.lines.drop(1).map { |line| line.split(",")[3] }
+      assert_equal suppliers.sort, suppliers, "a supplier's references must not be scattered"
+    end
+
     test "the org email toggle suppresses delivery and logs it as skipped" do
       variant_with_rupture
       @organisation.update!(email_automation_enabled: false)

@@ -49,9 +49,7 @@
         </div>
         <div class="col-md-3">
           <label class="form-label"><%= t('bo.automations.form.hour') %></label>
-          <%= f.select :schedule_hour,
-                       (0..23).map { |h| [ format("%02d:00", h), h ] },
-                       {}, class: "form-select" %>
+          <%= f.time_field :schedule_time, value: automation.schedule_time, class: "form-control" %>
           <div class="form-text"><%= t('bo.automations.form.timezone_hint', zone: current_organisation.timezone) %></div>
         </div>
         <div class="col-md-3">

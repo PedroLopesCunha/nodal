@@ -2,7 +2,9 @@ es:
   mailers:
     automation_mailer:
       digest:
-        subject: "%{name} — %{count} referencia(s)"
+        subject: "%{name} · %{period} · %{organisation}"
+        week: "Semana %{number}"
+        csv_note: "Se adjunta un CSV con la misma tabla, para abrir en Excel."
         period: "Período: %{from} a %{to}"
         empty: "Nada que señalar en este período."
         count: "%{count} referencia(s) en este período."

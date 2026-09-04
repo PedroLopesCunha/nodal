@@ -27,15 +27,23 @@ module Automations
                           .in_period(period)
                           .preload(product_variant: :product)
                           .order(occurred_at: :desc)
+                          .references(:products)
 
       scope = apply_suppliers(scope)
       scope = apply_categories(scope)
 
       # One line per reference, not per event: a reference that flapped three
       # times in the week is still one thing to reorder. Keep the most recent.
-      scope.to_a
-           .uniq { |event| event.product_variant_id }
-           .map { |event| build_row(event) }
+      rows = scope.to_a
+                  .uniq { |event| event.product_variant_id }
+                  .map { |event| build_row(event) }
+
+      # Grouped by supplier, because the reader's next action is writing a
+      # purchase order per supplier — scattering a supplier's references across
+      # the table is how one gets forgotten.
+      rows.sort_by do |row|
+        [ row[:supplier].to_s.downcase.presence || "\uffff", row[:product].to_s.downcase ]
+      end
     end
 
     private

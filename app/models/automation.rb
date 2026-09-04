@@ -14,6 +14,8 @@ class Automation < ApplicationRecord
   validates :schedule_kind, presence: true, inclusion: { in: SCHEDULE_KINDS }
   validates :schedule_hour, presence: true,
             numericality: { only_integer: true, greater_than_or_equal_to: 0, less_than_or_equal_to: 23 }
+  validates :schedule_minute, presence: true,
+            numericality: { only_integer: true, greater_than_or_equal_to: 0, less_than_or_equal_to: 59 }
   validates :schedule_day, presence: true, if: -> { schedule_kind.in?(%w[weekly monthly]) }
   validates :schedule_day, numericality: { only_integer: true, in: 0..6 }, if: -> { schedule_kind == "weekly" }
   # Capped at 28 so every month has the day — no silent skipping in February.
@@ -26,6 +28,32 @@ class Automation < ApplicationRecord
 
   scope :active, -> { where(active: true) }
   scope :due, ->(now = Time.current) { active.where(next_run_at: ..now) }
+
+  # The form uses a single <input type="time">; the schedule is stored as two
+  # integers so it stays comparable and time-zone independent.
+  def schedule_time
+    format("%02d:%02d", schedule_hour.to_i, schedule_minute.to_i)
+  end
+
+  def schedule_time=(value)
+    hours, minutes = value.to_s.split(":")
+    return if hours.blank?
+
+    self.schedule_hour = hours.to_i
+    self.schedule_minute = minutes.to_i
+  end
+
+  # Human label for the period a run covered — goes in the subject line so a
+  # digest is identifiable in an inbox without opening it.
+  def period_label(period)
+    reference = (period.last || Time.current).in_time_zone(time_zone)
+
+    case schedule_kind
+    when "daily"   then I18n.l(reference.to_date, format: :short)
+    when "monthly" then I18n.l(reference.to_date, format: :month_year, default: reference.strftime("%m/%Y"))
+    else I18n.t("mailers.automation_mailer.digest.week", number: reference.strftime("%V"))
+    end
+  end
 
   def report
     @report ||= Automations::Registry.build(kind, automation: self)
@@ -82,12 +110,12 @@ class Automation < ApplicationRecord
 
     candidate = case schedule_kind
     when "daily"
-      local.change(hour: schedule_hour, min: 0, sec: 0)
+      local.change(hour: schedule_hour, min: schedule_minute.to_i, sec: 0)
     when "weekly"
-      day = local.change(hour: schedule_hour, min: 0, sec: 0)
+      day = local.change(hour: schedule_hour, min: schedule_minute.to_i, sec: 0)
       day + ((schedule_day.to_i - day.wday) % 7).days
     when "monthly"
-      local.change(day: schedule_day.to_i, hour: schedule_hour, min: 0, sec: 0)
+      local.change(day: schedule_day.to_i, hour: schedule_hour, min: schedule_minute.to_i, sec: 0)
     end
 
     candidate = advance(candidate) while candidate <= local
@@ -110,7 +138,7 @@ class Automation < ApplicationRecord
 
   def schedule_changed?
     new_record? || schedule_kind_changed? || schedule_day_changed? ||
-      schedule_hour_changed? || (active_changed? && active?)
+      schedule_hour_changed? || schedule_minute_changed? || (active_changed? && active?)
   end
 
   def set_next_run_at

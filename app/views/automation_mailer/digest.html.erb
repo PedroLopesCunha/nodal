@@ -1,5 +1,9 @@
 <h2 style="margin:0 0 4px 0;"><%= @automation.name %></h2>
 
+<p style="margin:0 0 2px 0;font-size:15px;font-weight:600;color:#1a1a1a;">
+  <%= @organisation.name %>
+</p>
+
 <p style="color:#6c757d;margin:0 0 20px 0;font-size:14px;">
   <%= t("mailers.automation_mailer.digest.period",
         from: l(@period.first.in_time_zone(@automation.time_zone), format: :short),
@@ -36,6 +40,12 @@
       <% end %>
     </tbody>
   </table>
+<% end %>
+
+<% if @rows.any? %>
+  <p style="color:#6c757d;margin-top:20px;font-size:13px;">
+    <%= t("mailers.automation_mailer.digest.csv_note") %>
+  </p>
 <% end %>
 
 <p style="color:#6c757d;margin-top:24px;font-size:12px;">

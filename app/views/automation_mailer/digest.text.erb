@@ -1,4 +1,5 @@
 <%= @automation.name %>
+<%= @organisation.name %>
 <%= t("mailers.automation_mailer.digest.period",
       from: l(@period.first.in_time_zone(@automation.time_zone), format: :short),
       to:   l(@period.last.in_time_zone(@automation.time_zone), format: :short)) %>

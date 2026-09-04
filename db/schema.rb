@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2026_09_04_140000) do
+ActiveRecord::Schema[7.1].define(version: 2026_09_04_160000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_trgm"
   enable_extension "plpgsql"
@@ -103,6 +103,7 @@ ActiveRecord::Schema[7.1].define(version: 2026_09_04_140000) do
     t.datetime "next_run_at"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.integer "schedule_minute", default: 0, null: false
     t.index ["next_run_at"], name: "index_automations_on_next_run_at"
     t.index ["organisation_id", "active"], name: "index_automations_on_organisation_id_and_active"
     t.index ["organisation_id"], name: "index_automations_on_organisation_id"
