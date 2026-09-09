@@ -11,7 +11,12 @@
           price_cents: v.unit_price_cents,
           original_price_cents: @product.unit_price,
           attribute_value_ids: v.attribute_values.pluck(:id),
-          in_stock: v.in_stock?, stock_quantity: v.stock_quantity,
+          # No stock_quantity here. Nothing in the browser ever read it, and it
+          # put the real figure for every variant into the page source of every
+          # product, for everyone. Whether a customer may see quantities is a
+          # decision for the organisation, so the number has to be withheld on
+          # the server rather than merely not displayed.
+          in_stock: v.in_stock?,
           track_stock: v.track_stock?, purchasable: v.purchasable?,
           photo_url: v.photo.attached? ? url_for(v.photo.variant(resize_to_limit: [400, 400])) : nil,
           has_discount: vd[:has_discount],
