@@ -6,12 +6,35 @@ export default class extends Controller {
   // Searching happens on the server now — the picker used to render every
   // product in the organisation and filter them here, which stopped working
   // once the catalog grew past a couple of thousand products.
+  //
+  // The frame is driven directly rather than by submitting a form: this card
+  // lives inside the page's save form, and a nested form is invalid HTML — the
+  // browser drops it, so a submit here saved the product on every keystroke.
   debouncedSearch() {
     clearTimeout(this.searchTimeout)
-    this.searchTimeout = setTimeout(() => {
-      const form = this.searchTarget.closest("form")
-      if (form) form.requestSubmit()
-    }, 300)
+    this.searchTimeout = setTimeout(() => this.search(), 300)
+  }
+
+  search() {
+    const frame = this.resultsFrameTarget
+    const url = new URL(frame.dataset.searchUrl, window.location.origin)
+    const query = this.searchTarget.value.trim()
+
+    if (query) url.searchParams.set("query", query)
+
+    // Assigning the same src is a no-op in Turbo, so reload explicitly when the
+    // query has not actually changed (a trailing space, say).
+    if (frame.src === url.toString()) {
+      frame.reload()
+    } else {
+      frame.src = url.toString()
+    }
+  }
+
+  // The input sits inside the page's save form, where Enter would submit it.
+  preventSubmit(event) {
+    event.preventDefault()
+    this.search()
   }
 
   // Results arrive from the server knowing nothing about what has been picked

@@ -72,26 +72,31 @@
 
             <% search_url = related_products_search_bo_product_path(params[:org_slug], @product) %>
 
-            <%# The search input stays OUTSIDE the turbo-frame: if it were inside,
-                every keystroke would re-render it and the field would lose focus
-                and drop characters. Only the results below reload. (Same shape as
-                bo/shared/_catalog_selection_modal.) %>
+            <%# No <form> here on purpose. This card sits inside the page's own
+                form (the one that saves the related products), and a nested form
+                is invalid HTML: the browser discards it, the input ends up
+                belonging to the outer form, and every keystroke saved the
+                product. The frame is pointed at the search URL directly instead,
+                and Enter is swallowed so it cannot submit the outer form either.
+
+                The input stays OUTSIDE the turbo-frame: inside, every keystroke
+                would re-render it and the field would lose focus and drop
+                characters. Only the results below reload. %>
             <div class="mb-3">
               <div class="input-group">
                 <span class="input-group-text bg-white"><i class="fa-solid fa-magnifying-glass text-muted"></i></span>
-                <%= form_with url: search_url, method: :get, data: { turbo_frame: "related_products_results" }, local: false, class: "flex-grow-1 d-flex" do %>
-                  <input type="text" name="query" class="form-control border-start-0"
-                         placeholder="<%= t('bo.products.related.search_placeholder') %>"
-                         data-related-products-target="search"
-                         data-action="input->related-products#debouncedSearch"
-                         autocomplete="off">
-                <% end %>
+                <input type="text" class="form-control border-start-0"
+                       placeholder="<%= t('bo.products.related.search_placeholder') %>"
+                       data-related-products-target="search"
+                       data-action="input->related-products#debouncedSearch keydown.enter->related-products#preventSubmit"
+                       autocomplete="off">
               </div>
             </div>
 
             <turbo-frame id="related_products_results"
                          data-related-products-target="resultsFrame"
                          data-action="turbo:frame-load->related-products#syncAvailable"
+                         data-search-url="<%= search_url %>"
                          src="<%= search_url %>"
                          loading="lazy">
               <div class="text-center py-4">
