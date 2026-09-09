@@ -158,6 +158,13 @@ Rails.application.routes.draw do
         post :catalog,           to: "catalog#create", as: nil
         get  :catalog_selection, to: "catalog#selection"
       end
+      # Who may see stock quantities in the shop. Reached from the stock section
+      # of Definições, which is where the setting that gives it meaning lives —
+      # not the sidebar, for a page opened a couple of times a year.
+      resource :stock_visibility, only: [ :show, :update ], controller: "stock_visibility" do
+        get :company_picker
+      end
+
       resources :customer_categories, except: [:index, :show] do
         member do
           post :add_customers

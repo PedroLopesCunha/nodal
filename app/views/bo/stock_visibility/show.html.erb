@@ -1,0 +1,72 @@
+<% content_for :bo_main_content do %>
+
+<div class="bo-page-header">
+  <div class="d-flex justify-content-between align-items-start mb-4">
+    <div class="d-flex align-items-center gap-3">
+      <%= link_to edit_bo_settings_path(params[:org_slug]), class: "text-muted text-decoration-none" do %>
+        <i class="fa-solid fa-arrow-left fa-lg"></i>
+      <% end %>
+      <div>
+        <h1><%= t('bo.stock_visibility.title') %></h1>
+        <span class="text-muted"><%= t('bo.stock_visibility.subtitle') %></span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="bo-page-body">
+  <%= form_with url: bo_stock_visibility_path(params[:org_slug]), method: :patch, local: true,
+                data: { controller: "stock-visibility" } do %>
+    <div class="row g-4">
+      <div class="col-lg-8">
+        <div class="card">
+          <div class="card-body">
+            <div class="d-flex justify-content-between align-items-start mb-3">
+              <div>
+                <h5 class="card-title mb-1">
+                  <i class="fa-solid fa-eye me-2 text-primary"></i><%= t('bo.stock_visibility.permitted_companies') %>
+                </h5>
+                <p class="text-muted small mb-0"><%= t('bo.stock_visibility.permitted_companies_hint') %></p>
+              </div>
+              <button type="button" class="btn btn-outline-primary btn-sm text-nowrap"
+                      data-bs-toggle="modal" data-bs-target="#companyPickerModal">
+                <i class="fa-solid fa-plus me-1"></i><%= t('bo.stock_visibility.add_companies') %>
+              </button>
+            </div>
+
+            <div id="permitted-companies" data-stock-visibility-target="list">
+              <% @permitted_customers.each do |customer| %>
+                <%= render "company_row", customer: customer %>
+              <% end %>
+            </div>
+
+            <div data-stock-visibility-target="emptyState"
+                 class="<%= 'd-none' if @permitted_customers.any? %> text-center py-5 text-muted">
+              <i class="fa-solid fa-eye-slash fa-2x mb-2"></i>
+              <p class="mb-0"><%= t('bo.stock_visibility.none_yet') %></p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-lg-4">
+        <div class="card mb-4">
+          <div class="card-body">
+            <h5 class="card-title mb-3">
+              <i class="fa-solid fa-circle-info me-2"></i><%= t('bo.stock_visibility.who_else') %>
+            </h5>
+            <p class="text-muted small mb-0"><%= t('bo.stock_visibility.who_else_hint') %></p>
+          </div>
+        </div>
+
+        <div class="d-grid">
+          <%= submit_tag t('bo.common.actions.save'), class: "btn btn-primary btn-lg" %>
+        </div>
+      </div>
+    </div>
+
+    <%= render "company_picker_modal" %>
+  <% end %>
+</div>
+
+<% end %>

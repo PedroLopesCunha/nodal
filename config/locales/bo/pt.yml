@@ -1410,6 +1410,27 @@ pt:
         reason: "Motivo"
         reason_placeholder: "Introduza o motivo do desconto"
 
+    stock_visibility:
+      title: "Quem vê as quantidades"
+      subtitle: "Empresas autorizadas a ver o stock real na loja"
+      permitted_companies: "Empresas autorizadas"
+      permitted_companies_hint: "Estas empresas vêem as quantidades. Todos os logins de cada empresa as vêem."
+      add_companies: "Adicionar empresas"
+      pick_by_category: "Adicionar todas as empresas de um escalão:"
+      search_placeholder: "Pesquisar empresa por nome ou NIF…"
+      selected_count: "autorizadas"
+      done: "Concluído"
+      remove: "Retirar"
+      no_category: "Sem escalão"
+      none_yet: "Ainda não autorizaste nenhuma empresa."
+      who_else: "Quem vê sempre"
+      who_else_hint: "A tua equipa vê as quantidades independentemente desta lista: membros do back office e vendedores, incluindo quando estão a operar como uma empresa que não está autorizada."
+      updated:
+        zero: "Nenhuma empresa vê as quantidades."
+        one: "1 empresa passa a ver as quantidades."
+        other: "%{count} empresas passam a ver as quantidades."
+      not_enabled: "Primeiro escolhe o que a loja mostra sobre stock nas definições."
+
     # Secção Preços
     pricing:
       index:
@@ -1956,6 +1977,17 @@ pt:
         out_of_stock_strategy_hint: "Define o que acontece automaticamente na loja quando o stock chega a zero (via sync ERP ou edição manual). Variantes com 'Acompanhar stock' desativado não são afetadas."
         low_stock_threshold: "Limiar de stock baixo"
         low_stock_threshold_hint: "Uma variante fica 'Em risco' quando o stock é igual ou inferior a este número. Usado no separador Controlo de stock."
+        storefront_stock_display: "Mostrar stock na loja"
+        storefront_stock_display_hint: "Define o que a loja pode dizer sobre quantidades. Quem vê é escolhido empresa a empresa."
+        storefront_stock_none: "Não mostrar quantidades"
+        storefront_stock_bands: "Faixas (poucas unidades / disponível)"
+        storefront_stock_exact: "Quantidade exacta"
+        stock_visibility_manage: "Quem vê as quantidades"
+        stock_visibility_manage_hint:
+          zero: "Nenhuma empresa autorizada — só a tua equipa vê as quantidades."
+          one: "1 empresa autorizada, além da tua equipa."
+          other: "%{count} empresas autorizadas, além da tua equipa."
+        stock_visibility_manage_action: "Gerir empresas"
         out_of_stock_do_nothing: "Apenas registar stock"
         out_of_stock_deactivate: "Mostrar badge 'Sem Stock'"
         out_of_stock_hide: "Ocultar da loja"
