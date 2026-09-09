@@ -31,6 +31,18 @@ class OrderPolicy < ApplicationPolicy
     true
   end
 
+  # Looking up a line to add, and what it would cost this customer. Reachable
+  # from both the new and the edit screens, so there is no order to check
+  # against — membership of the organisation in context is the gate, and the
+  # controller only ever reads variants and customers belonging to it.
+  def variant_search?
+    user.is_a?(Member) && organisation.present? && user.organisations.include?(organisation)
+  end
+
+  def variant_pricing?
+    variant_search?
+  end
+
   def create?
     return false unless member_of_organisation?
     return true unless pure_sales_rep?

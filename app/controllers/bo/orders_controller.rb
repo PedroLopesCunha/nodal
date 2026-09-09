@@ -27,13 +27,54 @@ class Bo::OrdersController < Bo::BaseController
   end
 
   def edit
-    @products = Product.where(organisation: @current_organisation)
+  end
+
+  VARIANT_SEARCH_LIMIT = 30
+
+  # Type-ahead for picking an order line. Searches variants, not products: the
+  # SKU lives on the variant, and it is the only thing that tells apart the 45
+  # products called "Moldura Criança" in this catalog. Unpublished items are
+  # included on purpose — the back office has to be able to put anything on an
+  # order.
+  def variant_search
+    authorize Order, :variant_search?
+
+    render json: variant_search_scope.map { |variant|
+      {
+        value: variant.id,
+        text: variant.picker_label,
+        sku: variant.sku.to_s
+      }
+    }
+  end
+
+  # What this line should start at: the variant's price, and the discount the
+  # shop would give this customer. Both land in editable fields — the back
+  # office can override either — so this is a starting point, not a verdict.
+  def variant_pricing
+    authorize Order, :variant_pricing?
+
+    variant = current_organisation.product_variants.find(params[:variant_id])
+    customer = current_organisation.customers.find_by(id: params[:customer_id])
+    quantity = params[:quantity].presence&.to_i || 1
+
+    discount = DiscountCalculator.new(
+      product: variant.product,
+      customer: customer,
+      quantity: quantity,
+      variant: variant
+    ).effective_discount[:percentage] || 0
+
+    render json: {
+      product_id: variant.product_id,
+      unit_price: ((variant.unit_price_cents || variant.product.unit_price).to_i / 100.0).round(2),
+      discount_percentage: discount
+    }
   end
 
   def new
     @order = Order.new
     @customers = Customer.where(organisation: @current_organisation)
-    @products = Product.where(organisation: @current_organisation)
     authorize @order
   end
 
@@ -47,7 +88,6 @@ class Bo::OrdersController < Bo::BaseController
       redirect_to bo_order_path(org_slug: @current_organisation.slug, id: @order.id), notice: "Order created successfully."
     else
       @customers = Customer.where(organisation: @current_organisation)
-      @products = Product.where(organisation: @current_organisation)
       render :new, status: :unprocessable_entity
     end
   end
@@ -146,6 +186,23 @@ class Bo::OrdersController < Bo::BaseController
 
   private
 
+  # Variants, not products, and never the placeholder base variant of a variable
+  # product — that one is not a sellable unit. Matching is accent-insensitive on
+  # both the SKU and the product name, so "coracao" finds "Coração".
+  def variant_search_scope
+    scope = current_organisation.product_variants
+                                .real_units
+                                .includes(:product, attribute_values: :product_attribute)
+
+    query = params[:query].to_s.strip
+    return scope.none if query.blank?
+
+    scope.joins(:product).where(
+      "unaccent(product_variants.sku) ILIKE unaccent(:q) OR unaccent(products.name) ILIKE unaccent(:q)",
+      q: "%#{query}%"
+    ).order("products.name").limit(VARIANT_SEARCH_LIMIT)
+  end
+
   def exportable_class
     Order
   end
@@ -199,7 +256,7 @@ class Bo::OrdersController < Bo::BaseController
   def order_params
     params.require(:order).permit(
       :customer_id, :status, :payment_status, :receive_on, :notes,
-      order_items_attributes: [:id, :product_id, :quantity, :price, :discount_percentage, :note, :_destroy]
+      order_items_attributes: [ :id, :product_id, :product_variant_id, :quantity, :price, :discount_percent, :discount_percentage, :note, :_destroy ]
     )
   end
 
