@@ -2195,6 +2195,8 @@ pt:
       cancel: "Cancelar"
       cancel_confirm: "Tem a certeza que deseja cancelar este processo?"
       cancelled: "Processo cancelado."
+      cancel_too_late: "Este processo já terminou — não há nada para cancelar."
+      stalled: "Interrompida: a tarefa esteve %{hours}h sem terminar e o processo que a executava já não existe. Fechada automaticamente."
       product_grid_import:
         title: "A importar produtos"
       product_csv_import:

@@ -43,6 +43,12 @@ production:
     schedule: "*/15 * * * *"
     description: "Fire back-office automations whose next_run_at has come due"
 
+  reap_stalled_background_tasks:
+    class: ReapStalledBackgroundTasksJob
+    queue: default
+    schedule: "20 * * * *"
+    description: "Close background tasks whose job was killed without ever finishing"
+
   clear_solid_queue_finished_jobs:
     command: "SolidQueue::Job.clear_finished_in_batches(sleep_between_batches: 0.3)"
     schedule: "12 * * * *"

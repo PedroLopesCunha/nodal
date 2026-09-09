@@ -31,6 +31,18 @@ class Bo::BackgroundTasksController < Bo::BaseController
   def cancel
     @task = current_organisation.background_tasks.find(params[:id])
     authorize @task
+
+    # A task that already finished has nothing left to cancel, and writing
+    # `cancelled` over it would only lose the outcome it recorded.
+    unless @task.pending? || @task.running?
+      redirect_to bo_background_tasks_path(params[:org_slug]),
+        alert: t("bo.background_tasks.cancel_too_late")
+      return
+    end
+
+    # Writing the status is the whole mechanism: nothing can kill a running job
+    # from the outside, so the job reads this at its next checkpoint and stops
+    # itself (see Trackable#checkpoint!).
     @task.update!(status: :cancelled)
     redirect_to bo_background_tasks_path(params[:org_slug]), notice: t("bo.background_tasks.cancelled")
   end
