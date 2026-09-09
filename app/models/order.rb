@@ -59,14 +59,25 @@ class Order < ApplicationRecord
 
   PUSH_RETRY_COOLDOWN = 10.minutes
 
+  # `syncing` is written before the adapter is called, so a process that dies
+  # mid-push leaves the order in it forever — nothing retried them, because the
+  # retry only ever looked at pending and failed. Two orders sat like that in
+  # production from May to September.
+  PUSH_STALE_AFTER = 30.minutes
+
   scope :push_pending, -> { where(push_status: "pending") }
   scope :push_synced, -> { where(push_status: "synced") }
   scope :push_failed, -> { where(push_status: "failed") }
   scope :pushable, -> {
     placed
-      .where(push_status: %w[pending failed])
       .where("push_attempts < ?", MAX_PUSH_ATTEMPTS)
-      .where("last_pushed_at IS NULL OR last_pushed_at < ?", PUSH_RETRY_COOLDOWN.ago)
+      .where(
+        "(orders.push_status IN ('pending', 'failed')" \
+        " AND (orders.last_pushed_at IS NULL OR orders.last_pushed_at < :cooldown))" \
+        " OR (orders.push_status = 'syncing' AND orders.last_pushed_at < :stale)",
+        cooldown: PUSH_RETRY_COOLDOWN.ago,
+        stale: PUSH_STALE_AFTER.ago
+      )
   }
 
   def self.exportable_columns
@@ -145,6 +156,18 @@ class Order < ApplicationRecord
 
   def push_exhausted?
     push_attempts >= MAX_PUSH_ATTEMPTS
+  end
+
+  # A push that started but never finished: the process was killed between
+  # marking `syncing` and hearing back from the ERP.
+  def push_stale?
+    push_status == "syncing" && last_pushed_at.present? && last_pushed_at < PUSH_STALE_AFTER.ago
+  end
+
+  # Nothing will move this order on its own — it has run out of attempts, or it
+  # is stuck part-way. Worth offering a person the chance to send it again.
+  def push_stuck?
+    placed? && !push_synced? && (push_failed? || push_exhausted? || push_stale?)
   end
 
   # Re-evaluates every line item against current data — re-pricing it and
@@ -326,8 +349,12 @@ class Order < ApplicationRecord
     place!
   end
 
+  # Seeded with a zero Money: summing an empty set gives the integer 0, and
+  # every caller here goes on to ask it for `.cents` or add Money to it. An
+  # order with no lines — one emptied before its replacement line is added —
+  # raised NoMethodError on save.
   def total_amount
-    order_items.sum(&:total_price)
+    order_items.sum(Money.new(0, organisation&.currency || "EUR"), &:total_price)
   end
 
   # Find the best applicable order tier discount

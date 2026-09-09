@@ -55,8 +55,27 @@ class OrderItem < ApplicationRecord
   validate :meets_minimum_quantity, on: [:create, :customer_change]
 
   before_validation :set_variant_for_simple_product, on: :create
+  before_validation :set_product_from_variant
   before_validation :set_unit_price_from_variant, on: :create
   before_validation :recalculate_discount, if: :should_recalculate_discount?
+
+  # The back office form works in percent (15), the column in fractions (0.15).
+  # Assigning it also means a person set this line's discount deliberately, so
+  # the automatic calculation leaves it alone — that is the whole point of the
+  # field: correcting a bad discount, or granting one. Left blank, it means
+  # "work it out for me" and the automatic rules apply as before.
+  attr_reader :discount_set_by_hand
+
+  def discount_percent=(value)
+    return if value.blank?
+
+    @discount_set_by_hand = true
+    self.discount_percentage = value.to_f / 100.0
+  end
+
+  def discount_percent
+    discount_percentage.present? ? (discount_percentage * 100).round(2) : nil
+  end
 
   def total_price
     subtotal = price * quantity
@@ -129,6 +148,15 @@ class OrderItem < ApplicationRecord
 
   private
 
+  # The picker chooses a variant; which product it belongs to is not a separate
+  # decision. Deriving it keeps a stale or missing product_id from producing an
+  # inconsistent line.
+  def set_product_from_variant
+    return if product_variant.nil?
+
+    self.product_id = product_variant.product_id
+  end
+
   def set_variant_for_simple_product
     return if product_variant.present?
     return unless product.present?
@@ -175,6 +203,9 @@ class OrderItem < ApplicationRecord
   end
 
   def should_recalculate_discount?
+    # A discount typed in the back office is a decision, not a starting point.
+    return false if discount_set_by_hand
+
     # Recalculate on create, or when quantity changes (for min_quantity thresholds)
     new_record? || quantity_changed?
   end

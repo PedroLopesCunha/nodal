@@ -95,6 +95,11 @@ Rails.application.routes.draw do
         collection do
           get :export
           get :export_items
+          # Picking a line by SKU: the search feeds the type-ahead, the pricing
+          # call fills in what this customer would pay once one is chosen. Both
+          # are on the collection because the order may not exist yet (new).
+          get :variant_search
+          get :variant_pricing
         end
         member do
           get :download_pdf
