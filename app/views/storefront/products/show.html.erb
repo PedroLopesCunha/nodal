@@ -19,11 +19,13 @@
           discount_percentage: vd[:discount_percentage]
         }
 
-        # The quantity is added only for someone allowed to see it. Withheld
-        # here rather than hidden in the markup: this payload used to carry the
-        # real figure for every variant to every visitor, and no script ever
-        # read it.
-        variant_data[:stock_quantity] = v.stock_quantity if may_see_stock_quantities?
+        # A label, never the raw figure. Withheld here rather than hidden in the
+        # markup: this payload used to carry the real quantity for every variant
+        # to every visitor, and no script ever read it. Sending the number and
+        # rendering a word would publish the number all the same, which matters
+        # when the organisation chose bands over exact quantities.
+        label = stock_display_label(v)
+        variant_data[:stock_label] = label if label.present?
         variant_data
       }.to_json,
       "variant-selector-currency-symbol-value" => current_organisation.currency_symbol,
@@ -277,6 +279,10 @@
                   <% else %>
                     <i class="fa-solid fa-circle-xmark me-1 text-danger"></i>
                     <%= t('storefront.products.show.out_of_stock') %>
+                  <% end %>
+                  <% stock_label = stock_display_label(@default_variant) %>
+                  <% if stock_label.present? %>
+                    <span class="text-muted small ms-1"><%= stock_label %></span>
                   <% end %>
                 </div>
               </div>

@@ -15,6 +15,9 @@
 <% interactive = !browsing_as_member? && !product.price_on_request? %>
 <% min_qty = product.min_quantity || 1 %>
 <% attribute_names = product.product_product_attributes.includes(:product_attribute).order(:position).map { |ppa| ppa.product_attribute.name } %>
+<%# Computed once: whether this viewer may see quantities does not change
+    row by row, and the header has to agree with the cells. %>
+<% show_stock_column = visible_variants.any? { |v| stock_display_label(v).present? } %>
 
 <%# Live combined-minimum counter (illustrative only — never blocks adding) %>
 <% combined_counter = interactive && product.min_quantity_combined? && product.enforced_min_quantity.present? && product.combined_min_reachable? %>
@@ -84,6 +87,11 @@
                 <% end %>
               </th>
               <th class="text-center align-middle"><%= t('storefront.products.show.grid.sku') %></th>
+              <%# Its own column, like the price one: this grid exists for
+                  ordering in quantity, and the buyer reads down it to decide
+                  which variants to take. Under the name it would compete with
+                  the out-of-stock badge. %>
+              <% if show_stock_column %><th class="text-center align-middle"><%= t('storefront.products.show.grid.stock') %></th><% end %>
               <% if show_prices? %><th class="text-center align-middle"><%= t('storefront.products.show.grid.price') %></th><% end %>
               <% if interactive %><th class="text-center align-middle" style="width: 140px;"><%= t('storefront.products.show.grid.quantity') %></th><% end %>
             </tr>
@@ -101,6 +109,9 @@
                   <% end %>
                 </td>
                 <td class="text-muted small text-center align-middle"><%= variant.sku %></td>
+                <% if show_stock_column %>
+                  <td class="text-muted small text-center align-middle"><%= stock_display_label(variant) %></td>
+                <% end %>
                 <% if show_prices? %>
                   <td class="text-center align-middle">
                     <span class="text-decoration-line-through text-muted small d-block <%= 'd-none' unless discounted %>" data-grid-pricing-target="rowOriginal"><%= money_amount(calc.base_price) %></span>
