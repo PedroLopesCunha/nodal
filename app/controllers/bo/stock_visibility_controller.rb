@@ -43,6 +43,27 @@ class Bo::StockVisibilityController < Bo::BaseController
     render partial: "company_picker", formats: [ :html ]
   end
 
+  # Every company at once. Fetched only when asked for, because "all" is 827
+  # companies in the largest organisation and there is no reason to carry them
+  # in the page until someone clicks. A snapshot like the categories are: a
+  # company created tomorrow is not covered by having pressed this today.
+  def all_companies
+    authorize current_organisation, :manage_stock_visibility?, policy_class: SettingPolicy
+
+    companies = current_organisation.customers
+                                    .includes(:customer_category)
+                                    .order(:company_name)
+                                    .map do |customer|
+      {
+        id: customer.id,
+        name: customer.company_name,
+        subtitle: [ customer.customer_category&.name, customer.taxpayer_id ].compact_blank.join(" · ")
+      }
+    end
+
+    render json: companies
+  end
+
   private
 
   def picker_scope

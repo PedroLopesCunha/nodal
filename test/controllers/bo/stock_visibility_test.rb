@@ -134,4 +134,52 @@ class Bo::StockVisibilityTest < ActionDispatch::IntegrationTest
     assert_raises(Pundit::NotAuthorizedError) { save_permitted([ @alpha.id ]) }
     assert_not @alpha.reload.sees_stock_quantities?
   end
+  # "Add all" is a snapshot, exactly like the category buttons: it permits the
+  # companies that exist when it is pressed, and says nothing about the future.
+  test "the all-companies list carries every company in the organisation" do
+    get all_companies_bo_stock_visibility_path(org_slug: @org.slug)
+
+    assert_response :success
+    ids = JSON.parse(response.body).map { |c| c["id"] }
+    assert_equal [ @alpha.id, @beta.id, @gamma.id ].sort, ids.sort
+  end
+
+  test "the all-companies list carries a name to show" do
+    get all_companies_bo_stock_visibility_path(org_slug: @org.slug)
+
+    alpha = JSON.parse(response.body).find { |c| c["id"] == @alpha.id }
+    assert_equal "Alpha Lda", alpha["name"]
+    assert_match(/Parceiros/, alpha["subtitle"])
+  end
+
+  test "the all-companies list never reaches into another organisation" do
+    other_org = Organisation.create!(name: "Outra Org", currency: "EUR", storefront_stock_display: "exact")
+    other_org.customers.create!(company_name: "Estranha Lda", contact_name: "X", active: true)
+
+    get all_companies_bo_stock_visibility_path(org_slug: @org.slug)
+
+    names = JSON.parse(response.body).map { |c| c["name"] }
+    assert_not_includes names, "Estranha Lda"
+  end
+
+  # The snapshot again, from the other side: permitting everyone today leaves
+  # tomorrow's company out until someone decides.
+  test "a company created after permitting everyone is not permitted" do
+    save_permitted([ @alpha.id, @beta.id, @gamma.id ])
+
+    newcomer = company("Delta Lda")
+
+    assert_not newcomer.reload.sees_stock_quantities?
+  end
+
+  test "a member who cannot edit settings cannot list every company" do
+    plain = Member.create!(email: "vis-plain3@example.com", password: "password123",
+                           first_name: "Zé", last_name: "Membro")
+    @org.org_members.create!(member: plain, role: "member", active: true)
+    sign_in plain
+
+    assert_raises(Pundit::NotAuthorizedError) do
+      get all_companies_bo_stock_visibility_path(org_slug: @org.slug)
+    end
+  end
 end

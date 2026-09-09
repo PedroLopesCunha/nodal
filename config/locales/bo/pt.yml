@@ -1416,6 +1416,8 @@ pt:
       permitted_companies: "Empresas autorizadas"
       permitted_companies_hint: "Estas empresas vêem as quantidades. Todos os logins de cada empresa as vêem."
       add_companies: "Adicionar empresas"
+      add_all: "Adicionar todas (%{count})"
+      all_companies_hint: "Autorizar todas as empresas de uma vez. As que forem criadas depois não ficam autorizadas."
       pick_by_category: "Adicionar todas as empresas de um escalão:"
       search_placeholder: "Pesquisar empresa por nome ou NIF…"
       selected_count: "autorizadas"

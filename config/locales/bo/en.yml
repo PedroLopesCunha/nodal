@@ -1421,6 +1421,8 @@ en:
       permitted_companies: "Permitted companies"
       permitted_companies_hint: "These companies see quantities. Every login of each company sees them."
       add_companies: "Add companies"
+      add_all: "Add all (%{count})"
+      all_companies_hint: "Permit every company at once. Companies created afterwards are not covered."
       pick_by_category: "Add every company in a category:"
       search_placeholder: "Search a company by name or tax id…"
       selected_count: "permitted"

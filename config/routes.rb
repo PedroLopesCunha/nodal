@@ -163,6 +163,7 @@ Rails.application.routes.draw do
       # not the sidebar, for a page opened a couple of times a year.
       resource :stock_visibility, only: [ :show, :update ], controller: "stock_visibility" do
         get :company_picker
+        get :all_companies
       end
 
       resources :customer_categories, except: [:index, :show] do

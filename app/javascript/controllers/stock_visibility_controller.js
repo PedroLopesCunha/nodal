@@ -4,7 +4,7 @@ import { Controller } from "@hotwired/stimulus"
 // pick everyone in it at once; what the form submits is always a list of
 // companies, so reclassifying a customer later never grants access on its own.
 export default class extends Controller {
-  static targets = ["list", "emptyState", "search", "pickerFrame", "count", "row"]
+  static targets = ["list", "emptyState", "search", "pickerFrame", "count", "row", "addAllButton"]
 
   addCompany(event) {
     const { customerId, companyName, categoryName, taxpayerId } = event.currentTarget.dataset
@@ -25,19 +25,55 @@ export default class extends Controller {
     this.refresh()
   }
 
+  // Everyone at once. The list is fetched only on the click, because "all" is
+  // hundreds of companies in the larger organisations and there is no reason
+  // to carry them in the page until somebody asks. It stays a snapshot, like
+  // the category buttons: a company created tomorrow is not covered by this.
+  addAll(event) {
+    const button = event.currentTarget
+    button.disabled = true
+
+    fetch(button.dataset.url, { headers: { Accept: "application/json" } })
+      .then(response => response.json())
+      .then(companies => {
+        // One insert instead of one per company: adding 800 rows individually
+        // makes the browser lay the page out 800 times.
+        const html = companies
+          .filter(company => !this.hasCompany(company.id))
+          .map(company => this.rowHtml(company.id, company.name, company.subtitle))
+          .join("")
+
+        if (html) this.listTarget.insertAdjacentHTML("beforeend", html)
+        this.refresh()
+      })
+      .finally(() => { button.disabled = false })
+  }
+
   addOne(customerId, companyName, subtitle) {
     if (this.hasCompany(customerId)) return
 
     this.listTarget.insertAdjacentHTML("beforeend", this.rowHtml(customerId, companyName, subtitle))
   }
 
+  // Asked once per company being added, so it reads from a set rather than
+  // walking every row each time — adding hundreds at once would otherwise cost
+  // hundreds of thousands of comparisons.
   hasCompany(customerId) {
-    return this.rowTargets.some(row => row.dataset.customerId === String(customerId))
+    return this.selectedIds().has(String(customerId))
+  }
+
+  selectedIds() {
+    if (!this.idCache || this.idCacheSize !== this.rowTargets.length) {
+      this.idCache = new Set(this.rowTargets.map(row => row.dataset.customerId))
+      this.idCacheSize = this.rowTargets.length
+    }
+    return this.idCache
   }
 
   refresh() {
     const count = this.rowTargets.length
-    if (this.hasCountTarget) this.countTarget.textContent = count
+    this.idCache = null
+    this.countTargets.forEach(target => { target.textContent = count })
     if (this.hasEmptyStateTarget) this.emptyStateTarget.classList.toggle("d-none", count > 0)
   }
 

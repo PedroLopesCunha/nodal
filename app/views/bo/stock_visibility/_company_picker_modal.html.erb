@@ -22,6 +22,20 @@
           </div>
         </div>
 
+        <%# "Everyone" is its own intent, not a search result — it sits above the
+            search rather than pretending to be one of its rows. Still a
+            snapshot: a company created tomorrow is not covered by pressing it
+            today, exactly like the category buttons. %>
+        <div class="d-flex justify-content-between align-items-center mb-3 p-2 border rounded bg-light">
+          <div class="small text-muted"><%= t('bo.stock_visibility.all_companies_hint') %></div>
+          <button type="button" class="btn btn-sm btn-outline-primary text-nowrap"
+                  data-action="click->stock-visibility#addAll"
+                  data-url="<%= all_companies_bo_stock_visibility_path(params[:org_slug]) %>"
+                  data-stock-visibility-target="addAllButton">
+            <i class="fa-solid fa-check-double me-1"></i><%= t('bo.stock_visibility.add_all', count: current_organisation.customers.count) %>
+          </button>
+        </div>
+
         <turbo-frame id="company_picker"
                      data-stock-visibility-target="pickerFrame"
                      data-search-url="<%= company_picker_bo_stock_visibility_path(params[:org_slug]) %>"

@@ -26,7 +26,10 @@
                 <h5 class="card-title mb-1">
                   <i class="fa-solid fa-eye me-2 text-primary"></i><%= t('bo.stock_visibility.permitted_companies') %>
                 </h5>
-                <p class="text-muted small mb-0"><%= t('bo.stock_visibility.permitted_companies_hint') %></p>
+                <p class="text-muted small mb-0">
+                  <%= t('bo.stock_visibility.permitted_companies_hint') %>
+                  <span class="fw-semibold" data-stock-visibility-target="count"><%= @permitted_customers.size %></span>
+                </p>
               </div>
               <button type="button" class="btn btn-outline-primary btn-sm text-nowrap"
                       data-bs-toggle="modal" data-bs-target="#companyPickerModal">
@@ -34,7 +37,10 @@
               </button>
             </div>
 
-            <div id="permitted-companies" data-stock-visibility-target="list">
+            <%# Bounded on purpose: "add all" can put 800 companies in here, and a
+                page you have to scroll past to reach the save button is no use. %>
+            <div id="permitted-companies" data-stock-visibility-target="list"
+                 style="max-height: 460px; overflow-y: auto;">
               <% @permitted_customers.each do |customer| %>
                 <%= render "company_row", customer: customer %>
               <% end %>
