@@ -609,7 +609,7 @@ class Bo::ProductsController < Bo::BaseController
                                 .where.not(id: @product.id)
                                 .includes(:categories)
 
-    return same_category_products(scope) if params[:query].blank?
+    return suggestions(scope) if params[:query].blank?
 
     query = params[:query]
     exact_ids = scope.left_joins(:categories, :product_variants).where(
@@ -622,6 +622,23 @@ class Bo::ProductsController < Bo::BaseController
     ).select("products.id").distinct
 
     scope.where(id: exact_ids).or(scope.where(id: fuzzy_ids)).order(:name)
+  end
+
+  # What to offer before the user searches. Products sharing a category are the
+  # best guess, but a product with no categories — or the only one in its own —
+  # would then face an empty picker reading "nothing to add" while the catalog
+  # is full, so fall back to the catalog itself. @suggestion tells the view
+  # which of the two it is looking at.
+  def suggestions(scope)
+    same_category = same_category_products(scope)
+
+    if same_category.exists?
+      @suggestion = :same_category
+      same_category
+    else
+      @suggestion = :all
+      scope.order(:name)
+    end
   end
 
   def same_category_products(scope)

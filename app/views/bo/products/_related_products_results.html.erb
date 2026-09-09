@@ -1,8 +1,10 @@
 <%# Results for the related-products picker. Only this frame reloads while the
     user types — the search input lives outside it, in related_products.html.erb. %>
 <turbo-frame id="related_products_results">
-  <% if params[:query].blank? %>
-    <p class="text-muted small mb-2"><%= t('bo.products.related.same_category_hint') %></p>
+  <% if params[:query].blank? && @results.any? %>
+    <p class="text-muted small mb-2">
+      <%= @suggestion == :same_category ? t('bo.products.related.same_category_hint') : t('bo.products.related.all_products_hint') %>
+    </p>
   <% end %>
 
   <div style="max-height: 400px; overflow-y: auto;">

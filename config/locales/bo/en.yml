@@ -1087,6 +1087,7 @@ en:
         available_products: "Available Products"
         search_placeholder: "Search by name, SKU or category…"
         same_category_hint: "Products in the same category. Search to find others."
+        all_products_hint: "This product has no category, so we are showing the catalog. Search to find a product."
         no_products_available: "No available products to add."
         settings: "Settings"
         hide_for_product: "Hide related products for this product"

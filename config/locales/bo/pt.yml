@@ -1083,6 +1083,7 @@ pt:
         available_products: "Adicionar produtos"
         search_placeholder: "Pesquisar por nome, referência ou categoria…"
         same_category_hint: "Produtos da mesma categoria. Pesquise para encontrar outros."
+        all_products_hint: "Este produto não tem categoria, por isso mostramos o catálogo. Pesquise para encontrar um produto."
         no_products_available: "Não há produtos para adicionar."
         settings: "Definições"
         hide_for_product: "Não mostrar produtos relacionados neste produto"

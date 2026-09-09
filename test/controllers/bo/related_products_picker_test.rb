@@ -48,6 +48,30 @@ class Bo::RelatedProductsPickerTest < ActionDispatch::IntegrationTest
     assert_no_match(/#{other_category.name}/, response.body)
   end
 
+  # Caught on screen, not by the first round of tests: a product with no
+  # category matched nothing, so the picker said "nothing to add" while the
+  # catalog was full. Offering the catalog is better than offering nothing.
+  test "falls back to the catalog when the product has no category" do
+    uncategorised = product("Aliança Prata")
+    other = product("Colar Prata")
+
+    get related_products_search_bo_product_path(org_slug: @organisation.slug, id: uncategorised.id)
+
+    assert_response :success
+    assert_match other.name, response.body
+    assert_select "[data-related-products-target='availableItem']", minimum: 1
+  end
+
+  test "falls back to the catalog when it is the only product in its category" do
+    lonely = product("Anel Único", category: @organisation.categories.create!(name: "Únicos"))
+    other = product("Colar Prata")
+
+    get related_products_search_bo_product_path(org_slug: @organisation.slug, id: lonely.id)
+
+    assert_response :success
+    assert_match other.name, response.body
+  end
+
   test "search finds a product by name" do
     match = product("Pulseira Dourada", category: @organisation.categories.create!(name: "Pulseiras"))
 
