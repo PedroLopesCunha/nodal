@@ -65,6 +65,10 @@ class OrderLinePickerTest < ApplicationSystemTestCase
       find(".ts-control input", visible: :all).send_keys(sku)
       assert_selector ".ts-dropdown .option", text: sku, wait: 5
       find(".ts-dropdown .option", text: sku).click
+      # The price arrives from the server. Typing before it lands is a race the
+      # test should not be running — and the person editing should not lose
+      # what they typed either, which is why the fill skips touched fields.
+      assert_eventually(true) { find("[data-price-field]").value.present? }
     end
   end
 

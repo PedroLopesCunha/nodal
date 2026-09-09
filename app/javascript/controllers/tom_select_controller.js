@@ -45,13 +45,18 @@ export default class extends Controller {
       create: false,
       sortField: { field: "text", direction: "asc" },
       render: {
+        // stock and warning are optional: only the remote sources that send
+        // them (the order line picker) render the extra state.
         option: function (data, escape) {
           const sku = data.sku ? `<span class="text-muted small"> (${escape(data.sku)})</span>` : ""
-          return `<div>${escape(data.text)}${sku}</div>`
+          const stock = data.stock ? `<span class="text-muted small"> · ${escape(data.stock)}</span>` : ""
+          const warning = data.warning ? `<span class="badge text-bg-warning ms-2">${escape(data.warning)}</span>` : ""
+          return `<div>${escape(data.text)}${sku}${stock}${warning}</div>`
         },
         item: function (data, escape) {
           const sku = data.sku ? `<span class="text-muted small"> (${escape(data.sku)})</span>` : ""
-          return `<div>${escape(data.text)}${sku}</div>`
+          const warning = data.warning ? `<span class="badge text-bg-warning ms-2">${escape(data.warning)}</span>` : ""
+          return `<div>${escape(data.text)}${sku}${warning}</div>`
         }
       }
     }

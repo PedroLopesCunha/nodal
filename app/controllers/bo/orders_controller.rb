@@ -39,13 +39,7 @@ class Bo::OrdersController < Bo::BaseController
   def variant_search
     authorize Order, :variant_search?
 
-    render json: variant_search_scope.map { |variant|
-      {
-        value: variant.id,
-        text: variant.picker_label,
-        sku: variant.sku.to_s
-      }
-    }
+    render json: variant_search_scope.map { |variant| variant_option(variant) }
   end
 
   # What this line should start at: the variant's price, and the discount the
@@ -185,6 +179,24 @@ class Bo::OrdersController < Bo::BaseController
   helper_method :filter_params_hash
 
   private
+
+  # Everything the catalog has is offered, not only what the shop would sell: the
+  # back office has to be able to put a restock, or something still unpublished,
+  # on an order. But never blindly — each result carries its stock and whether
+  # the shop can sell it, so an unusual choice is a choice and not an accident.
+  def variant_option(variant)
+    warnings = []
+    warnings << t("bo.orders.form.picker_out_of_stock") if variant.track_stock? && variant.stock_quantity.to_i <= 0
+    warnings << t("bo.orders.form.picker_unpublished") unless variant.published? && variant.product.published?
+
+    {
+      value: variant.id,
+      text: variant.picker_label,
+      sku: variant.sku.to_s,
+      stock: variant.track_stock? ? t("bo.orders.form.picker_stock", count: variant.stock_quantity.to_i) : t("bo.orders.form.picker_no_stock_control"),
+      warning: warnings.join(" · ").presence
+    }
+  end
 
   # Variants, not products, and never the placeholder base variant of a variable
   # product — that one is not a sellable unit. Matching is accent-insensitive on

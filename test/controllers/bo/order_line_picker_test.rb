@@ -17,7 +17,10 @@ class Bo::OrderLinePickerTest < ActionDispatch::IntegrationTest
     @customer = @organisation.customers.create!(company_name: "Cliente Teste", contact_name: "Rui", active: true)
     @product = @organisation.products.create!(name: "Moldura Criança", unit_price: 1000, published: true)
     @variant = @product.default_variant
-    @variant.update!(sku: "MC-001", unit_price_cents: 1000)
+    # A default variant starts tracked with nothing in stock, which would put an
+    # "out of stock" warning on every result; give it stock so each test says
+    # what it is actually about.
+    @variant.update!(sku: "MC-001", unit_price_cents: 1000, track_stock: true, stock_quantity: 5)
   end
 
   def search(query)
@@ -62,6 +65,46 @@ class Bo::OrderLinePickerTest < ActionDispatch::IntegrationTest
     variable.default_variant.update_columns(sku: "PLACEHOLDER-1")
 
     assert_empty search("PLACEHOLDER-1")
+  end
+
+  # The back office may sell what the shop cannot — a restock on its way, an
+  # item still unpublished — but never without seeing what it is choosing.
+  test "shows how much stock a line has" do
+    @variant.update!(track_stock: true, stock_quantity: 12)
+
+    assert_equal I18n.t("bo.orders.form.picker_stock", count: 12), search("MC-001").first["stock"]
+  end
+
+  test "says so when stock is not tracked" do
+    @variant.update!(track_stock: false)
+
+    assert_equal I18n.t("bo.orders.form.picker_no_stock_control"), search("MC-001").first["stock"]
+    assert_nil search("MC-001").first["warning"]
+  end
+
+  test "warns about a line with no stock" do
+    @variant.update!(track_stock: true, stock_quantity: 0)
+
+    assert_equal I18n.t("bo.orders.form.picker_out_of_stock"), search("MC-001").first["warning"]
+  end
+
+  test "warns about a line the shop does not show" do
+    @variant.update!(published: false)
+
+    assert_equal I18n.t("bo.orders.form.picker_unpublished"), search("MC-001").first["warning"]
+  end
+
+  test "warns about both at once" do
+    @variant.update!(track_stock: true, stock_quantity: 0, published: false)
+
+    assert_equal "#{I18n.t("bo.orders.form.picker_out_of_stock")} · #{I18n.t("bo.orders.form.picker_unpublished")}", search("MC-001").first["warning"]
+  end
+
+  # The warning is the whole point: it is offered anyway.
+  test "still offers a line the shop could not sell" do
+    @variant.update!(track_stock: true, stock_quantity: 0, published: false)
+
+    assert_equal [ @variant.id ], search("MC-001").map { |r| r["value"] }
   end
 
   test "an empty query returns nothing rather than the catalog" do

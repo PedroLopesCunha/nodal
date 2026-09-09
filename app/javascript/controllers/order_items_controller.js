@@ -54,17 +54,27 @@ export default class extends Controller {
     const customerId = this.customerId()
     if (customerId) url.searchParams.set("customer_id", customerId)
 
+    // What the fields held when the request went out. If the person has typed
+    // since, that is a deliberate value and the answer must not land on top of
+    // it — the whole point of these fields is that they can be overridden.
+    const priceInput = row.querySelector("[data-price-field]")
+    const discountInput = row.querySelector("[data-discount-field]")
+    const priceBefore = priceInput?.value
+    const discountBefore = discountInput?.value
+
     fetch(url, { headers: { Accept: "application/json" } })
       .then(response => response.json())
       .then(pricing => {
         // The line belongs to the variant's product; the form never picks it.
         if (productInput) productInput.value = pricing.product_id
 
-        const priceInput = row.querySelector("[data-price-field]")
-        if (priceInput) priceInput.value = Number(pricing.unit_price).toFixed(2)
+        if (priceInput && priceInput.value === priceBefore) {
+          priceInput.value = Number(pricing.unit_price).toFixed(2)
+        }
 
-        const discountInput = row.querySelector("[data-discount-field]")
-        if (discountInput) discountInput.value = (Number(pricing.discount_percentage) * 100).toFixed(2)
+        if (discountInput && discountInput.value === discountBefore) {
+          discountInput.value = (Number(pricing.discount_percentage) * 100).toFixed(2)
+        }
 
         this.calculateLineTotal(row)
         this.updateTotal()
