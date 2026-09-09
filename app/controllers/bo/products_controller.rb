@@ -566,10 +566,15 @@ class Bo::ProductsController < Bo::BaseController
     ActiveRecord::Base.transaction do
       @product.update!(hide_related_products: hide_related_products)
 
+      previous_ids = @product.related_product_associations.pluck(:related_product_id)
+      chosen_ids = related_product_ids.map(&:to_i)
+
       @product.related_product_associations.destroy_all
-      related_product_ids.each_with_index do |product_id, index|
+      chosen_ids.each_with_index do |product_id, index|
         @product.related_product_associations.create!(related_product_id: product_id, position: index + 1)
       end
+
+      mirror_related_products(chosen_ids, previous_ids)
     end
 
     redirect_to related_products_bo_product_path(params[:org_slug], @product), notice: t("bo.products.related.updated")
@@ -638,6 +643,20 @@ class Bo::ProductsController < Bo::BaseController
     else
       @suggestion = :all
       scope.order(:name)
+    end
+  end
+
+  # Relationships are mutual, so every link is kept in both directions: picking
+  # B on A's page gives B a link back to A, and dropping it from either side
+  # drops both. Ordering on the other side is not ours to decide, so a new
+  # mirror simply goes to the end of that product's list.
+  def mirror_related_products(chosen_ids, previous_ids)
+    chosen_ids.each do |other_id|
+      RelatedProduct.find_or_create_by!(product_id: other_id, related_product_id: @product.id)
+    end
+
+    (previous_ids - chosen_ids).each do |dropped_id|
+      RelatedProduct.where(product_id: dropped_id, related_product_id: @product.id).destroy_all
     end
   end
 

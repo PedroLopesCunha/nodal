@@ -133,4 +133,67 @@ class Bo::RelatedProductsPickerTest < ActionDispatch::IntegrationTest
     assert_response :success
     assert_equal 30, css_select("[data-related-products-target='availableItem']").size
   end
+
+  # Relationships are mutual: picking B on A's page has to give B a link back to
+  # A, and dropping it from either side has to drop both. Without the second row
+  # RelatedProductsFetcher, which only reads `product_id = self`, never shows the
+  # link from B.
+  def save_related(product, ids)
+    patch update_related_products_bo_product_path(org_slug: @organisation.slug, id: product.id),
+          params: { related_product_ids: ids.map(&:to_s), hide_related_products: "0" }
+  end
+
+  test "picking a product links it back the other way" do
+    other = product("Colar Prata")
+
+    save_related(@product, [ other.id ])
+
+    assert RelatedProduct.exists?(product: @product, related_product: other)
+    assert RelatedProduct.exists?(product: other, related_product: @product),
+      "the other product must link back"
+  end
+
+  test "dropping a product removes both directions" do
+    other = product("Colar Prata")
+    save_related(@product, [ other.id ])
+
+    save_related(@product, [])
+
+    assert_not RelatedProduct.exists?(product: @product, related_product: other)
+    assert_not RelatedProduct.exists?(product: other, related_product: @product)
+  end
+
+  test "dropping it from the other side removes both directions too" do
+    other = product("Colar Prata")
+    save_related(@product, [ other.id ])
+
+    save_related(other, [])
+
+    assert_not RelatedProduct.exists?(product: other, related_product: @product)
+    assert_not RelatedProduct.exists?(product: @product, related_product: other),
+      "removing from one side must not leave the other half behind"
+  end
+
+  test "saving one product does not disturb another product's links" do
+    other = product("Colar Prata")
+    third = product("Brinco Prata")
+    save_related(@product, [ other.id ])
+    save_related(third, [ other.id ])
+
+    save_related(@product, [])
+
+    assert RelatedProduct.exists?(product: third, related_product: other)
+    assert RelatedProduct.exists?(product: other, related_product: third),
+      "only the pair being edited should change"
+  end
+
+  test "saving the same selection twice is harmless" do
+    other = product("Colar Prata")
+
+    save_related(@product, [ other.id ])
+    save_related(@product, [ other.id ])
+
+    assert_equal 1, RelatedProduct.where(product: @product, related_product: other).count
+    assert_equal 1, RelatedProduct.where(product: other, related_product: @product).count
+  end
 end
