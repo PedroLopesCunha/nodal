@@ -3,7 +3,9 @@ require "csv"
 class Bo::ProductsController < Bo::BaseController
   include Exportable
 
-  before_action :set_product, only: [:show, :edit, :update, :destroy, :configure_variants, :update_variant_configuration, :delete_photo, :set_main_photo, :related_products, :update_related_products, :reorder_related_products]
+  RELATED_PRODUCTS_PER_PAGE = 30
+
+  before_action :set_product, only: [:show, :edit, :update, :destroy, :configure_variants, :update_variant_configuration, :delete_photo, :set_main_photo, :related_products, :related_products_search, :update_related_products, :reorder_related_products]
   before_action :load_attributes_for_form, only: [:new, :edit, :create, :update]
 
   # Add products choice page
@@ -540,11 +542,21 @@ class Bo::ProductsController < Bo::BaseController
     else
       @selected_products = []
     end
+  end
 
-    @available_products = current_organisation.products
-                                               .where.not(id: [@product.id] + related_ids)
-                                               .where(published: true)
-                                               .order(:name)
+  # The picker used to render every published product in the organisation — 2766
+  # of them here, each costing a photo, variant and category query, for ~15k
+  # queries and 2.4 MB of HTML. It timed out (H12) and the page was unusable.
+  # Now nothing is listed until this frame asks for it: same-category products
+  # to begin with (the likeliest candidates, and what RelatedProductsFetcher
+  # auto-fills with), then whatever the search matches.
+  def related_products_search
+    @results = related_products_search_scope
+    # `limit:`, not `items:` — Pagy 9 renamed it, and the old name is ignored
+    # without complaint, silently falling back to Pagy::DEFAULT[:limit].
+    @pagy, @results = pagy(@results, limit: RELATED_PRODUCTS_PER_PAGE)
+
+    render partial: "related_products_results", formats: [ :html ]
   end
 
   def update_related_products
@@ -554,10 +566,15 @@ class Bo::ProductsController < Bo::BaseController
     ActiveRecord::Base.transaction do
       @product.update!(hide_related_products: hide_related_products)
 
+      previous_ids = @product.related_product_associations.pluck(:related_product_id)
+      chosen_ids = related_product_ids.map(&:to_i)
+
       @product.related_product_associations.destroy_all
-      related_product_ids.each_with_index do |product_id, index|
+      chosen_ids.each_with_index do |product_id, index|
         @product.related_product_associations.create!(related_product_id: product_id, position: index + 1)
       end
+
+      mirror_related_products(chosen_ids, previous_ids)
     end
 
     redirect_to related_products_bo_product_path(params[:org_slug], @product), notice: t("bo.products.related.updated")
@@ -584,6 +601,72 @@ class Bo::ProductsController < Bo::BaseController
   helper_method :filter_params_hash, :sort_link_params, :storefront_state
 
   private
+
+  # Mirrors the catalog picker's search (Bo::ProductsController#catalog_selection):
+  # accent-insensitive matching across name, SKU, description, category and
+  # variant SKU, plus a fuzzy pass so a near miss or a typo still finds the
+  # product. With no query we show products sharing a category with this one —
+  # the likeliest candidates, and the same rule RelatedProductsFetcher uses to
+  # auto-fill.
+  def related_products_search_scope
+    scope = current_organisation.products
+                                .where(published: true)
+                                .where.not(id: @product.id)
+                                .includes(:categories)
+
+    return suggestions(scope) if params[:query].blank?
+
+    query = params[:query]
+    exact_ids = scope.left_joins(:categories, :product_variants).where(
+      "unaccent(products.name) ILIKE unaccent(:q) OR unaccent(products.description) ILIKE unaccent(:q) OR unaccent(products.sku) ILIKE unaccent(:q) OR unaccent(categories.name) ILIKE unaccent(:q) OR unaccent(product_variants.sku) ILIKE unaccent(:q)",
+      q: "%#{query}%"
+    ).select("products.id").distinct
+    fuzzy_ids = scope.left_joins(:categories).where(
+      "word_similarity(unaccent(:q), unaccent(products.name)) > 0.5 OR word_similarity(unaccent(:q), unaccent(categories.name)) > 0.5",
+      q: query
+    ).select("products.id").distinct
+
+    scope.where(id: exact_ids).or(scope.where(id: fuzzy_ids)).order(:name)
+  end
+
+  # What to offer before the user searches. Products sharing a category are the
+  # best guess, but a product with no categories — or the only one in its own —
+  # would then face an empty picker reading "nothing to add" while the catalog
+  # is full, so fall back to the catalog itself. @suggestion tells the view
+  # which of the two it is looking at.
+  def suggestions(scope)
+    same_category = same_category_products(scope)
+
+    if same_category.exists?
+      @suggestion = :same_category
+      same_category
+    else
+      @suggestion = :all
+      scope.order(:name)
+    end
+  end
+
+  # Relationships are mutual, so every link is kept in both directions: picking
+  # B on A's page gives B a link back to A, and dropping it from either side
+  # drops both. Ordering on the other side is not ours to decide, so a new
+  # mirror simply goes to the end of that product's list.
+  def mirror_related_products(chosen_ids, previous_ids)
+    chosen_ids.each do |other_id|
+      RelatedProduct.find_or_create_by!(product_id: other_id, related_product_id: @product.id)
+    end
+
+    (previous_ids - chosen_ids).each do |dropped_id|
+      RelatedProduct.where(product_id: dropped_id, related_product_id: @product.id).destroy_all
+    end
+  end
+
+  def same_category_products(scope)
+    category_ids = @product.categories.pluck(:id)
+    category_ids << @product.category_id if @product.category_id.present?
+    return scope.none if category_ids.empty?
+
+    scope.where(id: CategoryProduct.where(category_id: category_ids).select(:product_id)).order(:name)
+  end
 
   # Total open unmet demand (Quis − Levou) per variant — the Faltas cross-link
   # for the stock list. Returns { variant_id => outstanding_shortfall }.

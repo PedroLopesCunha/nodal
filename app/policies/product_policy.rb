@@ -92,6 +92,11 @@ class ProductPolicy < ApplicationPolicy
     !pure_sales_rep? && belongs_to_organisation?
   end
 
+  # The picker's search frame — same page, same permission.
+  def related_products_search?
+    related_products?
+  end
+
   def update_related_products?
     !pure_sales_rep? && belongs_to_organisation?
   end

@@ -70,35 +70,40 @@
               <%= t('bo.products.related.available_products') %>
             </h5>
 
+            <% search_url = related_products_search_bo_product_path(params[:org_slug], @product) %>
+
+            <%# No <form> here on purpose. This card sits inside the page's own
+                form (the one that saves the related products), and a nested form
+                is invalid HTML: the browser discards it, the input ends up
+                belonging to the outer form, and every keystroke saved the
+                product. The frame is pointed at the search URL directly instead,
+                and Enter is swallowed so it cannot submit the outer form either.
+
+                The input stays OUTSIDE the turbo-frame: inside, every keystroke
+                would re-render it and the field would lose focus and drop
+                characters. Only the results below reload. %>
             <div class="mb-3">
-              <input type="text" class="form-control" placeholder="<%= t('bo.products.related.search_placeholder') %>" data-related-products-target="search" data-action="input->related-products#filter">
+              <div class="input-group">
+                <span class="input-group-text bg-white"><i class="fa-solid fa-magnifying-glass text-muted"></i></span>
+                <input type="text" class="form-control border-start-0"
+                       placeholder="<%= t('bo.products.related.search_placeholder') %>"
+                       data-related-products-target="search"
+                       data-action="input->related-products#debouncedSearch keydown.enter->related-products#preventSubmit"
+                       autocomplete="off">
+              </div>
             </div>
 
-            <div style="max-height: 400px; overflow-y: auto;">
-              <% @available_products.each do |product| %>
-                <div class="d-flex align-items-center gap-3 p-2 mb-2 border rounded" data-related-products-target="availableItem" data-product-id="<%= product.id %>" data-product-name="<%= product.name.downcase %>" data-product-sku="<%= [product.sku, product.product_variants.map(&:sku).compact].flatten.join(' ').downcase %>" data-product-category="<%= product.primary_category&.name&.downcase %>">
-                  <% if product.photo_attached? %>
-                    <%= image_tag product.photo, style: "width: 40px; height: 40px; object-fit: cover; border-radius: 4px;" %>
-                  <% else %>
-                    <div class="bg-secondary d-flex align-items-center justify-content-center" style="width: 40px; height: 40px; border-radius: 4px;">
-                      <i class="fa-solid fa-image text-white"></i>
-                    </div>
-                  <% end %>
-                  <div class="flex-grow-1">
-                    <strong><%= product.name %></strong>
-                    <small class="text-muted d-block"><%= [product.sku, product.primary_category&.name].compact_blank.join(' · ') %></small>
-                  </div>
-                  <button type="button" class="btn btn-sm btn-outline-primary" data-action="click->related-products#add" data-product-id="<%= product.id %>" data-product-name="<%= product.name %>" data-product-category="<%= product.primary_category&.name %>" data-product-image="<%= product.photo_attached? ? url_for(product.photo) : '' %>">
-                    <i class="fa-solid fa-plus"></i>
-                  </button>
-                </div>
-              <% end %>
-              <% if @available_products.empty? %>
-                <div class="text-center py-4 text-muted">
-                  <p class="mb-0"><%= t('bo.products.related.no_products_available') %></p>
-                </div>
-              <% end %>
-            </div>
+            <turbo-frame id="related_products_results"
+                         data-related-products-target="resultsFrame"
+                         data-action="turbo:frame-load->related-products#syncAvailable"
+                         data-search-url="<%= search_url %>"
+                         src="<%= search_url %>"
+                         loading="lazy">
+              <div class="text-center py-4">
+                <div class="spinner-border spinner-border-sm text-muted" role="status"></div>
+                <p class="text-muted small mt-2"><%= t('bo.common.loading', default: 'A carregar...') %></p>
+              </div>
+            </turbo-frame>
           </div>
         </div>
       </div>
