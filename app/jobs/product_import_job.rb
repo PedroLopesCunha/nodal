@@ -15,7 +15,8 @@ class ProductImportJob < ApplicationJob
       zip_path: zip_path,
       images_dir: images_dir,
       photo_mode: photo_mode,
-      form_category_id: form_category_id
+      form_category_id: form_category_id,
+      on_progress: ->(processed, total) { update_progress(processed, total) }
     )
     result = service.call
 

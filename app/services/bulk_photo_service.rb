@@ -1,12 +1,17 @@
 class BulkPhotoService
   Result = Struct.new(:photos_attached, :products_matched, :errors, keyword_init: true)
 
-  def initialize(organisation:, zip_path: nil, images_dir: nil, photo_mode: "append")
+  def initialize(organisation:, zip_path: nil, images_dir: nil, photo_mode: "append", on_progress: nil)
     @organisation = organisation
     @zip_path = zip_path
     @images_dir = images_dir
     @photo_mode = photo_mode
     @images_by_sku = {}
+    # Called between records so the job can report progress and stop early
+    # when the task was cancelled. It may raise, so it is deliberately kept
+    # outside the per-record rescue below — that rescue swallows StandardError
+    # and would turn a cancellation into an import error.
+    @on_progress = on_progress
   end
 
   def call
@@ -16,9 +21,11 @@ class BulkPhotoService
     photos_attached = 0
     products_matched = 0
     errors = []
+    processed = 0
+    total = products_scope.count + variants_scope.count
 
     # Match photos to products (has_many_attached :photos)
-    @organisation.products.where.not(sku: [nil, ""]).find_each do |product|
+    products_scope.find_each do |product|
       begin
         count = attach_photos(product)
         if count > 0
@@ -28,10 +35,13 @@ class BulkPhotoService
       rescue => e
         errors << { row: nil, field: product.sku, message: e.message }
       end
+
+      processed += 1
+      @on_progress&.call(processed, total)
     end
 
     # Match photos to variants (has_one_attached :photo)
-    @organisation.product_variants.where.not(sku: [nil, ""]).where(is_default: false).find_each do |variant|
+    variants_scope.find_each do |variant|
       begin
         count = attach_variant_photo(variant)
         if count > 0
@@ -41,6 +51,9 @@ class BulkPhotoService
       rescue => e
         errors << { row: nil, field: variant.sku, message: e.message }
       end
+
+      processed += 1
+      @on_progress&.call(processed, total)
     end
 
     Result.new(photos_attached: photos_attached, products_matched: products_matched, errors: errors)
@@ -49,6 +62,14 @@ class BulkPhotoService
   end
 
   private
+
+  def products_scope
+    @organisation.products.where.not(sku: [ nil, "" ])
+  end
+
+  def variants_scope
+    @organisation.product_variants.where.not(sku: [ nil, "" ]).where(is_default: false)
+  end
 
   def extract_images_from_zip
     return unless @zip_path.present? && File.exist?(@zip_path)

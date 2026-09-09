@@ -11,7 +11,8 @@ class BulkPhotoJob < ApplicationJob
       organisation: organisation,
       zip_path: zip_path,
       images_dir: images_dir,
-      photo_mode: photo_mode
+      photo_mode: photo_mode,
+      on_progress: ->(processed, total) { update_progress(processed, total) }
     )
     result = service.call
 

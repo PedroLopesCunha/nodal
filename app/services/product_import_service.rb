@@ -15,7 +15,7 @@ class ProductImportService
     "available" => { required: false, type: :boolean }
   }.freeze
 
-  def initialize(organisation:, csv_content:, column_mapping:, col_sep: ",", zip_path: nil, images_dir: nil, photo_mode: "append", form_category_id: nil)
+  def initialize(organisation:, csv_content:, column_mapping:, col_sep: ",", zip_path: nil, images_dir: nil, photo_mode: "append", form_category_id: nil, on_progress: nil)
     @organisation = organisation
     @csv_content = csv_content
     @column_mapping = column_mapping
@@ -26,6 +26,10 @@ class ProductImportService
     @form_category_id = form_category_id
     @images_by_sku = {}
     @imported_products = []
+    # Called once per row. The job uses it to report progress and to stop
+    # early when the task was cancelled, so it may raise — deliberately, and
+    # between rows, where a half-finished import is at least a coherent one.
+    @on_progress = on_progress
   end
 
   def call
@@ -34,8 +38,10 @@ class ProductImportService
     extract_images_from_zip if @zip_path.present?
     load_images_from_dir if @images_dir.present?
 
-    CSV.parse(@csv_content, headers: true, col_sep: @col_sep).each.with_index(2) do |row, line_num|
+    rows = CSV.parse(@csv_content, headers: true, col_sep: @col_sep)
+    rows.each.with_index(2) do |row, line_num|
       process_row(row, line_num, results)
+      @on_progress&.call(line_num - 1, rows.size)
     end
 
     # Also match photos to variants by SKU

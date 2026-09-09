@@ -233,4 +233,60 @@ class ProductImportServiceTest < ActiveSupport::TestCase
     assert_includes fields, "description"
     assert_includes fields, "available"
   end
+
+  # The hook is what lets the back office's cancel button actually stop an
+  # import: the job passes a callable that reports progress and raises when the
+  # task was cancelled. Between rows, so a stopped import is at least coherent.
+  test "reports progress after every row" do
+    csv_content = <<~CSV
+      Product Name,Product SKU
+      One,SKU-P1
+      Two,SKU-P2
+      Three,SKU-P3
+    CSV
+
+    seen = []
+    ProductImportService.new(
+      organisation: @organisation,
+      csv_content: csv_content,
+      column_mapping: { "Product Name" => "name", "Product SKU" => "sku" },
+      on_progress: ->(processed, total) { seen << [ processed, total ] }
+    ).call
+
+    assert_equal [ [ 1, 3 ], [ 2, 3 ], [ 3, 3 ] ], seen
+  end
+
+  test "stops importing when the hook raises" do
+    csv_content = <<~CSV
+      Product Name,Product SKU
+      One,SKU-S1
+      Two,SKU-S2
+      Three,SKU-S3
+    CSV
+
+    stop = Class.new(StandardError)
+    service = ProductImportService.new(
+      organisation: @organisation,
+      csv_content: csv_content,
+      column_mapping: { "Product Name" => "name", "Product SKU" => "sku" },
+      on_progress: ->(processed, _total) { raise stop if processed == 2 }
+    )
+
+    assert_raises(stop) { service.call }
+
+    assert_not_nil @organisation.products.find_by(sku: "SKU-S1")
+    assert_nil @organisation.products.find_by(sku: "SKU-S3"), "rows after the stop must not be imported"
+  end
+
+  test "works without a progress hook" do
+    csv_content = "Product Name,Product SKU\nOne,SKU-N1\n"
+
+    result = ProductImportService.new(
+      organisation: @organisation,
+      csv_content: csv_content,
+      column_mapping: { "Product Name" => "name", "Product SKU" => "sku" }
+    ).call
+
+    assert_equal 1, result.created
+  end
 end
