@@ -2,7 +2,6 @@ module Trackable
   extend ActiveSupport::Concern
 
   included do
-    before_perform :mark_running
     after_perform :mark_completed
 
     rescue_from(StandardError) do |exception|
@@ -19,8 +18,17 @@ module Trackable
 
   private
 
+  # Marking the task running belongs here, not in a before_perform callback:
+  # the callback fires before `perform` runs, and every job only looks its task
+  # up on the first line of `perform`, so @background_task was still nil and the
+  # marking silently did nothing. Tasks stayed `pending` for their whole run and
+  # `started_at` was never written — which also left a job killed mid-flight
+  # (OOM, SIGKILL: no exception to rescue) indistinguishable from one that never
+  # started.
   def find_task(task_id)
     @background_task = BackgroundTask.find(task_id)
+    mark_running
+    @background_task
   end
 
   def mark_running
