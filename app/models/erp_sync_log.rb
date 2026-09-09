@@ -1,5 +1,9 @@
 class ErpSyncLog < ApplicationRecord
-  SYNC_TYPES = %w[full incremental manual].freeze
+  # `manual` and `scheduled` record how the sync was triggered, `full` and
+  # `incremental` what it did. ErpScheduledSyncJob writes `scheduled`, so it
+  # has to be accepted here — without it every nightly sync died on
+  # ErpSyncLog.start! and no scheduled sync ever ran.
+  SYNC_TYPES = %w[full incremental manual scheduled].freeze
   ENTITY_TYPES = %w[products customers orders].freeze
   STATUSES = %w[running completed failed].freeze
 
