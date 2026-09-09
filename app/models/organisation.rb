@@ -3,6 +3,13 @@ class Organisation < ApplicationRecord
 
   SUPPORTED_CURRENCIES = %w[EUR CHF USD GBP].freeze
   OUT_OF_STOCK_STRATEGIES = %w[do_nothing deactivate hide].freeze
+
+  # What the shop may say about quantities. `none` is today's behaviour: in
+  # stock or not, and the cart corrects the quantity later. `bands` says
+  # "few left" using low_stock_threshold, which survives a stale sync — a
+  # band stays true while a number goes wrong the moment someone buys by
+  # phone. `exact` publishes the figure, and is only as good as the last sync.
+  STOREFRONT_STOCK_DISPLAYS = %w[none bands exact].freeze
   CART_STOCK_POLICIES = %w[allow warn remove].freeze
   CART_QTY_OVERFLOW_POLICIES = %w[allow warn cap].freeze
   CHECKOUT_STOCK_POLICIES = %w[allow warn block].freeze
@@ -60,6 +67,7 @@ class Organisation < ApplicationRecord
   validates :currency, presence: true, inclusion: { in: SUPPORTED_CURRENCIES }
   validates :default_locale, inclusion: { in: I18n.available_locales.map(&:to_s) }
   validates :out_of_stock_strategy, inclusion: { in: OUT_OF_STOCK_STRATEGIES }
+  validates :storefront_stock_display, inclusion: { in: STOREFRONT_STOCK_DISPLAYS }
   validates :cart_stock_policy, inclusion: { in: CART_STOCK_POLICIES }
   validates :shipping_mode, inclusion: { in: SHIPPING_MODES }
   validates :cart_qty_overflow_policy, inclusion: { in: CART_QTY_OVERFLOW_POLICIES }
@@ -135,6 +143,20 @@ class Organisation < ApplicationRecord
 
   def deactivate_out_of_stock?
     out_of_stock_strategy.in?(%w[deactivate hide])
+  end
+
+  # Whether quantities may be shown at all. Who actually sees them is a
+  # separate question, answered per company — see Customer#sees_stock_quantities.
+  def shows_stock_quantities?
+    storefront_stock_display != "none"
+  end
+
+  def shows_exact_stock?
+    storefront_stock_display == "exact"
+  end
+
+  def shows_stock_bands?
+    storefront_stock_display == "bands"
   end
 
   def hide_out_of_stock?

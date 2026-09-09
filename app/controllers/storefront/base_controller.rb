@@ -6,7 +6,24 @@ class Storefront::BaseController < ApplicationController
 
   helper_method :current_cart, :cart_item_count, :cart_line_item_count, :active_order_discounts,
                 :has_order_discounts?, :browsing_as_member?, :current_storefront_user,
-                :impersonation_cart_user, :visible_orders_scope
+                :impersonation_cart_user, :visible_orders_scope, :may_see_stock_quantities?
+
+  # The one place that answers whether the person looking at this page may see
+  # how much stock there is. Everything that discloses a quantity asks here, so
+  # the rule lives in one place and the number is withheld on the server rather
+  # than hidden in the markup — a quantity that reaches the browser is
+  # disclosed whatever the page chooses to render.
+  #
+  # A member is one of ours: back office staff and sales reps see quantities,
+  # including while impersonating a company that cannot. They are working, and
+  # the shop is where they work. For everyone else it is the company's own
+  # permission, granted deliberately in the back office.
+  def may_see_stock_quantities?
+    return false unless current_organisation&.shows_stock_quantities?
+    return true if current_member.present?
+
+    current_customer&.sees_stock_quantities? || false
+  end
 
   # The Order relation to display in storefront views. During impersonation,
   # the rep doesn't have their own CustomerUser session — orders are viewed
