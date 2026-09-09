@@ -219,6 +219,11 @@ en:
           other: "%{count} more categories"
         availability: "Availability"
         in_stock: "In Stock"
+        stock_units:
+          one: "%{count} unit"
+          other: "%{count} units"
+        stock_low: "Few left"
+        stock_available: "Available"
         out_of_stock: "Out of Stock"
         add_to_cart: "Add to cart"
         estimated_total: "Estimated total:"
@@ -250,6 +255,7 @@ en:
         grid:
           variant: "Variant"
           sku: "SKU"
+          stock: "Stock"
           price: "Price"
           quantity: "Quantity"
           show_more:

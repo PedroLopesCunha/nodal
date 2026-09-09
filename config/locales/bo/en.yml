@@ -1415,6 +1415,29 @@ en:
         reason_placeholder: "Enter reason for discount"
 
     # Pricing section
+    stock_visibility:
+      title: "Who sees quantities"
+      subtitle: "Companies allowed to see real stock in the shop"
+      permitted_companies: "Permitted companies"
+      permitted_companies_hint: "These companies see quantities. Every login of each company sees them."
+      add_companies: "Add companies"
+      add_all: "Add all (%{count})"
+      all_companies_hint: "Permit every company at once. Companies created afterwards are not covered."
+      pick_by_category: "Add every company in a category:"
+      search_placeholder: "Search a company by name or tax id…"
+      selected_count: "permitted"
+      done: "Done"
+      remove: "Remove"
+      no_category: "No category"
+      none_yet: "No company has been permitted yet."
+      who_else: "Who always sees"
+      who_else_hint: "Your team sees quantities regardless of this list: back office members and sales reps, including while acting as a company that is not permitted."
+      updated:
+        zero: "No company sees quantities."
+        one: "1 company now sees quantities."
+        other: "%{count} companies now see quantities."
+      not_enabled: "Choose what the shop shows about stock in the settings first."
+
     pricing:
       index:
         title: "Pricing & Discounts"
@@ -1952,6 +1975,17 @@ en:
         out_of_stock_strategy_hint: "Defines what happens automatically in the storefront when stock reaches zero (via ERP sync or manual edit). Variants with 'Track stock' disabled are not affected."
         low_stock_threshold: "Low stock threshold"
         low_stock_threshold_hint: "A variant is flagged 'At risk' when its stock is at or below this number. Used in the Stock control tab."
+        storefront_stock_display: "Show stock in the shop"
+        storefront_stock_display_hint: "What the shop may say about quantities. Who sees them is chosen company by company."
+        storefront_stock_none: "Do not show quantities"
+        storefront_stock_bands: "Bands (few left / available)"
+        storefront_stock_exact: "Exact quantity"
+        stock_visibility_manage: "Who sees quantities"
+        stock_visibility_manage_hint:
+          zero: "No company allowed — only your team sees quantities."
+          one: "1 company allowed, besides your team."
+          other: "%{count} companies allowed, besides your team."
+        stock_visibility_manage_action: "Manage companies"
         out_of_stock_do_nothing: "Track stock only"
         out_of_stock_deactivate: "Show 'Out of Stock' badge"
         out_of_stock_hide: "Hide from storefront"

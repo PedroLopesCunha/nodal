@@ -346,12 +346,17 @@ export default class extends Controller {
     }
 
     if (this.hasStockTarget) {
-      if (variant.purchasable) {
-        this.stockTarget.innerHTML = `<i class="fa-solid fa-circle-check me-1 text-success"></i> ${this.inStockTextValue}`
-      } else if (variant.track_stock && !variant.in_stock) {
-        this.stockTarget.innerHTML = `<i class="fa-solid fa-circle-xmark me-1 text-danger"></i> ${this.outOfStockTextValue}`
+      // The quantity comes ready as a label, and only for someone allowed to
+      // see it — the server decides both whether to say anything and how, so
+      // an organisation showing bands never ships the exact figure here.
+      const stockLabel = variant.stock_label
+        ? `<div class="text-muted small">${this.escapeHtml(variant.stock_label)}</div>`
+        : ""
+
+      if (variant.track_stock && !variant.in_stock && !variant.purchasable) {
+        this.stockTarget.innerHTML = `<i class="fa-solid fa-circle-xmark me-1 text-danger"></i> ${this.outOfStockTextValue}${stockLabel}`
       } else {
-        this.stockTarget.innerHTML = `<i class="fa-solid fa-circle-check me-1 text-success"></i> ${this.inStockTextValue}`
+        this.stockTarget.innerHTML = `<i class="fa-solid fa-circle-check me-1 text-success"></i> ${this.inStockTextValue}${stockLabel}`
       }
     }
 
@@ -387,5 +392,11 @@ export default class extends Controller {
   formatPrice(cents) {
     const amount = (cents / 100).toFixed(2)
     return `${this.currencySymbolValue}${amount}`
+  }
+
+  escapeHtml(value) {
+    const div = document.createElement("div")
+    div.textContent = value ?? ""
+    return div.innerHTML
   }
 }

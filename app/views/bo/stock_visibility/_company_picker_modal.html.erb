@@ -1,0 +1,62 @@
+<div class="modal fade" id="companyPickerModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">
+          <i class="fa-solid fa-building me-2"></i><%= t('bo.stock_visibility.add_companies') %>
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+
+      <div class="modal-body">
+        <%# The search input stays outside the frame so typing never re-renders
+            it and drops characters. Only the results below reload. %>
+        <div class="mb-3">
+          <div class="input-group input-group-sm">
+            <span class="input-group-text bg-white"><i class="fa-solid fa-magnifying-glass text-muted"></i></span>
+            <input type="text" class="form-control border-start-0"
+                   placeholder="<%= t('bo.stock_visibility.search_placeholder') %>"
+                   data-stock-visibility-target="search"
+                   data-action="input->stock-visibility#debouncedSearch keydown.enter->stock-visibility#preventSubmit"
+                   autocomplete="off">
+          </div>
+        </div>
+
+        <%# "Everyone" is its own intent, not a search result — it sits above the
+            search rather than pretending to be one of its rows. Still a
+            snapshot: a company created tomorrow is not covered by pressing it
+            today, exactly like the category buttons. %>
+        <div class="d-flex justify-content-between align-items-center mb-3 p-2 border rounded bg-light">
+          <div class="small text-muted"><%= t('bo.stock_visibility.all_companies_hint') %></div>
+          <button type="button" class="btn btn-sm btn-outline-primary text-nowrap"
+                  data-action="click->stock-visibility#addAll"
+                  data-url="<%= all_companies_bo_stock_visibility_path(params[:org_slug]) %>"
+                  data-stock-visibility-target="addAllButton">
+            <i class="fa-solid fa-check-double me-1"></i><%= t('bo.stock_visibility.add_all', count: current_organisation.customers.count) %>
+          </button>
+        </div>
+
+        <turbo-frame id="company_picker"
+                     data-stock-visibility-target="pickerFrame"
+                     data-search-url="<%= company_picker_bo_stock_visibility_path(params[:org_slug]) %>"
+                     src="<%= company_picker_bo_stock_visibility_path(params[:org_slug]) %>"
+                     loading="lazy">
+          <div class="text-center py-4">
+            <div class="spinner-border spinner-border-sm text-muted" role="status"></div>
+          </div>
+        </turbo-frame>
+      </div>
+
+      <div class="modal-footer d-flex justify-content-between">
+        <div class="text-muted small">
+          <i class="fa-solid fa-eye me-1"></i>
+          <strong data-stock-visibility-target="count"><%= @permitted_customers.size %></strong>
+          <%= t('bo.stock_visibility.selected_count') %>
+        </div>
+        <button type="button" class="btn btn-primary btn-sm" data-bs-dismiss="modal">
+          <%= t('bo.stock_visibility.done') %>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

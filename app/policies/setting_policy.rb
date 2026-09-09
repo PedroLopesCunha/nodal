@@ -12,6 +12,12 @@ class SettingPolicy < ApplicationPolicy
     admin_or_owner?
   end
 
+  # Deciding which companies see stock quantities is the same authority as
+  # turning the setting on in the first place.
+  def manage_stock_visibility?
+    admin_or_owner?
+  end
+
   private
 
   def admin_or_owner?

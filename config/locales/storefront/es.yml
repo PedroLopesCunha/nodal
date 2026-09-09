@@ -207,6 +207,11 @@ es:
           other: "%{count} categorías"
         availability: "Disponibilidad"
         in_stock: "En Stock"
+        stock_units:
+          one: "%{count} ud."
+          other: "%{count} uds."
+        stock_low: "Pocas unidades"
+        stock_available: "Disponible"
         out_of_stock: "Agotado"
         add_to_cart: "Añadir al carrito"
         estimated_total: "Total estimado:"
@@ -238,6 +243,7 @@ es:
         grid:
           variant: "Variante"
           sku: "SKU"
+          stock: "Stock"
           price: "Precio"
           quantity: "Cantidad"
           show_more:

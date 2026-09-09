@@ -1,0 +1,45 @@
+<%# Results for the picker. A category adds every company in it at once — the
+    category itself is never stored, only the companies it selected. %>
+<turbo-frame id="company_picker">
+  <% if @categories.any? %>
+    <div class="mb-3">
+      <div class="text-muted small mb-2"><%= t('bo.stock_visibility.pick_by_category') %></div>
+      <div class="d-flex flex-wrap gap-2">
+        <% @categories.each do |category| %>
+          <% ids = category.customers.where(organisation_id: current_organisation.id).pluck(:id) %>
+          <button type="button" class="btn btn-sm btn-outline-secondary"
+                  data-action="click->stock-visibility#addCategory"
+                  data-customer-ids="<%= ids.to_json %>"
+                  data-names="<%= category.customers.where(organisation_id: current_organisation.id).pluck(:company_name).to_json %>"
+                  <%= 'disabled' if ids.empty? %>>
+            <%= category.name %>
+            <span class="badge bg-secondary ms-1"><%= ids.size %></span>
+          </button>
+        <% end %>
+      </div>
+    </div>
+  <% end %>
+
+  <div class="list-group" style="max-height: 320px; overflow-y: auto;">
+    <% @customers.each do |customer| %>
+      <button type="button" class="list-group-item list-group-item-action d-flex align-items-center"
+              data-action="click->stock-visibility#addCompany"
+              data-customer-id="<%= customer.id %>"
+              data-company-name="<%= customer.company_name %>"
+              data-category-name="<%= customer.customer_category&.name %>"
+              data-taxpayer-id="<%= customer.taxpayer_id %>">
+        <div class="flex-grow-1 text-start">
+          <div class="fw-medium small"><%= customer.company_name %></div>
+          <small class="text-muted"><%= [ customer.customer_category&.name, customer.taxpayer_id ].compact_blank.join(" · ") %></small>
+        </div>
+        <i class="fa-solid fa-plus text-primary"></i>
+      </button>
+    <% end %>
+
+    <% if @customers.empty? %>
+      <div class="text-center py-4 text-muted">
+        <p class="mb-0"><%= t('bo.common.no_results', default: 'Sem resultados.') %></p>
+      </div>
+    <% end %>
+  </div>
+</turbo-frame>

@@ -1,0 +1,17 @@
+<%# One authorised company. The hidden field is the whole state: the form
+    submits the full list, so removing a row is what removes the permission. %>
+<div class="d-flex align-items-center gap-3 p-2 mb-2 border rounded"
+     data-stock-visibility-target="row" data-customer-id="<%= customer.id %>">
+  <input type="hidden" name="customer_ids[]" value="<%= customer.id %>">
+  <div class="flex-grow-1">
+    <strong><%= customer.company_name %></strong>
+    <small class="text-muted d-block">
+      <%= [ customer.customer_category&.name, customer.taxpayer_id ].compact_blank.join(" · ").presence || t('bo.stock_visibility.no_category') %>
+    </small>
+  </div>
+  <button type="button" class="btn btn-sm btn-link text-danger p-1"
+          data-action="click->stock-visibility#remove"
+          title="<%= t('bo.stock_visibility.remove') %>">
+    <i class="fa-solid fa-times"></i>
+  </button>
+</div>

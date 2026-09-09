@@ -6,16 +6,11 @@
     row_data.merge!(
       "variant-selector-variants-value" => @variants.map { |v|
         vd = @variant_discounts[v.id] || { has_discount: false, final_price_cents: v.unit_price_cents, discount_percentage: 0 }
-        {
+        variant_data = {
           id: v.id, name: v.name, sku: v.sku,
           price_cents: v.unit_price_cents,
           original_price_cents: @product.unit_price,
           attribute_value_ids: v.attribute_values.pluck(:id),
-          # No stock_quantity here. Nothing in the browser ever read it, and it
-          # put the real figure for every variant into the page source of every
-          # product, for everyone. Whether a customer may see quantities is a
-          # decision for the organisation, so the number has to be withheld on
-          # the server rather than merely not displayed.
           in_stock: v.in_stock?,
           track_stock: v.track_stock?, purchasable: v.purchasable?,
           photo_url: v.photo.attached? ? url_for(v.photo.variant(resize_to_limit: [400, 400])) : nil,
@@ -23,6 +18,16 @@
           final_price_cents: vd[:final_price_cents],
           discount_percentage: vd[:discount_percentage]
         }
+
+        # A label, never the raw figure. Withheld here rather than hidden in the
+        # markup: this payload used to carry the real quantity for every variant
+        # to every visitor, and no script ever read it. Sending the number and
+        # rendering a word would publish the number all the same, which matters
+        # when the organisation chose bands over exact quantities.
+        # Feeds the availability line, which already says "In stock" in words.
+        label = stock_display_label(v, beside_availability: true)
+        variant_data[:stock_label] = label if label.present?
+        variant_data
       }.to_json,
       "variant-selector-currency-symbol-value" => current_organisation.currency_symbol,
       "variant-selector-default-price-cents-value" => @default_variant&.unit_price_cents || @product.unit_price,
@@ -275,6 +280,10 @@
                   <% else %>
                     <i class="fa-solid fa-circle-xmark me-1 text-danger"></i>
                     <%= t('storefront.products.show.out_of_stock') %>
+                  <% end %>
+                  <% stock_label = stock_display_label(@default_variant, beside_availability: true) %>
+                  <% if stock_label.present? %>
+                    <div class="text-muted small"><%= stock_label %></div>
                   <% end %>
                 </div>
               </div>

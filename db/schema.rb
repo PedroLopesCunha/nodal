@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2026_09_04_170000) do
+ActiveRecord::Schema[7.1].define(version: 2026_09_09_180000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_trgm"
   enable_extension "plpgsql"
@@ -322,6 +322,7 @@ ActiveRecord::Schema[7.1].define(version: 2026_09_04_170000) do
     t.string "last_sign_in_ip"
     t.boolean "hide_prices", default: false, null: false
     t.bigint "created_by_member_id"
+    t.boolean "sees_stock_quantities", default: false, null: false
     t.index ["created_by_member_id"], name: "index_customers_on_created_by_member_id"
     t.index ["customer_category_id"], name: "index_customers_on_customer_category_id"
     t.index ["email", "organisation_id"], name: "index_customers_on_email_and_organisation_id", unique: true, where: "((email)::text <> ''::text)"
@@ -330,6 +331,7 @@ ActiveRecord::Schema[7.1].define(version: 2026_09_04_170000) do
     t.index ["invited_by_type", "invited_by_id"], name: "index_customers_on_invited_by"
     t.index ["locale"], name: "index_customers_on_locale"
     t.index ["organisation_id", "external_id", "external_source"], name: "index_customers_on_org_external_id_source", unique: true, where: "(external_id IS NOT NULL)"
+    t.index ["organisation_id", "sees_stock_quantities"], name: "index_customers_on_org_and_stock_visibility"
     t.index ["organisation_id", "taxpayer_id"], name: "index_customers_on_org_id_taxpayer_id_unique", unique: true, where: "((taxpayer_id IS NOT NULL) AND ((taxpayer_id)::text <> ''::text))"
     t.index ["organisation_id"], name: "index_customers_on_organisation_id"
     t.index ["reset_password_token"], name: "index_customers_on_reset_password_token", unique: true
@@ -655,6 +657,7 @@ ActiveRecord::Schema[7.1].define(version: 2026_09_04_170000) do
     t.boolean "show_product_sku_on_card", default: false, null: false
     t.string "shipping_mode", default: "fixed", null: false
     t.boolean "email_automation_enabled", default: true, null: false
+    t.string "storefront_stock_display", default: "none", null: false
     t.index ["custom_domain"], name: "index_organisations_on_custom_domain", unique: true, where: "(custom_domain IS NOT NULL)"
     t.index ["default_locale"], name: "index_organisations_on_default_locale"
     t.index ["slug"], name: "index_organisations_on_slug", unique: true
