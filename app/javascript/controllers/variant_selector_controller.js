@@ -350,7 +350,7 @@ export default class extends Controller {
       // see it — the server decides both whether to say anything and how, so
       // an organisation showing bands never ships the exact figure here.
       const stockLabel = variant.stock_label
-        ? ` <span class="text-muted small ms-1">${this.escapeHtml(variant.stock_label)}</span>`
+        ? `<div class="text-muted small">${this.escapeHtml(variant.stock_label)}</div>`
         : ""
 
       if (variant.track_stock && !variant.in_stock && !variant.purchasable) {

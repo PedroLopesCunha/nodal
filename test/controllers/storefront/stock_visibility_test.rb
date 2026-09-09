@@ -213,14 +213,30 @@ class Storefront::StockVisibilityTest < ActionDispatch::IntegrationTest
     assert_no_match(/\b3 uni/, response.body)
   end
 
-  test "bands say available when there is plenty" do
+  # Next to a line that already reads "In stock", a band saying "Available"
+  # says the same thing twice. Only the warning earns its place there.
+  test "bands stay quiet beside the availability line when there is plenty" do
     @org.update!(storefront_stock_display: "bands", low_stock_threshold: 5)
     @customer.update!(sees_stock_quantities: true)
     @variant.update!(stock_quantity: 40)
     sign_in @customer_user
 
-    assert_equal I18n.t("storefront.products.show.stock_available"), variant_payload["stock_label"]
+    assert_not variant_payload.key?("stock_label")
     assert_no_match(/8675309|40 uni/, response.body)
+  end
+
+  # The grid column has no words around it, so it has to say something.
+  test "the grid column says available when there is plenty" do
+    @org.update!(storefront_stock_display: "bands", low_stock_threshold: 5)
+    @customer.update!(sees_stock_quantities: true)
+    @variant.update!(stock_quantity: 40)
+    @product.update!(add_to_cart_mode: "grid")
+    sign_in @customer_user
+
+    get product_path(org_slug: @org.slug, id: @product.id)
+
+    assert_response :success
+    assert_select "td", text: I18n.t("storefront.products.show.stock_available")
   end
 
   # A variant that is not counted has no quantity to report.

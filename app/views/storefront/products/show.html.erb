@@ -24,7 +24,8 @@
         # to every visitor, and no script ever read it. Sending the number and
         # rendering a word would publish the number all the same, which matters
         # when the organisation chose bands over exact quantities.
-        label = stock_display_label(v)
+        # Feeds the availability line, which already says "In stock" in words.
+        label = stock_display_label(v, beside_availability: true)
         variant_data[:stock_label] = label if label.present?
         variant_data
       }.to_json,
@@ -280,9 +281,9 @@
                     <i class="fa-solid fa-circle-xmark me-1 text-danger"></i>
                     <%= t('storefront.products.show.out_of_stock') %>
                   <% end %>
-                  <% stock_label = stock_display_label(@default_variant) %>
+                  <% stock_label = stock_display_label(@default_variant, beside_availability: true) %>
                   <% if stock_label.present? %>
-                    <span class="text-muted small ms-1"><%= stock_label %></span>
+                    <div class="text-muted small"><%= stock_label %></div>
                   <% end %>
                 </div>
               </div>
