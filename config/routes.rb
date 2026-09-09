@@ -183,6 +183,7 @@ Rails.application.routes.draw do
           delete :delete_photo
           patch :set_main_photo
           get :related_products
+          get :related_products_search
           patch :update_related_products
           patch :reorder_related_products
         end

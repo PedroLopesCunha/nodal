@@ -1075,6 +1075,21 @@ pt:
         attributes_assigned: "Atributos"
         values_selected: "Valores"
         variants_count: "Variantes"
+      related:
+        title: "Produtos relacionados"
+        selected_products: "Produtos escolhidos"
+        selected_description: "Arraste para ordenar. Estes produtos aparecem primeiro na página do produto."
+        no_products_selected: "Ainda não escolheu nenhum produto relacionado."
+        available_products: "Adicionar produtos"
+        search_placeholder: "Pesquisar por nome, referência ou categoria…"
+        same_category_hint: "Produtos da mesma categoria. Pesquise para encontrar outros."
+        no_products_available: "Não há produtos para adicionar."
+        settings: "Definições"
+        hide_for_product: "Não mostrar produtos relacionados neste produto"
+        hide_description: "Quando ligado, a página deste produto não mostra produtos relacionados."
+        auto_fill: "Preenchimento automático"
+        auto_fill_description: "Quando estão escolhidos menos de 4 produtos, o sistema completa com produtos da mesma categoria."
+        updated: "Produtos relacionados atualizados"
 
     # Secção Categorias
     categories:
