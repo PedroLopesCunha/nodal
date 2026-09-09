@@ -19,8 +19,13 @@ module Erp
       return skip("ERP disabled or not configured") unless @erp_config&.can_sync_orders?
       return skip("Order not placed") unless @order.placed?
       return skip("Order already synced") if @order.push_synced?
-      return skip("Push attempts exhausted") if @order.push_exhausted?
-      return skip("Customer has no external_id") if @order.customer&.external_id.blank?
+
+      # Recorded, not merely refused. Both of these are about this order and
+      # mean it will not reach the ERP without someone stepping in — leaving it
+      # sitting at `pending` with no reason made it look like it was still on
+      # its way, and the back office had no way to tell the difference.
+      return refuse("Push attempts exhausted") if @order.push_exhausted?
+      return refuse("Customer has no external_id") if @order.customer&.external_id.blank?
 
       adapter = @erp_config.adapter
       return skip("Adapter does not support push") unless adapter&.supports_push?
@@ -52,7 +57,16 @@ module Erp
 
     private
 
+    # A no-op that says nothing about this particular order — the org has no ERP
+    # configured, the order is a draft, it is already synced. Nothing to record.
     def skip(reason)
+      Result.new(success?: false, order: @order, error: reason)
+    end
+
+    # A refusal that is about this order. It goes on the record, so the order
+    # never sits in a state that suggests it is still queued when it is not.
+    def refuse(reason)
+      mark_failed(reason)
       Result.new(success?: false, order: @order, error: reason)
     end
 

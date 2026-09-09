@@ -148,7 +148,11 @@ class Bo::OrdersController < Bo::BaseController
 
   def retry_push
     authorize @order
-    @order.update!(push_status: "pending", sync_error: nil)
+    # A person clicking this is saying "I fixed it, try again", so the attempt
+    # budget starts over — without that the push refused itself immediately and
+    # left the order sitting at `pending`, with the retry button gone because
+    # it only shows for `failed`. Clearing last_pushed_at skips the cooldown.
+    @order.update!(push_status: "pending", push_attempts: 0, sync_error: nil, last_pushed_at: nil)
     OrderPushJob.perform_later(@order.id)
     redirect_to bo_orders_path(org_slug: @current_organisation.slug, **filter_params_hash),
                 notice: t('bo.orders.push_retry.queued', number: @order.order_number, default: "Push queued for order %{number}")

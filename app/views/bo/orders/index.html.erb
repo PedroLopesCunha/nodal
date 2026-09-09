@@ -235,7 +235,10 @@
               <% end %>
               <td class="text-end order-actions" onclick="event.stopPropagation();">
                 <div class="d-inline-flex align-items-center gap-1 flex-nowrap justify-content-end">
-                  <% if @current_organisation.erp_configuration&.sync_orders? && order.push_failed? %>
+                  <%# Any order that will not move on its own, not just `failed`: an order that
+                      ran out of attempts sat at `pending` and the button vanished exactly
+                      when it was needed. %>
+                  <% if @current_organisation.erp_configuration&.sync_orders? && order.push_stuck? %>
                     <%= button_to retry_push_bo_order_path(org_slug: @current_organisation.slug, id: order.id, **filter_params_hash), method: :post, form: { class: "d-inline m-0" }, class: "btn btn-sm btn-link text-warning p-1", title: t('bo.orders.push_retry.button', default: 'Retry ERP push') do %>
                       <i class="fa-solid fa-rotate-right"></i>
                     <% end %>
