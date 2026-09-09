@@ -38,10 +38,15 @@ namespace :related_products do
       RelatedProduct.create_missing_mirrors!(scope: scope, dry_run: dry_run)
     end
 
-    names = Product.where(id: result[:created].flatten.uniq).pluck(:id, :name).to_h
+    # Names alone are ambiguous here: this catalog has 45 products called
+    # "Moldura Criança" and 32 called "Conjunto de 2 Peças", so the id is what
+    # makes a line auditable.
+    labels = Product.where(id: result[:created].flatten.uniq).pluck(:id, :name, :sku).to_h do |id, name, sku|
+      [ id, "#{name}#{sku.present? ? " (#{sku})" : ""} ##{id}" ]
+    end
 
     result[:created].first(20).each do |from_id, to_id|
-      puts "  + #{names[from_id] || from_id} → #{names[to_id] || to_id}"
+      puts "  + #{labels[from_id] || from_id} → #{labels[to_id] || to_id}"
     end
     puts "  ... e mais #{result[:created].size - 20}" if result[:created].size > 20
 
