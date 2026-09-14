@@ -44,6 +44,18 @@ class Dashboard::MetricsTest < ActiveSupport::TestCase
     assert_equal 1, health[:uninvited_users]
   end
 
+  # A login can be accepted without invitation_sent_at (created outside the
+  # invite flow). It must land in active_users only, so the tiles add up.
+  test "accepted login without invitation_sent_at is active, not uninvited" do
+    c = build_customer("c_accepted_uninvited")
+    build_user(c, "e", invitation_accepted_at: 2.days.ago)
+
+    health = Dashboard::Metrics.customer_health(organisation: @org)
+
+    assert_equal 1, health[:active_users]
+    assert_equal 0, health[:uninvited_users]
+  end
+
   test "online_now reflects empresas with at least one user seen in 5 min" do
     c = build_customer("c1")
     build_user(c, "online", invitation_sent_at: 1.day.ago, invitation_accepted_at: 1.day.ago,

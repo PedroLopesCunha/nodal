@@ -15,6 +15,7 @@ class Bo::CustomersController < Bo::BaseController
         .customer_health(organisation: current_organisation)
         .slice(:total_customers, :active_users, :pending_users, :stale_pending_users, :uninvited_users,
                :no_email_users)
+      @rep_filter_options = rep_filter_options
     end
   end
 
@@ -145,7 +146,7 @@ class Bo::CustomersController < Bo::BaseController
 
   def filter_params_hash
     { query: params[:query], status: params[:status], category: params[:category],
-      sort: params[:sort], direction: params[:direction], page: params[:page] }.compact_blank
+      email: params[:email], rep: params[:rep], sort: params[:sort], direction: params[:direction], page: params[:page] }.compact_blank
   end
 
   def sort_link_params(column)
@@ -232,6 +233,19 @@ class Bo::CustomersController < Bo::BaseController
     @last_customer_sync = current_organisation.erp_sync_logs.for_entity('customers').completed.recent.first if current_organisation.erp_configuration&.enabled?
   end
 
+  # Current reps plus anyone who lost the flag but still holds a carteira —
+  # otherwise those customers could no longer be found by rep.
+  def rep_filter_options
+    members = current_organisation.org_members
+    assigned_ids = CustomerAssignment.joins(:customer)
+                                     .where(customers: { organisation_id: current_organisation.id })
+                                     .select(:org_member_id)
+    members.where(is_sales_rep: true).or(members.where(id: assigned_ids))
+           .accepted.includes(:member)
+           .sort_by { |om| om.display_name.to_s.squish.downcase }
+           .map { |om| [om.display_name.to_s.squish, om.id.to_s] }
+  end
+
   def apply_customer_filters(scope)
     if params[:query].present?
       scope = scope.where(
@@ -243,8 +257,6 @@ class Bo::CustomersController < Bo::BaseController
     case params[:status]
     when "pending_erp_sync"
       scope = scope.pending_erp_sync if erp_customer_sync_enabled?
-    when "no_rep"
-      scope = scope.left_joins(:customer_assignment).where(customer_assignments: { id: nil })
     when "no_email"
       # The rep's call/visit list: empresas that can't be invited until someone
       # collects an address. They can still be sold to via impersonation.
@@ -277,11 +289,15 @@ class Bo::CustomersController < Bo::BaseController
                    .where.not(id: accepted_ids)
                    .distinct
     when "not_invited"
-      # No logins yet, or none have been invited.
+      # No logins yet, or none have been invited or accepted. Accepted counts
+      # as invited: a login can be accepted without an invitation_sent_at.
       invited_ids = Customer.joins(:customer_users)
                             .where.not(customer_users: { invitation_sent_at: nil })
                             .select(:id)
-      scope = scope.where(active: true).where.not(id: invited_ids)
+      accepted_ids = Customer.joins(:customer_users)
+                             .where.not(customer_users: { invitation_accepted_at: nil })
+                             .select(:id)
+      scope = scope.where(active: true).where.not(id: invited_ids).where.not(id: accepted_ids)
     when "stale_pending"
       # At least one login invited >= 7 days ago and none accepted.
       accepted_ids = Customer.joins(:customer_users)
@@ -292,6 +308,25 @@ class Bo::CustomersController < Bo::BaseController
                    .where("customer_users.invitation_sent_at <= ?", 7.days.ago)
                    .where.not(id: accepted_ids)
                    .distinct
+    end
+
+    # Independent of status, so it narrows any of them — e.g. "Por convidar"
+    # with email are the ones that can be invited right away.
+    case params[:email]
+    when "with"
+      scope = scope.where.not(email: [nil, ""])
+    when "without"
+      scope = scope.without_email
+    end
+
+    # Subqueries, not joins: a join on customer_assignments next to the
+    # includes(customer_assignment:) would turn it into an eager_load, which
+    # drops the login_agg columns from load_customers' custom select.
+    case params[:rep]
+    when "none"
+      scope = scope.where.not(id: CustomerAssignment.select(:customer_id))
+    when /\A\d+\z/
+      scope = scope.where(id: CustomerAssignment.where(org_member_id: params[:rep]).select(:customer_id))
     end
 
     case params[:activity]

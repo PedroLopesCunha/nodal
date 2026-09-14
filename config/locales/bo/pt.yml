@@ -558,6 +558,11 @@ pt:
         filters:
           all_statuses: "Todos os Estados"
           all_categories: "Todas as Categorias"
+          all_emails: "Com e sem email"
+          with_email: "Com email"
+          without_email: "Sem email"
+          all_reps: "Todos os vendedores"
+          no_rep: "Sem vendedor atribuído"
           active_filters: "Filtros ativos"
         table:
           customer: "Cliente"
