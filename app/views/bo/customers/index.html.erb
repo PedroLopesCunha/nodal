@@ -29,6 +29,11 @@
         <a href="#" class="btn btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#exportModal">
           <i class="fa-solid fa-download"></i> <%= t('bo.common.actions.export') %>
         </a>
+        <% if policy(Customer).bulk_invite? %>
+          <a href="#" class="btn btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#bulkInvitationModal">
+            <i class="fa-solid fa-paper-plane"></i> <%= t('bo.bulk_invitations.button') %>
+          </a>
+        <% end %>
         <%= link_to new_bo_customer_path(params[:org_slug]), class: "btn btn-primary" do %>
           <i class="fa-solid fa-plus"></i> <%= t('bo.common.actions.add_new') %>
         <% end %>
@@ -322,6 +327,10 @@
     <%= render 'customer_categories' %>
   <% end %>
 </div>
+
+<% if @tab == 'customers' && policy(Customer).bulk_invite? %>
+  <%= render "bo/bulk_invitations/modal", rep_options: @rep_filter_options %>
+<% end %>
 
 <%= render "bo/shared/export_modal",
     columns: Customer.exportable_columns,

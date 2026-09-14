@@ -550,6 +550,41 @@ en:
         units: "Units Sold"
 
     # Customers section
+    bulk_invitations:
+      button: "Invite customers"
+      modal:
+        title: "Invite customers"
+        subtitle: "Send the storefront access invitation to several customers at once."
+        recent_note_html: "Customers invited in the <strong>last 48 hours</strong> start unticked, so they don't get two emails in a row — tick them if you do want to resend. Resending replaces the previous invitation link."
+        customers_selected: "customers selected"
+        emails_to_send: "emails to send"
+        send: "Send invitations"
+        confirm: "Send __EMAILS__ invitation emails? Sending runs in the background and you can follow it in Tasks."
+      filters:
+        search: "Search"
+        search_placeholder: "Company, contact, email or code..."
+        status: "Status"
+        both: "Not invited and pending"
+        sent_between: "Invited between"
+        and: "and"
+        rep: "Sales rep"
+      picker:
+        summary: "%{total} customers · %{eligible} can be invited"
+        select_all: "Tick all"
+        select_none: "Untick all"
+        recently_invited: "Invited %{time} ago"
+        pending_since: "Pending · invited on %{date}"
+        emails:
+          one: "1 email"
+          other: "%{count} emails"
+        empty: "No customers match these filters."
+      ineligible:
+        inactive: "Inactive customer"
+        accepted: "Already accepted"
+        logins_deactivated: "Logins deactivated"
+        no_email: "No email"
+      flash:
+        none_selected: "No customers selected."
     customers:
       index:
         title: "Customers"
@@ -2271,6 +2306,8 @@ en:
         title: "Exporting order items"
       export_customers:
         title: "Exporting customers"
+      bulk_customer_invitation:
+        title: "Sending customer invitations"
       no_file: "File not available"
       statuses:
         pending: "Pending"

@@ -1,5 +1,6 @@
 class Bo::CustomersController < Bo::BaseController
   include Exportable
+  include RepFilterOptions
 
   before_action :set_and_authorize_customer, only: [:show, :edit, :update, :destroy, :logins_modal]
 
@@ -231,19 +232,6 @@ class Bo::CustomersController < Bo::BaseController
     @pagy, @customers = pagy(@customers)
 
     @last_customer_sync = current_organisation.erp_sync_logs.for_entity('customers').completed.recent.first if current_organisation.erp_configuration&.enabled?
-  end
-
-  # Current reps plus anyone who lost the flag but still holds a carteira —
-  # otherwise those customers could no longer be found by rep.
-  def rep_filter_options
-    members = current_organisation.org_members
-    assigned_ids = CustomerAssignment.joins(:customer)
-                                     .where(customers: { organisation_id: current_organisation.id })
-                                     .select(:org_member_id)
-    members.where(is_sales_rep: true).or(members.where(id: assigned_ids))
-           .accepted.includes(:member)
-           .sort_by { |om| om.display_name.to_s.squish.downcase }
-           .map { |om| [om.display_name.to_s.squish, om.id.to_s] }
   end
 
   def apply_customer_filters(scope)

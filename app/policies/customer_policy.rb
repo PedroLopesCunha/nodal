@@ -41,6 +41,11 @@ class CustomerPolicy < ApplicationPolicy
     customer_in_carteira?(record)
   end
 
+  # Emails many customers in one go — owners and admins only for now.
+  def bulk_invite?
+    member_working_for_organisation? && admin_or_owner?
+  end
+
   # Manage logins modal — same gate as invite (creating/editing logins is
   # the rep's path to onboarding customers in their carteira).
   def logins_modal?

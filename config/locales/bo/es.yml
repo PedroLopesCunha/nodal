@@ -478,6 +478,41 @@ es:
         units: "Unidades Vendidas"
 
     # Sección Clientes
+    bulk_invitations:
+      button: "Invitar clientes"
+      modal:
+        title: "Invitar clientes"
+        subtitle: "Envía la invitación de acceso a la tienda a varios clientes a la vez."
+        recent_note_html: "Los clientes invitados en las <strong>últimas 48 horas</strong> aparecen desmarcados, para que no reciban dos emails seguidos — márcalos si quieres reenviar. Reenviar sustituye el enlace de la invitación anterior."
+        customers_selected: "clientes seleccionados"
+        emails_to_send: "emails a enviar"
+        send: "Enviar invitaciones"
+        confirm: "¿Enviar __EMAILS__ emails de invitación? El envío se ejecuta en segundo plano y puedes seguirlo en Tareas."
+      filters:
+        search: "Búsqueda"
+        search_placeholder: "Empresa, contacto, email o código..."
+        status: "Estado"
+        both: "Por invitar y pendientes"
+        sent_between: "Invitados entre"
+        and: "y"
+        rep: "Vendedor"
+      picker:
+        summary: "%{total} clientes · %{eligible} pueden ser invitados"
+        select_all: "Marcar todos"
+        select_none: "Desmarcar todos"
+        recently_invited: "Invitado hace %{time}"
+        pending_since: "Pendiente · invitado el %{date}"
+        emails:
+          one: "1 email"
+          other: "%{count} emails"
+        empty: "Ningún cliente con estos filtros."
+      ineligible:
+        inactive: "Cliente inactivo"
+        accepted: "Ya aceptó la invitación"
+        logins_deactivated: "Logins desactivados"
+        no_email: "Sin email"
+      flash:
+        none_selected: "Ningún cliente seleccionado."
     customers:
       index:
         title: "Clientes"

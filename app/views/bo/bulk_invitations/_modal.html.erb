@@ -1,0 +1,93 @@
+<%# locals: rep_options
+    The filters sit outside the turbo frame so typing never re-renders them;
+    only the list below reloads. The form wraps the frame so the ticked
+    checkboxes it loads are what gets posted. %>
+<div class="modal fade" id="bulkInvitationModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-xl modal-dialog-scrollable">
+    <%= form_with url: bo_bulk_invitation_path(params[:org_slug]), method: :post,
+                  class: "modal-content",
+                  data: { controller: "bulk-invitation", action: "submit->bulk-invitation#confirmSubmit", turbo_frame: "_top",
+                          bulk_invitation_confirm_value: t("bo.bulk_invitations.modal.confirm", emails: "__EMAILS__") } do %>
+      <div class="modal-header">
+        <div>
+          <h5 class="modal-title">
+            <i class="fa-solid fa-paper-plane me-2"></i><%= t("bo.bulk_invitations.modal.title") %>
+          </h5>
+          <small class="text-muted"><%= t("bo.bulk_invitations.modal.subtitle") %></small>
+        </div>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+
+      <div class="modal-body">
+        <div class="row g-2 mb-3">
+          <div class="col-md-4">
+            <label class="form-label small text-muted mb-1"><%= t("bo.bulk_invitations.filters.search") %></label>
+            <div class="input-group input-group-sm">
+              <span class="input-group-text bg-white"><i class="fa-solid fa-magnifying-glass text-muted"></i></span>
+              <input type="text" class="form-control border-start-0" autocomplete="off"
+                     placeholder="<%= t("bo.bulk_invitations.filters.search_placeholder") %>"
+                     data-bulk-invitation-target="query"
+                     data-action="input->bulk-invitation#debouncedReload keydown.enter->bulk-invitation#preventSubmit">
+            </div>
+          </div>
+          <div class="col-md-2">
+            <label class="form-label small text-muted mb-1"><%= t("bo.bulk_invitations.filters.status") %></label>
+            <select class="form-select form-select-sm" data-bulk-invitation-target="status" data-action="change->bulk-invitation#statusChanged">
+              <option value="not_invited"><%= t("bo.common.statuses.not_invited") %></option>
+              <option value="pending"><%= t("bo.common.statuses.pending") %></option>
+              <option value="all"><%= t("bo.bulk_invitations.filters.both") %></option>
+            </select>
+          </div>
+          <div class="col-md-4">
+            <label class="form-label small text-muted mb-1"><%= t("bo.bulk_invitations.filters.sent_between") %></label>
+            <div class="input-group input-group-sm">
+              <input type="date" class="form-control" data-bulk-invitation-target="sentFrom" data-action="change->bulk-invitation#dateChanged">
+              <span class="input-group-text"><%= t("bo.bulk_invitations.filters.and") %></span>
+              <input type="date" class="form-control" data-bulk-invitation-target="sentTo" data-action="change->bulk-invitation#dateChanged">
+            </div>
+          </div>
+          <div class="col-md-2">
+            <label class="form-label small text-muted mb-1"><%= t("bo.bulk_invitations.filters.rep") %></label>
+            <select class="form-select form-select-sm" data-bulk-invitation-target="rep" data-action="change->bulk-invitation#reload">
+              <option value=""><%= t("bo.customers.index.filters.all_reps") %></option>
+              <option value="none"><%= t("bo.customers.index.filters.no_rep") %></option>
+              <%= options_for_select(rep_options) %>
+            </select>
+          </div>
+        </div>
+
+        <div class="alert alert-light border small py-2 mb-3">
+          <i class="fa-solid fa-circle-info text-primary me-1"></i>
+          <%= t("bo.bulk_invitations.modal.recent_note_html") %>
+        </div>
+
+        <turbo-frame id="bulk_invitation_picker"
+                     data-bulk-invitation-target="frame"
+                     data-url="<%= new_bo_bulk_invitation_path(params[:org_slug]) %>"
+                     data-action="turbo:frame-load->bulk-invitation#refresh"
+                     src="<%= new_bo_bulk_invitation_path(params[:org_slug]) %>"
+                     loading="lazy">
+          <div class="text-center py-5">
+            <div class="spinner-border spinner-border-sm text-muted" role="status"></div>
+          </div>
+        </turbo-frame>
+      </div>
+
+      <div class="modal-footer d-flex justify-content-between">
+        <div class="small">
+          <strong data-bulk-invitation-target="customerCount">0</strong> <%= t("bo.bulk_invitations.modal.customers_selected") %>
+          &middot;
+          <strong data-bulk-invitation-target="emailCount">0</strong> <%= t("bo.bulk_invitations.modal.emails_to_send") %>
+        </div>
+        <div class="d-flex gap-2">
+          <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">
+            <%= t("bo.common.actions.cancel") %>
+          </button>
+          <button type="submit" class="btn btn-primary btn-sm" disabled data-bulk-invitation-target="submit">
+            <i class="fa-solid fa-paper-plane me-1"></i><%= t("bo.bulk_invitations.modal.send") %>
+          </button>
+        </div>
+      </div>
+    <% end %>
+  </div>
+</div>
