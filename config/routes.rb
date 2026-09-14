@@ -109,6 +109,9 @@ Rails.application.routes.draw do
           post :retry_push
         end
       end
+      # Picker (turbo frame, new) and send (create) for inviting many
+      # customers at once from the customers page.
+      resource :bulk_invitation, only: [:new, :create]
       resources :customers do
         collection do
           get :export

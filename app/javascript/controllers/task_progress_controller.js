@@ -129,6 +129,8 @@ export default class extends Controller {
     if (stats.products_matched) statItems.push(`<strong>${stats.products_matched}</strong> produto(s) com foto`)
     if (stats.product_count) statItems.push(`<strong>${stats.product_count}</strong> produto(s) no catálogo`)
     if (stats.record_count) statItems.push(`<strong>${stats.record_count}</strong> registo(s) exportado(s)`)
+    if (stats.invitations_sent !== undefined) statItems.push(`<strong>${stats.invitations_sent}</strong> convite(s) enviado(s)`)
+    if (stats.customers_invited !== undefined) statItems.push(`<strong>${stats.customers_invited}</strong> cliente(s) convidado(s)`)
 
     if (statItems.length > 0) {
       html += `<div class="alert alert-success"><i class="fa-solid fa-check-circle me-1"></i> ${statItems.join(" &middot; ")}</div>`

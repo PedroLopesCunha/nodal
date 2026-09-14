@@ -547,6 +547,41 @@ pt:
         units: "Unidades Vendidas"
 
     # Secção Clientes
+    bulk_invitations:
+      button: "Convidar clientes"
+      modal:
+        title: "Convidar clientes"
+        subtitle: "Envia o convite de acesso à loja a vários clientes de uma vez."
+        recent_note_html: "Clientes convidados nas <strong>últimas 48 horas</strong> aparecem desmarcados, para não receberem dois emails seguidos — marca-os se quiseres mesmo reenviar. Reenviar substitui o link do convite anterior."
+        customers_selected: "clientes selecionados"
+        emails_to_send: "emails a enviar"
+        send: "Enviar convites"
+        confirm: "Enviar __EMAILS__ emails de convite? O envio corre em segundo plano e podes acompanhar em Tarefas."
+      filters:
+        search: "Pesquisa"
+        search_placeholder: "Empresa, contacto, email ou código..."
+        status: "Estado"
+        both: "Por convidar e pendentes"
+        sent_between: "Convidados entre"
+        and: "e"
+        rep: "Vendedor"
+      picker:
+        summary: "%{total} clientes · %{eligible} podem ser convidados"
+        select_all: "Marcar todos"
+        select_none: "Desmarcar todos"
+        recently_invited: "Convidado há %{time}"
+        pending_since: "Pendente · convidado a %{date}"
+        emails:
+          one: "1 email"
+          other: "%{count} emails"
+        empty: "Nenhum cliente com estes filtros."
+      ineligible:
+        inactive: "Cliente inativo"
+        accepted: "Já aceitou o convite"
+        logins_deactivated: "Logins desativados"
+        no_email: "Sem email"
+      flash:
+        none_selected: "Nenhum cliente selecionado."
     customers:
       index:
         title: "Clientes"
@@ -2275,6 +2310,8 @@ pt:
         title: "A exportar linhas de encomenda"
       export_customers:
         title: "A exportar clientes"
+      bulk_customer_invitation:
+        title: "A enviar convites a clientes"
       no_file: "Ficheiro não disponível"
       statuses:
         pending: "Pendente"

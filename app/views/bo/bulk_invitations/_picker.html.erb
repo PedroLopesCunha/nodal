@@ -1,0 +1,82 @@
+<%# The picker's list. Every invitable customer starts ticked except those
+    invited in the last 48 hours; the ones that can't be invited are listed
+    after, unticked and disabled, with the reason. %>
+<turbo-frame id="bulk_invitation_picker">
+  <% eligible = @candidates.select(&:eligible?) %>
+
+  <div class="d-flex justify-content-between align-items-center mb-2 small">
+    <div class="text-muted">
+      <%= t("bo.bulk_invitations.picker.summary", total: @candidates.size, eligible: eligible.size) %>
+    </div>
+    <% if eligible.any? %>
+      <div class="d-flex gap-2">
+        <button type="button" class="btn btn-link btn-sm p-0" data-action="bulk-invitation#selectAll">
+          <%= t("bo.bulk_invitations.picker.select_all") %>
+        </button>
+        <span class="text-muted">&middot;</span>
+        <button type="button" class="btn btn-link btn-sm p-0" data-action="bulk-invitation#selectNone">
+          <%= t("bo.bulk_invitations.picker.select_none") %>
+        </button>
+      </div>
+    <% end %>
+  </div>
+
+  <div class="list-group" style="max-height: 50vh; overflow-y: auto;">
+    <% @candidates.each do |candidate| %>
+      <% customer = candidate.customer %>
+      <% rep = customer.customer_assignment&.org_member %>
+      <label class="list-group-item d-flex align-items-center gap-3 <%= 'bg-light text-muted' unless candidate.eligible? %>"
+             style="<%= 'cursor: pointer;' if candidate.eligible? %>">
+        <input type="checkbox" class="form-check-input flex-shrink-0 m-0"
+               name="customer_ids[]" value="<%= customer.id %>"
+               data-bulk-invitation-target="checkbox"
+               data-emails="<%= candidate.email_count %>"
+               data-action="bulk-invitation#refresh"
+               <%= 'checked' if candidate.eligible? && !candidate.recently_invited? %>
+               <%= 'disabled' unless candidate.eligible? %>>
+
+        <div class="flex-grow-1 min-width-0">
+          <div class="fw-medium small text-truncate"><%= customer.company_name %></div>
+          <small class="text-muted">
+            <%= [customer.external_id, rep&.display_name.to_s.squish.presence].compact_blank.join(" · ") %>
+          </small>
+        </div>
+
+        <div class="d-flex flex-wrap justify-content-end gap-1 text-nowrap">
+          <% if candidate.recently_invited? %>
+            <span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle"
+                  title="<%= l(candidate.last_sent_at, format: :short) %>">
+              <i class="fa-solid fa-clock-rotate-left me-1"></i><%= t("bo.bulk_invitations.picker.recently_invited", time: time_ago_in_words(candidate.last_sent_at)) %>
+            </span>
+          <% end %>
+
+          <% if candidate.status == :pending %>
+            <span class="badge bg-info-subtle text-info-emphasis">
+              <%= t("bo.bulk_invitations.picker.pending_since", date: l(candidate.last_sent_at.to_date, format: :short)) %>
+            </span>
+          <% else %>
+            <span class="badge bg-secondary-subtle text-secondary-emphasis"><%= t("bo.common.statuses.not_invited") %></span>
+          <% end %>
+
+          <% if candidate.eligible? %>
+            <% if candidate.email_count > 1 %>
+              <span class="badge bg-primary-subtle text-primary-emphasis">
+                <i class="fa-solid fa-envelope me-1"></i><%= t("bo.bulk_invitations.picker.emails", count: candidate.email_count) %>
+              </span>
+            <% end %>
+          <% else %>
+            <span class="badge bg-danger-subtle text-danger-emphasis">
+              <%= t("bo.bulk_invitations.ineligible.#{candidate.ineligible_reason}") %>
+            </span>
+          <% end %>
+        </div>
+      </label>
+    <% end %>
+
+    <% if @candidates.empty? %>
+      <div class="text-center py-5 text-muted small">
+        <%= t("bo.bulk_invitations.picker.empty") %>
+      </div>
+    <% end %>
+  </div>
+</turbo-frame>
