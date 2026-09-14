@@ -115,8 +115,8 @@
               <% end %>
             <% end %>
           </div>
-          <div class="row mt-3">
-            <div class="col-md-4">
+          <div class="row g-2 mt-3">
+            <div class="col-md-3">
               <select name="status" class="form-select form-select-sm" onchange="this.form.submit()">
                 <option value=""><%= t('bo.customers.index.filters.all_statuses') %></option>
                 <option value="active" <%= 'selected' if params[:status] == 'active' %>><%= t('bo.common.statuses.active') %></option>
@@ -126,12 +126,25 @@
                 <% if erp_customer_sync_enabled? %>
                   <option value="pending_erp_sync" <%= 'selected' if params[:status] == 'pending_erp_sync' %>>Por sincronizar com ERP</option>
                 <% end %>
-                <option value="no_rep" <%= 'selected' if params[:status] == 'no_rep' %>>Sem vendedor atribuído</option>
                 <option value="no_email" <%= 'selected' if params[:status] == 'no_email' %>>Sem email</option>
               </select>
             </div>
+            <div class="col-md-3">
+              <select name="email" class="form-select form-select-sm" onchange="this.form.submit()">
+                <option value=""><%= t('bo.customers.index.filters.all_emails') %></option>
+                <option value="with" <%= 'selected' if params[:email] == 'with' %>><%= t('bo.customers.index.filters.with_email') %></option>
+                <option value="without" <%= 'selected' if params[:email] == 'without' %>><%= t('bo.customers.index.filters.without_email') %></option>
+              </select>
+            </div>
+            <div class="col-md-3">
+              <select name="rep" class="form-select form-select-sm" onchange="this.form.submit()">
+                <option value=""><%= t('bo.customers.index.filters.all_reps') %></option>
+                <option value="none" <%= 'selected' if params[:rep] == 'none' %>><%= t('bo.customers.index.filters.no_rep') %></option>
+                <%= options_for_select(@rep_filter_options, params[:rep]) %>
+              </select>
+            </div>
             <% if @customer_categories.any? %>
-              <div class="col-md-4">
+              <div class="col-md-3">
                 <select name="category" class="form-select form-select-sm" onchange="this.form.submit()">
                   <option value=""><%= t('bo.customers.index.filters.all_categories') %></option>
                   <% @customer_categories.each do |cat| %>
@@ -159,12 +172,24 @@
               status_label =
                 case params[:status]
                 when 'pending_erp_sync' then 'Por sincronizar com ERP'
-                when 'no_rep' then 'Sem vendedor'
                 when 'no_email' then 'Sem email'
                 else t("bo.common.statuses.#{params[:status]}")
                 end
             %>
             <%= status_label %> <i class="fa-solid fa-xmark ms-1"></i>
+          <% end %>
+        <% end %>
+        <% if params[:email].in?(%w[with without]) %>
+          <%= link_to bo_customers_path(params[:org_slug], filter_params_hash.except(:email, :page)), class: "badge bg-secondary text-decoration-none" do %>
+            <%= t("bo.customers.index.filters.#{params[:email]}_email") %> <i class="fa-solid fa-xmark ms-1"></i>
+          <% end %>
+        <% end %>
+        <% if params[:rep].present? %>
+          <% rep_label = params[:rep] == 'none' ? t('bo.customers.index.filters.no_rep') : @rep_filter_options.to_h.invert[params[:rep]] %>
+          <% if rep_label %>
+            <%= link_to bo_customers_path(params[:org_slug], filter_params_hash.except(:rep, :page)), class: "badge bg-secondary text-decoration-none" do %>
+              <i class="fa-solid fa-user-tie me-1"></i><%= rep_label %> <i class="fa-solid fa-xmark ms-1"></i>
+            <% end %>
           <% end %>
         <% end %>
         <% if params[:category].present? %>

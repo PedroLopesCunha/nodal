@@ -277,7 +277,11 @@ module Dashboard
                                       .where("customer_users.invitation_sent_at <= ?", 7.days.ago)
                                       .where.not(id: accepted_customer_ids)
                                       .distinct.count,
-        uninvited_users:     customers.where(active: true).where.not(id: invited_customer_ids).count,
+        # Excludes accepted logins too: a login can be accepted without an
+        # invitation_sent_at (created outside the invite flow), and it would
+        # otherwise count both here and in active_users.
+        uninvited_users:     customers.where(active: true).where.not(id: invited_customer_ids)
+                                      .where.not(id: accepted_customer_ids).count,
         # Can't be invited at all until someone collects an address — the rep's
         # call/visit list, not a subset of the invitation funnel above.
         no_email_users:      customers.where(active: true).without_email.count,

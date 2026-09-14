@@ -561,6 +561,11 @@ en:
         filters:
           all_statuses: "All Statuses"
           all_categories: "All Categories"
+          all_emails: "With or without email"
+          with_email: "With email"
+          without_email: "Without email"
+          all_reps: "All sales reps"
+          no_rep: "No sales rep assigned"
           active_filters: "Active filters"
         table:
           customer: "Customer"
