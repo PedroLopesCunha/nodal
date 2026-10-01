@@ -47,6 +47,7 @@ class OrderItem < ApplicationRecord
   validates :discount_percentage, numericality: { greater_than_or_equal_to: 0,
      less_than_or_equal_to: 1 }, allow_nil: true
   validates :note, length: { maximum: 500 }, allow_blank: true
+  validate :variant_belongs_to_order_organisation
   validate :variant_belongs_to_product
   validate :variant_is_purchasable, on: :create
   # Only enforced on customer-initiated add/edit (:create, :customer_change),
@@ -168,6 +169,13 @@ class OrderItem < ApplicationRecord
     return if unit_price.present?
 
     self.unit_price = product_variant&.unit_price_cents || product&.unit_price
+  end
+
+  def variant_belongs_to_order_organisation
+    return unless product_variant && order&.organisation_id
+    return if product_variant.organisation_id == order.organisation_id
+
+    errors.add(:product_variant, "must belong to the order organisation")
   end
 
   def variant_belongs_to_product

@@ -19,7 +19,7 @@ class Order < ApplicationRecord
 
   # Virtual attribute set by the checkout form's extra confirmation checkbox,
   # used by validate_checkout_stock! when checkout_stock_policy is "warn".
-  attr_accessor :confirmed_stock_warnings
+  attr_accessor :confirmed_stock_warnings, :stock_checkout_context
 
   belongs_to :customer
   belongs_to :customer_user, optional: true
@@ -48,6 +48,9 @@ class Order < ApplicationRecord
 
   before_validation :generate_order_number, on: :create
   before_validation :update_tax, on: :update
+  around_save :manage_local_stock
+  around_destroy :restore_local_stock, prepend: true
+
   before_save :settle_pending_shipping
 
   after_commit :enqueue_erp_push, if: :should_enqueue_erp_push?
@@ -136,6 +139,8 @@ class Order < ApplicationRecord
   end
 
   def place!
+    return if placed?
+
     update!(placed_at: Time.current)
     # The customer ended up taking these products — close any open demand they
     # satisfy (decision 4: a falta fecha-se sozinha).
@@ -329,8 +334,31 @@ class Order < ApplicationRecord
   end
 
   def finalize_checkout!(same_as_billing: false)
+    # Keep pricing acknowledgements visible when checkout is refused. Stock is
+    # refreshed and checked again under the locks immediately before placement.
+    OrderStockService.new(self).synchronize do |persisted, _items, _variants|
+      ensure_checkout_unplaced!(persisted)
+      order_items.reload
+      refresh_cart!
+    end
+    validate_pricing_acknowledged!
+    OrderStockService.new(self).synchronize do |persisted, _items, _variants|
+      ensure_checkout_unplaced!(persisted)
+      order_items.reload
+      self.stock_checkout_context = true
+      finalize_locked_checkout!(same_as_billing: same_as_billing)
+    end
+  ensure
+    self.stock_checkout_context = false
+  end
+
+  def finalize_locked_checkout!(same_as_billing: false)
     self.shipping_address = billing_address if same_as_billing && billing_address.present?
     refresh_cart!
+    if order_items.reload.empty?
+      errors.add(:base, I18n.t("storefront.carts.show.empty_cart"))
+      raise ActiveRecord::RecordInvalid, self
+    end
     validate_checkout_stock!
     validate_minimum_quantities!
     validate_pricing_acknowledged!
@@ -348,6 +376,8 @@ class Order < ApplicationRecord
     validate_receive_on!
     place!
   end
+
+  private :finalize_locked_checkout!
 
   # Seeded with a zero Money: summing an empty set gives the integer 0, and
   # every caller here goes on to ask it for `.cents` or add Money to it. An
@@ -546,6 +576,21 @@ class Order < ApplicationRecord
   end
 
   private
+
+  def ensure_checkout_unplaced!(persisted)
+    return unless persisted&.placed?
+
+    errors.add(:base, I18n.t("stock_management.already_placed"))
+    raise ActiveRecord::RecordInvalid, self
+  end
+
+  def manage_local_stock(&block)
+    OrderStockService.new(self).save(&block)
+  end
+
+  def restore_local_stock(&block)
+    OrderStockService.new(self).destroy(&block)
+  end
 
   # Pricing the shipping is what closes the "to be calculated" state: the moment
   # an amount lands on the order, it is no longer pending. Reads the column

@@ -12,7 +12,7 @@
       </div>
     </div>
     <div class="bo-page-actions">
-      <%= link_to stock_control_bo_products_path(params[:org_slug], format: :csv, stock_status: @stock_status, query: @query.presence, category_id: params[:category_id].presence, supplier: params[:supplier].presence, sort: @sort_column, direction: @sort_column ? @sort_direction : nil),
+      <%= link_to stock_control_bo_products_path(params[:org_slug], format: :csv, stock_status: @stock_status, stock_source: @stock_source, query: @query.presence, category_id: params[:category_id].presence, supplier: params[:supplier].presence, sort: @sort_column, direction: @sort_column ? @sort_direction : nil),
                   class: "btn btn-outline-secondary" do %>
         <i class="fa-solid fa-download"></i> <%= t('bo.common.actions.export') %>
       <% end %>
@@ -40,7 +40,7 @@
           <button type="submit" class="btn btn-outline-secondary me-2">
             <i class="fa-solid fa-magnifying-glass"></i> <%= t('bo.common.actions.search') %>
           </button>
-          <% if @query.present? || @stock_status.present? || params[:category_id].present? || params[:supplier].present? %>
+          <% if @query.present? || @stock_status.present? || @stock_source.present? || params[:category_id].present? || params[:supplier].present? %>
             <%= link_to stock_control_bo_products_path(params[:org_slug]), class: "btn btn-outline-danger" do %>
               <i class="fa-solid fa-xmark"></i> <%= t('bo.common.actions.clear') %>
             <% end %>
@@ -64,6 +64,13 @@
                 <option value="<%= supplier %>" <%= 'selected' if params[:supplier] == supplier %>><%= supplier %></option>
               <% end %>
             </select>
+          </div>
+          <div class="col">
+            <%= select_tag :stock_source,
+                  options_for_select([[t('stock_management.all_sources'), ""], ["Nodal", "nodal"], ["ERP", "erp"]], @stock_source),
+                  class: "form-select form-select-sm",
+                  aria: { label: t('stock_management.source') },
+                  onchange: "this.form.submit()" %>
           </div>
           <div class="col">
             <%= select_tag :stock_status,
@@ -90,7 +97,7 @@
     <div class="card-body p-0">
       <div class="table-responsive">
         <table class="table table-sm align-middle mb-0">
-          <% sort_for = ->(col) { { sort: col, direction: (@sort_column == col && @sort_direction == "asc" ? "desc" : "asc"), stock_status: @stock_status, query: @query.presence, category_id: params[:category_id].presence, supplier: params[:supplier].presence } } %>
+          <% sort_for = ->(col) { { sort: col, direction: (@sort_column == col && @sort_direction == "asc" ? "desc" : "asc"), stock_status: @stock_status, stock_source: @stock_source, query: @query.presence, category_id: params[:category_id].presence, supplier: params[:supplier].presence } } %>
           <% sort_icon = ->(col) { @sort_column == col ? "fa-sort-#{@sort_direction == 'asc' ? 'up' : 'down'}" : "fa-sort text-muted opacity-50" } %>
           <thead>
             <tr class="text-muted small">
@@ -105,6 +112,7 @@
                 <% end %>
               </th>
               <th><%= t('bo.products.stock_control.table.supplier') %></th>
+              <th class="text-center"><%= t('stock_management.source') %></th>
               <th class="text-center">
                 <%= link_to stock_control_bo_products_path(params[:org_slug], sort_for.call("stock")), class: "text-decoration-none text-muted" do %>
                   <%= t('bo.products.stock_control.table.stock') %> <i class="fa-solid <%= sort_icon.call("stock") %> ms-1"></i>
@@ -116,7 +124,7 @@
           </thead>
           <tbody>
             <% if @variants.empty? %>
-              <tr><td colspan="6" class="text-center text-muted py-4"><%= t('bo.products.stock_control.empty') %></td></tr>
+              <tr><td colspan="7" class="text-center text-muted py-4"><%= t('bo.products.stock_control.empty') %></td></tr>
             <% end %>
             <% @variants.each do |variant| %>
               <% status = variant.stock_control_status(@threshold) %>
@@ -130,6 +138,7 @@
                 </td>
                 <td class="small text-muted"><%= variant.sku.presence || "—" %></td>
                 <td class="small text-muted"><%= variant.product.supplier.presence || "—" %></td>
+                <td class="text-center"><%= render "bo/product_variants/stock_source_badge", variant: variant %></td>
                 <td class="text-center">
                   <% if variant.track_stock? %>
                     <span class="fw-semibold <%= 'text-danger' if status == :out_of_stock %><%= 'text-warning-emphasis' if status == :at_risk %>"><%= variant.stock_quantity.to_i %></span>

@@ -1,0 +1,45 @@
+pt:
+  stock_management:
+    customer_contact_required: O cliente precisa de um contacto ativo para criar a encomenda.
+    all_sources: Gestão de stock — Todos
+    source: Gestão de stock
+    erp_hint: A quantidade é atualizada pela sincronização com o ERP.
+    nodal_hint: Define a quantidade disponível. As encomendas descontam stock automaticamente.
+    policy: Quando fica sem stock
+    policies:
+      inherit: Usar regra da organização
+      track_only: Permitir encomendas sem stock
+      show_badge: Mostrar como indisponível
+      hide: Ocultar
+    insufficient: 'Stock insuficiente para %{name}.'
+    already_placed: Esta encomenda já foi finalizada.
+en:
+  stock_management:
+    customer_contact_required: The customer needs an active contact to create the order.
+    all_sources: Stock management — All
+    source: Stock management
+    erp_hint: The quantity is updated by ERP synchronization.
+    nodal_hint: Set the available quantity. Orders automatically deduct stock.
+    policy: When out of stock
+    policies:
+      inherit: Use organisation policy
+      track_only: Allow orders without stock
+      show_badge: Show as unavailable
+      hide: Hide
+    insufficient: 'Insufficient stock for %{name}.'
+    already_placed: This order has already been placed.
+es:
+  stock_management:
+    customer_contact_required: El cliente necesita un contacto activo para crear el pedido.
+    all_sources: Gestión de stock — Todos
+    source: Gestión de stock
+    erp_hint: La cantidad se actualiza mediante la sincronización con el ERP.
+    nodal_hint: Define la cantidad disponible. Los pedidos descuentan stock automáticamente.
+    policy: Cuando se agota el stock
+    policies:
+      inherit: Usar regla de la organización
+      track_only: Permitir pedidos sin stock
+      show_badge: Mostrar como no disponible
+      hide: Ocultar
+    insufficient: 'Stock insuficiente para %{name}.'
+    already_placed: Este pedido ya se ha finalizado.

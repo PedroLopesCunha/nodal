@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2026_09_09_180000) do
+ActiveRecord::Schema[7.1].define(version: 2026_10_01_150000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_trgm"
   enable_extension "plpgsql"
@@ -500,10 +500,12 @@ ActiveRecord::Schema[7.1].define(version: 2026_09_09_180000) do
     t.datetime "updated_at", null: false
     t.bigint "product_variant_id"
     t.text "note"
+    t.integer "local_stock_consumed", default: 0, null: false
     t.index ["order_id", "product_id", "product_variant_id"], name: "idx_order_items_order_product_variant", unique: true
     t.index ["order_id"], name: "index_order_items_on_order_id"
     t.index ["product_id"], name: "index_order_items_on_product_id"
     t.index ["product_variant_id"], name: "index_order_items_on_product_variant_id"
+    t.check_constraint "local_stock_consumed >= 0", name: "order_items_local_stock_consumed"
   end
 
   create_table "orders", force: :cascade do |t|
@@ -761,6 +763,7 @@ ActiveRecord::Schema[7.1].define(version: 2026_09_09_180000) do
     t.decimal "custom_discount_value"
     t.boolean "published", default: true, null: false
     t.string "stock_policy", default: "inherit", null: false
+    t.string "stock_source", default: "erp", null: false
     t.index ["organisation_id", "sku"], name: "index_product_variants_on_organisation_id_and_sku", unique: true, where: "((sku IS NOT NULL) AND ((sku)::text <> ''::text))"
     t.index ["organisation_id"], name: "index_product_variants_on_organisation_id"
     t.index ["product_id", "available"], name: "index_product_variants_on_product_id_and_available"
@@ -768,6 +771,7 @@ ActiveRecord::Schema[7.1].define(version: 2026_09_09_180000) do
     t.index ["product_id", "is_default"], name: "index_product_variants_on_product_id_and_is_default"
     t.index ["product_id", "position"], name: "index_product_variants_on_product_id_and_position"
     t.index ["product_id"], name: "index_product_variants_on_product_id"
+    t.check_constraint "stock_source::text = ANY (ARRAY['erp'::character varying, 'nodal'::character varying]::text[])", name: "product_variants_stock_source"
   end
 
   create_table "products", force: :cascade do |t|

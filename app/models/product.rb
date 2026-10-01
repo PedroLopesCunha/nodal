@@ -95,6 +95,49 @@ class Product < ApplicationRecord
   after_update :clear_default_variant_for_variable, if: :became_variable?
   after_update :promote_default_variant_for_simple, if: :became_simple?
 
+  # The simple-product form edits the inventory of its default variant.
+  def inventory_attributes=(attributes)
+    @inventory_attributes = attributes.to_h.stringify_keys
+    source = @inventory_attributes["stock_source"] || default_variant&.stock_source || "erp"
+    @inventory_attributes.delete("stock_quantity") unless source == "nodal"
+  end
+
+  validate :validate_inventory_attributes
+  after_save :save_inventory_attributes
+
+  def inventory_attributes
+    @inventory_attributes || {}
+  end
+
+  def inventory_variant
+    variant = default_variant || ProductVariant.new(organisation: organisation, product: self, name: name.presence || "Product")
+    variant.assign_attributes(inventory_attributes) unless has_variants?
+    variant
+  end
+
+  def validate_inventory_attributes
+    return if has_variants? || inventory_attributes.empty?
+
+    variant = inventory_variant
+    unless variant.valid?
+      variant.errors.full_messages.each { |message| errors.add(:base, message) }
+    end
+  end
+
+  def save_inventory_attributes
+    return if has_variants? || inventory_attributes.empty?
+
+    # A save containing only virtual inventory attributes does not UPDATE the
+    # product row. Lock it explicitly, using the same order as checkout/ERP.
+    Product.where(id: id).lock.load
+    variant = default_variant
+    variant.with_lock do
+      variant.update!(inventory_attributes)
+      StockRulesService.new(organisation).apply_to_variant(variant)
+    end
+    @inventory_attributes = nil
+  end
+
   scope :simple, -> { where(has_variants: false) }
   scope :variable, -> { where(has_variants: true) }
 
