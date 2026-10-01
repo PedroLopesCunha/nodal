@@ -72,6 +72,18 @@ class ProductVariant < ApplicationRecord
     ]
   end
 
+  validates :stock_source, inclusion: { in: %w[erp nodal] }
+  validates :stock_quantity, numericality: { only_integer: true }, if: :nodal_stock?
+  before_validation :enable_nodal_stock_tracking, if: :stock_source_changed?
+
+  def nodal_stock?
+    stock_source == "nodal" && track_stock?
+  end
+
+  def enable_nodal_stock_tracking
+    self.track_stock = true if stock_source == "nodal"
+  end
+
   STOCK_POLICIES = %w[inherit track_only show_badge hide].freeze
 
   validates :stock_policy, inclusion: { in: STOCK_POLICIES }

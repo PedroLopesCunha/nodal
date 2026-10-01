@@ -248,6 +248,7 @@ class Bo::ProductsController < Bo::BaseController
   def stock_control
     authorize Product, :stock_control?
     @threshold = current_organisation.low_stock_threshold
+    @stock_source = %w[nodal erp].include?(params[:stock_source]) ? params[:stock_source] : nil
     @stock_status = %w[out_of_stock at_risk risky].include?(params[:stock_status]) ? params[:stock_status] : nil
     @query = params[:query].to_s.strip
     @categories = current_organisation.categories.kept.sorted_by_full_path
@@ -257,6 +258,7 @@ class Bo::ProductsController < Bo::BaseController
     # searching/sorting; the includes preload the option values for the label.
     scope = current_organisation.product_variants.real_units
               .includes(:product, attribute_values: :product_attribute)
+    scope = scope.where(stock_source: @stock_source) if @stock_source
     scope = case @stock_status
             when "out_of_stock" then scope.stock_out
             when "at_risk"      then scope.stock_at_risk(@threshold)
@@ -693,7 +695,7 @@ class Bo::ProductsController < Bo::BaseController
 
   def stock_control_csv(variants, unmet)
     CSV.generate(headers: true) do |csv|
-      csv << ["Produto", "Variante", "SKU", "Fornecedor", "Stock", "Status", "Em falta"]
+      csv << ["Produto", "Variante", "SKU", "Fornecedor", I18n.t("stock_management.source"), "Stock", "Status", "Em falta"]
       variants.each do |v|
         status = v.stock_control_status(@threshold)
         csv << [
@@ -701,6 +703,7 @@ class Bo::ProductsController < Bo::BaseController
           v.option_values_string,
           v.sku,
           v.product&.supplier,
+          v.stock_source == "nodal" ? "Nodal" : "ERP",
           v.track_stock? ? v.stock_quantity.to_i : "∞",
           I18n.t("bo.products.stock_control.status.#{status}"),
           unmet[v.id].to_i
@@ -815,7 +818,7 @@ class Bo::ProductsController < Bo::BaseController
   end
 
   def product_params
-    params.require(:product).permit(:name, :slug, :sku, :description, :rich_description, :price, :unit_description, :min_quantity, :min_quantity_type, :min_quantity_scope, :published, :price_on_request, :hide_sku_on_card, :category_id, :add_to_cart_mode, :supplier, category_ids: [], photos: [])
+    params.require(:product).permit(:name, :slug, :sku, :description, :rich_description, :price, :unit_description, :min_quantity, :min_quantity_type, :min_quantity_scope, :published, :price_on_request, :hide_sku_on_card, :category_id, :add_to_cart_mode, :supplier, inventory_attributes: [:stock_source, :track_stock, :stock_quantity, :stock_policy], category_ids: [], photos: [])
   end
 
   def parse_uploaded_file(uploaded_file)

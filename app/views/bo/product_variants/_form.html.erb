@@ -3,6 +3,12 @@
             method: variant.persisted? ? :patch : :post,
             id: "variant-form" do |f| %>
 
+  <% if variant.errors.any? %>
+    <div class="alert alert-danger" role="alert">
+      <%= variant.errors.full_messages.to_sentence %>
+    </div>
+  <% end %>
+
   <div class="row g-3">
     <div class="col-md-8">
       <div class="card mb-3">
@@ -34,22 +40,8 @@
         <div class="card-body">
           <h5 class="card-title mb-4"><%= t('bo.product_variants.form.inventory') %></h5>
 
-          <div class="row g-3">
-            <div class="col-md-12">
-              <div class="form-check">
-                <%= f.check_box :track_stock, class: "form-check-input", data: { controller: "toggle-field", toggle_field_target_value: "#stock-quantity-field", action: "change->toggle-field#change" } %>
-                <%= f.label :track_stock, t('bo.product_variants.form.track_stock'), class: "form-check-label" %>
-              </div>
-              <small class="text-muted"><%= t('bo.product_variants.form.track_stock_hint') %></small>
-            </div>
-          </div>
+          <%= render "bo/product_variants/inventory_fields", f: f, variant: variant %>
 
-          <div class="row g-3 mt-2" id="stock-quantity-field" <%= 'style="display: none;"' unless variant.track_stock? %>>
-            <div class="col-md-6">
-              <label class="form-label"><%= t('bo.product_variants.form.stock_quantity') %></label>
-              <%= f.number_field :stock_quantity, class: "form-control", min: 0, step: 1, placeholder: "0" %>
-            </div>
-          </div>
         </div>
       </div>
 

@@ -98,6 +98,12 @@ module Erp
       end
 
       def sync_variant(variant, data)
+        variant.product.with_lock do
+          variant.with_lock { sync_locked_variant(variant, data) }
+        end
+      end
+
+      def sync_locked_variant(variant, data)
         update_variant_attributes(variant, data)
         attributes_changed = variant.changed?
 
@@ -137,6 +143,8 @@ module Erp
       end
 
       def update_stock(variant, data)
+        return if variant.stock_source == "nodal"
+
         variant.stock_quantity = data[:stock_quantity]
         variant.track_stock = true if variant.new_record? || !variant.persisted?
       end

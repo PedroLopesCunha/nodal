@@ -31,8 +31,29 @@
 <div class="bo-page-body">
 
 <%= form_with model: @product, url: bo_products_path(params[:org_slug]), method: :post, id: "product-form", multipart: true do |f| %>
+  <% if @product.errors.any? %>
+    <div class="alert alert-danger" role="alert">
+      <%= @product.errors.full_messages.to_sentence %>
+    </div>
+  <% end %>
+
   <div class="row g-3">
     <div class="col-md-8">
+      <% unless @product.has_variants? %>
+        <div class="card mb-3">
+          <div class="card-body">
+            <h5 class="card-title mb-4"><%= t('bo.product_variants.form.inventory') %></h5>
+            <%= f.fields_for :inventory_attributes, @product.inventory_variant do |inventory| %>
+              <%= render "bo/product_variants/inventory_fields", f: inventory, variant: @product.inventory_variant %>
+              <div class="mt-3">
+                <%= inventory.label :stock_policy, t('stock_management.policy'), class: "form-label" %>
+                <%= inventory.select :stock_policy, ProductVariant::STOCK_POLICIES.map { |policy| [t("stock_management.policies.#{policy}"), policy] }, {}, class: "form-select" %>
+              </div>
+            <% end %>
+          </div>
+        </div>
+      <% end %>
+
       <div class="card mb-3">
         <div class="card-body">
           <h5 class="card-title mb-4"><%= t('bo.products.form.basic_information') %></h5>

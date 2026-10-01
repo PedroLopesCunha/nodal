@@ -76,9 +76,11 @@ class Bo::OrdersController < Bo::BaseController
     @order = Order.new(order_params)
     @order.organisation = @current_organisation
     @order.placed_at = Time.current
+    @order.placed_by = current_member
+    @order.sales_rep = current_org_member if current_org_member&.is_sales_rep?
     authorize @order
 
-    if @order.save
+    if assign_customer_contact && @order.save
       redirect_to bo_order_path(org_slug: @current_organisation.slug, id: @order.id), notice: "Order created successfully."
     else
       @customers = Customer.where(organisation: @current_organisation)
@@ -87,7 +89,8 @@ class Bo::OrdersController < Bo::BaseController
   end
 
   def update
-    if @order.update(order_params)
+    @order.assign_attributes(order_params)
+    if assign_customer_contact && @order.save
       redirect_to bo_order_path(org_slug: @current_organisation.slug, id: @order.id, **filter_params_hash), notice: "Order updated successfully."
     else
       render :edit, status: :unprocessable_entity
@@ -267,6 +270,20 @@ class Bo::OrdersController < Bo::BaseController
   def set_order
     @order = Order.find(params[:id])
     authorize @order
+  end
+
+  # BO orders are attributed to the member. The required customer contact uses
+  # the same first-contact convention as the existing customer-user backfill.
+  def assign_customer_contact
+    return true unless @order.customer_id_changed? || @order.customer_user.nil?
+
+    customer = current_organisation.customers.find_by(id: @order.customer_id)
+    @order.customer = customer
+    @order.customer_user = customer&.customer_users&.where(active: true)&.order(:id)&.first
+    return true if @order.customer_user
+
+    @order.errors.add(:base, t("stock_management.customer_contact_required"))
+    false
   end
 
   def order_params

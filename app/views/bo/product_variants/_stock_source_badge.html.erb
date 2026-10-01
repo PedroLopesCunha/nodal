@@ -1,0 +1,4 @@
+<span class="badge <%= variant.stock_source == 'nodal' ? 'bg-primary-subtle text-primary' : 'bg-light text-muted border' %>"
+      title="<%= variant.track_stock? ? t("stock_management.#{variant.stock_source}_hint") : t('bo.products.stock_control.status.untracked') %>">
+  <%= variant.stock_source == 'nodal' ? 'Nodal' : 'ERP' %>
+</span>

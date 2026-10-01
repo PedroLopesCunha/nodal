@@ -1,0 +1,18 @@
+<div data-controller="stock-management">
+  <div class="form-check">
+    <%= f.check_box :track_stock, class: "form-check-input", data: { stock_management_target: "tracking", action: "stock-management#refresh" } %>
+    <%= f.label :track_stock, t('bo.product_variants.form.track_stock'), class: "form-check-label" %>
+  </div>
+  <div data-stock-management-target="settings" <%= 'hidden' unless variant.track_stock? %>>
+    <div class="mt-3">
+      <%= f.label :stock_source, t('stock_management.source'), class: "form-label" %>
+      <%= f.select :stock_source, [["ERP", "erp"], ["Nodal", "nodal"]], {}, class: "form-select", data: { stock_management_target: "source", action: "stock-management#refresh" } %>
+      <small class="text-muted" data-stock-management-target="erpHint"><%= t('stock_management.erp_hint') %></small>
+      <small class="text-muted" data-stock-management-target="nodalHint"><%= t('stock_management.nodal_hint') %></small>
+    </div>
+    <div class="mt-3">
+      <%= f.label :stock_quantity, t('bo.product_variants.form.stock_quantity'), class: "form-label" %>
+      <%= f.number_field :stock_quantity, class: "form-control", step: 1, readonly: variant.stock_source != 'nodal', data: { stock_management_target: "quantity" } %>
+    </div>
+  </div>
+</div>

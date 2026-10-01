@@ -47,6 +47,7 @@
                 <th><%= t('bo.product_variants.index.variant') %></th>
                 <th><%= t('bo.product_variants.index.sku') %></th>
                 <th><%= t('bo.product_variants.index.price') %></th>
+                <th><%= t('stock_management.source') %></th>
                 <th><%= t('bo.product_variants.index.stock') %></th>
                 <th><%= t('bo.product_variants.index.storefront') %></th>
                 <th style="width: 100px;"></th>
@@ -78,6 +79,7 @@
                   <td>
                     <%= variant.price&.format %>
                   </td>
+                  <td><%= render "bo/product_variants/stock_source_badge", variant: variant %></td>
                   <td>
                     <% if variant.track_stock? %>
                       <span class="<%= variant.in_stock? ? 'text-success' : 'text-danger' %>">

@@ -35,16 +35,19 @@ class Bo::ProductVariantsController < Bo::BaseController
   def update
     @variant.photo.purge if params[:product_variant][:remove_photo] == '1'
 
-    stock_changed = params[:product_variant].key?(:stock_quantity) &&
-      params[:product_variant][:stock_quantity].to_i != @variant.stock_quantity
+    saved = @product.with_lock do
+      @variant.with_lock do
+        if @variant.update(variant_params)
+          update_attribute_values
+          StockRulesService.new(current_organisation).apply_to_variant(@variant)
+          true
+        else
+          false
+        end
+      end
+    end
 
-    if @variant.update(variant_params)
-      update_attribute_values
-
-      service = StockRulesService.new(current_organisation)
-      service.apply_to_variant(@variant)
-      service.recalculate_product_availability(@product)
-
+    if saved
       redirect_to bo_product_variants_path(params[:org_slug], @product), notice: t('bo.flash.variant_updated')
     else
       load_attribute_values_for_form
@@ -92,9 +95,12 @@ class Bo::ProductVariantsController < Bo::BaseController
   end
 
   def variant_params
-    params.require(:product_variant).permit(
-      :name, :sku, :price, :stock_quantity, :track_stock, :published, :is_default, :photo, :stock_policy
+    attributes = params.require(:product_variant).permit(
+      :name, :sku, :price, :stock_quantity, :stock_source, :track_stock, :published, :is_default, :photo, :stock_policy
     )
+    source = attributes[:stock_source] || @variant&.stock_source || "erp"
+    attributes.delete(:stock_quantity) unless source == "nodal"
+    attributes
   end
 
   def assign_attribute_values
