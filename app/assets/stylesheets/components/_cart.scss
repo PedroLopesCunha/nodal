@@ -147,6 +147,13 @@
 }
 
 // Checkout summary card - sticky only on desktop
+.cart-summary-sticky {
+  @media (min-width: 992px) {
+    position: sticky;
+    top: calc(var(--storefront-header-height, 64px) + 16px);
+  }
+}
+
 .checkout-summary-card {
   @media (min-width: 992px) {
     position: sticky;
