@@ -1,4 +1,5 @@
 require "test_helper"
+require 'minitest/mock'
 
 class Storefront::OrderCampaignProgressTest < ActionDispatch::IntegrationTest
   include Devise::Test::IntegrationHelpers
@@ -33,6 +34,28 @@ class Storefront::OrderCampaignProgressTest < ActionDispatch::IntegrationTest
     assert_response :success
     assert_select "[data-line-total-id='#{item.id}'][data-total-cents='96800']", count: 1
     assert_select '[data-line-campaign-savings-cents="13200"]', count: 1
+    org.update!(email_order_confirmation_enabled: true)
+    user.update!(invitation_accepted_at: Time.current)
+    mail = CustomerMailer.with(customer_user: user, order: order).confirm_order
+    assert_includes mail.html_part.body.decoded, Money.new(13200, org.currency).format
+    assert_includes mail.text_part.body.decoded, Money.new(96800, org.currency).format
+    assert_not_includes mail.html_part.body.decoded, '-5%'
+    captured = nil
+    fake = Object.new
+    def fake.to_pdf = '%PDF-1.4'
+    Grover.stub :new, ->(html) { captured = html; fake } do
+      get download_pdf_order_path(org.slug, order)
+    end
+    assert_response :success
+    pdf = Nokogiri::HTML(captured)
+    assert_match(/968/, pdf.at_css('tbody td.fw-bold .text-success').text)
+    assert_match(/132/, pdf.at_css('.summary-row.discount').text)
+    member = Member.create!(email: 'exclusive-admin@example.test', password: 'password123', first_name: 'J', last_name: 'Admin')
+    OrgMember.create!(organisation: org, member: member, role: 'owner', active: true)
+    sign_in member
+    get bo_order_path(org.slug, order)
+    assert_response :success
+    assert_select "[data-line-total-id='#{item.id}'][data-total-cents='96800']", count: 1
   end
 
   test "cart progress excludes Molduras and shows campaigns separately" do

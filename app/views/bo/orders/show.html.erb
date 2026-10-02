@@ -88,27 +88,19 @@
                     </td>
                     <td class="text-center"><%= item.quantity %> <%= item.product.min_quantity_type %></td>
                     <td class="text-end">
-                      <% if item.discount_percentage && item.discount_percentage > 0 %>
-                        <span class="text-muted text-decoration-line-through small d-block"><%= humanized_money_with_symbol(item.price) %></span>
-                        <span class="text-success"><%= humanized_money_with_symbol(item.price - (item.price * item.discount_percentage)) %></span>
-                      <% else %>
-                        <%= humanized_money_with_symbol(item.price) %>
-                      <% end %>
+                      <%= render "storefront/shared/line_unit_price", order: @order, item: item %>
                     </td>
                     <td class="text-center">
-                      <% if item.discount_percentage && item.discount_percentage > 0 %>
-                        <span class="badge bg-success">-<%= format_discount_percentage(item.discount_percentage) %></span>
-                      <% else %>
-                        <span class="text-muted">-</span>
+                      <% pricing = order_line_pricing(@order).line(item) %>
+                      <% if pricing.line_discount_percentage.to_d.positive? %>
+                        <span class="badge bg-success">-<%= format_discount_percentage(pricing.line_discount_percentage) %></span>
+                      <% end %>
+                      <% if pricing.campaign_savings.positive? %>
+                        <small class="d-block text-success"><%= t('bo.orders.show.order_tier_discount') %></small>
                       <% end %>
                     </td>
                     <td class="text-end">
-                      <% if item.discount_percentage && item.discount_percentage > 0 %>
-                        <span class="text-muted text-decoration-line-through small d-block"><%= humanized_money_with_symbol(item.price * item.quantity) %></span>
-                        <span class="text-success fw-medium"><%= humanized_money_with_symbol(item.total_price) %></span>
-                      <% else %>
-                        <%= humanized_money_with_symbol(item.total_price) %>
-                      <% end %>
+                      <%= render "storefront/shared/line_total", order: @order, item: item %>
                     </td>
                   </tr>
                 <% end %>
@@ -119,7 +111,7 @@
           <div class="border-top pt-3 mt-3">
             <div class="d-flex justify-content-between mb-2">
               <span class="text-muted"><%= t('bo.common.subtotal') %></span>
-              <span><%= humanized_money_with_symbol(@order.total_amount) %></span>
+              <span><%= humanized_money_with_symbol(order_line_pricing(@order).subtotal_before_campaign) %></span>
             </div>
 
             <% if @order.has_auto_discount_snapshot? %>
@@ -127,7 +119,7 @@
                 <span>
                   <%= t('bo.orders.show.order_tier_discount') %><% if (description = automatic_campaign_description(@order)) %><small class="d-block text-muted"><%= description %></small><% end %> (<%= @order.auto_discount_display %>)
                 </span>
-                <span>-<%= humanized_money_with_symbol(@order.auto_order_discount_amount) %></span>
+                <span>-<%= humanized_money_with_symbol(order_line_pricing(@order).campaign_discount_amount) %></span>
               </div>
             <% end %>
 
@@ -339,7 +331,7 @@
                   <strong><%= @order.auto_discount_display %> <%= t('bo.orders.show.off') %></strong>
                 </div>
                 <span class="badge bg-success fs-6">
-                  -<%= humanized_money_with_symbol(@order.auto_order_discount_amount) %>
+                  -<%= humanized_money_with_symbol(order_line_pricing(@order).campaign_discount_amount) %>
                 </span>
               </div>
             </div>

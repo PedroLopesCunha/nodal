@@ -61,3 +61,18 @@ O limite global de desconto da organização continua a aplicar-se depois dos de
 - Com política de remoção, tornar um artigo indisponível: deixa de contar para o mínimo.
 - Com política de limite de quantidade por stock, reduzir o stock: o mínimo usa a quantidade final.
 - Variantes excluídas continuam a seguir as políticas anteriores dos descontos globais, específicos de cliente e de encomenda.
+
+## Concorrência entre descontos de linha e campanhas de encomenda
+
+- O mínimo é verificado uma única vez sobre os valores após descontos de linha.
+- Ambas as regras permitem acumulação: a campanha aplica-se sobre o preço já descontado.
+- Pelo menos uma não permite: em cada linha compara-se o preço completo já obtido com o preço da campanha sobre o valor original. Mantém-se o melhor preço; em empate mantém-se o desconto de linha.
+- Se várias regras contribuíram para o preço de linha, todas têm de permitir acumulação para esse preço acumular com a campanha.
+- A prioridade escolhe a campanha; uma campanha de menor prioridade não toma o seu lugar por oferecer maior poupança.
+- Teste: 1.100 € elegíveis, categoria 5%, patamar 1.000 € → 12%. Qualificação: 1.045 €. Sem acumulação: desconto em vigor 132 €, total 968 €. Com ambas acumuláveis: descontos 55 € e 125,40 €, total 919,60 €.
+- Teste de fronteira: 1.020 € originais com 5% ficam em 969 € e não desbloqueiam o patamar de 1.000 €, mesmo que substituir os 5% pudesse aumentar a base.
+- Artigos fora do scope mantêm os seus descontos de linha. As mensagens “desbloqueado” não devem celebrar descontos substituídos.
+- Confirmar os mesmos valores no checkout, histórico, detalhe do backoffice, emails e PDF.
+- Campanhas fixas repartem o valor em cêntimos pelas bases elegíveis antes da comparação. Uma parcela que perde para o desconto de linha não é redistribuída; a poupança efetiva pode ser inferior ao valor nominal da campanha.
+
+As atribuições persistidas por linha continuam a representar a poupança adicional sobre a base de qualificação. O snapshot também regista os descontos de linha substituídos; a apresentação soma esses valores para mostrar a poupança completa da campanha e retira-os da rubrica de descontos de linha. Snapshots antigos sem esta informação preservam a acumulação histórica. Não é necessária uma migration nem recalcular encomendas colocadas.

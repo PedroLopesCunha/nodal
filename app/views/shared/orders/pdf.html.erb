@@ -136,26 +136,28 @@
           <td class="text-muted small"><%= item.product_variant&.sku.presence || item.product.sku || '-' %></td>
           <td class="text-center"><%= item.quantity %></td>
           <td class="text-end">
-            <% if item.discount_percentage.to_f > 0 %>
+            <% if order_line_pricing(@order).line(item).original_total > order_line_pricing(@order).line(item).total %>
               <div class="small strikethrough"><%= humanized_money_with_symbol(item.price) %></div>
-              <div class="text-success"><%= humanized_money_with_symbol(item.price - (item.price * item.discount_percentage)) %></div>
+              <div class="text-success"><%= humanized_money_with_symbol(order_line_pricing(@order).line(item).unit_price) %></div>
             <% else %>
               <%= humanized_money_with_symbol(item.price) %>
             <% end %>
           </td>
           <td class="text-center">
-            <% if item.discount_percentage.to_f > 0 %>
-              <span class="text-success">-<%= format_discount_percentage(item.discount_percentage) %></span>
+            <% if order_line_pricing(@order).line(item).original_total > order_line_pricing(@order).line(item).total %>
+              <% pricing = order_line_pricing(@order).line(item) %>
+              <% if pricing.line_discount_percentage.to_d.positive? %><div class="text-success">-<%= format_discount_percentage(pricing.line_discount_percentage) %></div><% end %>
+              <% if pricing.campaign_savings.positive? %><div class="text-success"><%= t('storefront.orders.pdf.order_discount') %><% if pricing.campaign_percentage %>: -<%= format_discount_percentage(pricing.campaign_percentage) %><% end %></div><% end %>
             <% else %>
               -
             <% end %>
           </td>
           <td class="text-end fw-bold">
-            <% if item.discount_percentage.to_f > 0 %>
+            <% if order_line_pricing(@order).line(item).original_total > order_line_pricing(@order).line(item).total %>
               <div class="small strikethrough"><%= humanized_money_with_symbol(item.price * item.quantity) %></div>
-              <div class="text-success"><%= humanized_money_with_symbol(item.total_price) %></div>
+              <div class="text-success"><%= humanized_money_with_symbol(order_line_pricing(@order).line(item).total) %></div>
             <% else %>
-              <%= humanized_money_with_symbol(item.total_price) %>
+              <%= humanized_money_with_symbol(order_line_pricing(@order).line(item).total) %>
             <% end %>
           </td>
         </tr>
@@ -166,13 +168,13 @@
   <div class="summary">
     <div class="summary-row">
       <span class="text-muted"><%= t('storefront.orders.pdf.subtotal') %></span>
-      <span><%= humanized_money_with_symbol(@order.total_amount) %></span>
+      <span><%= humanized_money_with_symbol(order_line_pricing(@order).subtotal_before_campaign) %></span>
     </div>
 
     <% if @order.has_auto_discount_snapshot? %>
       <div class="summary-row discount">
         <span><%= t('storefront.orders.pdf.order_discount') %> (<%= @order.auto_discount_display %>)</span>
-        <span>-<%= humanized_money_with_symbol(@order.auto_order_discount_amount) %></span>
+        <span>-<%= humanized_money_with_symbol(order_line_pricing(@order).campaign_discount_amount) %></span>
       </div>
     <% end %>
 
