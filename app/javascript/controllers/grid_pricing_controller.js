@@ -94,6 +94,7 @@ export default class extends Controller {
   }
 
   qtyOf(input) {
+    if (input.disabled) return 0
     return Math.max(parseInt(input.value, 10) || 0, 0)
   }
 

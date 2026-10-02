@@ -419,7 +419,7 @@
                     <label class="text-muted small me-2 mb-0"><%= t('storefront.products.show.quantity') %></label>
                     <% qty_action = "change->variant-selector#updateTotal input->variant-selector#updateTotal input->product-pricing#update" %>
                     <% qty_action += " input->min-quantity-counter#update" if combined_counter %>
-                    <%= number_field_tag "order_item[quantity]", @product.quantity_input_min, min: @product.quantity_input_min, class: "form-control text-center", style: "width: 70px;", data: { variant_selector_target: "quantity", product_pricing_target: "quantity", min_quantity_counter_target: ("input" if combined_counter), action: qty_action } %>
+                    <%= number_field_tag "order_item[quantity]", @product.quantity_input_default, required: true, min: @product.quantity_input_min, class: "form-control text-center", style: "width: 70px;", data: { variant_selector_target: "quantity", product_pricing_target: "quantity", min_quantity_counter_target: ("input" if combined_counter), action: qty_action } %>
                   </div>
                   <% if show_prices? %>
                     <small class="text-success fw-semibold" data-product-pricing-target="discountNote"></small>
@@ -455,7 +455,7 @@
               <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-2">
                 <div class="d-flex align-items-center">
                   <label class="text-muted small me-2 mb-0"><%= t('storefront.products.show.quantity') %></label>
-                  <%= number_field_tag "order_item[quantity]", @product.quantity_input_min, min: @product.quantity_input_min, class: "form-control text-center", style: "width: 70px;", data: (pp ? { product_pricing_target: "quantity", action: "input->product-pricing#update" } : {}) %>
+                  <%= number_field_tag "order_item[quantity]", @product.quantity_input_default, required: true, min: @product.quantity_input_min, class: "form-control text-center", style: "width: 70px;", data: (pp ? { product_pricing_target: "quantity", action: "input->product-pricing#update" } : {}) %>
                 </div>
                 <% if show_prices? %>
                   <small class="text-success fw-semibold" data-product-pricing-target="discountNote"></small>

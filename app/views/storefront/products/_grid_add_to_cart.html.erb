@@ -127,7 +127,9 @@
                     <% acts << "input->min-quantity-counter#update" if combined_counter %>
                     <% acts << "input->grid-pricing#update" if grid %>
                     <% input_data[:action] = acts.join(" ") if acts.any? %>
-                    <%= number_field_tag "bulk_items[#{variant.id}]", nil, min: 0, class: "form-control text-center mx-auto d-block", style: "width: 100px;", data: input_data %>
+                    <% deferred_default = hidden && product.quantity_input_default.present? %>
+                    <% input_data[:enable_on_expand] = true if deferred_default %>
+                    <%= number_field_tag "bulk_items[#{variant.id}]", product.quantity_input_default, min: 0, disabled: deferred_default, class: "form-control text-center mx-auto d-block", style: "width: 100px;", data: input_data %>
                   </td>
                 <% end %>
               </tr>

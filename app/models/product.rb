@@ -274,6 +274,11 @@ class Product < ApplicationRecord
     [min_quantity.to_i, 1].max
   end
 
+  # A combined minimum belongs to the selection, not to each variant input.
+  def quantity_input_default
+    enforced_min_quantity unless min_quantity_combined?
+  end
+
   # Human label for the minimum value, e.g. "10 caixas" or "10" — nil when none.
   def minimum_quantity_label
     min = enforced_min_quantity

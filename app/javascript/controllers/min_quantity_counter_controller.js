@@ -20,6 +20,7 @@ export default class extends Controller {
 
   update() {
     const typed = this.inputTargets.reduce((sum, el) => {
+      if (el.disabled) return sum
       const n = parseInt(el.value, 10)
       return sum + (isNaN(n) || n < 0 ? 0 : n)
     }, 0)
