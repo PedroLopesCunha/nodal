@@ -107,4 +107,41 @@ class DiscountScopesAdminTest < ActionDispatch::IntegrationTest
     assert_nil flash[:alert]
   end
 
+  test 'both variant endpoints paginate category scopes and search SKUs' do
+    child = @org.categories.create!(name: 'Child', ancestry: @category.id.to_s)
+    products = 52.times.map do |i|
+      product = @org.products.create!(name: "Page #{i.to_s.rjust(3, '0')}", sku: "PAGE-#{i}", unit_price: 1000)
+      product.categories = [child, @category]
+      product
+    end
+    [variant_overrides_bo_product_discounts_path(@org.slug), variant_overrides_bo_customer_product_discounts_path(@org.slug)].each do |path|
+      get path, params: { scope_mode: 'include', category_ids: [@category.id, child.id] }
+      assert_response :success
+      assert_select '[data-discount-preview-target=row]', count: 50
+      assert_select 'button[data-page="2"]', count: 1
+      get path, params: { scope_mode: 'include', category_ids: [@category.id], variant_page: 2 }
+      assert_select '[data-discount-preview-target=row]', count: 2
+      get path, params: { scope_mode: 'include', category_ids: [@category.id], variant_query: 'PAGE-51' }
+      assert_select '[data-discount-preview-target=row]', count: 1
+      get path, params: { scope_mode: 'exclude', category_ids: [@category.id] }
+      assert_select '[data-discount-preview-target=row]', count: 0
+    end
+  end
+
+  test 'saving a rule persists submitted variant edits from multiple pages' do
+    products = 2.times.map { |i| @org.products.create!(name: "Edited #{i}", unit_price: 1000) }
+    first, second = products.map { |product| product.product_variants.first }
+    post bo_product_discounts_path(@org.slug), params: {
+      target_type: 'category', scope_config: { mode: 'all' },
+      product_discount: { discount_type: 'percentage', discount_value: '0.08' },
+      variant_overrides: {
+        first.id => { exclude_from_discounts: '1', custom_discount_type: '', custom_discount_value: '' },
+        second.id => { exclude_from_discounts: '0', custom_discount_type: 'percentage', custom_discount_value: '0.15' }
+      }
+    }
+    assert_response :redirect
+    assert first.reload.exclude_from_discounts?
+    assert_equal BigDecimal('0.15'), second.reload.custom_discount_value
+  end
+
 end

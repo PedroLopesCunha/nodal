@@ -49,8 +49,11 @@ module EditsDiscountCategoryScopes
     else
       current_organisation.products.none
     end
-    products.includes(:product_variants).order(:name).to_h do |product|
-      [product, product.product_variants.by_position.to_a]
-    end
+    load_variant_page(products)
+  end
+
+  def load_variant_page(products)
+    @variant_page = DiscountVariantPage.new(products, page: params[:variant_page] || 1, query: params[:variant_query])
+    @variant_page.grouped
   end
 end

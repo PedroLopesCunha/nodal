@@ -9,8 +9,14 @@ export default class extends Controller {
   static values = { symbol: String }
 
   connect() {
+    this.onDiscountChange = () => this.recalculate()
     this.bindFormFields()
     this.recalculate()
+  }
+
+  disconnect() {
+    this.discountTypeField?.removeEventListener("change", this.onDiscountChange)
+    this.discountValueField?.removeEventListener("input", this.onDiscountChange)
   }
 
   bindFormFields() {
@@ -21,10 +27,10 @@ export default class extends Controller {
     this.discountValueField = form.querySelector("[name$='[discount_value]']") || form.querySelector("[name$='[discount_percentage]']")
 
     if (this.discountTypeField) {
-      this.discountTypeField.addEventListener("change", () => this.recalculate())
+      this.discountTypeField.addEventListener("change", this.onDiscountChange)
     }
     if (this.discountValueField) {
-      this.discountValueField.addEventListener("input", () => this.recalculate())
+      this.discountValueField.addEventListener("input", this.onDiscountChange)
     }
   }
 

@@ -85,11 +85,7 @@ class Bo::CustomerProductDiscountsController < Bo::BaseController
 
   def variant_overrides
     authorize CustomerProductDiscount.new(organisation: current_organisation), :new?
-    @variants_grouped = {}
-
-    variant_products_for_scope.includes(:product_variants).order(:name).each do |product|
-      @variants_grouped[product] = product.product_variants.by_position.to_a
-    end
+    @variants_grouped = load_variant_page(variant_products_for_scope)
 
     render partial: "bo/product_discounts/variant_overrides_frame", locals: { variants_grouped: @variants_grouped, currency_symbol: current_organisation.currency_symbol }, layout: false
   end

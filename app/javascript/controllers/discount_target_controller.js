@@ -7,9 +7,9 @@ export default class extends Controller {
   static values = { url: String }
 
   connect() {
-    this.toggle()
     this.scopeChangeHandler = () => this.scopeChanged()
     this.element.addEventListener("category-scope:change", this.scopeChangeHandler)
+    this.toggle()
   }
 
   disconnect() {
@@ -29,35 +29,18 @@ export default class extends Controller {
       // Clear category select
       if (this.hasCategorySelectTarget) this.clearSelect(this.categorySelectTarget)
     }
+    this.dispatchReload()
   }
 
   // Reload variant overrides when category changes
-  categoryChanged(event) {
-    const categoryId = event.target.value
-    const frame = document.getElementById("variant-overrides")
-    if (!frame) return
-
-    if (categoryId) {
-      const newSrc = `${this.urlValue}?category_id=${categoryId}`
-      if (frame.src === newSrc) {
-        frame.removeAttribute("src")
-      }
-      frame.src = newSrc
-    } else {
-      frame.removeAttribute("src")
-      frame.innerHTML = ""
-    }
-  }
+  categoryChanged() { this.dispatchReload() }
 
   scopeChanged() {
-    if (this.element.querySelector("input[name=target_type]:checked")?.value === "product") return
-    const frame = document.getElementById("variant-overrides")
-    const mode = this.element.querySelector("[name='scope_config[mode]']")
-    const categories = this.element.querySelector("select[name='scope_config[category_ids][]']")
-    if (!frame || !mode || !categories) return
-    const query = new URLSearchParams({ scope_mode: mode.value })
-    if (mode.value !== "all") Array.from(categories.selectedOptions).forEach(option => query.append("category_ids[]", option.value))
-    frame.src = `${this.urlValue}?${query}`
+    if (this.element.querySelector("input[name=target_type]:checked")?.value !== "product") this.dispatchReload()
+  }
+
+  dispatchReload() {
+    this.element.dispatchEvent(new CustomEvent("variant-overrides:reload", { bubbles: true }))
   }
 
   clearSelect(selectEl) {
