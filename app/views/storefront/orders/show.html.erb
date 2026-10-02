@@ -103,10 +103,7 @@
               </div>
             <% end %>
             <% if @order.has_auto_discount_snapshot? %>
-              <div class="d-flex justify-content-between mb-2 text-success">
-                <span><%= t('storefront.carts.show.order_discount') %><% if (description = automatic_campaign_description(@order)) %><small class="d-block text-muted"><%= description %></small><% end %> (<%= @order.auto_discount_display %>)</span>
-                <span>-<%= money_amount(@order.auto_order_discount_amount) %></span>
-              </div>
+              <%= render 'storefront/shared/automatic_order_discount', order: @order, discount_display: @order.auto_discount_display %>
             <% end %>
             <% if @order.has_order_discount? %>
               <div class="d-flex justify-content-between mb-2 text-success">

@@ -1,0 +1,9 @@
+<div class="mb-2">
+  <div class="d-flex justify-content-between align-items-start gap-3 text-success">
+    <span><%= t('storefront.carts.show.order_discount') %> <span class="text-nowrap">(<%= discount_display %>)</span></span>
+    <span class="text-nowrap flex-shrink-0">-<%= money_amount(order.auto_order_discount_amount) %></span>
+  </div>
+  <% if (description = automatic_campaign_description(order)) %>
+    <small class="d-block text-muted mt-1"><%= description %></small>
+  <% end %>
+</div>
