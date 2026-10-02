@@ -1,0 +1,2 @@
+class OrderDiscountCampaignPolicy < OrderDiscountPolicy
+end

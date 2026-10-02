@@ -259,6 +259,8 @@ Rails.application.routes.draw do
         end
       end
 
+      resources :order_discount_campaigns, except: [:index, :show]
+
       resources :order_discounts, except: [:index, :show] do
         member do
           patch :toggle_active

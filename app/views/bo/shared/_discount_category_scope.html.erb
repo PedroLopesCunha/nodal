@@ -1,0 +1,24 @@
+<% scope = record.discount_scope %>
+<div data-controller="category-scope" class="row g-3 mt-1">
+  <div class="col-md-12">
+    <label class="form-label" for="scope_config_mode">Artigos elegíveis</label>
+    <select name="scope_config[mode]" id="scope_config_mode" class="form-select"
+            data-category-scope-target="mode" data-action="change->category-scope#update">
+      <% [['Todos os artigos', 'all'], ['Apenas destas categorias', 'include'], ['Todos exceto destas categorias', 'exclude']].each do |label, value| %>
+        <option value="<%= value %>" <%= 'selected' if (scope&.mode || 'include') == value %>><%= label %></option>
+      <% end %>
+    </select>
+  </div>
+  <div class="col-md-12" data-category-scope-target="categoriesWrapper">
+    <label class="form-label" for="scope_config_category_ids">Categorias (inclui subcategorias)</label>
+    <input type="hidden" name="scope_config[category_ids][]" value="">
+    <select name="scope_config[category_ids][]" id="scope_config_category_ids" multiple class="form-select"
+            data-controller="tom-select" data-category-scope-target="categories"
+            data-action="change->category-scope#changed">
+      <% current_organisation.categories.kept.sorted_by_full_path.each do |category| %>
+        <option value="<%= category.id %>" <%= 'selected' if scope&.selected_category_ids&.include?(category.id) %>><%= category.full_path %></option>
+      <% end %>
+    </select>
+  </div>
+  <div class="col-12"><small class="text-muted">Esta seleção determina os artigos que contam para o mínimo e os que recebem o desconto.</small></div>
+</div>

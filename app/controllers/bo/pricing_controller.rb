@@ -20,14 +20,14 @@ class Bo::PricingController < Bo::BaseController
 
   def load_product_discounts
     @product_discounts = policy_scope(current_organisation.product_discounts)
-      .includes(:product, :category, :email_notification)
+      .includes(:product, :category, :email_notification, category_scopes: :categories)
       .order(created_at: :desc)
 
     if params[:search].present? && @tab == 'product_discounts'
       search_term = "%#{params[:search]}%"
       @product_discounts = @product_discounts
-        .left_joins(:product, :category)
-        .where("unaccent(products.name) ILIKE unaccent(:q) OR unaccent(categories.name) ILIKE unaccent(:q)", q: search_term)
+        .left_joins(:product, category_scopes: :categories)
+        .where("unaccent(products.name) ILIKE unaccent(:q) OR unaccent(categories.name) ILIKE unaccent(:q) OR unaccent(product_discounts.name) ILIKE unaccent(:q)", q: search_term).distinct
     end
   end
 
@@ -45,20 +45,21 @@ class Bo::PricingController < Bo::BaseController
 
   def load_custom_pricing
     @custom_pricing = policy_scope(current_organisation.customer_product_discounts)
-      .includes(:customer, :customer_category, :product, :category, :email_notification)
+      .includes(:customer, :customer_category, :product, :category, :email_notification, category_scopes: :categories)
       .order(created_at: :desc)
 
     if params[:search].present? && @tab == 'custom_pricing'
       search_term = "%#{params[:search]}%"
       @custom_pricing = @custom_pricing
-        .left_joins(:customer, :customer_category, :product, :category)
-        .where("unaccent(customers.company_name) ILIKE unaccent(:q) OR unaccent(customer_categories.name) ILIKE unaccent(:q) OR unaccent(products.name) ILIKE unaccent(:q) OR unaccent(categories.name) ILIKE unaccent(:q)", q: search_term)
+        .left_joins(:customer, :customer_category, :product, category_scopes: :categories)
+        .where("unaccent(customers.company_name) ILIKE unaccent(:q) OR unaccent(customer_categories.name) ILIKE unaccent(:q) OR unaccent(products.name) ILIKE unaccent(:q) OR unaccent(categories.name) ILIKE unaccent(:q) OR unaccent(customer_product_discounts.name) ILIKE unaccent(:q)", q: search_term).distinct
     end
   end
 
   def load_order_tiers
+    @order_discount_campaigns = current_organisation.order_discount_campaigns.includes(category_scopes: :categories).order(:priority)
     @order_discounts = policy_scope(current_organisation.order_discounts)
-      .includes(:email_notification)
+      .includes(:email_notification, :order_discount_campaign)
       .order(min_order_amount_cents: :asc)
   end
 

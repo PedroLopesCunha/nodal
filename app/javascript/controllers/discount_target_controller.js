@@ -8,6 +8,12 @@ export default class extends Controller {
 
   connect() {
     this.toggle()
+    this.scopeChangeHandler = () => this.scopeChanged()
+    this.element.addEventListener("category-scope:change", this.scopeChangeHandler)
+  }
+
+  disconnect() {
+    this.element.removeEventListener("category-scope:change", this.scopeChangeHandler)
   }
 
   toggle() {
@@ -21,7 +27,7 @@ export default class extends Controller {
       this.productWrapperTarget.classList.remove("d-none")
       this.categoryWrapperTarget.classList.add("d-none")
       // Clear category select
-      this.clearSelect(this.categorySelectTarget)
+      if (this.hasCategorySelectTarget) this.clearSelect(this.categorySelectTarget)
     }
   }
 
@@ -41,6 +47,17 @@ export default class extends Controller {
       frame.removeAttribute("src")
       frame.innerHTML = ""
     }
+  }
+
+  scopeChanged() {
+    if (this.element.querySelector("input[name=target_type]:checked")?.value === "product") return
+    const frame = document.getElementById("variant-overrides")
+    const mode = this.element.querySelector("[name='scope_config[mode]']")
+    const categories = this.element.querySelector("select[name='scope_config[category_ids][]']")
+    if (!frame || !mode || !categories) return
+    const query = new URLSearchParams({ scope_mode: mode.value })
+    if (mode.value !== "all") Array.from(categories.selectedOptions).forEach(option => query.append("category_ids[]", option.value))
+    frame.src = `${this.urlValue}?${query}`
   }
 
   clearSelect(selectEl) {

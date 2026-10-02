@@ -1,4 +1,6 @@
 class Bo::CustomerProductDiscountsController < Bo::BaseController
+  include EditsDiscountCategoryScopes
+
   before_action :set_discount, only: [:edit, :update, :destroy, :toggle_active]
   before_action :load_form_collections, only: [:new, :create, :edit, :update]
 
@@ -38,7 +40,7 @@ class Bo::CustomerProductDiscountsController < Bo::BaseController
       discount = CustomerProductDiscount.new(customer_product_discount_params.except(:customer_id, :customer_category_id))
       discount.organisation = current_organisation
       discount.customer_id = cid
-      if discount.save
+      if persist_scoped_discount(discount, {})
         created_discounts << discount
       else
         errors << discount.errors.full_messages
@@ -49,7 +51,7 @@ class Bo::CustomerProductDiscountsController < Bo::BaseController
       discount = CustomerProductDiscount.new(customer_product_discount_params.except(:customer_id, :customer_category_id))
       discount.organisation = current_organisation
       discount.customer_category_id = ccid
-      if discount.save
+      if persist_scoped_discount(discount, {})
         created_discounts << discount
       else
         errors << discount.errors.full_messages
@@ -85,25 +87,15 @@ class Bo::CustomerProductDiscountsController < Bo::BaseController
     authorize CustomerProductDiscount.new(organisation: current_organisation), :new?
     @variants_grouped = {}
 
-    if params[:product_id].present?
-      product = current_organisation.products.find_by(id: params[:product_id])
-      @variants_grouped = { product => product.product_variants.by_position.to_a } if product
-    elsif params[:category_id].present?
-      category = current_organisation.categories.find_by(id: params[:category_id])
-      if category
-        product_ids = CategoryProduct.where(category_id: category.subtree_ids).select(:product_id)
-        current_organisation.products.where(id: product_ids).includes(:product_variants).order(:name).each do |product|
-          variants = product.product_variants.by_position.to_a
-          @variants_grouped[product] = variants if variants.any?
-        end
-      end
+    variant_products_for_scope.includes(:product_variants).order(:name).each do |product|
+      @variants_grouped[product] = product.product_variants.by_position.to_a
     end
 
     render partial: "bo/product_discounts/variant_overrides_frame", locals: { variants_grouped: @variants_grouped, currency_symbol: current_organisation.currency_symbol }, layout: false
   end
 
   def update
-    if @discount.update(customer_product_discount_params)
+    if persist_scoped_discount(@discount, customer_product_discount_params)
       update_variant_overrides
       redirect_to bo_pricing_path(params[:org_slug], tab: 'custom_pricing'),
                   notice: "Custom price updated successfully."
@@ -143,25 +135,14 @@ class Bo::CustomerProductDiscountsController < Bo::BaseController
 
   def customer_product_discount_params
     params.require(:customer_product_discount).permit(
-      :customer_id, :product_id, :category_id, :discount_value, :discount_type,
+      :customer_category_id, :customer_id, :name, :product_id, :category_id, :discount_value, :discount_type,
       :condition_type, :condition_scope, :min_quantity, :min_amount,
       :valid_from, :valid_until, :stackable, :active
     )
   end
 
   def load_variants_for_form
-    if @discount.product?
-      @variants_grouped = { @discount.product => @discount.product.product_variants.by_position.to_a }
-    elsif @discount.category?
-      @variants_grouped = {}
-      product_ids = CategoryProduct.where(category_id: @discount.category.subtree_ids).select(:product_id)
-      current_organisation.products.where(id: product_ids).includes(:product_variants).order(:name).each do |product|
-        variants = product.product_variants.by_position.to_a
-        @variants_grouped[product] = variants if variants.any?
-      end
-    else
-      @variants_grouped = {}
-    end
+    @variants_grouped = scoped_variants_for(@discount)
   end
 
   def update_variant_overrides

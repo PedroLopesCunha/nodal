@@ -29,6 +29,14 @@ class DiscountCategoryScope < ApplicationRecord
     [mode, selected_category_ids.sort]
   end
 
+  def product_relation
+    products = organisation.products
+    return products if mode == "all"
+    subtree_ids = categories.flat_map(&:subtree_ids).uniq
+    matching = CategoryProduct.where(category_id: subtree_ids).select(:product_id)
+    mode == "include" ? products.where(id: matching) : products.where.not(id: matching)
+  end
+
   def description
     return "Todos os artigos" if mode == "all"
     prefix = mode == "include" ? "Apenas" : "Todos exceto"

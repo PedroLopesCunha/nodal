@@ -3,12 +3,14 @@ class Bo::OrderDiscountsController < Bo::BaseController
 
   def new
     @discount = OrderDiscount.new
+    @discount.order_discount_campaign = current_organisation.order_discount_campaigns.find(params[:campaign_id]) if params[:campaign_id].present?
     authorize @discount
   end
 
   def create
     @discount = OrderDiscount.new(order_discount_params)
     @discount.organisation = current_organisation
+    resolve_campaign
     authorize @discount
 
     if @discount.save
@@ -29,7 +31,9 @@ class Bo::OrderDiscountsController < Bo::BaseController
   end
 
   def update
-    if @discount.update(order_discount_params)
+    @discount.assign_attributes(order_discount_params)
+    resolve_campaign
+    if @discount.save
       redirect_to bo_pricing_path(params[:org_slug], tab: 'order_tiers'),
                   notice: "Order discount updated successfully."
     else
@@ -56,9 +60,15 @@ class Bo::OrderDiscountsController < Bo::BaseController
     authorize @discount
   end
 
+  def resolve_campaign
+    if @discount.order_discount_campaign_id
+      @discount.order_discount_campaign = current_organisation.order_discount_campaigns.find(@discount.order_discount_campaign_id)
+    end
+  end
+
   def order_discount_params
     params.require(:order_discount).permit(
-      :discount_type, :discount_value, :min_order_amount,
+      :order_discount_campaign_id, :discount_type, :discount_value, :min_order_amount,
       :valid_from, :valid_until, :stackable, :active
     )
   end

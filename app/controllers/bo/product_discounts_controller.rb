@@ -1,4 +1,6 @@
 class Bo::ProductDiscountsController < Bo::BaseController
+  include EditsDiscountCategoryScopes
+
   before_action :set_discount, only: [:edit, :update, :destroy, :toggle_active]
   before_action :load_form_collections, only: [:new, :create, :edit, :update]
 
@@ -12,7 +14,7 @@ class Bo::ProductDiscountsController < Bo::BaseController
     @discount.organisation = current_organisation
     authorize @discount
 
-    if @discount.save
+    if persist_scoped_discount(@discount, {})
       update_variant_overrides
       notification = DiscountEmailNotification.create!(
         notifiable: @discount,
@@ -36,24 +38,8 @@ class Bo::ProductDiscountsController < Bo::BaseController
     authorize ProductDiscount.new(organisation: current_organisation), :new?
     @variants_grouped = {}
 
-    if params[:product_id].present?
-      product = current_organisation.products.find_by(id: params[:product_id])
-      if product
-        @variants_grouped = { product => product.product_variants.by_position.to_a }
-      end
-    elsif params[:category_id].present?
-      category = current_organisation.categories.find_by(id: params[:category_id])
-      if category
-        product_ids = CategoryProduct.where(category_id: category.subtree_ids).select(:product_id)
-        products = current_organisation.products
-                          .where(id: product_ids)
-                          .includes(:product_variants)
-                          .order(:name)
-        products.each do |product|
-          variants = product.product_variants.by_position.to_a
-          @variants_grouped[product] = variants if variants.any?
-        end
-      end
+    variant_products_for_scope.includes(:product_variants).order(:name).each do |product|
+      @variants_grouped[product] = product.product_variants.by_position.to_a
     end
 
     render partial: "variant_overrides_frame",
@@ -62,7 +48,7 @@ class Bo::ProductDiscountsController < Bo::BaseController
   end
 
   def update
-    if @discount.update(product_discount_params)
+    if persist_scoped_discount(@discount, product_discount_params)
       update_variant_overrides
       redirect_to bo_pricing_path(params[:org_slug], tab: 'product_discounts'),
                   notice: "Product discount updated successfully."
@@ -103,25 +89,14 @@ class Bo::ProductDiscountsController < Bo::BaseController
 
   def product_discount_params
     params.require(:product_discount).permit(
-      :product_id, :category_id, :discount_type, :discount_value, :min_quantity,
+      :name, :product_id, :category_id, :discount_type, :discount_value, :min_quantity,
       :condition_type, :condition_scope, :min_amount,
       :valid_from, :valid_until, :stackable, :active
     )
   end
 
   def load_variants_for_form
-    if @discount.product?
-      @variants_grouped = { @discount.product => @discount.product.product_variants.by_position.to_a }
-    elsif @discount.category?
-      @variants_grouped = {}
-      product_ids = CategoryProduct.where(category_id: @discount.category.subtree_ids).select(:product_id)
-      current_organisation.products.where(id: product_ids).includes(:product_variants).order(:name).each do |product|
-        variants = product.product_variants.by_position.to_a
-        @variants_grouped[product] = variants if variants.any?
-      end
-    else
-      @variants_grouped = {}
-    end
+    @variants_grouped = scoped_variants_for(@discount)
   end
 
   def update_variant_overrides

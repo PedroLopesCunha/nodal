@@ -47,6 +47,7 @@
       <div class="card mb-3">
         <div class="card-body">
           <h5 class="card-title mb-4"><%= t('bo.pricing.custom_pricing.card_title') %></h5>
+          <div class="mb-3"><%= f.label :name, 'Nome interno (opcional)', class: 'form-label' %><%= f.text_field :name, class: 'form-control' %></div>
 
           <div class="row g-3" data-controller="discount-target variant-overrides"
                data-variant-overrides-url-value="<%= variant_overrides_bo_customer_product_discounts_path(params[:org_slug]) %>"
@@ -104,6 +105,9 @@
             </div>
 
             <div class="col-md-12 <%= 'd-none' unless @discount.category? %>" data-discount-target-target="categoryWrapper">
+              <% if Rails.configuration.x.discount_category_scopes_enabled %>
+                <%= render 'bo/shared/discount_category_scope', record: @discount %>
+              <% else %>
               <label class="form-label"><%= t('bo.pricing.product_discounts.category_target') %> <span class="text-danger">*</span></label>
               <select name="customer_product_discount[category_id]" id="customer_product_discount_category_id" class="form-select"
                       data-controller="tom-select"
@@ -114,6 +118,7 @@
                   <option value="<%= id %>" <%= 'selected' if @discount.category_id == id %>><%= name %></option>
                 <% end %>
               </select>
+              <% end %>
             </div>
           </div>
 
