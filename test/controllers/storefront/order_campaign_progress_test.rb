@@ -41,7 +41,10 @@ class Storefront::OrderCampaignProgressTest < ActionDispatch::IntegrationTest
     eligible = order.order_items.find_by!(product: silver)
     excluded = order.order_items.find_by!(product: frame)
     assert_select "[data-line-total-id='#{eligible.id}'][data-total-cents='74400']", count: 2
-    assert_select "[data-line-total-id='#{eligible.id}'] small", text: /7%.*5[,.]600|7%.*56/, count: 2
+    assert_select "[data-line-total-id='#{eligible.id}'] small", text: /56/, count: 2
+    assert_select "td.text-end > .text-success.text-nowrap", text: /744.*\(-7%\)/
+    assert_select "td.text-end > .text-decoration-line-through.d-block", text: /800/
+    assert_select "[data-line-total-id='#{eligible.id}']", text: /Campanha/, count: 0
     assert_select "[data-line-total-id='#{excluded.id}'][data-total-cents='50000']", count: 2
     assert_select "[data-line-total-id='#{excluded.id}'] [data-line-campaign-savings-cents]", count: 0
   end

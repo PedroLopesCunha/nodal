@@ -8,7 +8,6 @@
   <% end %>
   <% if pricing.campaign_savings.positive? %>
     <small class="d-block text-success fw-normal" data-line-campaign-savings-cents="<%= pricing.campaign_savings.cents %>">
-      <%= t('storefront.line_pricing.campaign') %><% if pricing.campaign_percentage %> -<%= format_discount_percentage(pricing.campaign_percentage) %><% end %>
       <span class="text-nowrap">(-<%= money_amount(pricing.campaign_savings) %>)</span>
     </small>
     <% if order.discount_capped? %>
