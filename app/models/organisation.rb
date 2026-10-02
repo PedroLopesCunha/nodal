@@ -37,6 +37,7 @@ class Organisation < ApplicationRecord
   has_one :contact_address, -> { contact }, class_name: "Address", as: :addressable, dependent: :destroy
 
   accepts_nested_attributes_for :contact_address, allow_destroy: true, reject_if: :all_blank
+  has_many :discount_category_scopes, dependent: :destroy
   has_many :categories, dependent: :destroy
   has_many :products, dependent: :destroy
   has_many :product_attributes, dependent: :destroy
@@ -50,6 +51,7 @@ class Organisation < ApplicationRecord
   has_many :product_discounts, dependent: :destroy
   has_many :customer_discounts, dependent: :destroy
   has_many :order_discounts, dependent: :destroy
+  has_many :order_discount_campaigns, dependent: :destroy
   has_many :promo_codes, dependent: :destroy
   has_one :erp_configuration, dependent: :destroy
   has_many :erp_sync_logs, dependent: :destroy

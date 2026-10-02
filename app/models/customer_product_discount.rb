@@ -1,6 +1,7 @@
 class CustomerProductDiscount < ApplicationRecord
   include HasEmailNotification
   include HasDiscountCondition
+  include HasLineCategoryScopes
 
   DISCOUNT_TYPES = %w[percentage fixed].freeze
 
@@ -27,7 +28,7 @@ class CustomerProductDiscount < ApplicationRecord
   }
 
   scope :for_product, -> { where.not(product_id: nil) }
-  scope :for_category, -> { where.not(category_id: nil) }
+  scope :for_category, -> { where(product_id: nil) }
 
   def percentage?
     discount_type == 'percentage'
@@ -45,9 +46,7 @@ class CustomerProductDiscount < ApplicationRecord
     product_id.present?
   end
 
-  def category?
-    category_id.present?
-  end
+
 
   def category_based?
     customer_category_id.present?
@@ -61,13 +60,7 @@ class CustomerProductDiscount < ApplicationRecord
     end
   end
 
-  def target_name
-    if product?
-      product.name
-    elsif category?
-      category.full_path
-    end
-  end
+
 
   def percentage_display
     (discount_value * 100).round(0)
@@ -120,7 +113,7 @@ class CustomerProductDiscount < ApplicationRecord
 
   def no_overlapping_discounts
     return if customer_id.blank? && customer_category_id.blank?
-    return if product_id.blank? && category_id.blank?
+    return if product_id.blank? && category_id.blank? && !scoped_target?
 
     overlapping = CustomerProductDiscount.where.not(id: id)
 
@@ -133,7 +126,7 @@ class CustomerProductDiscount < ApplicationRecord
     if product?
       overlapping = overlapping.where(product_id: product_id)
     else
-      overlapping = overlapping.where(category_id: category_id)
+      overlapping = overlapping.where(product_id: nil)
     end
 
     if valid_from.present? && valid_until.present?
@@ -145,7 +138,14 @@ class CustomerProductDiscount < ApplicationRecord
       overlapping = overlapping.all
     end
 
-    if overlapping.exists?
+    conflict = if product?
+      overlapping.exists?
+    else
+      overlapping.includes(category_scopes: :categories).any? do |rule|
+        rule.category_scope_signature == category_scope_signature
+      end
+    end
+    if conflict
       target = product? ? "product" : "category"
       errors.add(:base, "overlaps with an existing discount for this customer and #{target}")
     end
@@ -160,7 +160,7 @@ class CustomerProductDiscount < ApplicationRecord
   end
 
   def must_have_product_or_category
-    if product_id.blank? && category_id.blank?
+    if product_id.blank? && category_id.blank? && !scoped_target?
       errors.add(:base, "must target either a product or a category")
     elsif product_id.present? && category_id.present?
       errors.add(:base, "cannot target both a product and a category")

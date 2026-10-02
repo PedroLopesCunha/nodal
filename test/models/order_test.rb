@@ -22,6 +22,40 @@ class OrderTest < ActiveSupport::TestCase
     assert_equal 1500, item.reload.unit_price
   end
 
+  test "summed amount uses refreshed prices for every line" do
+    ProductDiscount.create!(organisation: @org, product: @product, discount_type: "percentage",
+      discount_value: 0.1, condition_type: "amount", condition_scope: "summed", min_amount_cents: 1500)
+    item = @order.order_items.create!(product: @product, quantity: 1)
+    @product.default_variant.update!(unit_price_cents: 2000)
+    @order.reload.refresh_cart!
+    assert_equal 0.1, item.reload.discount_percentage
+  end
+
+  test "summed quantity uses capped quantities and keeps the final discount" do
+    @org.update!(cart_qty_overflow_policy: "cap")
+    ProductDiscount.create!(organisation: @org, product: @product, discount_type: "percentage",
+      discount_value: 0.1, condition_type: "quantity", condition_scope: "summed", min_quantity: 4)
+    item = @order.order_items.create!(product: @product, quantity: 5)
+    @product.default_variant.update!(track_stock: true, stock_quantity: 2, stock_policy: "show_badge")
+    @order.reload.refresh_cart!
+    assert_equal 2, item.reload.quantity
+    assert_equal 0, item.discount_percentage
+  end
+
+  test "removed category lines no longer qualify remaining lines" do
+    @org.update!(cart_stock_policy: "remove")
+    category = Category.create!(organisation: @org, name: "Sale")
+    other = Product.create!(organisation: @org, name: "Other", unit_price: 1000, published: true)
+    [@product, other].each { |product| CategoryProduct.create!(category: category, product: product) }
+    ProductDiscount.create!(organisation: @org, category: category, discount_type: "percentage",
+      discount_value: 0.1, condition_type: "amount", condition_scope: "summed", min_amount_cents: 2000)
+    item = @order.order_items.create!(product: @product, quantity: 1)
+    @order.order_items.create!(product: other, quantity: 1)
+    other.default_variant.update!(track_stock: true, stock_quantity: 0, stock_policy: "show_badge")
+    @order.reload.refresh_cart!
+    assert_equal 0, item.reload.discount_percentage
+  end
+
   test "refresh_cart! is a no-op for placed orders" do
     item = @order.order_items.create!(product: @product, quantity: 1)
     @order.update!(placed_at: Time.current)

@@ -188,7 +188,7 @@ export default class extends Controller {
   updateTotal() {
     if (this.hasProductPricingOutlet) return // product-pricing owns the total
 
-    const quantity = this.hasQuantityTarget ? parseInt(this.quantityTarget.value) || this.minQuantityValue || 1 : this.minQuantityValue || 1
+    const quantity = this.hasQuantityTarget ? Math.max(parseInt(this.quantityTarget.value, 10) || 0, 0) : this.minQuantityValue || 1
     const isVariable = this.variantsValue && this.variantsValue.length > 0
 
     let priceCents

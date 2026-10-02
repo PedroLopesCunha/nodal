@@ -1,0 +1,32 @@
+<% evaluator = OrderDiscountEvaluator.new(order) %>
+<% selected = evaluator.selected %>
+<% discounts.group_by(&:order_discount_campaign).sort_by { |campaign, _| campaign&.priority || 1 }.each do |campaign, campaign_tiers| %>
+  <% tiers = campaign_tiers.sort_by { |tier| [tier.min_order_amount_cents, tier.id] } %>
+  <% current = evaluator.evaluate(tiers.first).qualification_cents %>
+  <% reached = tiers.select { |tier| current >= tier.min_order_amount_cents }.last %>
+  <% next_tier = tiers.find { |tier| current < tier.min_order_amount_cents } %>
+  <div class="border-top py-3" data-order-campaign-id="<%= campaign&.id %>">
+    <div class="fw-semibold"><%= campaign&.name || 'Escalões de encomenda' %></div>
+    <small class="text-muted d-block"><%= campaign&.qualification_scope&.description || 'Todos os artigos' %></small>
+    <div class="small my-2">Subtotal elegível: <strong><%= money_amount(Money.new(current, order.organisation.currency)) %></strong></div>
+    <% if selected&.campaign == campaign %>
+      <% if selected.discount_amount.positive? %>
+        <div class="small text-success">Campanha aplicada: <%= selected.discount.value_display %></div>
+      <% else %>
+        <div class="small text-muted">Patamar atingido. Mantêm-se os descontos de artigo mais vantajosos.</div>
+      <% end %>
+    <% elsif reached %>
+      <div class="small text-muted">Patamar atingido. Outra campanha tem prioridade.</div>
+    <% end %>
+    <% if next_tier %>
+      <div class="small text-muted">Faltam <%= money_amount(Money.new(next_tier.min_order_amount_cents - current, order.organisation.currency)) %> em artigos elegíveis para o patamar de <%= next_tier.value_display %>.</div>
+    <% end %>
+    <% progress = (current.to_f / tiers.last.min_order_amount_cents * 100).clamp(0, 100) %>
+    <div class="progress my-2" style="height: 8px"><div class="progress-bar bg-success" role="progressbar" aria-valuenow="<%= progress.round %>" aria-valuemin="0" aria-valuemax="100" style="width: <%= progress %>%"></div></div>
+    <div class="d-flex flex-wrap gap-3 small">
+      <% tiers.each do |tier| %>
+        <span class="<%= current >= tier.min_order_amount_cents ? 'text-success' : 'text-muted' %>"><%= tier.min_amount_display %> → <%= tier.value_display %></span>
+      <% end %>
+    </div>
+  </div>
+<% end %>

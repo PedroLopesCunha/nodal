@@ -1,5 +1,18 @@
 <%= turbo_frame_tag "variant-overrides" do %>
-  <% if variants_grouped.present? && variants_grouped.values.flatten.any? %>
+  <% if @variant_page %>
+    <div class="d-flex align-items-center gap-2 flex-wrap mt-3">
+      <input type="search" class="form-control form-control-sm" style="max-width: 320px;" aria-label="Pesquisar produto ou SKU" placeholder="Pesquisar produto ou SKU" value="<%= @variant_page.query %>" data-action="input->variant-overrides#search keydown.enter->variant-overrides#searchNow">
+      <span class="small text-muted">Página <%= @variant_page.page %> · Até 50 variantes por página</span>
+      <% if @variant_page.page > 1 %>
+        <button type="button" class="btn btn-sm btn-outline-secondary" data-action="variant-overrides#page" data-page="<%= @variant_page.page - 1 %>">Anterior</button>
+      <% end %>
+      <% if @variant_page.next_page? %>
+        <button type="button" class="btn btn-sm btn-outline-secondary" data-action="variant-overrides#page" data-page="<%= @variant_page.page + 1 %>">Seguinte</button>
+      <% end %>
+    </div>
+    <p class="small text-muted mt-2">As alterações manuais mantêm-se ao navegar e são guardadas ao guardar o desconto. As exceções pertencem à variante e afetam outras regras que a utilizem.</p>
+  <% end %>
+  <% if variants_grouped.present? && variants_grouped.values.any?(&:present?) %>
     <div class="card mt-3" data-controller="discount-preview" data-discount-preview-symbol-value="<%= currency_symbol %>">
       <div class="card-body">
         <h5 class="card-title mb-4"><%= t('bo.pricing.product_discounts.variant_overrides.title') %></h5>
@@ -72,5 +85,7 @@
         </div>
       </div>
     </div>
+  <% elsif @variant_page %>
+    <p class="text-muted mt-3">Não foram encontradas variantes para esta seleção.</p>
   <% end %>
 <% end %>

@@ -151,6 +151,47 @@ class Storefront::StockVisibilityTest < ActionDispatch::IntegrationTest
     product
   end
 
+  test 'simple products prefill only a specific minimum' do
+    sign_in @customer_user
+    product = simple_product(quantity: 20)
+    [nil, 1, 4].each do |minimum|
+      product.update!(min_quantity: minimum)
+      get product_path(org_slug: @org.slug, id: product.id)
+      assert_response :success
+      field = css_select("input[name='order_item[quantity]']").first
+      assert_equal(minimum == 4 ? '4' : '', field['value'].to_s)
+      assert_equal(minimum == 4 ? '4' : '1', field['min'])
+      assert field.key?('required')
+    end
+  end
+
+  test 'selector and grid defaults distinguish per variant and combined minimums' do
+    sign_in @customer_user
+    %w[default grid].each do |mode|
+      [[1, 'per_variant', ''], [4, 'per_variant', '4'], [4, 'combined', '']].each do |minimum, scope, expected|
+        @product.update!(add_to_cart_mode: mode, min_quantity: minimum, min_quantity_scope: scope)
+        get product_path(org_slug: @org.slug, id: @product.id)
+        assert_response :success
+        field = css_select(mode == 'grid' ? "input[name='bulk_items[#{@variant.id}]']" : "input[name='order_item[quantity]']").first
+        assert_not_nil field
+        assert_equal expected, field['value'].to_s
+      end
+    end
+  end
+
+  test 'prefilled minima on initially collapsed grid rows are not submitted unseen' do
+    sign_in @customer_user
+    @product.update!(add_to_cart_mode: 'grid', min_quantity: 4)
+    5.times do |i|
+      @product.product_variants.create!(organisation: @org, name: "Extra #{i}", sku: "EXTRA-#{i}",
+        unit_price_cents: 1999, published: true, available: true, is_default: false)
+    end
+    get product_path(org_slug: @org.slug, id: @product.id)
+    assert_response :success
+    assert_select "input[name^='bulk_items['][value='4']:not([disabled])", count: 4
+    assert_select "input[name^='bulk_items['][value='4'][disabled][data-enable-on-expand]", count: 2
+  end
+
   test "a simple product shows the quantity next to its availability" do
     @customer.update!(sees_stock_quantities: true)
     product = simple_product(quantity: 12)

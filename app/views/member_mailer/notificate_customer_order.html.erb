@@ -1,3 +1,4 @@
+<% line_pricing = OrderLinePricing.new(@order) %>
 <!-- Success banner -->
 <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="margin: 0 0 32px 0;">
   <tr>
@@ -125,8 +126,11 @@
         <% if item.product_variant.present? && item.product.variable? %>
           <span style="display: block; font-size: 13px; color: #6366f1; margin-top: 2px;"><%= item.product_variant.sku.presence || item.product_variant.option_values_string %></span>
         <% end %>
-        <% if item.discount_percentage && item.discount_percentage > 0 %>
-          <span style="display: inline-block; margin-left: 8px; background-color: #dcfce7; color: #166534; font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 10px;">-<%= (item.discount_percentage * 100).round(0) %>%</span>
+        <% if line_pricing.line(item).line_discount_percentage && line_pricing.line(item).line_discount_percentage > 0 %>
+          <span style="display: inline-block; margin-left: 8px; background-color: #dcfce7; color: #166534; font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 10px;">-<%= (line_pricing.line(item).line_discount_percentage * 100).round(0) %>%</span>
+        <% end %>
+        <% if line_pricing.line(item).campaign_savings.positive? %>
+          <span style="display: block; font-size: 12px; color: #166534;"> <%= t('mailers.common.order_tier_discount') %><% if line_pricing.line(item).campaign_percentage %> (-<%= (line_pricing.line(item).campaign_percentage * 100).round(0) %>%)<% end %>: -<%= line_pricing.line(item).campaign_savings.format %></span>
         <% end %>
         <% if item.note.present? %>
           <span style="display: block; font-size: 13px; color: #6b7280; font-style: italic; margin-top: 4px;"><%= t('orders.item_note_label') %>: <%= item.note %></span>
@@ -136,10 +140,10 @@
         <span style="display: inline-block; background-color: #f3f4f6; padding: 4px 12px; border-radius: 20px; font-size: 14px; font-weight: 600; color: #4b5563;"><%= item.quantity %></span>
       </td>
       <td align="right" style="padding: 16px 20px; background-color: #ffffff; <%= index < @order.order_items.count - 1 ? 'border-bottom: 1px solid #f3f4f6;' : '' %>">
-        <% if item.discount_percentage && item.discount_percentage > 0 %>
+        <% if line_pricing.line(item).total < line_pricing.line(item).original_total %>
           <span style="font-size: 13px; color: #9ca3af; text-decoration: line-through; display: block;"><%= (item.price * item.quantity).format %></span>
         <% end %>
-        <span style="font-size: 15px; font-weight: 500; color: #1a1a1a;"><%= item.total_price.format %></span>
+        <span style="font-size: 15px; font-weight: 500; color: #1a1a1a;"><%= line_pricing.line(item).total.format %></span>
       </td>
     </tr>
   <% end %>
@@ -154,7 +158,7 @@
             <span style="font-size: 14px; color: #6b7177;"><%= t('mailers.common.subtotal') %></span>
           </td>
           <td align="right" style="padding: 12px 20px;">
-            <span style="font-size: 14px; color: #1a1a1a;"><%= @order.total_amount.format %></span>
+            <span style="font-size: 14px; color: #1a1a1a;"><%= line_pricing.subtotal_before_campaign.format %></span>
           </td>
         </tr>
 
@@ -165,7 +169,7 @@
               <span style="font-size: 14px; color: #166534;"><%= t('mailers.common.order_tier_discount') %> (<%= @order.auto_discount_display %>)</span>
             </td>
             <td align="right" style="padding: 8px 20px;">
-              <span style="font-size: 14px; color: #166534;">-<%= @order.auto_order_discount_amount.format %></span>
+              <span style="font-size: 14px; color: #166534;">-<%= line_pricing.campaign_discount_amount.format %></span>
             </td>
           </tr>
         <% end %>

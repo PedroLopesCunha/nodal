@@ -47,6 +47,12 @@
       <div class="card mb-3">
         <div class="card-body">
           <h5 class="card-title mb-4"><%= t('bo.pricing.order_tiers.card_title') %></h5>
+          <% if Rails.configuration.x.discount_category_scopes_enabled %>
+            <div class="mb-3"><%= f.label :order_discount_campaign_id, 'Campanha de encomenda', class: 'form-label' %>
+              <%= f.collection_select :order_discount_campaign_id, current_organisation.order_discount_campaigns.order(:priority), :id, :name, { prompt: 'Selecionar campanha' }, { required: true, class: 'form-select' } %>
+              <small class="text-muted">O scope é definido na campanha. Dentro dela vence o maior patamar atingido.</small>
+            </div>
+          <% end %>
 
           <div class="row g-3">
             <div class="col-md-12">

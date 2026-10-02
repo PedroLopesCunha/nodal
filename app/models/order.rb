@@ -188,25 +188,15 @@ class Order < ApplicationRecord
     changes = blank_cart_changes
     return changes if placed?
 
-    # Built once so each line can evaluate "summed" discount conditions against
-    # the whole cart (a product's variants, or a category total).
-    cart_context = CartDiscountContext.new(order_items.includes(:product_variant, product: :categories).to_a)
-
-    order_items.to_a.each do |item|
+    items = order_items.includes(:product_variant, product: :categories).to_a
+    remaining = []
+    items.each do |item|
       status = item.stock_status
-
       if status.in?(%i[out_of_stock variant_unpublished]) && organisation.cart_stock_policy == "remove"
         changes[:removed] << cart_item_label(item)
         record_unmet_demand(item, requested: item.quantity, kept: 0, reason: :removed)
         item.destroy!
         next
-      end
-
-      item_changes = item.refresh_pricing!(cart_context: cart_context)
-      if item_changes.any?
-        item.save!
-        changes[:price_changed] << item.id if item_changes.key?(:unit_price)
-        changes[:discount_changed] << item.id if item_changes.key?(:discount_percentage)
       end
 
       case status
@@ -215,16 +205,33 @@ class Order < ApplicationRecord
       when :qty_overflow
         available = item.product_variant.stock_quantity.to_i
         if organisation.cart_qty_overflow_policy == "cap" && available >= 1
-          # Record before the update — item.quantity still holds the original
-          # requested amount here; the cap below overwrites it.
           record_unmet_demand(item, requested: item.quantity, kept: available, reason: :capped)
-          item.update!(quantity: available)
+          item.quantity = available
           changes[:capped] << cart_item_label(item).merge(to: available)
         else
           changes[:qty_overflow] << cart_item_label(item).merge(available: available)
         end
       end
+      item.refresh_base_price!
+      remaining << item
     end
+
+    cart_context = CartDiscountContext.new(remaining)
+    remaining.each do |item|
+      item_changes = item.refresh_pricing!(cart_context: cart_context)
+      changes[:price_changed] << item.id if item_changes.key?(:unit_price)
+      changes[:discount_changed] << item.id if item_changes.key?(:discount_percentage)
+      # Quantity callbacks normally evaluate without the cart context. Keep
+      # the aggregate result computed above when persisting system changes.
+      item.preserve_calculated_discount = true
+      begin
+        item.save! if item.changed?
+      ensure
+        item.preserve_calculated_discount = false
+      end
+    end
+    order_items.reset
+    @best_order_discount = nil
 
     # Under the "confirm" price-change policy we persist that a change is
     # pending, so the checkout can require an explicit acknowledgement even
@@ -389,19 +396,25 @@ class Order < ApplicationRecord
 
   # Find the best applicable order tier discount
   def best_order_discount
-    @best_order_discount ||= organisation.order_discounts
-      .active
-      .where("min_order_amount_cents <= ?", total_amount.cents)
-      .order(min_order_amount_cents: :desc)
-      .first
+    return order_discount if placed?
+    automatic_discount_evaluation&.discount
+  end
+
+  def automatic_discount_evaluation
+    return nil if placed?
+    # No model-level cache: changing quantities, prices or campaigns must
+    # never leave a previously selected tier active on the same order object.
+    OrderDiscountEvaluator.new(self).selected
   end
 
   # Calculate the automatic order tier discount amount
   def auto_order_discount_amount
     if placed? && has_auto_discount_snapshot?
       Money.new(auto_discount_amount_cents, organisation.currency)
-    elsif best_order_discount.present?
-      best_order_discount.calculate_discount(total_amount)
+    elsif placed?
+      Money.new(0, organisation.currency)
+    elsif (evaluation = automatic_discount_evaluation)
+      evaluation.discount_amount
     else
       Money.new(0, organisation.currency)
     end
@@ -670,11 +683,31 @@ class Order < ApplicationRecord
   end
 
   def snapshot_auto_discount!
-    if (discount = best_order_discount)
+    evaluation = automatic_discount_evaluation
+    order_items.each { |item| item.update_column(:auto_order_discount_amount_cents, evaluation&.allocations&.fetch(item.id, 0) || 0) }
+    if evaluation
+      discount = evaluation.discount
       self.order_discount = discount
       self.auto_discount_type = discount.discount_type
       self.auto_discount_value = discount.discount_value
-      self.auto_discount_amount_cents = discount.calculate_discount(total_amount).cents
+      self.auto_discount_amount_cents = evaluation.discount_amount.cents
+      self.auto_discount_scope_snapshot = {
+        campaign_id: evaluation.campaign.id, campaign_name: evaluation.campaign.name,
+        priority: evaluation.campaign.priority,
+        qualification: evaluation.campaign.qualification_scope.snapshot,
+        discount: evaluation.campaign.discount_scope.snapshot,
+        qualification_cents: evaluation.qualification_cents,
+        discount_base_cents: evaluation.discount_base_cents,
+        allocation_basis: "before_organisation_cap",
+        competition_policy: "mutual_stackability_per_line_v1",
+        replaced_line_savings: evaluation.replaced_line_savings
+      }
+    else
+      self.order_discount = nil
+      self.auto_discount_type = nil
+      self.auto_discount_value = nil
+      self.auto_discount_amount_cents = 0
+      self.auto_discount_scope_snapshot = nil
     end
   end
 

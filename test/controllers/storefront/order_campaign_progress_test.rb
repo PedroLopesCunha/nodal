@@ -1,0 +1,106 @@
+require "test_helper"
+require 'minitest/mock'
+
+class Storefront::OrderCampaignProgressTest < ActionDispatch::IntegrationTest
+  include Devise::Test::IntegrationHelpers
+
+  test 'exclusive campaign replaces category prices in cart checkout and saved order' do
+    org = Organisation.create!(name: 'Exclusive cart')
+    customer = org.customers.create!(company_name: 'Buyer', contact_name: 'J', active: true)
+    user = org.customer_users.create!(customer: customer, email: 'exclusive-cart@example.test', password: 'password123', active: true)
+    product = org.products.create!(name: 'Prata', unit_price: 10000, published: true)
+    rule = org.product_discounts.build(discount_type: 'percentage', discount_value: 0.05, min_quantity: 1)
+    rule.configure_category_scopes(mode: 'all')
+    rule.save!
+    campaign = org.order_discount_campaigns.create!(name: 'Outubro', priority: 1)
+    org.order_discounts.create!(order_discount_campaign: campaign, min_order_amount_cents: 100000,
+      discount_type: 'percentage', discount_value: 0.12)
+    sign_in user
+    post order_items_path(org.slug), params: { product_id: product.id, order_item: { quantity: 11 } }
+    order = user.orders.draft.find_by!(organisation: org)
+    item = order.order_items.first
+    [cart_path(org.slug), checkout_path(org.slug)].each do |path|
+      get path
+      assert_response :success
+      assert_select "[data-line-total-id='#{item.id}'][data-total-cents='96800']", count: 2
+      assert_select "[data-line-campaign-savings-cents='13200']", count: 2
+      assert_select '.badge', text: /Produto -5%/, count: 0
+      assert_select '.text-success .text-nowrap', text: /132/
+    end
+    order.terms_accepted_at = Time.current
+    order.finalize_checkout!
+    rule.update!(discount_value: 0.5)
+    get order_path(org.slug, order)
+    assert_response :success
+    assert_select "[data-line-total-id='#{item.id}'][data-total-cents='96800']", count: 1
+    assert_select '[data-line-campaign-savings-cents="13200"]', count: 1
+    org.update!(email_order_confirmation_enabled: true)
+    user.update!(invitation_accepted_at: Time.current)
+    mail = CustomerMailer.with(customer_user: user, order: order).confirm_order
+    assert_includes mail.html_part.body.decoded, Money.new(13200, org.currency).format
+    assert_includes mail.text_part.body.decoded, Money.new(96800, org.currency).format
+    assert_not_includes mail.html_part.body.decoded, '-5%'
+    captured = nil
+    fake = Object.new
+    def fake.to_pdf = '%PDF-1.4'
+    Grover.stub :new, ->(html) { captured = html; fake } do
+      get download_pdf_order_path(org.slug, order)
+    end
+    assert_response :success
+    pdf = Nokogiri::HTML(captured)
+    assert_match(/968/, pdf.at_css('tbody td.fw-bold .text-success').text)
+    assert_match(/132/, pdf.at_css('.summary-row.discount').text)
+    member = Member.create!(email: 'exclusive-admin@example.test', password: 'password123', first_name: 'J', last_name: 'Admin')
+    OrgMember.create!(organisation: org, member: member, role: 'owner', active: true)
+    sign_in member
+    get bo_order_path(org.slug, order)
+    assert_response :success
+    assert_select "[data-line-total-id='#{item.id}'][data-total-cents='96800']", count: 1
+  end
+
+  test "cart progress excludes Molduras and shows campaigns separately" do
+    org = Organisation.create!(name: "Campaign cart")
+    customer = org.customers.create!(company_name: "Buyer", contact_name: "J", active: true)
+    user = org.customer_users.create!(customer: customer, email: "progress@example.test", password: "password123", active: true)
+    frames = org.categories.create!(name: "Molduras")
+    campaign = org.order_discount_campaigns.build(name: "Outubro", priority: 1)
+    campaign.configure_category_scopes(mode: "exclude", category_ids: [frames.id])
+    campaign.save!
+    org.order_discounts.create!(order_discount_campaign: campaign, min_order_amount_cents: 75000, discount_type: 'percentage', discount_value: 0.07)
+    other = org.order_discount_campaigns.create!(name: "Especial", priority: 2)
+    org.order_discounts.create!(order_discount_campaign: other, min_order_amount_cents: 50000, discount_type: 'percentage', discount_value: 0.1)
+    silver = org.products.create!(name: "Prata", unit_price: 50000, published: true)
+    frame = org.products.create!(name: "Moldura", unit_price: 50000, published: true)
+    frame.categories = [frames]
+    sign_in user
+    [silver, frame].each do |product|
+      post order_items_path(org.slug), params: { product_id: product.id, order_item: { quantity: 1 } }
+    end
+    get cart_path(org.slug)
+    assert_response :success
+    assert_select "[data-order-campaign-id='#{campaign.id}']" do
+      assert_select ".text-muted", text: /Todos exceto: Molduras/
+      assert_select ".small", text: /Faltam.*250.*artigos elegíveis/
+      assert_select ".text-success", count: 0
+    end
+    assert_select "[data-order-campaign-id='#{other.id}'] .text-success", text: /Campanha aplicada/
+    order = user.orders.draft.find_by!(organisation: org)
+    order.order_items.each do |item|
+      assert_select "[data-line-total-id='#{item.id}'][data-total-cents='45000']", count: 2
+      assert_select "[data-line-total-id='#{item.id}'] [data-line-campaign-savings-cents='5000']", count: 2
+    end
+
+    silver.update!(unit_price: 80000)
+    get cart_path(org.slug)
+    assert_response :success
+    eligible = order.order_items.find_by!(product: silver)
+    excluded = order.order_items.find_by!(product: frame)
+    assert_select "[data-line-total-id='#{eligible.id}'][data-total-cents='74400']", count: 2
+    assert_select "[data-line-total-id='#{eligible.id}'] small", text: /56/, count: 2
+    assert_select "td.text-end > .text-success.text-nowrap", text: /744.*\(-7%\)/
+    assert_select "td.text-end > .text-decoration-line-through.d-block", text: /800/
+    assert_select "[data-line-total-id='#{eligible.id}']", text: /Campanha/, count: 0
+    assert_select "[data-line-total-id='#{excluded.id}'][data-total-cents='50000']", count: 2
+    assert_select "[data-line-total-id='#{excluded.id}'] [data-line-campaign-savings-cents]", count: 0
+  end
+end

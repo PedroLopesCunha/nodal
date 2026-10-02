@@ -1,0 +1,8 @@
+<div data-variant-overrides-target="changes">
+  <% (params[:variant_overrides] || {}).each do |id, values| %>
+    <% next unless id.to_s.match?(/\A\d+\z/) %>
+    <% %w[exclude_from_discounts custom_discount_type custom_discount_value].each do |field| %>
+      <%= hidden_field_tag "variant_overrides[#{id}][#{field}]", values[field] %>
+    <% end %>
+  <% end %>
+</div>

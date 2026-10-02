@@ -105,7 +105,7 @@ class CustomerMailer < ApplicationMailer
         if @discount.has_attribute?(:product_id) # CustomerProductDiscount
           @product = @discount.product
           @category = @discount.category
-          subject_name = @product&.name || @category&.name
+          subject_name = @discount.display_name
           subject = t('mailers.customer_mailer.customer_product_discount.subject',
                       product_name: subject_name)
           mail_with_org_defaults(@organisation, bcc: mailing_list, subject: subject) do |format|
@@ -132,7 +132,7 @@ class CustomerMailer < ApplicationMailer
         if @discount.has_attribute?(:product_id) # CustomerProductDiscount
           @product = @discount.product
           @category = @discount.category
-          subject_name = @product&.name || @category&.name
+          subject_name = @discount.display_name
           subject = t('mailers.customer_mailer.customer_product_discount.subject',
                       product_name: subject_name)
           mail_with_org_defaults(@organisation, to: @customer.email, subject: subject) do |format|
@@ -155,7 +155,7 @@ class CustomerMailer < ApplicationMailer
   def send_product_discount_mail(mailing_list)
     @product = @discount.product
     @category = @discount.category
-    subject_name = @product&.name || @category&.name
+    subject_name = @discount.display_name
     if @product
       subject = t('mailers.customer_mailer.product_discount.subject',
                   product_name: subject_name)

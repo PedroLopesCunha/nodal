@@ -63,7 +63,7 @@ class Storefront::BaseController < ApplicationController
   end
 
   def active_order_discounts
-    @active_order_discounts ||= current_organisation.order_discounts.active.by_min_amount
+    @active_order_discounts ||= current_organisation.order_discounts.active.by_min_amount.includes(order_discount_campaign: { category_scopes: :categories })
   end
 
   def has_order_discounts?

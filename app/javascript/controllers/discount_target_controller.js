@@ -7,7 +7,13 @@ export default class extends Controller {
   static values = { url: String }
 
   connect() {
+    this.scopeChangeHandler = () => this.scopeChanged()
+    this.element.addEventListener("category-scope:change", this.scopeChangeHandler)
     this.toggle()
+  }
+
+  disconnect() {
+    this.element.removeEventListener("category-scope:change", this.scopeChangeHandler)
   }
 
   toggle() {
@@ -21,26 +27,20 @@ export default class extends Controller {
       this.productWrapperTarget.classList.remove("d-none")
       this.categoryWrapperTarget.classList.add("d-none")
       // Clear category select
-      this.clearSelect(this.categorySelectTarget)
+      if (this.hasCategorySelectTarget) this.clearSelect(this.categorySelectTarget)
     }
+    this.dispatchReload()
   }
 
   // Reload variant overrides when category changes
-  categoryChanged(event) {
-    const categoryId = event.target.value
-    const frame = document.getElementById("variant-overrides")
-    if (!frame) return
+  categoryChanged() { this.dispatchReload() }
 
-    if (categoryId) {
-      const newSrc = `${this.urlValue}?category_id=${categoryId}`
-      if (frame.src === newSrc) {
-        frame.removeAttribute("src")
-      }
-      frame.src = newSrc
-    } else {
-      frame.removeAttribute("src")
-      frame.innerHTML = ""
-    }
+  scopeChanged() {
+    if (this.element.querySelector("input[name=target_type]:checked")?.value !== "product") this.dispatchReload()
+  }
+
+  dispatchReload() {
+    this.element.dispatchEvent(new CustomEvent("variant-overrides:reload", { bubbles: true }))
   }
 
   clearSelect(selectEl) {

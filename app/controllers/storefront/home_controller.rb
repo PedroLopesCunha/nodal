@@ -118,12 +118,8 @@ class Storefront::HomeController < Storefront::BaseController
   def has_public_discount?(product)
     return true if product.product_discounts.active.exists?
 
-    category_path_ids = product.categories.flat_map(&:path_ids).uniq
-    return false if category_path_ids.empty?
-
-    ProductDiscount.active.for_category
-                   .where(organisation: product.organisation, category_id: category_path_ids)
-                   .exists?
+    ProductDiscount.active.where(organisation: product.organisation, product_id: nil)
+      .includes(category_scopes: :categories).any? { |discount| discount.matches_discount_product?(product) }
   end
 
   def load_frequent_products

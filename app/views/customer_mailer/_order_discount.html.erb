@@ -94,3 +94,5 @@
 <p style="margin: 0; color: #9ca3af; font-size: 13px; text-align: center;">
   <%= t('mailers.common.questions_footer') %>
 </p>
+
+<p><%= @discount.order_discount_campaign&.name %> · <%= @discount.order_discount_campaign&.discount_scope&.description %></p>

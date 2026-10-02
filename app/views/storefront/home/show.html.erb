@@ -221,7 +221,7 @@
                     <%= money_amount(Money.new((od.discount_value * 100).to_i, current_organisation.currency)) %>
                   <% end %>
                 </div>
-                <div class="small" style="opacity: 0.7;"><%= t('storefront.home.tier_discount.off_orders_over', amount: money_amount(od.min_order_amount)) %></div>
+                <div class="small" style="opacity: 0.7;"><%= t('storefront.home.tier_discount.off_orders_over', amount: money_amount(od.min_order_amount)) %><br><%= od.order_discount_campaign&.qualification_scope&.description %></div>
               </div>
             </div>
           <% end %>

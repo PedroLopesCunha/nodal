@@ -114,25 +114,13 @@ class Bo::HomepageSettingsController < Bo::BaseController
   # out a specific product, so they're not the basis for a "special price" badge.
   def discountable_product_ids(org)
     direct_pd_ids = ProductDiscount.active.for_product.where(organisation: org).pluck(:product_id)
-    pd_category_ids = ProductDiscount.active.for_category.where(organisation: org).pluck(:category_id)
 
     direct_cpd_ids = CustomerProductDiscount.active.for_product.where(organisation: org).pluck(:product_id)
-    cpd_category_ids = CustomerProductDiscount.active.for_category.where(organisation: org).pluck(:category_id)
 
-    cat_product_ids = expand_category_ids_to_product_ids(org, (pd_category_ids + cpd_category_ids).uniq)
-
-    (direct_pd_ids + direct_cpd_ids + cat_product_ids).uniq
-  end
-
-  def expand_category_ids_to_product_ids(org, category_ids)
-    return [] if category_ids.empty?
-
-    # Mirror DiscountCalculator behaviour: a discount on a parent category
-    # applies to all descendant categories' products too.
-    all_cat_ids = org.categories.where(id: category_ids).flat_map(&:subtree_ids).uniq
-    return [] if all_cat_ids.empty?
-
-    CategoryProduct.where(category_id: all_cat_ids).pluck(:product_id)
+    scoped_rules = org.product_discounts.active.where(product_id: nil).includes(category_scopes: :categories).to_a +
+      org.customer_product_discounts.active.where(product_id: nil).includes(category_scopes: :categories).to_a
+    scoped_ids = scoped_rules.flat_map { |rule| rule.discount_scope&.product_relation&.pluck(:id) || [] }
+    (direct_pd_ids + direct_cpd_ids + scoped_ids).uniq
   end
 
   def set_and_authorize_organisation

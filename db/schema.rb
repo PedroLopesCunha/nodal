@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2026_10_01_150000) do
+ActiveRecord::Schema[7.1].define(version: 2026_10_02_110000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_trgm"
   enable_extension "plpgsql"
@@ -222,6 +222,7 @@ ActiveRecord::Schema[7.1].define(version: 2026_10_01_150000) do
     t.integer "min_quantity"
     t.integer "min_amount_cents"
     t.string "condition_scope", default: "per_line", null: false
+    t.string "name"
     t.index ["category_id"], name: "index_customer_product_discounts_on_category_id"
     t.index ["customer_category_id"], name: "index_customer_product_discounts_on_customer_category_id"
     t.index ["customer_id"], name: "index_customer_product_discounts_on_customer_id"
@@ -335,6 +336,37 @@ ActiveRecord::Schema[7.1].define(version: 2026_10_01_150000) do
     t.index ["organisation_id", "taxpayer_id"], name: "index_customers_on_org_id_taxpayer_id_unique", unique: true, where: "((taxpayer_id IS NOT NULL) AND ((taxpayer_id)::text <> ''::text))"
     t.index ["organisation_id"], name: "index_customers_on_organisation_id"
     t.index ["reset_password_token"], name: "index_customers_on_reset_password_token", unique: true
+  end
+
+  create_table "discount_category_scope_categories", force: :cascade do |t|
+    t.bigint "discount_category_scope_id", null: false
+    t.bigint "category_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["category_id"], name: "index_discount_category_scope_categories_on_category_id"
+    t.index ["discount_category_scope_id", "category_id"], name: "idx_scope_category_unique", unique: true
+    t.index ["discount_category_scope_id"], name: "idx_scope_category_scope"
+  end
+
+  create_table "discount_category_scopes", force: :cascade do |t|
+    t.bigint "organisation_id", null: false
+    t.bigint "product_discount_id"
+    t.bigint "customer_product_discount_id"
+    t.bigint "order_discount_campaign_id"
+    t.string "role", null: false
+    t.string "mode", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["customer_product_discount_id", "role"], name: "idx_scope_customer_product_discount_role", unique: true, where: "(customer_product_discount_id IS NOT NULL)"
+    t.index ["customer_product_discount_id"], name: "idx_scope_customer_discount"
+    t.index ["order_discount_campaign_id", "role"], name: "idx_scope_order_discount_campaign_role", unique: true, where: "(order_discount_campaign_id IS NOT NULL)"
+    t.index ["order_discount_campaign_id"], name: "idx_scope_order_campaign"
+    t.index ["organisation_id"], name: "index_discount_category_scopes_on_organisation_id"
+    t.index ["product_discount_id", "role"], name: "idx_scope_product_discount_role", unique: true, where: "(product_discount_id IS NOT NULL)"
+    t.index ["product_discount_id"], name: "index_discount_category_scopes_on_product_discount_id"
+    t.check_constraint "mode::text = ANY (ARRAY['all'::character varying, 'include'::character varying, 'exclude'::character varying]::text[])", name: "discount_scope_mode"
+    t.check_constraint "num_nonnulls(product_discount_id, customer_product_discount_id, order_discount_campaign_id) = 1", name: "discount_scope_one_owner"
+    t.check_constraint "role::text = ANY (ARRAY['qualification'::character varying, 'discount'::character varying]::text[])", name: "discount_scope_role"
   end
 
   create_table "discount_email_notifications", force: :cascade do |t|
@@ -475,6 +507,18 @@ ActiveRecord::Schema[7.1].define(version: 2026_10_01_150000) do
     t.index ["reset_password_token"], name: "index_members_on_reset_password_token", unique: true
   end
 
+  create_table "order_discount_campaigns", force: :cascade do |t|
+    t.bigint "organisation_id", null: false
+    t.string "name", null: false
+    t.integer "priority", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.boolean "legacy", default: false, null: false
+    t.index ["organisation_id", "priority"], name: "idx_order_campaign_priority", unique: true
+    t.index ["organisation_id"], name: "index_order_discount_campaigns_on_organisation_id"
+    t.check_constraint "priority > 0", name: "order_campaign_positive_priority"
+  end
+
   create_table "order_discounts", force: :cascade do |t|
     t.bigint "organisation_id", null: false
     t.string "discount_type", null: false
@@ -486,6 +530,8 @@ ActiveRecord::Schema[7.1].define(version: 2026_10_01_150000) do
     t.boolean "active", default: true
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.bigint "order_discount_campaign_id"
+    t.index ["order_discount_campaign_id"], name: "index_order_discounts_on_order_discount_campaign_id"
     t.index ["organisation_id", "active"], name: "index_order_discounts_on_organisation_id_and_active"
     t.index ["organisation_id"], name: "index_order_discounts_on_organisation_id"
   end
@@ -501,6 +547,7 @@ ActiveRecord::Schema[7.1].define(version: 2026_10_01_150000) do
     t.bigint "product_variant_id"
     t.text "note"
     t.integer "local_stock_consumed", default: 0, null: false
+    t.integer "auto_order_discount_amount_cents"
     t.index ["order_id", "product_id", "product_variant_id"], name: "idx_order_items_order_product_variant", unique: true
     t.index ["order_id"], name: "index_order_items_on_order_id"
     t.index ["product_id"], name: "index_order_items_on_product_id"
@@ -551,6 +598,7 @@ ActiveRecord::Schema[7.1].define(version: 2026_10_01_150000) do
     t.bigint "sales_rep_id"
     t.datetime "pricing_changed_at"
     t.boolean "shipping_pending", default: false, null: false
+    t.jsonb "auto_discount_scope_snapshot"
     t.index ["applied_by_id"], name: "index_orders_on_applied_by_id"
     t.index ["billing_address_id"], name: "index_orders_on_billing_address_id"
     t.index ["customer_id"], name: "index_orders_on_customer_id"
@@ -723,6 +771,7 @@ ActiveRecord::Schema[7.1].define(version: 2026_10_01_150000) do
     t.string "condition_type", default: "quantity", null: false
     t.integer "min_amount_cents"
     t.string "condition_scope", default: "per_line", null: false
+    t.string "name"
     t.index ["category_id"], name: "index_product_discounts_on_category_id"
     t.index ["organisation_id"], name: "index_product_discounts_on_organisation_id"
     t.index ["product_id", "organisation_id"], name: "index_product_discounts_on_product_id_and_organisation_id"
@@ -1141,6 +1190,12 @@ ActiveRecord::Schema[7.1].define(version: 2026_10_01_150000) do
   add_foreign_key "customers", "customer_categories"
   add_foreign_key "customers", "org_members", column: "created_by_member_id"
   add_foreign_key "customers", "organisations"
+  add_foreign_key "discount_category_scope_categories", "categories"
+  add_foreign_key "discount_category_scope_categories", "discount_category_scopes"
+  add_foreign_key "discount_category_scopes", "customer_product_discounts"
+  add_foreign_key "discount_category_scopes", "order_discount_campaigns"
+  add_foreign_key "discount_category_scopes", "organisations"
+  add_foreign_key "discount_category_scopes", "product_discounts"
   add_foreign_key "discount_email_notifications", "members", column: "sent_by_id"
   add_foreign_key "discount_email_notifications", "organisations"
   add_foreign_key "email_logs", "customers"
@@ -1156,6 +1211,8 @@ ActiveRecord::Schema[7.1].define(version: 2026_10_01_150000) do
   add_foreign_key "homepage_featured_products", "products"
   add_foreign_key "homepage_special_price_products", "organisations"
   add_foreign_key "homepage_special_price_products", "products"
+  add_foreign_key "order_discount_campaigns", "organisations"
+  add_foreign_key "order_discounts", "order_discount_campaigns"
   add_foreign_key "order_discounts", "organisations"
   add_foreign_key "order_items", "orders"
   add_foreign_key "order_items", "product_variants"

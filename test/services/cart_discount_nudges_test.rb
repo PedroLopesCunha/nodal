@@ -89,4 +89,16 @@ class CartDiscountNudgesTest < ActiveSupport::TestCase
     assert_instance_of CartDiscountNudges::Unlocked, unlocked.first
     assert_equal "-15%", unlocked.first.discount_label
   end
+  test "per-line category messages do not combine separate products" do
+    category = Category.create!(organisation: @org, name: "Sale")
+    other = Product.create!(organisation: @org, name: "Other", unit_price: 1000, published: true)
+    [@product, other].each { |product| CategoryProduct.create!(category: category, product: product) }
+    ProductDiscount.create!(organisation: @org, category: category, discount_type: "percentage",
+      discount_value: 0.1, condition_type: "quantity", min_quantity: 10, condition_scope: "per_line")
+    [@product, other].each { |product| @order.order_items.create!(product: product, quantity: 7) }
+    assert_equal 2, nudges.size
+    assert_equal [3, 3], nudges.map(&:remaining)
+    assert_empty CartDiscountNudges.new(@order).unlocked
+  end
+
 end

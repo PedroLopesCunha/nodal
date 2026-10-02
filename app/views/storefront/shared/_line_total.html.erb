@@ -1,0 +1,17 @@
+<% pricing = order_line_pricing(order).line(item) %>
+<span class="d-block" data-line-total-id="<%= item.id %>" data-total-cents="<%= pricing.total.cents %>">
+  <% if pricing.original_total > pricing.total %>
+    <span class="text-muted text-decoration-line-through small d-block"><%= money_amount(pricing.original_total) %></span>
+    <span class="text-success fw-bold"><%= money_amount(pricing.total) %></span>
+  <% else %>
+    <%= money_amount(pricing.total) %>
+  <% end %>
+  <% if pricing.campaign_savings.positive? %>
+    <small class="d-block text-success fw-normal" data-line-campaign-savings-cents="<%= pricing.campaign_savings.cents %>">
+      <span class="text-nowrap">(-<%= money_amount(pricing.campaign_savings) %>)</span>
+    </small>
+    <% if order.discount_capped? %>
+      <small class="d-block text-muted fw-normal"><%= t('storefront.line_pricing.before_cap') %></small>
+    <% end %>
+  <% end %>
+</span>

@@ -1,6 +1,7 @@
 class ProductDiscount < ApplicationRecord
   include HasEmailNotification
   include HasDiscountCondition
+  include HasLineCategoryScopes
 
   DISCOUNT_TYPES = %w[percentage fixed].freeze
 
@@ -24,7 +25,7 @@ class ProductDiscount < ApplicationRecord
   }
 
   scope :for_product, -> { where.not(product_id: nil) }
-  scope :for_category, -> { where.not(category_id: nil) }
+  scope :for_category, -> { where(product_id: nil) }
 
   def percentage?
     discount_type == 'percentage'
@@ -42,18 +43,10 @@ class ProductDiscount < ApplicationRecord
     product_id.present?
   end
 
-  def category?
-    category_id.present?
-  end
+
 
   # Display name: product name or category path
-  def target_name
-    if product?
-      product.name
-    elsif category?
-      category.full_path
-    end
-  end
+
 
   def value_display
     if percentage?
@@ -104,7 +97,7 @@ class ProductDiscount < ApplicationRecord
   end
 
   def must_have_product_or_category
-    if product_id.blank? && category_id.blank?
+    if product_id.blank? && category_id.blank? && !scoped_target?
       errors.add(:base, "must target either a product or a category")
     elsif product_id.present? && category_id.present?
       errors.add(:base, "cannot target both a product and a category")
