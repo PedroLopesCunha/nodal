@@ -89,25 +89,45 @@ module Erp
     end
 
     def serialize_order
+      items = @order.order_items.includes(:product, :product_variant).to_a
+      validate_campaign_allocations!(items)
+      @line_pricing = OrderLinePricing.new(@order)
       {
         idempotency_key: idempotency_key,
         customer_external_id: @order.customer.external_id,
         delivery_date: @order.receive_on&.iso8601,
         notes: @order.notes.to_s[0, 255].presence,
-        items: @order.order_items.includes(:product, :product_variant).map { |item| serialize_item(item) }
+        items: items.map { |item| serialize_item(item) }
       }
     end
 
     def serialize_item(item)
-      discount = item.discount_percentage.to_f
-      gross_unit_price = item.price.to_f
-      net_unit_price = (gross_unit_price * (1.0 - discount)).round(4)
+      # Use the recorded line total, including the saved campaign allocation.
+      # Money division would round each unit to cents and lose fixed allocations.
+      total_cents = @line_pricing.line(item).total.cents
+      net_unit_price = (BigDecimal(total_cents.to_s) / 100 / item.quantity).round(4)
+      # Reject half-cent boundaries too: ERP rounding modes may differ there.
+      unless (net_unit_price * item.quantity * 100 - total_cents).abs < BigDecimal('0.5')
+        raise Erp::ApiError, "Line #{item.id}: final amount cannot be represented by a unit price with 4 decimal places"
+      end
 
       {
         product_code: product_code_for(item),
         quantity: item.quantity,
-        unit_price: net_unit_price
+        unit_price: net_unit_price.to_f
       }
+    end
+
+    def validate_campaign_allocations!(items)
+      if @order.order_discount_id.present? && @order.auto_discount_amount_cents.nil?
+        raise Erp::ApiError, 'Historical order campaign has no recorded amount or line allocations; review this order before retrying'
+      end
+      amount = @order.auto_discount_amount_cents.to_i
+      allocations = items.map(&:auto_order_discount_amount_cents)
+      return if amount.zero? && allocations.compact.sum.zero?
+      if allocations.any?(&:nil?) || allocations.compact.sum != amount
+        raise Erp::ApiError, 'Order campaign discount has missing or inconsistent recorded line allocations; review this historical order before retrying'
+      end
     end
 
     def product_code_for(item)

@@ -76,3 +76,13 @@ O limite global de desconto da organização continua a aplicar-se depois dos de
 - Campanhas fixas repartem o valor em cêntimos pelas bases elegíveis antes da comparação. Uma parcela que perde para o desconto de linha não é redistribuída; a poupança efetiva pode ser inferior ao valor nominal da campanha.
 
 As atribuições persistidas por linha continuam a representar a poupança adicional sobre a base de qualificação. O snapshot também regista os descontos de linha substituídos; a apresentação soma esses valores para mostrar a poupança completa da campanha e retira-os da rubrica de descontos de linha. Snapshots antigos sem esta informação preservam a acumulação histórica. Não é necessária uma migration nem recalcular encomendas colocadas.
+
+## Envio de preços de campanha para o ERP
+
+- O payload usa o total guardado da linha, após descontos de artigo e a atribuição da campanha, dividido pela quantidade com quatro casas decimais. Não se divide Money por quantidade, para evitar perder a repartição de descontos fixos.
+- Uma peça de 100 €, com categoria 5% e campanha 12% exclusivas, é enviada a 88 €. Com ambas acumuláveis é enviada a 83,60 €. Artigos excluídos e preços de artigo superiores mantêm o valor respetivo.
+- Editar a campanha ou os descontos depois do checkout não muda estes valores. O envio não avalia regras atuais para encomendas colocadas.
+- A soma das atribuições guardadas deve coincidir com o montante automático guardado. Descontos históricos sem repartição por linha, ou repartições inconsistentes, deixam o envio em estado de falha com mensagem explícita; não são reconstruídos.
+- Se quatro casas decimais não conseguirem representar o total da linha ao cêntimo para a quantidade indicada, o envio falha antes de chamar o adapter. Não se alteram quantidades nem se criam linhas artificiais para compensar.
+- Mantém-se o contrato anterior para impostos, portes, códigos promocionais, descontos manuais e limite global: esta correção cobre preços de artigo e campanhas automáticas de encomenda, antes dos restantes ajustes globais.
+- Validar o payload e a nota criada num ambiente de teste do ERP antes do deploy. Os testes automatizados usam um adapter simulado, sem envios reais. Encomendas já sincronizadas não são reenviadas automaticamente.
