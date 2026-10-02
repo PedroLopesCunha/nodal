@@ -86,9 +86,15 @@ class DiscountCalculator
   end
 
   def condition_inputs(source)
+    if !source.summed_condition? && source.qualification_scope && !source.qualification_scope.matches_product?(product)
+      return [0, 0]
+    end
     return [quantity, @line_amount_cents] unless source.summed_condition? && @cart_context
 
-    if source.product_id
+    if source.qualification_scope
+      selection = { scope: source.qualification_scope, product_id: source.product_id, exclude_variants: true }
+      [@cart_context.quantity_for(**selection), @cart_context.amount_cents_for(**selection)]
+    elsif source.product_id
       [@cart_context.product_quantity(source.product_id), @cart_context.product_amount_cents(source.product_id)]
     elsif source.category_id
       [@cart_context.category_quantity(source.category_id), @cart_context.category_amount_cents(source.category_id)]
@@ -332,41 +338,23 @@ class DiscountCalculator
   end
 
   def find_category_discounts
-    # Collect all category IDs the product belongs to, plus their ancestors
-    category_ids = product.categories.flat_map { |cat| cat.path_ids }.uniq
-    return [] if category_ids.empty?
-
-    ProductDiscount.active
-      .for_category
-      .where(organisation: product.organisation, category_id: category_ids)
+    ProductDiscount.active.where(organisation: product.organisation, product_id: nil)
+      .includes(category_scopes: :categories).select { |rule| rule.matches_discount_product?(product) }
   end
 
   def find_customer_category_discounts
     return [] unless customer
+    candidates = CustomerProductDiscount.active.where(organisation: product.organisation, product_id: nil)
+      .includes(category_scopes: :categories)
+    direct = candidates.where(customer: customer).select { |rule| rule.matches_discount_product?(product) }
+    return direct unless customer.customer_category_id
 
-    category_ids = product.categories.flat_map { |cat| cat.path_ids }.uniq
-    return [] if category_ids.empty?
-
-    # Direct customer match
-    direct = CustomerProductDiscount.active
-      .for_category
-      .where(customer: customer, organisation: product.organisation, category_id: category_ids)
-
-    # Also include customer_category-based matches
-    if customer.customer_category_id.present?
-      category_based = CustomerProductDiscount.active
-        .for_category
-        .where(customer_category_id: customer.customer_category_id, organisation: product.organisation, category_id: category_ids)
-        .where(customer_id: nil)
-
-      # Direct customer discounts take precedence — only include category-based for categories not already covered
-      covered_category_ids = direct.pluck(:category_id)
-      category_based = category_based.where.not(category_id: covered_category_ids) if covered_category_ids.any?
-
-      return direct.to_a + category_based.to_a
-    end
-
-    direct.to_a
+    group = candidates.where(customer_category_id: customer.customer_category_id, customer_id: nil)
+      .select { |rule| rule.matches_discount_product?(product) }
+    # Preserve existing direct-customer precedence for equivalent category
+    # targets. Distinct targets continue competing/stacking as before.
+    covered = direct.map(&:category_scope_signature)
+    direct + group.reject { |rule| covered.include?(rule.category_scope_signature) }
   end
 
   def currency

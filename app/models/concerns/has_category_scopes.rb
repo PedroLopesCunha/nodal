@@ -17,6 +17,7 @@ module HasCategoryScopes
   # The initial admin uses one configuration for both roles. Domain callers
   # can configure each role independently through the owned scope records.
   def configure_category_scopes(mode:, category_ids: [])
+    @explicit_category_scopes = true
     ids = Array(category_ids).reject(&:blank?).map(&:to_i).uniq
     categories = organisation.categories.where(id: ids).to_a
     raise ActiveRecord::RecordNotFound, "Invalid category selection" unless categories.map(&:id).sort == ids.sort
