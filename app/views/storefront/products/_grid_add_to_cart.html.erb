@@ -127,7 +127,7 @@
                     <% acts << "input->min-quantity-counter#update" if combined_counter %>
                     <% acts << "input->grid-pricing#update" if grid %>
                     <% input_data[:action] = acts.join(" ") if acts.any? %>
-                    <%= number_field_tag "bulk_items[#{variant.id}]", 0, min: 0, class: "form-control text-center mx-auto d-block", style: "width: 100px;", data: input_data %>
+                    <%= number_field_tag "bulk_items[#{variant.id}]", nil, min: 0, class: "form-control text-center mx-auto d-block", style: "width: 100px;", data: input_data %>
                   </td>
                 <% end %>
               </tr>
