@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2026_10_02_100000) do
+ActiveRecord::Schema[7.1].define(version: 2026_10_02_110000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_trgm"
   enable_extension "plpgsql"
@@ -513,6 +513,7 @@ ActiveRecord::Schema[7.1].define(version: 2026_10_02_100000) do
     t.integer "priority", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.boolean "legacy", default: false, null: false
     t.index ["organisation_id", "priority"], name: "idx_order_campaign_priority", unique: true
     t.index ["organisation_id"], name: "index_order_discount_campaigns_on_organisation_id"
     t.check_constraint "priority > 0", name: "order_campaign_positive_priority"

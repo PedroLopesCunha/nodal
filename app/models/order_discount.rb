@@ -4,6 +4,10 @@ class OrderDiscount < ApplicationRecord
   DISCOUNT_TYPES = %w[percentage fixed].freeze
 
   belongs_to :organisation
+  belongs_to :order_discount_campaign, optional: true
+  before_validation :assign_legacy_campaign
+  validate :campaign_organisation_matches
+  validate :unique_overlapping_tier
 
   monetize :min_order_amount_cents
 
@@ -58,6 +62,14 @@ class OrderDiscount < ApplicationRecord
     end
   end
 
+  def evaluation_for(order)
+    OrderDiscountEvaluator.new(order).evaluate(self)
+  end
+
+  def display_name
+    "#{order_discount_campaign&.name || 'Escalão'} · #{min_amount_display} → #{value_display}"
+  end
+
   def calculate_discount(order_total)
     return Money.new(0, organisation.currency) unless order_total >= min_order_amount
 
@@ -73,6 +85,29 @@ class OrderDiscount < ApplicationRecord
   end
 
   private
+
+  def assign_legacy_campaign
+    return if order_discount_campaign || !organisation
+    organisation.with_lock do
+      self.order_discount_campaign = organisation.order_discount_campaigns.find_by(legacy: true) ||
+        organisation.order_discount_campaigns.create!(name: "Escalões existentes", legacy: true,
+          priority: (organisation.order_discount_campaigns.maximum(:priority) || 0) + 1)
+    end
+  end
+
+  def campaign_organisation_matches
+    if order_discount_campaign && order_discount_campaign.organisation_id != organisation_id
+      errors.add(:order_discount_campaign, "must belong to the organisation")
+    end
+  end
+
+  def unique_overlapping_tier
+    return if !active? || !order_discount_campaign || order_discount_campaign.legacy?
+    candidates = order_discount_campaign.order_discounts.where(active: true, min_order_amount_cents: min_order_amount_cents).where.not(id: id)
+    candidates = candidates.where("valid_until IS NULL OR valid_until >= ?", valid_from) if valid_from
+    candidates = candidates.where("valid_from IS NULL OR valid_from <= ?", valid_until) if valid_until
+    errors.add(:min_order_amount, "overlaps with another active tier in this campaign") if candidates.exists?
+  end
 
   def discount_value_valid_for_type
     return unless discount_value.present? && discount_type.present?

@@ -396,19 +396,25 @@ class Order < ApplicationRecord
 
   # Find the best applicable order tier discount
   def best_order_discount
-    @best_order_discount ||= organisation.order_discounts
-      .active
-      .where("min_order_amount_cents <= ?", total_amount.cents)
-      .order(min_order_amount_cents: :desc)
-      .first
+    return order_discount if placed?
+    automatic_discount_evaluation&.discount
+  end
+
+  def automatic_discount_evaluation
+    return nil if placed?
+    # No model-level cache: changing quantities, prices or campaigns must
+    # never leave a previously selected tier active on the same order object.
+    OrderDiscountEvaluator.new(self).selected
   end
 
   # Calculate the automatic order tier discount amount
   def auto_order_discount_amount
     if placed? && has_auto_discount_snapshot?
       Money.new(auto_discount_amount_cents, organisation.currency)
-    elsif best_order_discount.present?
-      best_order_discount.calculate_discount(total_amount)
+    elsif placed?
+      Money.new(0, organisation.currency)
+    elsif (evaluation = automatic_discount_evaluation)
+      evaluation.discount_amount
     else
       Money.new(0, organisation.currency)
     end
@@ -677,11 +683,29 @@ class Order < ApplicationRecord
   end
 
   def snapshot_auto_discount!
-    if (discount = best_order_discount)
+    evaluation = automatic_discount_evaluation
+    order_items.each { |item| item.update_column(:auto_order_discount_amount_cents, evaluation&.allocations&.fetch(item.id, 0) || 0) }
+    if evaluation
+      discount = evaluation.discount
       self.order_discount = discount
       self.auto_discount_type = discount.discount_type
       self.auto_discount_value = discount.discount_value
-      self.auto_discount_amount_cents = discount.calculate_discount(total_amount).cents
+      self.auto_discount_amount_cents = evaluation.discount_amount.cents
+      self.auto_discount_scope_snapshot = {
+        campaign_id: evaluation.campaign.id, campaign_name: evaluation.campaign.name,
+        priority: evaluation.campaign.priority,
+        qualification: evaluation.campaign.qualification_scope.snapshot,
+        discount: evaluation.campaign.discount_scope.snapshot,
+        qualification_cents: evaluation.qualification_cents,
+        discount_base_cents: evaluation.discount_base_cents,
+        allocation_basis: "before_organisation_cap"
+      }
+    else
+      self.order_discount = nil
+      self.auto_discount_type = nil
+      self.auto_discount_value = nil
+      self.auto_discount_amount_cents = 0
+      self.auto_discount_scope_snapshot = nil
     end
   end
 
