@@ -64,4 +64,30 @@ class DiscountScopeEvaluatorTest < ActiveSupport::TestCase
     assert_not @other.destroy
     assert Category.exists?(@other.id)
   end
+  test "discarding a descendant cannot silently remove an exclusion" do
+    @campaign.configure_category_scopes(mode: "exclude", category_ids: [@parent.id])
+    @campaign.save!
+    assert_not @child.discard
+    assert_not @child.discarded?
+    assert @product.reload.categories.include?(@child)
+  end
+
+  test "organisation deletion cleans scopes before removing referenced categories" do
+    @campaign.configure_category_scopes(mode: "exclude", category_ids: [@other.id])
+    @campaign.save!
+    assert @org.destroy
+    assert_not DiscountCategoryScope.exists?(organisation_id: @org.id)
+  end
+
+  test "scope category changes stay in memory until the owner is saved" do
+    @campaign.configure_category_scopes(mode: "include", category_ids: [@parent.id])
+    assert_equal 0, DiscountCategoryScopeCategory.where(discount_category_scope_id: @campaign.category_scopes.map(&:id)).count
+    @campaign.save!
+    assert_equal [@parent.id], @campaign.reload.discount_scope.selected_category_ids
+    @campaign.configure_category_scopes(mode: "include", category_ids: [@other.id])
+    assert_equal [@parent.id], DiscountCategoryScope.find(@campaign.discount_scope.id).selected_category_ids
+    @campaign.save!
+    assert_equal [@other.id], @campaign.reload.discount_scope.selected_category_ids
+  end
+
 end

@@ -1,5 +1,5 @@
 Hello
-<% if @product || @category %>
+<% if @discount.is_a?(ProductDiscount) %>
   <%= render "product_discount" %>
 <% else %>
   <%= render "order_discount" %>

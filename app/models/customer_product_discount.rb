@@ -28,7 +28,7 @@ class CustomerProductDiscount < ApplicationRecord
   }
 
   scope :for_product, -> { where.not(product_id: nil) }
-  scope :for_category, -> { where.not(category_id: nil) }
+  scope :for_category, -> { where(product_id: nil) }
 
   def percentage?
     discount_type == 'percentage'

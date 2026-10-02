@@ -25,7 +25,7 @@ module HasCategoryScopes
       scope = category_scopes.find { |existing| existing.role == role } || category_scopes.build(role: role)
       scope.organisation = organisation
       scope.mode = mode
-      scope.categories = categories
+      scope.stage_categories(categories)
     end
   end
 end

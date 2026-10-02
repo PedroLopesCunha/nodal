@@ -22,6 +22,8 @@
   <%= @product ? t('mailers.customer_mailer.product_discount.intro') : t('mailers.customer_mailer.product_discount.category_intro') %>
 </p>
 
+<p><%= @discount.discount_scope&.description %></p>
+
 <!-- Shop button -->
 <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="margin: 0 0 32px 0;">
   <tr>
@@ -56,8 +58,8 @@
             <h2 style="margin: 0 0 8px 0; font-size: 20px; font-weight: 600; color: #1a1a1a;">
               <% if @product %>
                 <%= @product.name %>
-              <% elsif @category %>
-                <%= @category.full_path %>
+              <% else %>
+                <%= @discount.target_name %>
               <% end %>
             </h2>
             <% if @product&.description.present? %>

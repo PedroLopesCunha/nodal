@@ -50,7 +50,7 @@
                     <% value = discount.percentage? ? discount.value_display : money_amount(Money.new((discount.discount_value * 100).to_i, @current_organisation.currency)) %>
                     <%= t('storefront.carts.show.discount_off', value: value) %>
                   </div>
-                  <small class="text-muted"><%= t('storefront.carts.show.orders_over', amount: discount.min_amount_display) %></small>
+                  <small class="text-muted"><%= discount.order_discount_campaign&.name %> · <%= t('storefront.carts.show.orders_over', amount: discount.min_amount_display) %><br><%= discount.order_discount_campaign&.qualification_scope&.description %></small>
                 </div>
               </div>
             <% end %>
@@ -286,7 +286,7 @@
 
             <% if @order.best_order_discount.present? %>
               <div class="d-flex justify-content-between mb-2 text-success">
-                <span><%= t('storefront.carts.show.order_discount') %> (<%= @order.best_order_discount.value_display %>)</span>
+                <span><%= t('storefront.carts.show.order_discount') %><% if (description = automatic_campaign_description(@order)) %><small class="d-block text-muted"><%= description %></small><% end %> (<%= @order.best_order_discount.value_display %>)</span>
                 <span>-<%= money_amount(@order.auto_order_discount_amount) %></span>
               </div>
             <% end %>
@@ -331,54 +331,7 @@
               <i class="fa-solid fa-percent text-primary me-2"></i><%= t('storefront.carts.show.available_discounts') %>
             </h6>
 
-            <%# One progress ladder: a single bar with a marker per tier, so the
-                order's progress across all thresholds reads at a glance. Tiers
-                get equal width on the bar (thresholds are far apart), so it's a
-                clean "staircase" rather than markers bunched at the start. %>
-            <% tiers = @order_discounts.sort_by(&:min_order_amount_cents) %>
-            <% best = @order.best_order_discount %>
-            <% total_c = @order.total_amount.cents %>
-            <% seg = 100.0 / tiers.size %>
-            <%
-              fill = 100.0
-              prev = 0
-              tiers.each_with_index do |d, i|
-                th = d.min_order_amount_cents
-                if total_c < th
-                  fill = (i + (total_c - prev).to_f / (th - prev)) * seg
-                  break
-                end
-                prev = th
-              end
-            %>
-            <% next_tier = tiers.find { |d| !d.applicable_to?(@order.total_amount) } %>
-
-            <div class="small mb-2">
-              <% if next_tier %>
-                <% nv = next_tier.percentage? ? next_tier.value_display : money_amount(Money.new((next_tier.discount_value * 100).to_i, @current_organisation.currency)) %>
-                <i class="fa-solid fa-bolt text-warning me-1"></i><span class="text-muted"><%= t('storefront.carts.show.order_ladder_next', amount: money_amount(next_tier.min_order_amount - @order.total_amount), discount: "-#{nv}") %></span>
-              <% else %>
-                <% bv = best&.value_display %>
-                <i class="fa-solid fa-circle-check text-success me-1"></i><span class="text-success fw-semibold"><%= t('storefront.carts.show.order_ladder_done', discount: "-#{bv}") %></span>
-              <% end %>
-            </div>
-
-            <div class="progress position-relative" style="height: 8px; overflow: visible;">
-              <div class="progress-bar bg-success" role="progressbar" style="width: <%= fill %>%; border-radius: 4px;"></div>
-              <% tiers.each_with_index do |d, i| %>
-                <% next if i == tiers.size - 1 %>
-                <span class="position-absolute" style="left: <%= (i + 1) * seg %>%; top: 0; bottom: 0; width: 2px; background: #fff;"></span>
-              <% end %>
-            </div>
-
-            <div class="position-relative mt-1" style="height: 1rem;">
-              <% tiers.each_with_index do |d, i| %>
-                <% reached = d.applicable_to?(@order.total_amount) %>
-                <% v = d.percentage? ? d.value_display : money_amount(Money.new((d.discount_value * 100).to_i, @current_organisation.currency)) %>
-                <span class="position-absolute <%= reached ? 'text-success fw-semibold' : 'text-muted' %>"
-                      style="left: <%= (i + 1) * seg %>%; transform: translateX(<%= i == tiers.size - 1 ? '-100%' : '-50%' %>); font-size: 0.7rem; white-space: nowrap;">-<%= v %></span>
-              <% end %>
-            </div>
+            <%= render 'order_campaign_progress', order: @order, discounts: @order_discounts %>
           </div>
         </div>
       <% end %>

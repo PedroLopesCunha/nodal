@@ -26,6 +26,7 @@
 <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="margin: 0 0 32px 0;">
   <tr>
     <td align="center">
+      <p><%= @discount.discount_scope&.description %></p>
       <% if @product %>
         <a href="<%= product_url(@product, org_slug: @organisation.slug) %>" style="display: inline-block; background: linear-gradient(135deg, #7c3aed 0%, #a855f7 100%); background-color: #7c3aed; color: #ffffff; text-decoration: none; font-size: 16px; font-weight: 600; padding: 14px 32px; border-radius: 8px;">
           <%= t('mailers.common.view_product') %>
@@ -53,7 +54,7 @@
       <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0">
         <tr>
           <td style="vertical-align: top;">
-            <h2 style="margin: 0 0 8px 0; font-size: 20px; font-weight: 600; color: #1a1a1a;"><%= @product&.name || @category&.full_path %></h2>
+            <h2 style="margin: 0 0 8px 0; font-size: 20px; font-weight: 600; color: #1a1a1a;"><%= @discount.display_name %></h2>
             <% if @product&.description.present? %>
               <p style="margin: 0 0 16px 0; font-size: 14px; color: #6b7177; line-height: 1.5;"><%= @product.description %></p>
             <% end %>

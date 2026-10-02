@@ -125,7 +125,7 @@
             <% if @order.has_auto_discount_snapshot? %>
               <div class="d-flex justify-content-between mb-2 text-success">
                 <span>
-                  <%= t('bo.orders.show.order_tier_discount') %> (<%= @order.auto_discount_display %>)
+                  <%= t('bo.orders.show.order_tier_discount') %><% if (description = automatic_campaign_description(@order)) %><small class="d-block text-muted"><%= description %></small><% end %> (<%= @order.auto_discount_display %>)
                 </span>
                 <span>-<%= humanized_money_with_symbol(@order.auto_order_discount_amount) %></span>
               </div>
@@ -330,7 +330,7 @@
         <div class="card mb-4">
           <div class="card-body">
             <h6 class="text-muted mb-3">
-              <i class="fa-solid fa-cart-shopping me-2"></i><%= t('bo.orders.show.order_tier_discount') %>
+              <i class="fa-solid fa-cart-shopping me-2"></i><%= t('bo.orders.show.order_tier_discount') %><% if (description = automatic_campaign_description(@order)) %><small class="d-block text-muted"><%= description %></small><% end %>
             </h6>
 
             <div class="alert alert-success mb-0">

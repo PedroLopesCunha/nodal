@@ -42,6 +42,7 @@ class Category < ApplicationRecord
 
   before_validation :generate_slug, if: -> { slug.blank? && name.present? }
   before_save :normalize_name
+  before_discard :prevent_referenced_scope_removal
   before_discard :check_children
   before_discard :remove_product_associations
 
@@ -122,7 +123,7 @@ class Category < ApplicationRecord
   end
 
   def prevent_referenced_scope_removal
-    if discount_category_scope_categories.exists?
+    if DiscountCategoryScopeCategory.where(category_id: path_ids).exists?
       errors.add(:base, "Category is referenced by a discount scope; review the campaign before deleting it")
       throw :abort
     end
