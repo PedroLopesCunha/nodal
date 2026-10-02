@@ -698,7 +698,9 @@ class Order < ApplicationRecord
         discount: evaluation.campaign.discount_scope.snapshot,
         qualification_cents: evaluation.qualification_cents,
         discount_base_cents: evaluation.discount_base_cents,
-        allocation_basis: "before_organisation_cap"
+        allocation_basis: "before_organisation_cap",
+        competition_policy: "mutual_stackability_per_line_v1",
+        replaced_line_savings: evaluation.replaced_line_savings
       }
     else
       self.order_discount = nil

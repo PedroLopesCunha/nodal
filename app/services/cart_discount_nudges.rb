@@ -27,6 +27,7 @@ class CartDiscountNudges
     @org = order.organisation
     @currency = @org.currency
     @context = CartDiscountContext.new(order.order_items.includes(:product_variant, product: :categories).to_a)
+    @replaced_line_ids = order.automatic_discount_evaluation&.replaced_line_savings&.keys || []
   end
 
   def opportunities
@@ -142,6 +143,7 @@ class CartDiscountNudges
   end
 
   def applied_to_line?(discount, item)
+    return false if @replaced_line_ids.include?(item.id)
     DiscountCalculator.new(product: item.product, customer: @order.customer, quantity: item.quantity,
       variant: item.product_variant, cart_context: @context).applied_discounts.any? { |applied| applied[:source] == discount }
   end

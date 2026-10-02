@@ -110,13 +110,142 @@ class OrderDiscountEvaluatorTest < ActiveSupport::TestCase
 
   test "line display compounds product and campaign discounts on the existing base" do
     @tier.update!(min_order_amount_cents: 50000, discount_value: 0.12, stackable: true)
-    @items.first.update_columns(discount_percentage: 0.1)
+    ProductDiscount.create!(organisation: @org, product: @items.first.product,
+      discount_type: 'percentage', discount_value: 0.1, stackable: true)
+    @order.refresh_cart!
     @order.order_items.reset
     pricing = OrderLinePricing.new(@order).line(@items.first.reload)
     assert_equal 40000, pricing.original_total.cents
     assert_equal 4320, pricing.campaign_savings.cents
     assert_equal 31680, pricing.total.cents
     assert_equal 36000, @items.first.total_price.cents
+  end
+
+  test 'exclusive campaign replaces inferior line discount without changing qualification' do
+    ProductDiscount.create!(organisation: @org, product: @items.first.product,
+      discount_type: 'percentage', discount_value: 0.05, stackable: false)
+    @tier.update!(discount_value: 0.12)
+    @order.refresh_cart!
+    result = @order.automatic_discount_evaluation
+    assert_equal 78000, result.qualification_cents
+    assert_equal 2000, result.replaced_line_savings[@items.first.id]
+    assert_equal 2800, result.allocations[@items.first.id]
+    assert_equal 35200, @items.first.reload.total_price.cents - result.allocations[@items.first.id]
+    assert_equal 100400, @order.total_with_auto_discount.cents
+    pricing = OrderLinePricing.new(@order)
+    assert_equal 0, pricing.line(@items.first).line_discount_percentage
+    assert_equal 4800, pricing.line(@items.first).campaign_savings.cents
+    assert_equal 0, pricing.line_discount_amount.cents
+    assert_equal 9600, pricing.campaign_discount_amount.cents
+    assert_equal 110000, pricing.subtotal_before_campaign.cents
+  end
+
+  test 'both rules must consent to accumulation and stronger line prices survive' do
+    rule = ProductDiscount.create!(organisation: @org, product: @items.first.product,
+      discount_type: 'percentage', discount_value: 0.05, stackable: true)
+    @tier.update!(discount_value: 0.12)
+    @order.refresh_cart!
+    assert_equal 2000, @order.automatic_discount_evaluation.replaced_line_savings[@items.first.id]
+    rule.update!(stackable: false)
+    @tier.update!(stackable: true)
+    @order.refresh_cart!
+    assert_equal 2000, @order.automatic_discount_evaluation.replaced_line_savings[@items.first.id]
+    rule.update!(discount_value: 0.20)
+    @tier.update!(min_order_amount_cents: 50000)
+    @order.refresh_cart!
+    assert_equal 0, @order.automatic_discount_evaluation.allocations.fetch(@items.first.id, 0)
+    assert_not @order.automatic_discount_evaluation.replaced_line_savings.key?(@items.first.id)
+  end
+
+  test 'a threshold is not unlocked by removing a line discount' do
+    ProductDiscount.create!(organisation: @org, product: @items.first.product,
+      discount_type: 'percentage', discount_value: 0.05)
+    @tier.update!(min_order_amount_cents: 79000, discount_value: 0.12)
+    @order.refresh_cart!
+    assert_nil @order.automatic_discount_evaluation
+  end
+
+  test 'replacement snapshots preserve final prices and qualification after rule edits' do
+    rule = ProductDiscount.create!(organisation: @org, product: @items.first.product,
+      discount_type: 'percentage', discount_value: 0.05)
+    @tier.update!(discount_value: 0.12)
+    @order.refresh_cart!
+    @order.terms_accepted_at = Time.current
+    @order.finalize_checkout!
+    assert_equal 78000, @order.auto_discount_scope_snapshot['qualification_cents']
+    assert_equal 'mutual_stackability_per_line_v1', @order.auto_discount_scope_snapshot['competition_policy']
+    assert_equal 7600, @order.auto_discount_amount_cents
+    rule.update!(discount_value: 0.5, stackable: true)
+    @tier.update!(discount_value: 0.9, stackable: true)
+    @order.reload
+    pricing = OrderLinePricing.new(@order)
+    assert_equal 35200, pricing.line(@items.first.reload).total.cents
+    assert_equal 4800, pricing.line(@items.first).campaign_savings.cents
+    assert_equal 9600, pricing.campaign_discount_amount.cents
+    assert_equal 100400, @order.total_with_auto_discount.cents
+  end
+
+  test 'fixed campaigns compare allocated money and never redistribute losing shares' do
+    ProductDiscount.create!(organisation: @org, product: @items.first.product,
+      discount_type: 'percentage', discount_value: 0.20)
+    @tier.update!(min_order_amount_cents: 50000, discount_type: 'fixed', discount_value: 80)
+    @order.refresh_cart!
+    result = @order.automatic_discount_evaluation
+    assert_equal 0, result.allocations.fetch(@items.first.id, 0)
+    assert_equal 2000, result.allocations[@items[1].id]
+    assert_equal 2000, result.allocations[@items[2].id]
+    assert_equal 98000, @order.total_with_auto_discount.cents
+  end
+
+  test 'ties keep line prices and do not announce a campaign saving' do
+    @items.first.update_columns(discount_percentage: 0.07)
+    @tier.update!(min_order_amount_cents: 50000)
+    result = @order.automatic_discount_evaluation
+    assert_equal 0, result.allocations.fetch(@items.first.id, 0)
+    assert_equal 0, OrderLinePricing.new(@order).line(@items.first.reload).campaign_savings.cents
+  end
+
+  test 'the 1100 euro cart receives 12 percent instead of 5 plus 12' do
+    [50000, 20000, 40000, 0].each_with_index { |price, i| @items[i].product.update!(unit_price: price) }
+    rule = @org.product_discounts.build(discount_type: 'percentage', discount_value: 0.05, min_quantity: 1)
+    rule.configure_category_scopes(mode: 'all')
+    rule.save!
+    @tier.update!(min_order_amount_cents: 100000, discount_value: 0.12)
+    @order.refresh_cart!
+    assert_equal 104500, @order.automatic_discount_evaluation.qualification_cents
+    pricing = OrderLinePricing.new(@order)
+    assert_equal [44000, 17600, 35200, 0], @items.map { |item| pricing.line(item.reload).total.cents }
+    assert_equal 96800, @order.total_with_auto_discount.cents
+    assert_equal 13200, pricing.campaign_discount_amount.cents
+    assert_equal 0, pricing.line_discount_amount.cents
+    assert_empty CartDiscountNudges.new(@order).unlocked
+  end
+
+  test 'customer category prices compete and excluded lines keep their price' do
+    rule = @org.customer_product_discounts.build(customer: @order.customer,
+      discount_type: 'percentage', discount_value: 0.05, min_quantity: 1)
+    rule.configure_category_scopes(mode: 'all')
+    rule.save!
+    @tier.update!(min_order_amount_cents: 50000, discount_value: 0.12)
+    @order.refresh_cart!
+    pricing = OrderLinePricing.new(@order)
+    assert_equal 35200, pricing.line(@items.first.reload).total.cents
+    assert_equal 28500, pricing.line(@items.last.reload).total.cents
+    assert_equal 1500, pricing.line_discount_amount.cents
+  end
+
+  test 'old allocation snapshots preserve historical stacking despite current exclusivity' do
+    @items.first.update_columns(discount_percentage: 0.05, auto_order_discount_amount_cents: 4560)
+    @items[1].update_column(:auto_order_discount_amount_cents, 2400)
+    @items[2].update_column(:auto_order_discount_amount_cents, 2400)
+    @items.last.update_column(:auto_order_discount_amount_cents, 0)
+    @order.update!(placed_at: Time.current, auto_discount_type: 'percentage', auto_discount_value: 0.12,
+      auto_discount_amount_cents: 9360, auto_discount_scope_snapshot: { campaign_id: @campaign.id })
+    pricing = OrderLinePricing.new(@order.reload)
+    assert_equal 33440, pricing.line(@items.first.reload).total.cents
+    assert_equal BigDecimal('0.05'), pricing.line(@items.first).line_discount_percentage
+    assert_equal 4560, pricing.line(@items.first).campaign_savings.cents
+    assert_equal 98640, @order.total_with_auto_discount.cents
   end
 
   test "fixed campaign line display retains exact cent allocations and shows no percentage" do

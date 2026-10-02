@@ -3,6 +3,38 @@ require "test_helper"
 class Storefront::OrderCampaignProgressTest < ActionDispatch::IntegrationTest
   include Devise::Test::IntegrationHelpers
 
+  test 'exclusive campaign replaces category prices in cart checkout and saved order' do
+    org = Organisation.create!(name: 'Exclusive cart')
+    customer = org.customers.create!(company_name: 'Buyer', contact_name: 'J', active: true)
+    user = org.customer_users.create!(customer: customer, email: 'exclusive-cart@example.test', password: 'password123', active: true)
+    product = org.products.create!(name: 'Prata', unit_price: 10000, published: true)
+    rule = org.product_discounts.build(discount_type: 'percentage', discount_value: 0.05, min_quantity: 1)
+    rule.configure_category_scopes(mode: 'all')
+    rule.save!
+    campaign = org.order_discount_campaigns.create!(name: 'Outubro', priority: 1)
+    org.order_discounts.create!(order_discount_campaign: campaign, min_order_amount_cents: 100000,
+      discount_type: 'percentage', discount_value: 0.12)
+    sign_in user
+    post order_items_path(org.slug), params: { product_id: product.id, order_item: { quantity: 11 } }
+    order = user.orders.draft.find_by!(organisation: org)
+    item = order.order_items.first
+    [cart_path(org.slug), checkout_path(org.slug)].each do |path|
+      get path
+      assert_response :success
+      assert_select "[data-line-total-id='#{item.id}'][data-total-cents='96800']", count: 2
+      assert_select "[data-line-campaign-savings-cents='13200']", count: 2
+      assert_select '.badge', text: /Produto -5%/, count: 0
+      assert_select '.text-success .text-nowrap', text: /132/
+    end
+    order.terms_accepted_at = Time.current
+    order.finalize_checkout!
+    rule.update!(discount_value: 0.5)
+    get order_path(org.slug, order)
+    assert_response :success
+    assert_select "[data-line-total-id='#{item.id}'][data-total-cents='96800']", count: 1
+    assert_select '[data-line-campaign-savings-cents="13200"]', count: 1
+  end
+
   test "cart progress excludes Molduras and shows campaigns separately" do
     org = Organisation.create!(name: "Campaign cart")
     customer = org.customers.create!(company_name: "Buyer", contact_name: "J", active: true)

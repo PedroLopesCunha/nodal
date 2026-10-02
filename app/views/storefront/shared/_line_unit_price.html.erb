@@ -7,8 +7,8 @@
       <small>(-<%= format_discount_percentage(pricing.campaign_percentage) %>)</small>
     <% end %>
   </span>
-  <% if item.discount_percentage.to_d.positive? %>
-    <span class="badge bg-success-subtle text-success small"><%= t('storefront.line_pricing.product') %> -<%= format_discount_percentage(item.discount_percentage) %></span>
+  <% if pricing.line_discount_percentage.to_d.positive? %>
+    <span class="badge bg-success-subtle text-success small"><%= t('storefront.line_pricing.product') %> -<%= format_discount_percentage(pricing.line_discount_percentage) %></span>
   <% end %>
 <% else %>
   <%= money_amount(item.price) %>

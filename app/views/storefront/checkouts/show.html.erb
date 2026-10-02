@@ -357,10 +357,10 @@
         <h5 class="card-title mb-3"><%= t('storefront.carts.show.order_summary') %></h5>
 
         <% if show_prices? %>
-          <% line_savings = @order.gross_subtotal - @order.total_amount %>
+          <% line_savings = order_line_pricing(@order).line_discount_amount %>
           <div class="d-flex justify-content-between mb-2">
             <span class="text-muted"><%= t('storefront.checkouts.show.summary.subtotal') %> (<%= t('storefront.common.items', count: @order.item_count) %>)</span>
-            <span><%= money_amount(line_savings.positive? ? @order.gross_subtotal : @order.total_amount) %></span>
+            <span><%= money_amount(line_savings.positive? ? @order.gross_subtotal : order_line_pricing(@order).subtotal_before_campaign) %></span>
           </div>
 
           <% if line_savings.positive? %>

@@ -10,7 +10,11 @@
     <small class="text-muted d-block"><%= campaign&.qualification_scope&.description || 'Todos os artigos' %></small>
     <div class="small my-2">Subtotal elegível: <strong><%= money_amount(Money.new(current, order.organisation.currency)) %></strong></div>
     <% if selected&.campaign == campaign %>
-      <div class="small text-success">Campanha aplicada: <%= selected.discount.value_display %></div>
+      <% if selected.discount_amount.positive? %>
+        <div class="small text-success">Campanha aplicada: <%= selected.discount.value_display %></div>
+      <% else %>
+        <div class="small text-muted">Patamar atingido. Mantêm-se os descontos de artigo mais vantajosos.</div>
+      <% end %>
     <% elsif reached %>
       <div class="small text-muted">Patamar atingido. Outra campanha tem prioridade.</div>
     <% end %>
