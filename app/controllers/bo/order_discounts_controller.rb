@@ -42,9 +42,20 @@ class Bo::OrderDiscountsController < Bo::BaseController
   end
 
   def destroy
-    @discount.destroy
+    if @discount.destroy
+      redirect_to bo_pricing_path(params[:org_slug], tab: 'order_tiers'),
+                  notice: "Order discount deleted successfully."
+    else
+      redirect_to bo_pricing_path(params[:org_slug], tab: 'order_tiers'),
+                  alert: @discount.errors.full_messages.to_sentence
+    end
+  rescue ActiveRecord::InvalidForeignKey
+    # The database remains the final safeguard if an order references this
+    # tier between the model's existence check and the DELETE.
+    raise unless @discount.orders.exists?
+
     redirect_to bo_pricing_path(params[:org_slug], tab: 'order_tiers'),
-                notice: "Order discount deleted successfully."
+                alert: OrderDiscount::USED_TIER_DELETION_MESSAGE
   end
 
   def toggle_active

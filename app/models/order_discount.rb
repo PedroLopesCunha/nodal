@@ -3,6 +3,11 @@ class OrderDiscount < ApplicationRecord
 
   DISCOUNT_TYPES = %w[percentage fixed].freeze
 
+  USED_TIER_DELETION_MESSAGE = "Este escalão está associado a encomendas e não pode ser apagado. Desative-o para impedir novas aplicações, mantendo o histórico.".freeze
+
+  has_many :orders
+  before_destroy :protect_order_history, prepend: true
+
   belongs_to :organisation
   belongs_to :order_discount_campaign, optional: true
   before_validation :assign_legacy_campaign
@@ -85,6 +90,13 @@ class OrderDiscount < ApplicationRecord
   end
 
   private
+
+  def protect_order_history
+    return unless orders.exists?
+
+    errors.add(:base, USED_TIER_DELETION_MESSAGE)
+    throw :abort
+  end
 
   def assign_legacy_campaign
     return if order_discount_campaign || !organisation

@@ -71,4 +71,40 @@ class DiscountScopesAdminTest < ActionDispatch::IntegrationTest
     end
     assert_response :unprocessable_entity
   end
+  test "deleting a used tier preserves the order and explains deactivation" do
+    tier = @org.order_discounts.create!(min_order_amount_cents: 75000,
+      discount_type: 'percentage', discount_value: 0.07)
+    customer = @org.customers.create!(company_name: 'Buyer', contact_name: 'J', active: true)
+    user = @org.customer_users.create!(customer: customer, email: 'tier-history@example.test',
+      password: 'password123', active: true)
+    order = @org.orders.create!(customer: customer, customer_user: user, order_discount: tier,
+      placed_at: Time.current, auto_discount_type: 'percentage', auto_discount_value: 0.07,
+      auto_discount_amount_cents: 5600)
+    notification = DiscountEmailNotification.create!(organisation: @org, notifiable: tier,
+      status: 'pending', recipient_count: 0)
+    assert_no_difference ['OrderDiscount.count', 'Order.count', 'DiscountEmailNotification.count'] do
+      delete bo_order_discount_path(@org.slug, tier)
+    end
+    assert_redirected_to bo_pricing_path(@org.slug, tab: 'order_tiers')
+    assert_match(/Desative/, flash[:alert])
+    assert_equal tier.id, order.reload.order_discount_id
+    assert_equal 5600, order.auto_discount_amount_cents
+    assert tier.reload.active?
+    assert DiscountEmailNotification.exists?(notification.id)
+    patch toggle_active_bo_order_discount_path(@org.slug, tier)
+    assert_response :redirect
+    assert_not tier.reload.active?
+    assert_equal 5600, order.reload.auto_discount_amount_cents
+  end
+
+  test "unused tiers can still be deleted" do
+    tier = @org.order_discounts.create!(min_order_amount_cents: 75000,
+      discount_type: 'percentage', discount_value: 0.07)
+    assert_difference 'OrderDiscount.count', -1 do
+      delete bo_order_discount_path(@org.slug, tier)
+    end
+    assert_redirected_to bo_pricing_path(@org.slug, tab: 'order_tiers')
+    assert_nil flash[:alert]
+  end
+
 end
