@@ -5,6 +5,7 @@
 # its ancestor categories).
 class CartDiscountContext
   def initialize(order_items)
+    @scope_evaluator = DiscountScopeEvaluator.new(order_items)
     @product_qty = Hash.new(0)
     @product_amount = Hash.new(0)
     @variant_qty = Hash.new(0)
@@ -23,6 +24,8 @@ class CartDiscountContext
   def variant_amount_cents(variant_id) = @variant_amount[variant_id]
   def category_quantity(category_id) = @category_qty[category_id]
   def category_amount_cents(category_id) = @category_amount[category_id]
+
+  delegate :items_for, :quantity_for, :amount_cents_for, to: :@scope_evaluator
 
   private
 
