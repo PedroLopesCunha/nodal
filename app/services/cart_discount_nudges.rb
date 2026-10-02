@@ -5,7 +5,7 @@
 #
 # A per-line discount is evaluated on each cart line (variant) independently —
 # so on a variable product one variant can be unlocked while another still
-# needs a nudge, exactly like separate simple products. A summed (or category)
+# needs a nudge, exactly like separate simple products. A summed
 # discount is evaluated on the aggregate, one entry for the whole product/category.
 class CartDiscountNudges
   THRESHOLD_RATIO = 0.65
@@ -41,19 +41,19 @@ class CartDiscountNudges
 
   private
 
-  # Per-line discount on a specific product → one entry per cart line (variant);
-  # summed or category-targeted discount → a single aggregate entry.
-  def per_line_product?(discount)
-    discount.product_id.present? && !discount.summed_condition?
+  # Per-line conditions are evaluated independently even for category rules.
+  def per_line?(discount)
+    !discount.summed_condition?
   end
 
-  def lines_for_product(product_id)
-    @order.order_items.select { |i| i.product_id == product_id && i.product }
+  def lines_for_discount(discount)
+    items_for_target(discount.category_id.present?, discount.category_id || discount.product_id)
+      .reject { |item| item.product_variant&.exclude_from_discounts? }
   end
 
   def build_opportunities(discount)
-    if per_line_product?(discount)
-      lines_for_product(discount.product_id).filter_map { |item| build_opportunity_line(discount, item) }
+    if per_line?(discount)
+      lines_for_discount(discount).filter_map { |item| build_opportunity_line(discount, item) }
     else
       # NB: [x].compact, not Array(x) — Array() would decompose the Struct into
       # its field values.
@@ -62,8 +62,8 @@ class CartDiscountNudges
   end
 
   def build_unlockeds(discount)
-    if per_line_product?(discount)
-      lines_for_product(discount.product_id).filter_map { |item| build_unlocked_line(discount, item) }
+    if per_line?(discount)
+      lines_for_discount(discount).filter_map { |item| build_unlocked_line(discount, item) }
     else
       [build_unlocked_aggregate(discount)].compact
     end

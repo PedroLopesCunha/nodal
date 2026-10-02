@@ -126,11 +126,17 @@ class OrderItem < ApplicationRecord
   # Returns a hash of {attribute => [old, new]} for whatever changed (empty
   # when nothing did). The caller decides whether to persist. No-op once the
   # order is placed, so historical orders keep the price they were sold at.
+  attr_accessor :preserve_calculated_discount
+
+  def refresh_base_price!
+    new_price = product_variant&.unit_price_cents || product&.unit_price
+    self.unit_price = new_price if new_price.present?
+  end
+
   def refresh_pricing!(cart_context: nil)
     return {} if order&.placed?
 
-    new_price = product_variant&.unit_price_cents || product&.unit_price
-    self.unit_price = new_price if new_price.present?
+    refresh_base_price!
 
     calculator = DiscountCalculator.new(
       product: product,
@@ -212,7 +218,7 @@ class OrderItem < ApplicationRecord
 
   def should_recalculate_discount?
     # A discount typed in the back office is a decision, not a starting point.
-    return false if discount_set_by_hand
+    return false if discount_set_by_hand || preserve_calculated_discount
 
     # Recalculate on create, or when quantity changes (for min_quantity thresholds)
     new_record? || quantity_changed?

@@ -188,25 +188,15 @@ class Order < ApplicationRecord
     changes = blank_cart_changes
     return changes if placed?
 
-    # Built once so each line can evaluate "summed" discount conditions against
-    # the whole cart (a product's variants, or a category total).
-    cart_context = CartDiscountContext.new(order_items.includes(:product_variant, product: :categories).to_a)
-
-    order_items.to_a.each do |item|
+    items = order_items.includes(:product_variant, product: :categories).to_a
+    remaining = []
+    items.each do |item|
       status = item.stock_status
-
       if status.in?(%i[out_of_stock variant_unpublished]) && organisation.cart_stock_policy == "remove"
         changes[:removed] << cart_item_label(item)
         record_unmet_demand(item, requested: item.quantity, kept: 0, reason: :removed)
         item.destroy!
         next
-      end
-
-      item_changes = item.refresh_pricing!(cart_context: cart_context)
-      if item_changes.any?
-        item.save!
-        changes[:price_changed] << item.id if item_changes.key?(:unit_price)
-        changes[:discount_changed] << item.id if item_changes.key?(:discount_percentage)
       end
 
       case status
@@ -215,16 +205,33 @@ class Order < ApplicationRecord
       when :qty_overflow
         available = item.product_variant.stock_quantity.to_i
         if organisation.cart_qty_overflow_policy == "cap" && available >= 1
-          # Record before the update — item.quantity still holds the original
-          # requested amount here; the cap below overwrites it.
           record_unmet_demand(item, requested: item.quantity, kept: available, reason: :capped)
-          item.update!(quantity: available)
+          item.quantity = available
           changes[:capped] << cart_item_label(item).merge(to: available)
         else
           changes[:qty_overflow] << cart_item_label(item).merge(available: available)
         end
       end
+      item.refresh_base_price!
+      remaining << item
     end
+
+    cart_context = CartDiscountContext.new(remaining)
+    remaining.each do |item|
+      item_changes = item.refresh_pricing!(cart_context: cart_context)
+      changes[:price_changed] << item.id if item_changes.key?(:unit_price)
+      changes[:discount_changed] << item.id if item_changes.key?(:discount_percentage)
+      # Quantity callbacks normally evaluate without the cart context. Keep
+      # the aggregate result computed above when persisting system changes.
+      item.preserve_calculated_discount = true
+      begin
+        item.save! if item.changed?
+      ensure
+        item.preserve_calculated_discount = false
+      end
+    end
+    order_items.reset
+    @best_order_discount = nil
 
     # Under the "confirm" price-change policy we persist that a change is
     # pending, so the checkout can require an explicit acknowledgement even
