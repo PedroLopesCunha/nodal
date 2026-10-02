@@ -153,9 +153,9 @@ class Product < ApplicationRecord
     active = ProductDiscount.active
     direct = active.where.not(product_id: nil).select(:product_id)
 
-    discounted_category_ids = active.where.not(category_id: nil).distinct.pluck(:category_id)
-    subtree_ids = Category.where(id: discounted_category_ids).flat_map(&:subtree_ids).uniq
-    via_category = CategoryProduct.where(category_id: subtree_ids).select(:product_id)
+    via_category = active.where(product_id: nil).includes(category_scopes: :categories).flat_map do |discount|
+      discount.discount_scope ? discount.discount_scope.product_relation.pluck(:id) : []
+    end.uniq
 
     # At least one sellable variant must be able to receive the discount: a
     # simple product's default variant, or a variable product's non-default
@@ -336,7 +336,8 @@ class Product < ApplicationRecord
   # already clears shows the discounted unit price — not the undiscounted one.
   def discounted_price_range(customer, for_display: true, cart_context: nil, quantity: quantity_input_min)
     @discounted_price_range ||= {}
-    @discounted_price_range[[ customer&.id, for_display, quantity ]] ||= compute_discounted_price_range(customer, for_display, cart_context, quantity)
+    cart_context ? compute_discounted_price_range(customer, for_display, cart_context, quantity) :
+      (@discounted_price_range[[ customer&.id, for_display, quantity ]] ||= compute_discounted_price_range(customer, for_display, cart_context, quantity))
   end
 
   def compute_discounted_price_range(customer, for_display, cart_context, quantity)

@@ -459,8 +459,8 @@ class Storefront::ProductsController < Storefront::BaseController
   def cart_scope_quantity(cond, source, cart_context, variant: nil)
     return 0 unless cart_context
 
-    if cond[:scope] == :summed && source.category_id.present?
-      cart_context.category_quantity(source.category_id).to_i
+    if cond[:scope] == :summed && source.qualification_scope
+      cart_context.quantity_for(scope: source.qualification_scope, product_id: source.product_id, exclude_variants: true)
     elsif cond[:scope] != :summed && variant
       cart_context.variant_quantity(variant.id).to_i
     else
@@ -528,8 +528,9 @@ class Storefront::ProductsController < Storefront::BaseController
   def cart_threshold_current(cond, source, cart_context, variant: nil)
     return 0 unless cart_context
 
-    if cond[:scope] == :summed && source.category_id.present?
-      cond[:type] == :amount ? cart_context.category_amount_cents(source.category_id) : cart_context.category_quantity(source.category_id)
+    if cond[:scope] == :summed && source.qualification_scope
+      selection = { scope: source.qualification_scope, product_id: source.product_id, exclude_variants: true }
+      cond[:type] == :amount ? cart_context.amount_cents_for(**selection) : cart_context.quantity_for(**selection)
     elsif cond[:scope] != :summed && variant
       # Per-line condition on a specific variant: only that variant's own cart
       # line merges when the customer adds more.

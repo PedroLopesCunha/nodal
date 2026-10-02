@@ -47,8 +47,7 @@ class CartDiscountNudges
   end
 
   def lines_for_discount(discount)
-    items_for_target(discount.category_id.present?, discount.category_id || discount.product_id)
-      .reject { |item| item.product_variant&.exclude_from_discounts? }
+    @context.items_for(scope: discount.discount_scope, product_id: discount.product_id, exclude_variants: true)
   end
 
   def build_opportunities(discount)
@@ -108,6 +107,7 @@ class CartDiscountNudges
     current, threshold = line_inputs(discount, item)
     return if threshold <= 0 || current < threshold
 
+    return unless applied_to_line?(discount, item)
     saved = (item.price * item.quantity - item.total_price).cents
     return if saved <= 0
 
@@ -116,105 +116,54 @@ class CartDiscountNudges
 
   # --- aggregate: product or category total -----------------------------
   def build_opportunity_aggregate(discount)
-    by_category = discount.category_id.present?
-    target_id = by_category ? discount.category_id : discount.product_id
-
-    current, threshold, remaining = progress_for(discount, by_category, target_id)
-    return if threshold.to_i <= 0
-
+    current, threshold, remaining = progress_for(discount)
+    return if threshold <= 0
     progress = current.to_f / threshold
     return if progress < THRESHOLD_RATIO || progress >= 1.0
 
-    qty = by_category ? @context.category_quantity(target_id) : @context.product_quantity(target_id)
-    amount = by_category ? @context.category_amount_cents(target_id) : @context.product_amount_cents(target_id)
+    selection = qualification_selection(discount)
+    qty = @context.quantity_for(**selection)
+    amount = @context.amount_cents_for(**selection)
     add = units_to_add(discount, threshold, qty, amount)
-
-    Opportunity.new(
-      label: discount_target_label(discount, by_category),
-      discount_label: discount_value_label(discount),
-      progress: progress,
-      remaining: remaining,
-      condition_type: discount.condition_type.to_sym,
-      reward: projected_reward(discount, qty, amount, add),
-      units_to_add: add,
-      # The "add N units" button only makes sense for a single product, not a
-      # whole category (which product would we add?).
-      add_product_id: by_category ? nil : discount.product_id,
-      add_variant_id: nil,
-      sku: by_category ? nil : discount.product&.sku
-    )
+    Opportunity.new(label: discount.display_name, discount_label: discount_value_label(discount),
+      progress: progress, remaining: remaining, condition_type: discount.condition_type.to_sym,
+      reward: projected_reward(discount, qty, amount, add), units_to_add: add,
+      add_product_id: discount.product_id, add_variant_id: nil, sku: discount.product&.sku)
   end
 
   def build_unlocked_aggregate(discount)
-    by_category = discount.category_id.present?
-    target_id = by_category ? discount.category_id : discount.product_id
-
-    current, threshold, = progress_for(discount, by_category, target_id)
-    return if threshold.to_i <= 0 || current < threshold
-
-    Unlocked.new(
-      label: discount_target_label(discount, by_category),
-      discount_label: discount_value_label(discount),
-      reward: current_reward(discount, by_category, target_id)
-    )
+    current, threshold, = progress_for(discount)
+    return if threshold <= 0 || current < threshold
+    cents = lines_for_discount(discount).sum do |item|
+      applied_to_line?(discount, item) ? (item.price * item.quantity - item.total_price).cents : 0
+    end
+    return if cents <= 0
+    Unlocked.new(label: discount.display_name, discount_label: discount_value_label(discount), reward: Money.new(cents, @currency))
   end
 
-  # € saved right now on the current cart contents — the effective saving on
-  # the target's line items (gross - discounted total), so the celebration
-  # badge matches the "Desconto -€X" line in the order summary to the cent
-  # (both derive from the same rounded per-unit prices).
-  def current_reward(discount, by_category, target_id)
-    cents = items_for_target(by_category, target_id).sum do |item|
-      (item.price * item.quantity - item.total_price).cents
-    end
-    Money.new([cents, 0].max, @currency)
-  end
-
-  def items_for_target(by_category, target_id)
-    @order.order_items.select do |item|
-      next false unless item.product
-      if by_category
-        item.product.categories.flat_map(&:path_ids).include?(target_id)
-      else
-        item.product_id == target_id
-      end
-    end
+  def applied_to_line?(discount, item)
+    DiscountCalculator.new(product: item.product, customer: @order.customer, quantity: item.quantity,
+      variant: item.product_variant, cart_context: @context).applied_discounts.any? { |applied| applied[:source] == discount }
   end
 
   def candidate_discounts
-    product_ids = @order.order_items.map(&:product_id).uniq.compact
-    return [] if product_ids.empty?
-
-    category_ids = Product.where(id: product_ids).includes(:categories)
-                          .flat_map { |p| p.categories.flat_map(&:path_ids) }.uniq
-
-    discounts = ProductDiscount.active.where(organisation: @org)
-                               .where("condition_type IN (?)", %w[quantity amount])
-                               .where("product_id IN (?) OR category_id IN (?)", product_ids, category_ids)
-                               .to_a
-
-    if (customer = @order.customer)
-      cpd = CustomerProductDiscount.active.where(organisation: @org)
-                                   .where("condition_type IN (?)", %w[quantity amount])
-                                   .where("product_id IN (?) OR category_id IN (?)", product_ids, category_ids)
-      discounts += cpd.where(customer_id: customer.id).to_a
-      discounts += cpd.where(customer_category_id: customer.customer_category_id).to_a if customer.customer_category_id
-    end
-
-    discounts.uniq
+    @order.order_items.filter_map do |item|
+      next unless item.product
+      DiscountCalculator.new(product: item.product, customer: @order.customer, quantity: item.quantity,
+        variant: item.product_variant, cart_context: @context, for_display: true).all_discounts
+        .select { |discount| discount[:condition] }.map { |discount| discount[:source] }
+    end.flatten.uniq
   end
 
-  def progress_for(discount, by_category, target_id)
-    if discount.amount_condition?
-      current = by_category ? @context.category_amount_cents(target_id) : @context.product_amount_cents(target_id)
-      threshold = discount.min_amount_cents.to_i
-      remaining = Money.new([threshold - current, 0].max, @currency)
-    else
-      current = by_category ? @context.category_quantity(target_id) : @context.product_quantity(target_id)
-      threshold = discount.min_quantity.to_i
-      remaining = [threshold - current, 0].max
-    end
-    [current, threshold, remaining]
+  def qualification_selection(discount)
+    { scope: discount.qualification_scope, product_id: discount.product_id, exclude_variants: true }
+  end
+
+  def progress_for(discount)
+    selection = qualification_selection(discount)
+    current = discount.amount_condition? ? @context.amount_cents_for(**selection) : @context.quantity_for(**selection)
+    threshold = discount.amount_condition? ? discount.min_amount_cents.to_i : discount.min_quantity.to_i
+    [current, threshold, remaining_for(discount, threshold, current)]
   end
 
   def remaining_for(discount, threshold, current)

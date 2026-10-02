@@ -61,8 +61,9 @@ module PriceDisplayHelper
     return 0 unless cart
 
     if summed
-      if source&.category_id
-        cond[:type] == :amount ? cart.category_amount_cents(source.category_id) : cart.category_quantity(source.category_id)
+      if source&.qualification_scope
+        selection = { scope: source.qualification_scope, product_id: source.product_id, exclude_variants: true }
+        cond[:type] == :amount ? cart.amount_cents_for(**selection) : cart.quantity_for(**selection)
       else
         cond[:type] == :amount ? cart.product_amount_cents(product.id) : cart.product_quantity(product.id)
       end

@@ -68,4 +68,18 @@ class MultiCategoryDiscountsTest < ActiveSupport::TestCase
     discount.reload.update!(category: @categories.last)
     assert_equal [@categories.last.id], discount.reload.discount_scope.selected_category_ids
   end
+  test "nudges aggregate the rule once across all eligible categories" do
+    discount = rule
+    discount.update!(min_amount_cents: 60000)
+    opportunities = CartDiscountNudges.new(@order).opportunities
+    assert_equal 1, opportunities.size
+    assert_equal Money.new(5000, "EUR"), opportunities.first.remaining
+    assert_empty CartDiscountNudges.new(@order).unlocked
+  end
+
+  test "campaign catalog respects exclude scopes" do
+    rule(mode: "exclude", ids: [@categories.last.id])
+    assert_equal @products.first(2).map(&:id).sort, @org.products.on_promotion.pluck(:id).sort
+  end
+
 end
