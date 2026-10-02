@@ -71,20 +71,10 @@
                     <td class="text-center"><%= item.quantity %></td>
                     <% if show_prices? %>
                       <td class="text-end">
-                        <% if item.discount_percentage && item.discount_percentage > 0 %>
-                          <span class="text-muted text-decoration-line-through small"><%= money_amount(item.price) %></span>
-                          <span class="text-success"><%= money_amount(item.price - (item.price * item.discount_percentage)) %></span>
-                        <% else %>
-                          <%= money_amount(item.price) %>
-                        <% end %>
+                        <%= render "storefront/shared/line_unit_price", order: @order, item: item %>
                       </td>
                       <td class="text-end fw-medium">
-                        <% if item.discount_percentage && item.discount_percentage > 0 %>
-                          <span class="text-muted text-decoration-line-through small"><%= money_amount(item.price * item.quantity) %></span>
-                          <span class="text-success"><%= money_amount(item.total_price) %></span>
-                        <% else %>
-                          <%= money_amount(item.total_price) %>
-                        <% end %>
+                        <%= render "storefront/shared/line_total", order: @order, item: item %>
                       </td>
                     <% end %>
                   </tr>
@@ -123,12 +113,7 @@
                       </span>
                       <% if show_prices? %>
                         <div class="text-end">
-                          <% if item.discount_percentage && item.discount_percentage > 0 %>
-                            <span class="text-muted text-decoration-line-through small d-block"><%= money_amount(item.price * item.quantity) %></span>
-                            <span class="text-success fw-bold"><%= money_amount(item.total_price) %></span>
-                          <% else %>
-                            <span class="fw-bold"><%= money_amount(item.total_price) %></span>
-                          <% end %>
+                          <%= render "storefront/shared/line_total", order: @order, item: item %>
                         </div>
                       <% end %>
                     </div>

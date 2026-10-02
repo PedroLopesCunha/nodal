@@ -31,6 +31,12 @@ class OrderDiscountEvaluatorTest < ActiveSupport::TestCase
     assert_not result.allocations.key?(@items.last.id)
     assert_equal 5600, result.allocations.values.sum
     assert_equal Money.new(104400, "EUR"), @order.total_with_auto_discount
+    pricing = OrderLinePricing.new(@order)
+    assert_equal 37200, pricing.line(@items.first).total.cents
+    assert_equal 30000, pricing.line(@items.last).total.cents
+    assert_equal 0, pricing.line(@items.last).campaign_savings.cents
+    assert_equal 104400, @items.sum { |item| pricing.line(item).total.cents }
+    assert_equal 110000, @order.total_amount.cents, "presentation must not deduct the campaign twice"
   end
 
   test "a large excluded subtotal cannot unlock a campaign" do
@@ -89,6 +95,9 @@ class OrderDiscountEvaluatorTest < ActiveSupport::TestCase
     @campaign.update!(name: "Changed")
     assert_equal Money.new(5600, "EUR"), @order.reload.auto_order_discount_amount
     assert_equal snapshot, @order.auto_discount_scope_snapshot
+    pricing = OrderLinePricing.new(@order)
+    assert_equal 2800, pricing.line(@items.first.reload).campaign_savings.cents
+    assert_equal BigDecimal('0.07'), pricing.line(@items.first).campaign_percentage
   end
 
   test "old placed orders without scope snapshots are not reconstructed" do
@@ -96,6 +105,26 @@ class OrderDiscountEvaluatorTest < ActiveSupport::TestCase
     assert_nil @order.auto_discount_scope_snapshot
     assert_equal Money.new(0, "EUR"), @order.auto_order_discount_amount
     assert @order.order_items.all? { |item| item.auto_order_discount_amount_cents.nil? }
+    assert_equal @items.first.total_price, OrderLinePricing.new(@order).line(@items.first).total
+  end
+
+  test "line display compounds product and campaign discounts on the existing base" do
+    @tier.update!(min_order_amount_cents: 50000, discount_value: 0.12, stackable: true)
+    @items.first.update_columns(discount_percentage: 0.1)
+    @order.order_items.reset
+    pricing = OrderLinePricing.new(@order).line(@items.first.reload)
+    assert_equal 40000, pricing.original_total.cents
+    assert_equal 4320, pricing.campaign_savings.cents
+    assert_equal 31680, pricing.total.cents
+    assert_equal 36000, @items.first.total_price.cents
+  end
+
+  test "fixed campaign line display retains exact cent allocations and shows no percentage" do
+    @tier.update!(discount_type: 'fixed', discount_value: 0.01)
+    pricing = OrderLinePricing.new(@order)
+    assert_equal 1, @items.sum { |item| pricing.line(item).campaign_savings.cents }
+    assert_nil pricing.line(@items.first).campaign_percentage
+    assert_equal 109999, @items.sum { |item| pricing.line(item).total.cents }
   end
 
   test "new campaigns reject overlapping duplicate minimums and foreign owners" do

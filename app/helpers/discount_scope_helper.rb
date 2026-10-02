@@ -1,4 +1,9 @@
 module DiscountScopeHelper
+  def order_line_pricing(order)
+    @order_line_pricing ||= {}
+    @order_line_pricing[order.object_id] ||= OrderLinePricing.new(order)
+  end
+
   def automatic_campaign_description(order)
     snapshot = order.auto_discount_scope_snapshot
     if snapshot

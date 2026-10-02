@@ -1,0 +1,18 @@
+pt:
+  storefront:
+    line_pricing:
+      product: "Produto"
+      campaign: "Campanha"
+      before_cap: "Antes do limite global de desconto"
+en:
+  storefront:
+    line_pricing:
+      product: "Product"
+      campaign: "Campaign"
+      before_cap: "Before the overall discount limit"
+es:
+  storefront:
+    line_pricing:
+      product: "Producto"
+      campaign: "Campaña"
+      before_cap: "Antes del límite global de descuento"

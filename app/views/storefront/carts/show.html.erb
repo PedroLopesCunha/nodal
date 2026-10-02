@@ -118,21 +118,10 @@
                   </td>
                   <% if show_prices? %>
                     <td class="text-end">
-                      <% if item.discount_percentage && item.discount_percentage > 0 %>
-                        <span class="text-muted text-decoration-line-through small d-block"><%= money_amount(item.price) %></span>
-                        <span class="text-success"><%= money_amount(item.price - (item.price * item.discount_percentage)) %></span>
-                        <span class="badge bg-success-subtle text-success small">-<%= format_discount_percentage(item.discount_percentage) %></span>
-                      <% else %>
-                        <%= money_amount(item.price) %>
-                      <% end %>
+                      <%= render "storefront/shared/line_unit_price", order: @order, item: item %>
                     </td>
                     <td class="text-end fw-medium">
-                      <% if item.discount_percentage && item.discount_percentage > 0 %>
-                        <span class="text-muted text-decoration-line-through small d-block"><%= money_amount(item.price * item.quantity) %></span>
-                        <span class="text-success fw-bold"><%= money_amount(item.total_price) %></span>
-                      <% else %>
-                        <%= money_amount(item.total_price) %>
-                      <% end %>
+                      <%= render "storefront/shared/line_total", order: @order, item: item %>
                     </td>
                   <% end %>
                   <td class="text-end pe-4">
@@ -199,26 +188,14 @@
                       <% parts << item.product.category.name %>
                     <% end %>
                     <% if show_prices? %>
-                      <% if item.discount_percentage && item.discount_percentage > 0 %>
-                        <% parts << capture do %>
-                          <span class="text-decoration-line-through"><%= money_amount(item.price) %></span>
-                          <span class="text-success"><%= money_amount(item.price - (item.price * item.discount_percentage)) %></span>
-                          <span class="badge bg-success-subtle text-success" style="font-size: 0.65rem;">-<%= format_discount_percentage(item.discount_percentage) %></span>
-                        <% end %>
-                      <% else %>
-                        <% parts << money_amount(item.price).to_s %>
-                      <% end %>
+                      <% parts << render("storefront/shared/line_unit_price", order: @order, item: item) %>
                     <% end %>
                     <%= raw parts.join(' · ') %>
                   </div>
                   <div class="flex-shrink-0 d-flex align-items-center ms-2">
                     <% if show_prices? %>
                       <span class="fw-bold small me-2">
-                        <% if item.discount_percentage && item.discount_percentage > 0 %>
-                          <span class="text-success"><%= money_amount(item.total_price) %></span>
-                        <% else %>
-                          <%= money_amount(item.total_price) %>
-                        <% end %>
+                        <%= render "storefront/shared/line_total", order: @order, item: item %>
                       </span>
                     <% end %>
                     <%= button_to order_item_path(org_slug: params[:org_slug], id: item), method: :delete, class: "btn btn-sm btn-outline-danger cart-remove-btn-compact", data: { turbo_confirm: t('storefront.carts.show.confirm_remove_item') } do %>
