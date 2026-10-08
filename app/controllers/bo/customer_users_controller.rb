@@ -25,20 +25,17 @@ class Bo::CustomerUsersController < Bo::BaseController
     @customer_user = CustomerUser.invite!(invite_attrs)
 
     if @customer_user.errors.empty?
-      respond_to do |format|
-        format.turbo_stream do
-          @customer_users = @customer.customer_users.order(:created_at)
-          @new_customer_user = @customer.customer_users.build
-          flash.now[:notice] = t("bo.customer_users.flash.invited", email: @customer_user.email)
-          render :create
-        end
-        format.html do
-          redirect_to bo_customer_path(params[:org_slug], @customer),
+      if params[:logins_modal] == '1' && request.format.turbo_stream?
+        @customer_users = @customer.customer_users.order(:created_at)
+        @new_customer_user = @customer.customer_users.build
+        flash.now[:notice] = t("bo.customer_users.flash.invited", email: @customer_user.email)
+        render :create
+      else
+        redirect_to bo_customer_path(params[:org_slug], @customer, anchor: 'logins'), status: :see_other,
                       notice: t("bo.customer_users.flash.invited", email: @customer_user.email)
-        end
       end
     else
-      render :new, status: :unprocessable_entity
+      render :new, formats: [:html], status: :unprocessable_entity
     end
   end
 

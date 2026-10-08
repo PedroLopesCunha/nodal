@@ -142,6 +142,7 @@
 
 <%= form_with model: new_customer_user,
               url: bo_customer_customer_users_path(org_slug: org_slug, customer_id: customer.id) do |f| %>
+    <%= hidden_field_tag :logins_modal, '1' %>
   <div class="row g-2">
     <div class="col-md-4">
       <%= f.label :contact_name, t("bo.customer_users.form.contact_name"), class: "form-label small text-muted mb-1" %>
