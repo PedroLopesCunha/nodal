@@ -195,6 +195,7 @@ Rails.application.routes.draw do
         end
         member do
           get :configure_variants
+          post :sync_erp
           patch :update_variant_configuration
           delete :delete_photo
           patch :set_main_photo

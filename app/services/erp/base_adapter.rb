@@ -22,6 +22,16 @@ module Erp
       raise NotImplementedError, "#{self.class} must implement #fetch_customers"
     end
 
+    # Generic APIs expose a collection endpoint. Filter its response locally;
+    # database adapters can override this with a targeted query.
+    def fetch_products_by_identifiers(external_ids:, skus:)
+      return [] if external_ids.empty? && skus.empty?
+
+      each_product.select do |data|
+        external_ids.include?(data[:external_id].to_s) || skus.include?(data[:sku].to_s)
+      end
+    end
+
     # Streaming variants — adapters that can yield rows incrementally should override
     # these to avoid materializing the full result set in memory. Default falls back
     # to the bulk fetch for backward compatibility.

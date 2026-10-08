@@ -5,7 +5,7 @@ class Bo::ProductsController < Bo::BaseController
 
   RELATED_PRODUCTS_PER_PAGE = 30
 
-  before_action :set_product, only: [:show, :edit, :update, :destroy, :configure_variants, :update_variant_configuration, :delete_photo, :set_main_photo, :related_products, :related_products_search, :update_related_products, :reorder_related_products]
+  before_action :set_product, only: [:show, :edit, :update, :destroy, :configure_variants, :sync_erp, :update_variant_configuration, :delete_photo, :set_main_photo, :related_products, :related_products_search, :update_related_products, :reorder_related_products]
   before_action :load_attributes_for_form, only: [:new, :edit, :create, :update]
 
   # Add products choice page
@@ -502,6 +502,25 @@ class Bo::ProductsController < Bo::BaseController
 
   def configure_variants
     @available_attributes = current_organisation.product_attributes.kept.active.by_position.includes(:product_attribute_values)
+  end
+
+  def sync_erp
+    authorize @product, :sync_erp?
+    unless erp_product_sync_enabled?
+      respond_to do |format|
+        format.json { render json: { error: t('bo.products.erp_sync.unavailable') }, status: :unprocessable_entity }
+        format.html { redirect_to bo_product_path(params[:org_slug], @product), alert: t('bo.products.erp_sync.unavailable') }
+      end
+      return
+    end
+
+    task = current_organisation.background_tasks.create!(member: current_member,
+      task_type: 'erp_product_sync', result: { product_id: @product.id })
+    ErpProductSyncJob.perform_later(task.id, product_id: @product.id)
+    respond_to do |format|
+      format.json { render json: { status_url: bo_background_task_path(params[:org_slug], task, format: :json) }, status: :accepted }
+      format.html { redirect_to bo_product_path(params[:org_slug], @product), notice: t('bo.products.erp_sync.queued') }
+    end
   end
 
   def update_variant_configuration

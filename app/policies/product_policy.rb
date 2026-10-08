@@ -13,6 +13,12 @@ class ProductPolicy < ApplicationPolicy
     !pure_sales_rep?
   end
 
+  def sync_erp?
+    return false unless user.is_a?(Member) && belongs_to_organisation?
+
+    OrgMember.find_by(member: user, organisation: record.organisation, active: true)&.role.in?(%w[admin owner])
+  end
+
   def generate_catalog?
     true
   end
