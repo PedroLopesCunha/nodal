@@ -291,6 +291,21 @@ class Storefront::ProductsController < Storefront::BaseController
       @attributes_with_values = @product.available_values_by_attribute.transform_values { |values|
         values.select { |v| variant_value_ids.include?(v.id) }
       }
+      # Grid rows exclude variants without a price; derive fixed attributes from
+      # the same variants the customer actually sees in each mode.
+      @grid_variants = @variants.reject { |variant| variant.unit_price_cents.nil? || variant.unit_price_cents.zero? }
+                                .sort_by(&:natural_sort_key) if @product.grid_add_to_cart?
+      displayed_variants = @product.grid_add_to_cart? ? @grid_variants : @variants
+      displayed_value_ids = displayed_variants.flat_map { |variant| variant.attribute_values.map(&:id) }.to_set
+      @attributes_with_values = @attributes_with_values.transform_values { |values| values.select { |value| displayed_value_ids.include?(value.id) } }
+      @fixed_attributes_with_values = @attributes_with_values.select do |attribute, values|
+        values.one? && displayed_variants.any? && displayed_variants.all? do |variant|
+          variant.attribute_values.select { |value| value.product_attribute_id == attribute.id }.map(&:id) == [values.first.id]
+        end
+      end
+      @selectable_attributes_with_values = @attributes_with_values.reject do |attribute, values|
+        values.empty? || @fixed_attributes_with_values.key?(attribute)
+      end
       @default_variant = @product.default_variant
 
       # Per-variant discount data for JS. Honest pricing: the price reflects the

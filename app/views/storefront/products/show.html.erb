@@ -291,13 +291,17 @@
           </div>
         <% end %>
 
-        <!-- Attributes display (for simple products) -->
-        <% if !@product.has_variants? && @simple_attribute_values.present? %>
+        <!-- Static attributes shared by all displayed variants, or simple-product attributes. -->
+        <% static_attributes = @product.has_variants? ? @fixed_attributes_with_values : @simple_attribute_values&.group_by(&:product_attribute) %>
+        <% if static_attributes.present? %>
           <div class="mb-4">
-            <% @simple_attribute_values.group_by(&:product_attribute).each do |attribute, values| %>
+            <% static_attributes.each do |attribute, values| %>
               <div class="mb-2">
                 <span class="fw-semibold"><%= attribute.name %>:</span>
                 <span class="text-muted"><%= values.map(&:value).join(', ') %></span>
+                <% if @product.has_variants? && !@product.grid_add_to_cart? %>
+                  <input type="hidden" data-single-attribute-value="<%= values.first.id %>">
+                <% end %>
               </div>
             <% end %>
           </div>
@@ -308,9 +312,11 @@
           <%= render "storefront/products/grid_add_to_cart", product: @product %>
         <% elsif @product.has_variants? && @attributes_with_values.present? %>
           <div class="mb-4">
-            <h6 class="text-muted mb-3"><%= t('storefront.products.show.select_options') %></h6>
+            <% if @selectable_attributes_with_values.present? %>
+              <h6 class="text-muted mb-3"><%= t('storefront.products.show.select_options') %></h6>
+            <% end %>
 
-            <% @attributes_with_values.each do |attribute, values| %>
+            <% @selectable_attributes_with_values.each do |attribute, values| %>
               <div class="mb-3">
                 <% if values.size == 1 %>
                   <span class="fw-semibold"><%= attribute.name %>:</span>
