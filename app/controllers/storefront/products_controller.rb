@@ -221,12 +221,13 @@ class Storefront::ProductsController < Storefront::BaseController
                      .limit(4)
     end
 
-    # Find matching products (by name, SKU, variant SKU, or category name)
+    # Find matching products by name, description, SKU, category, or attribute value
     by_fields = base.left_joins(:product_variants)
-                    .where("unaccent(products.name) ILIKE unaccent(?) OR unaccent(products.sku) ILIKE unaccent(?) OR unaccent(product_variants.sku) ILIKE unaccent(?)", like_query, like_query, like_query)
+                    .where("unaccent(products.name) ILIKE unaccent(?) OR unaccent(products.description) ILIKE unaccent(?) OR unaccent(products.sku) ILIKE unaccent(?) OR unaccent(product_variants.sku) ILIKE unaccent(?)", like_query, like_query, like_query, like_query)
     by_cat = base.joins(:categories)
                  .where("unaccent(categories.name) ILIKE unaccent(?)", like_query)
     products = by_fields.or(base.where(id: by_cat.select(:id)))
+                        .or(base.where(id: attribute_search(base, query)))
                    .select("products.id, products.name, products.slug, products.sku")
                    .distinct
                    .order(:name)
@@ -577,7 +578,15 @@ class Storefront::ProductsController < Storefront::BaseController
       "unaccent(products.name) ILIKE unaccent(?) OR unaccent(products.description) ILIKE unaccent(?) OR unaccent(products.sku) ILIKE unaccent(?) OR unaccent(product_variants.sku) ILIKE unaccent(?)",
       query, query, query, query
     ).pluck(:id)
-    (ids_by_product + ids_by_category).uniq
+    (ids_by_product + ids_by_category + attribute_search(base_products, term)).uniq
+  end
+
+  def attribute_search(base_products, term)
+    base_products.joins(product_variants: { variant_attribute_values: :product_attribute_value })
+      .where(product_variants: { published: true })
+      .where("(products.has_variants = true AND product_variants.is_default = false) OR (products.has_variants = false AND product_variants.is_default = true)")
+      .where("unaccent(product_attribute_values.value) ILIKE unaccent(?)", "%#{term}%")
+      .distinct.pluck(:id)
   end
 
   def fuzzy_search(base_products, term)

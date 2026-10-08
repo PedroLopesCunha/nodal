@@ -88,6 +88,43 @@ class ProductsControllerTest < ActionDispatch::IntegrationTest
 
   private
 
+  test "search results and suggestions match variant attribute values ignoring accents" do
+    @vermelho.update!(value: "Encarnádo exclusivo")
+    get products_path(org_slug: @org.slug, queries: ["encarnado exclusivo"])
+    assert_response :success
+    assert_select "a[href*='#{@a.id}']", minimum: 1
+
+    get autocomplete_products_path(org_slug: @org.slug, q: "encarnado exclusivo")
+    assert_response :success
+    assert_equal [@a.name], response.parsed_body["products"].map { |product| product["name"] }
+  end
+
+  test "search matches simple product attributes but ignores unpublished variants" do
+    simple = Product.create!(organisation: @org, name: "Produto Simples", unit_price: 1000,
+                             published: true, available: true, has_variants: false)
+    simple.default_variant.attribute_values << @azul
+    @b.product_variants.where(is_default: false).update_all(published: false)
+
+    get autocomplete_products_path(org_slug: @org.slug, q: "azul")
+    assert_response :success
+    assert_equal [simple.name], response.parsed_body["products"].map { |product| product["name"] }
+
+    get products_path(org_slug: @org.slug, queries: ["azul"])
+    assert_response :success
+    assert_select "a[href*='#{simple.id}']", minimum: 1
+  end
+
+  test "description is searchable in results and suggestions" do
+    @a.update!(description: "acabamento singularissimo")
+    get products_path(org_slug: @org.slug, queries: ["singularissimo"])
+    assert_response :success
+    assert_select "a[href*='#{@a.id}']", minimum: 1
+
+    get autocomplete_products_path(org_slug: @org.slug, q: "singularissimo")
+    assert_response :success
+    assert_equal [@a.name], response.parsed_body["products"].map { |product| product["name"] }
+  end
+
   # Variable product carrying one published, attribute-bearing variant.
   def build_product(name, attribute_values)
     product = Product.create!(organisation: @org, name: name, unit_price: 1000,

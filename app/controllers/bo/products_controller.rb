@@ -754,7 +754,11 @@ class Bo::ProductsController < Bo::BaseController
         "word_similarity(unaccent(:q), unaccent(products.name)) > 0.5 OR word_similarity(unaccent(:q), unaccent(categories.name)) > 0.5",
         q: params[:query]
       ).select("products.id").distinct
-      scope = scope.where(id: exact_ids).or(scope.where(id: fuzzy_ids))
+      attribute_ids = scope.joins(product_variants: { variant_attribute_values: :product_attribute_value })
+        .where("(products.has_variants = true AND product_variants.is_default = false) OR (products.has_variants = false AND product_variants.is_default = true)")
+        .where("unaccent(product_attribute_values.value) ILIKE unaccent(:q)", q: "%#{params[:query]}%")
+        .select("products.id").distinct
+      scope = scope.where(id: exact_ids).or(scope.where(id: fuzzy_ids)).or(scope.where(id: attribute_ids))
     end
 
     if params[:category_id] == "none"
