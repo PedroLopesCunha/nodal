@@ -1,13 +1,24 @@
 import { Controller } from "@hotwired/stimulus"
 
 export default class extends Controller {
-  static targets = ["toggle", "attributesSection", "attributeCard", "valuesSection"]
+  static targets = ["toggle", "attributesSection", "attributeCard", "valuesSection", "simpleSection", "simpleVariant"]
+
+  connect() {
+    this.toggleAttributes()
+  }
 
   toggleAttributes() {
     const isEnabled = this.toggleTarget.checked
 
     if (this.hasAttributesSectionTarget) {
       this.attributesSectionTarget.style.display = isEnabled ? "block" : "none"
+    }
+    if (this.hasSimpleSectionTarget) {
+      this.simpleSectionTarget.style.display = isEnabled ? "none" : "block"
+    }
+    if (this.hasSimpleVariantTarget) {
+      this.simpleVariantTarget.disabled = isEnabled
+      this.simpleVariantTarget.required = !isEnabled
     }
   }
 

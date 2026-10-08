@@ -4,7 +4,14 @@ class Bo::BaseController < ApplicationController
   before_action :redirect_pure_rep_from_admin_only_pages
   before_action :set_sidebar_counts
 
-  helper_method :pure_sales_rep?, :sales_rep_capability?, :erp_customer_sync_enabled?
+  helper_method :pure_sales_rep?, :sales_rep_capability?, :erp_customer_sync_enabled?, :erp_product_sync_enabled?
+
+  # Rendering a product must not require decrypting ERP credentials or building
+  # a connection. The background job validates those when sync is requested.
+  def erp_product_sync_enabled?
+    config = current_organisation&.erp_configuration
+    config&.enabled? && config.sync_products? && config.adapter_type.present?
+  end
 
   # ERP customer sync is the integration that fills external_id on rep-created
   # customers and unblocks order push. If the org doesn't have it configured,

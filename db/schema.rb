@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2026_10_02_110000) do
+ActiveRecord::Schema[7.1].define(version: 2026_10_08_130000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_trgm"
   enable_extension "plpgsql"
@@ -853,10 +853,12 @@ ActiveRecord::Schema[7.1].define(version: 2026_10_02_110000) do
     t.string "min_quantity_scope", default: "per_variant", null: false
     t.string "supplier"
     t.boolean "hide_sku_on_card", default: false, null: false
+    t.bigint "variable_base_variant_id"
     t.index ["category_id"], name: "index_products_on_category_id"
     t.index ["organisation_id", "external_id", "external_source"], name: "index_products_on_org_external_id_source", unique: true, where: "(external_id IS NOT NULL)"
     t.index ["organisation_id"], name: "index_products_on_organisation_id"
     t.index ["slug"], name: "index_products_on_slug", unique: true
+    t.index ["variable_base_variant_id"], name: "index_products_on_variable_base_variant_id"
   end
 
   create_table "promo_code_customer_categories", force: :cascade do |t|
@@ -1241,6 +1243,7 @@ ActiveRecord::Schema[7.1].define(version: 2026_10_02_110000) do
   add_foreign_key "product_variants", "products"
   add_foreign_key "products", "categories"
   add_foreign_key "products", "organisations"
+  add_foreign_key "products", "product_variants", column: "variable_base_variant_id", on_delete: :nullify
   add_foreign_key "promo_code_customer_categories", "customer_categories"
   add_foreign_key "promo_code_customer_categories", "promo_codes"
   add_foreign_key "promo_code_customers", "customers"

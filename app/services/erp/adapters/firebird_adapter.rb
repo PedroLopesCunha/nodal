@@ -68,6 +68,30 @@ module Erp
         raise_erp_error(e)
       end
 
+      def fetch_products_by_identifiers(external_ids:, skus:)
+        raise Erp::ConfigurationError, 'Missing credentials' unless valid_credentials?
+
+        mappings = product_field_mappings
+        predicates = []
+        params = []
+        { external_id: external_ids, sku: skus }.each do |field, values|
+          next if values.empty? || mappings[field].blank?
+
+          predicates << "#{safe_column_name(mappings[field])} IN (#{Array.new(values.length, '?').join(', ')})"
+          params.concat(values)
+        end
+        return [] if predicates.empty?
+
+        filter = "(#{predicates.join(' OR ')})"
+        filter = "(#{products_filter}) AND #{filter}" if products_filter.present?
+        rows = with_connection do |db|
+          query_as_hashes(db, build_select_sql(products_table, filter), *encode_values(params))
+        end
+        rows.map { |row| normalize_product(normalize_row(row)) }
+      rescue => e
+        raise_erp_error(e)
+      end
+
       # Streams products one at a time through the cursor without materializing
       # the full result set. Keeps peak memory bounded regardless of table size.
       def each_product(&block)
@@ -322,8 +346,8 @@ module Erp
       end
 
       # Execute a query and return rows as hashes with column names as keys
-      def query_as_hashes(db, sql)
-        cursor = db.execute(sql)
+      def query_as_hashes(db, sql, *params)
+        cursor = db.execute(sql, *params)
         columns = cursor.fields.map { |f| f.name.to_s }
         rows = []
         while (row = cursor.fetch)

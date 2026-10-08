@@ -1,0 +1,45 @@
+pt:
+  bo:
+    products:
+      erp_sync:
+        pending: "A sincronizar…"
+        success: "Produto sincronizado com o ERP com sucesso."
+        failed: "Não foi possível concluir a sincronização."
+        refresh_failed: "Sincronização concluída. Atualiza a página para veres os novos dados."
+        button: "Sincronizar com ERP"
+        queued: "Sincronização deste produto com o ERP em fila."
+        invalid_credentials: "Não foi possível ler as credenciais ERP neste ambiente. Verifica as chaves de encriptação ou volta a configurar a ligação ERP."
+        unavailable: "A sincronização de produtos com o ERP não está ativa."
+    background_tasks:
+      erp_product_sync:
+        title: "Sincronizar produto com ERP"
+en:
+  bo:
+    products:
+      erp_sync:
+        pending: "Syncing…"
+        success: "Product synced with ERP successfully."
+        failed: "The sync could not be completed."
+        refresh_failed: "Sync completed. Refresh the page to see the updated data."
+        button: "Sync with ERP"
+        queued: "ERP sync queued for this product."
+        invalid_credentials: "ERP credentials could not be read in this environment. Check the encryption keys or configure the ERP connection again."
+        unavailable: "ERP product sync is not enabled."
+    background_tasks:
+      erp_product_sync:
+        title: "Sync product with ERP"
+es:
+  bo:
+    products:
+      erp_sync:
+        pending: "Sincronizando…"
+        success: "Producto sincronizado con el ERP correctamente."
+        failed: "No se pudo completar la sincronización."
+        refresh_failed: "Sincronización completada. Actualiza la página para ver los nuevos datos."
+        button: "Sincronizar con ERP"
+        queued: "Sincronización de este producto con el ERP en cola."
+        invalid_credentials: "No se pudieron leer las credenciales ERP en este entorno. Comprueba las claves de cifrado o configura de nuevo la conexión ERP."
+        unavailable: "La sincronización de productos con el ERP no está activa."
+    background_tasks:
+      erp_product_sync:
+        title: "Sincronizar producto con ERP"

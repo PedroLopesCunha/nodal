@@ -42,21 +42,6 @@
 
   <div class="row g-3">
     <div class="col-md-8">
-      <% unless @product.has_variants? %>
-        <div class="card mb-3">
-          <div class="card-body">
-            <h5 class="card-title mb-4"><%= t('bo.product_variants.form.inventory') %></h5>
-            <%= f.fields_for :inventory_attributes, @product.inventory_variant do |inventory| %>
-              <%= render "bo/product_variants/inventory_fields", f: inventory, variant: @product.inventory_variant %>
-              <div class="mt-3">
-                <%= inventory.label :stock_policy, t('stock_management.policy'), class: "form-label" %>
-                <%= inventory.select :stock_policy, ProductVariant::STOCK_POLICIES.map { |policy| [t("stock_management.policies.#{policy}"), policy] }, {}, class: "form-select" %>
-              </div>
-            <% end %>
-          </div>
-        </div>
-      <% end %>
-
       <div class="card mb-3">
         <div class="card-body">
           <h5 class="card-title mb-4"><%= t('bo.products.form.basic_information') %></h5>
@@ -181,6 +166,21 @@
           <% end %>
         </div>
       </div>
+
+      <% unless @product.has_variants? %>
+        <div class="card mb-3">
+          <div class="card-body">
+            <h5 class="card-title mb-4"><%= t('bo.product_variants.form.inventory') %></h5>
+            <%= f.fields_for :inventory_attributes, @product.inventory_variant do |inventory| %>
+              <%= render "bo/product_variants/inventory_fields", f: inventory, variant: @product.inventory_variant %>
+              <div class="mt-3">
+                <%= inventory.label :stock_policy, t('stock_management.policy'), class: "form-label" %>
+                <%= inventory.select :stock_policy, ProductVariant::STOCK_POLICIES.map { |policy| [t("stock_management.policies.#{policy}"), policy] }, {}, class: "form-select" %>
+              </div>
+            <% end %>
+          </div>
+        </div>
+      <% end %>
 
       <% unless @product.has_variants? %>
         <% if @all_attributes.present? %>

@@ -85,7 +85,9 @@ class VariantGeneratorService
   def find_existing_variant(attribute_values)
     value_ids = attribute_values.map(&:id).sort
 
-    product.product_variants.find do |variant|
+    # The internal base may retain legacy attributes, but is never a sellable
+    # combination and must not prevent generating the corresponding option.
+    product.product_variants.where(is_default: false).includes(:attribute_values).find do |variant|
       variant.attribute_values.pluck(:id).sort == value_ids
     end
   end

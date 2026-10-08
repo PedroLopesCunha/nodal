@@ -5,7 +5,7 @@ class Bo::ProductsController < Bo::BaseController
 
   RELATED_PRODUCTS_PER_PAGE = 30
 
-  before_action :set_product, only: [:show, :edit, :update, :destroy, :configure_variants, :update_variant_configuration, :delete_photo, :set_main_photo, :related_products, :related_products_search, :update_related_products, :reorder_related_products]
+  before_action :set_product, only: [:show, :edit, :update, :destroy, :configure_variants, :sync_erp, :update_variant_configuration, :delete_photo, :set_main_photo, :related_products, :related_products_search, :update_related_products, :reorder_related_products]
   before_action :load_attributes_for_form, only: [:new, :edit, :create, :update]
 
   # Add products choice page
@@ -504,12 +504,35 @@ class Bo::ProductsController < Bo::BaseController
     @available_attributes = current_organisation.product_attributes.kept.active.by_position.includes(:product_attribute_values)
   end
 
+  def sync_erp
+    authorize @product, :sync_erp?
+    unless erp_product_sync_enabled?
+      respond_to do |format|
+        format.json { render json: { error: t('bo.products.erp_sync.unavailable') }, status: :unprocessable_entity }
+        format.html { redirect_to bo_product_path(params[:org_slug], @product), alert: t('bo.products.erp_sync.unavailable') }
+      end
+      return
+    end
+
+    task = current_organisation.background_tasks.create!(member: current_member,
+      task_type: 'erp_product_sync', result: { product_id: @product.id })
+    ErpProductSyncJob.perform_later(task.id, product_id: @product.id)
+    respond_to do |format|
+      format.json { render json: { status_url: bo_background_task_path(params[:org_slug], task, format: :json) }, status: :accepted }
+      format.html { redirect_to bo_product_path(params[:org_slug], @product), notice: t('bo.products.erp_sync.queued') }
+    end
+  end
+
   def update_variant_configuration
     has_variants = params[:has_variants] == '1'
     attribute_ids = params.dig(:product, :product_attribute_ids)&.reject(&:blank?) || []
     available_value_ids = params.dig(:product, :available_attribute_value_ids)&.reject(&:blank?) || []
 
     ActiveRecord::Base.transaction do
+      if @product.has_variants? && !has_variants
+        ProductSimpleConversionService.new(@product, variant_id: params[:simple_variant_id]).call
+        next
+      end
       # Update has_variants flag
       @product.update!(has_variants: has_variants)
 
@@ -754,7 +777,11 @@ class Bo::ProductsController < Bo::BaseController
         "word_similarity(unaccent(:q), unaccent(products.name)) > 0.5 OR word_similarity(unaccent(:q), unaccent(categories.name)) > 0.5",
         q: params[:query]
       ).select("products.id").distinct
-      scope = scope.where(id: exact_ids).or(scope.where(id: fuzzy_ids))
+      attribute_ids = scope.joins(product_variants: { variant_attribute_values: :product_attribute_value })
+        .where("(products.has_variants = true AND product_variants.is_default = false) OR (products.has_variants = false AND product_variants.is_default = true)")
+        .where("unaccent(product_attribute_values.value) ILIKE unaccent(:q)", q: "%#{params[:query]}%")
+        .select("products.id").distinct
+      scope = scope.where(id: exact_ids).or(scope.where(id: fuzzy_ids)).or(scope.where(id: attribute_ids))
     end
 
     if params[:category_id] == "none"

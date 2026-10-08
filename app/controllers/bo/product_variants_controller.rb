@@ -96,7 +96,7 @@ class Bo::ProductVariantsController < Bo::BaseController
 
   def variant_params
     attributes = params.require(:product_variant).permit(
-      :name, :sku, :price, :stock_quantity, :stock_source, :track_stock, :published, :is_default, :photo, :stock_policy
+      :name, :sku, :price, :stock_quantity, :stock_source, :track_stock, :published, :photo, :stock_policy
     )
     source = attributes[:stock_source] || @variant&.stock_source || "erp"
     attributes.delete(:stock_quantity) unless source == "nodal"
