@@ -1,0 +1,24 @@
+pt:
+  bo:
+    products:
+      configure_variants:
+        simple_variant_label: "Qual variante queres manter como produto simples?"
+        simple_variant_placeholder: "Seleciona uma variante"
+        choose_simple_variant: "Escolhe a variante que queres manter como produto simples."
+        simple_variant_hint: "Mantém os dados da variante escolhida. As restantes variantes ficam guardadas para preservar o histórico."
+en:
+  bo:
+    products:
+      configure_variants:
+        simple_variant_label: "Which variant do you want to keep as a simple product?"
+        simple_variant_placeholder: "Select a variant"
+        choose_simple_variant: "Choose the variant to keep as a simple product."
+        simple_variant_hint: "Keeps the selected variant's data. Other variants are retained to preserve order history."
+es:
+  bo:
+    products:
+      configure_variants:
+        simple_variant_label: "¿Qué variante quieres mantener como producto simple?"
+        simple_variant_placeholder: "Selecciona una variante"
+        choose_simple_variant: "Elige la variante que quieres mantener como producto simple."
+        simple_variant_hint: "Conserva los datos de la variante elegida. Las demás variantes se guardan para preservar el historial."

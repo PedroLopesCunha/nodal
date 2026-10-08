@@ -510,6 +510,10 @@ class Bo::ProductsController < Bo::BaseController
     available_value_ids = params.dig(:product, :available_attribute_value_ids)&.reject(&:blank?) || []
 
     ActiveRecord::Base.transaction do
+      if @product.has_variants? && !has_variants
+        ProductSimpleConversionService.new(@product, variant_id: params[:simple_variant_id]).call
+        next
+      end
       # Update has_variants flag
       @product.update!(has_variants: has_variants)
 

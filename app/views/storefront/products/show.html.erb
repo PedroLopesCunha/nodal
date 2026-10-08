@@ -60,7 +60,7 @@
 
       <!-- Main Image -->
       <%
-        all_photos = @product.photos.to_a
+        all_photos = [@product.photo, *@product.photos.to_a].compact.uniq
         if @product.has_variants? && defined?(@variants)
           @variants.each { |v| all_photos << v.photo if v.photo.attached? }
         end

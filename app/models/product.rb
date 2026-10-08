@@ -460,9 +460,24 @@ class Product < ApplicationRecord
   end
 
   def clear_default_variant_for_variable
+    # A variable -> simple conversion promotes a real unit. Restore the
+    # recorded internal base on the return trip without clearing that unit.
+    if variable_base_variant_id.present?
+      internal_base = product_variants.find_by(id: variable_base_variant_id)
+      if internal_base
+        product_variants.where(is_default: true).update_all(is_default: false)
+        internal_base.update_column(:is_default, true)
+        product_variants.reset
+        update_columns(unit_price: nil, variable_base_variant_id: nil)
+        return
+      end
+    end
     variant = default_variant
     return unless variant&.is_default?
 
+    # Simple-product attributes describe its sellable unit. Once variable,
+    # this record is only an internal base; combinations belong to real variants.
+    variant.variant_attribute_values.destroy_all
     variant.update_columns(
       sku: nil,
       unit_price_cents: nil,

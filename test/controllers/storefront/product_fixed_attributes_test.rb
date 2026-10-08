@@ -86,4 +86,18 @@ class Storefront::ProductFixedAttributesTest < ActionDispatch::IntegrationTest
     assert_select "select[data-variant-selector-target=select]", count: 0
     assert_select "h6", text: I18n.t("storefront.products.show.select_options"), count: 0
   end
+  test "existing variants remain selectable when generation configuration is narrower" do
+    @product.product_available_values.where(product_attribute_value_id: @red.id).destroy_all
+    get product_path(org_slug: @org.slug, id: @product.id)
+    assert_response :success
+    assert_select "select[data-variant-selector-target=select] option[value='#{@red.id}']", count: 1
+    assert_select "select[data-variant-selector-target=select] option[value='#{@blue.id}']", count: 1
+
+    @product.update!(add_to_cart_mode: "grid")
+    get product_path(org_slug: @org.slug, id: @product.id)
+    assert_response :success
+    assert_select "table tbody .fw-medium", text: "Azul", count: 1
+    assert_select "table tbody .fw-medium", text: "Vermelho", count: 1
+  end
+
 end

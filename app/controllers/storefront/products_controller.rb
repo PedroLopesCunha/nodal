@@ -287,11 +287,12 @@ class Storefront::ProductsController < Storefront::BaseController
       @variants = all_variants.select { |v|
         v.available? || v.effective_stock_policy != 'hide'
       }
-      # Only show attribute values that lead to at least one available variant
+      # Existing sellable variants are the source of storefront options. The
+      # generation configuration can be narrower after a simple conversion.
       variant_value_ids = @variants.flat_map { |v| v.attribute_values.map(&:id) }.to_set
-      @attributes_with_values = @product.available_values_by_attribute.transform_values { |values|
-        values.select { |v| variant_value_ids.include?(v.id) }
-      }
+      @attributes_with_values = ProductAttributeValue.where(id: variant_value_ids.to_a)
+        .includes(:product_attribute).naturally_sorted.group_by(&:product_attribute)
+        .sort_by { |attribute, _values| attribute.position }.to_h
       # Grid rows exclude variants without a price; derive fixed attributes from
       # the same variants the customer actually sees in each mode.
       @grid_variants = @variants.reject { |variant| variant.unit_price_cents.nil? || variant.unit_price_cents.zero? }

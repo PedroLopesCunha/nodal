@@ -8,7 +8,7 @@
 <% preview_count = 4 %>
 <% interactive = !browsing_as_member? && !product.price_on_request? %>
 <% min_qty = product.min_quantity || 1 %>
-<% grid_attributes = product.product_product_attributes.includes(:product_attribute).order(:position).map { |ppa| ppa.product_attribute }.reject { |attribute| @fixed_attributes_with_values.key?(attribute) } %>
+<% grid_attributes = @selectable_attributes_with_values.keys %>
 <% attribute_names = grid_attributes.map(&:name) %>
 <%# Computed once: whether this viewer may see quantities does not change
     row by row, and the header has to agree with the cells. %>

@@ -68,4 +68,78 @@ class Bo::ProductVariantsControllerTest < ActionDispatch::IntegrationTest
     assert @base.reload.is_default?
     assert @variant.reload.is_default?
   end
+  test "configuration converts using the chosen real variant and keeps its data" do
+    @variant.update!(sku: "BLUE-UNIT", stock_source: "nodal", track_stock: true, stock_quantity: 12)
+    @variant.photo.attach(io: StringIO.new("image"), filename: "blue.png", content_type: "image/png")
+    other = @product.product_variants.create!(name: "Other", unit_price_cents: 2000, is_default: false)
+    ids = @product.product_variants.ids.sort
+    patch update_variant_configuration_bo_product_path(org_slug: @org.slug, id: @product.id),
+      params: { has_variants: "0", simple_variant_id: @variant.id }
+    assert_response :redirect
+    assert_not @product.reload.has_variants?
+    assert_equal @variant.id, @product.default_variant.id
+    assert_equal 1000, @product.unit_price
+    assert_equal "BLUE-UNIT", @product.sku
+    assert_equal 12, @variant.reload.stock_quantity
+    assert_equal "nodal", @variant.stock_source
+    assert @variant.track_stock?
+    assert_equal [@blue.id], @variant.attribute_values.ids
+    assert_equal [@blue.id], @product.available_attribute_values.ids
+    assert_equal @variant.photo.blob_id, @product.cover_photo_blob_id
+    assert_equal ids, @product.product_variants.ids.sort
+    assert_not @base.reload.is_default?
+    assert_not other.reload.is_default?
+  end
+
+  test "configuration automatically chooses the only real variant" do
+    patch update_variant_configuration_bo_product_path(org_slug: @org.slug, id: @product.id),
+      params: { has_variants: "0" }
+    assert_response :redirect
+    assert_equal @variant.id, @product.reload.default_variant.id
+    assert_not @product.has_variants?
+  end
+
+  test "conversion rejects missing or foreign selection without modifying product" do
+    other = @product.product_variants.create!(name: "Other", unit_price_cents: 2000, is_default: false)
+    foreign = @org.products.create!(name: "Foreign", unit_price: 2000).default_variant
+    [nil, foreign.id, @base.id].each do |id|
+      patch update_variant_configuration_bo_product_path(org_slug: @org.slug, id: @product.id),
+        params: { has_variants: "0", simple_variant_id: id }
+      assert_response :unprocessable_entity
+      assert @product.reload.has_variants?
+      assert @base.reload.is_default?
+      assert_not @variant.reload.is_default?
+      assert_not other.reload.is_default?
+    end
+  end
+
+  test "variable simple variable round trip restores base without clearing the real variant" do
+    @variant.update!(sku: "BLUE-ROUND", stock_source: "nodal", stock_quantity: 12, track_stock: true)
+    @variant.photo.attach(io: StringIO.new("image"), filename: "round.png", content_type: "image/png")
+    original_ids = @product.product_variants.ids.sort
+    original_data = @variant.reload.attributes.slice("sku", "unit_price_cents", "stock_quantity", "track_stock", "stock_source")
+
+    2.times do
+      patch update_variant_configuration_bo_product_path(org_slug: @org.slug, id: @product.id),
+        params: { has_variants: "0", simple_variant_id: @variant.id }
+      assert_response :redirect
+      assert_equal @base.id, @product.reload.variable_base_variant_id
+      assert_equal @variant.id, @product.default_variant.id
+
+      patch update_variant_configuration_bo_product_path(org_slug: @org.slug, id: @product.id),
+        params: { has_variants: "1", product: { product_attribute_ids: [@blue.product_attribute_id], available_attribute_value_ids: [@blue.id] } }
+      assert_response :redirect
+      assert @product.reload.has_variants?
+      assert_equal @base.id, @product.default_variant.id
+      assert_nil @product.variable_base_variant_id
+      assert @base.reload.is_default?
+      assert_not @variant.reload.is_default?
+      assert_equal original_data, @variant.attributes.slice(*original_data.keys)
+      assert_equal [@blue.id], @variant.attribute_values.ids
+      assert @variant.photo.attached?
+      assert_equal original_ids, @product.product_variants.ids.sort
+      assert_equal [@base.id], @product.product_variants.where(is_default: true).ids
+    end
+  end
+
 end

@@ -45,6 +45,21 @@
         </div>
       </div>
 
+      <% if @product.has_variants? %>
+        <% simple_variants = @product.product_variants.where(is_default: false).by_position.includes(:attribute_values) %>
+        <div class="card mb-3" data-variant-configuration-target="simpleSection" style="display: none;">
+          <div class="card-body">
+            <label for="simple_variant_id" class="form-label fw-semibold"><%= t('bo.products.configure_variants.simple_variant_label') %></label>
+            <%= select_tag :simple_variant_id,
+                options_for_select(simple_variants.map { |variant| [[variant.option_values_string.presence || variant.name, variant.sku.presence].compact.join(' — '), variant.id] }, params[:simple_variant_id].presence || (simple_variants.first.id if simple_variants.one?)),
+                include_blank: t('bo.products.configure_variants.simple_variant_placeholder'),
+                class: "form-select", disabled: true,
+                data: { variant_configuration_target: "simpleVariant" } %>
+            <p class="text-muted small mt-2 mb-0"><%= t('bo.products.configure_variants.simple_variant_hint') %></p>
+          </div>
+        </div>
+      <% end %>
+
       <div data-variant-configuration-target="attributesSection" style="<%= 'display: none;' unless @product.has_variants? %>">
         <div class="card mb-3">
           <div class="card-body">
