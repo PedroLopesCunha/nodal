@@ -154,18 +154,22 @@ class ProductGridImportService
           @errors << { row: line, field: "sku_pai", message: "Produto pai '#{row['sku_pai']}' n\u00E3o encontrado" }
           next
         end
+        unless parent.has_variants?
+          @errors << { row: line, field: "sku_pai", message: "O produto pai '#{row['sku_pai']}' tem de ser variável" }
+          next
+        end
 
         # Upsert variant by SKU
         variant_sku = row["sku"].presence
-        if variant_sku
-          variant = @organisation.product_variants.find_by(sku: variant_sku)
-        end
+        variant = variant_sku && @organisation.product_variants.find_by(sku: variant_sku)
+        previous_product = variant&.product
 
         if variant
           variant.assign_attributes(
             name: row["nome"],
             unit_price_cents: parse_price(row["preco"]) || variant.unit_price_cents,
-            product: parent
+            product: parent,
+            is_default: false
           )
         else
           variant = parent.product_variants.new(
@@ -183,6 +187,12 @@ class ProductGridImportService
         # Re-link attribute values (clear and re-create)
         variant.variant_attribute_values.destroy_all
         link_variant_attributes(variant, row, line)
+
+        # Keep the original product for historical orders, but retire it from
+        # sale when its last unit has been moved into a variable product.
+        if previous_product && previous_product.id != parent.id && !previous_product.product_variants.exists?
+          previous_product.update!(published: false)
+        end
 
         # Inherit category from parent
         if row["categoria"].blank?

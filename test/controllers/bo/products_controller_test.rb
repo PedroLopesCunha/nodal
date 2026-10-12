@@ -14,6 +14,34 @@ class Bo::ProductsControllerTest < ActionDispatch::IntegrationTest
   # Regression guard: the catalog modals/partials were parameterized so the
   # sales-rep page can reuse them. The admin flow must keep working with the
   # default (products-scoped) URLs when no locals are passed.
+  test "an empty simple product is shown as hidden" do
+    product = @organisation.products.create!(name: "Empty", unit_price: 1000, published: true)
+    product.default_variant.destroy!
+    get bo_product_path(org_slug: @organisation.slug, id: product.id)
+    assert_response :success
+    assert_select "strong", text: I18n.t("bo.products.show.product_hidden_from_storefront")
+    assert_select "strong", text: I18n.t("bo.products.show.product_visible_in_storefront"), count: 0
+  end
+
+  test "deleting a regrouped product explains historical variant orders" do
+    original = @organisation.products.create!(name: "Original", unit_price: 1000, published: true)
+    unit = original.default_variant
+    customer = @organisation.customers.create!(company_name: "Acme", contact_name: "Ana", active: true)
+    user = customer.customer_users.create!(organisation: @organisation, email: "group-history@example.com",
+                                          password: "password123", contact_name: "Ana", active: true)
+    order = @organisation.orders.create!(customer: customer, customer_user: user)
+    item = order.order_items.create!(product: original, quantity: 1)
+    parent = @organisation.products.create!(name: "Group", has_variants: true)
+    unit.update!(product: parent, is_default: false)
+
+    delete bo_product_path(org_slug: @organisation.slug, id: parent.id)
+    assert_redirected_to bo_product_path(org_slug: @organisation.slug, id: parent.id)
+    assert_equal I18n.t("bo.flash.product_has_orders"), flash[:alert]
+    assert Product.exists?(parent.id)
+    assert_equal original.id, item.reload.product_id
+    assert_equal unit.id, item.product_variant_id
+  end
+
   test "admin products index renders the catalog modals" do
     get bo_products_path(org_slug: @organisation.slug)
     assert_response :success

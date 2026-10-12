@@ -307,6 +307,8 @@
             if !@product.published?
               product_visible = false
               hidden_reason = :unpublished
+            elsif @product.product_variants.empty?
+              product_visible = false
             elsif !@product.available?
               # Check if any variant has a non-hide policy (would still show)
               product_visible = @product.product_variants.published.where(is_default: false).any? { |v|

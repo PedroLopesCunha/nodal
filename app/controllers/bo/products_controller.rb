@@ -482,7 +482,9 @@ class Bo::ProductsController < Bo::BaseController
   end
 
   def destroy
-    if @product.destroy
+    if @product.order_items.exists? || OrderItem.where(product_variant_id: @product.product_variants.select(:id)).exists?
+      redirect_to bo_product_path(params[:org_slug], @product, filter_params_hash), alert: t('bo.flash.product_has_orders')
+    elsif @product.destroy
       redirect_to bo_products_path(params[:org_slug], filter_params_hash), notice: "Product was successfully deleted."
     else
       redirect_to bo_product_path(params[:org_slug], @product, filter_params_hash), alert: @product.errors.full_messages.to_sentence

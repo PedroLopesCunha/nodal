@@ -2266,6 +2266,7 @@ en:
       variant_updated: "Variant updated successfully"
       variant_deleted: "Variant deleted successfully"
       variant_has_orders: "Cannot delete variant with existing orders"
+      product_has_orders: "Cannot delete this product: the product or its variants are linked to existing orders."
       variant_configuration_updated: "Variant configuration updated successfully"
       variants_generated: "Generated %{created} variant(s), skipped %{skipped} existing"
       products_added_to_category: "%{count} product(s) added to category"

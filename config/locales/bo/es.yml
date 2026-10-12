@@ -1919,6 +1919,7 @@ es:
       variant_updated: "Variante actualizada con éxito"
       variant_deleted: "Variante eliminada con éxito"
       variant_has_orders: "No se puede eliminar variante con pedidos existentes"
+      product_has_orders: "No se puede eliminar este producto: el producto o sus variantes están vinculados a pedidos existentes."
       variant_configuration_updated: "Configuración de variantes actualizada con éxito"
       variants_generated: "Generada(s) %{created} variante(s), omitida(s) %{skipped} existente(s)"
       products_added_to_category: "%{count} producto(s) añadido(s) a la categoría"
