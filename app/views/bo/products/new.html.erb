@@ -201,6 +201,11 @@
             <label class="form-check-label" for="hideSkuOnCardSwitch"><%= t('bo.products.form.hide_sku_on_card') %></label>
           </div>
           <small class="text-muted"><%= t('bo.products.form.hide_sku_on_card_hint') %></small>
+          <div class="form-check form-switch mt-3">
+            <%= f.check_box :quick_add_enabled, class: "form-check-input", role: "switch" %>
+            <%= f.label :quick_add_enabled, t('quick_add.settings.product'), class: "form-check-label" %>
+          </div>
+          <small class="text-muted d-block mb-3"><%= t('quick_add.settings.product_hint') %></small>
         </div>
       </div>
     </div>

@@ -1,0 +1,43 @@
+<div data-controller="bulk-quantity"
+     data-bulk-quantity-label-value="<%= t('quick_add.add_units') %>"
+     data-bulk-quantity-unit-value="<%= t('quick_add.unit') %>"
+     data-bulk-quantity-units-value="<%= t('quick_add.units') %>">
+  <div class="quick-add-rows-heading">
+    <span><%= attributes.map(&:name).join(' / ').presence || t('storefront.products.show.grid.variant') %></span>
+    <span><%= t('storefront.products.show.grid.quantity') %></span>
+  </div>
+  <div class="quick-add-rows">
+    <% variants.each do |variant| %>
+      <% label = attributes.flat_map { |attribute| variant.attribute_values.select { |value| value.product_attribute_id == attribute.id }.map(&:value) }.join(' / ').presence || variant.name %>
+      <div class="quick-add-row" data-grid-row>
+        <div class="quick-add-row-details">
+          <div class="fw-semibold"><%= label %></div>
+          <% if variant.sku.present? %><div class="quick-add-row-sku"><%= variant.sku %></div><% end %>
+          <% if show_prices? %>
+            <% calc = DiscountCalculator.new(product: product, customer: current_customer, quantity: product.quantity_input_min, variant: variant) %>
+            <div class="quick-add-row-price">
+              <span class="text-muted text-decoration-line-through <%= 'd-none' unless calc.final_price < calc.base_price %>" data-grid-pricing-target="rowOriginal"><%= money_amount(calc.base_price) %></span>
+              <span data-grid-pricing-target="rowPrice"><%= money_amount(calc.final_price) %></span>
+            </div>
+          <% end %>
+          <% if (stock = stock_display_label(variant)).present? %><div class="small text-muted"><%= stock %></div><% end %>
+          <% unless variant.purchasable? %><div class="small text-danger"><%= t('storefront.carts.show.stock.out_of_stock') %></div><% end %>
+        </div>
+        <div class="quantity-stepper" data-controller="quantity-stepper">
+          <button type="button" data-action="quantity-stepper#decrease" aria-label="<%= t('quick_add.decrease', variant: label) %>" <%= 'disabled' unless variant.purchasable? %>><i class="fa-solid fa-minus" aria-hidden="true"></i></button>
+          <% actions = ['input->bulk-quantity#update'] %>
+          <% actions << 'input->grid-pricing#update' if grid %>
+          <% actions << 'input->min-quantity-counter#update' if combined_counter %>
+          <%= number_field_tag "bulk_items[#{variant.id}]", 0, min: 0, step: 1, disabled: !variant.purchasable?, aria: { label: "#{t('storefront.products.show.grid.quantity')} — #{label}" }, data: { variant_id: variant.id, minimum: product.quantity_input_min, bulk_quantity_target: 'input', grid_pricing_target: ('rowInput' if grid), min_quantity_counter_target: ('input' if combined_counter), action: actions.join(' ') } %>
+          <button type="button" data-action="quantity-stepper#increase" aria-label="<%= t('quick_add.increase', variant: label) %>" <%= 'disabled' unless variant.purchasable? %>><i class="fa-solid fa-plus" aria-hidden="true"></i></button>
+        </div>
+      </div>
+    <% end %>
+  </div>
+  <%= render 'storefront/products/quick_add_note' %>
+  <div class="quick-add-bulk-footer">
+    <button type="submit" class="btn btn-primary w-100 py-3" data-bulk-quantity-target="submit" disabled>
+      <span data-bulk-quantity-target="label"><%= t('storefront.products.show.grid.add_to_cart') %></span><span data-grid-pricing-target="buttonTotal"></span>
+    </button>
+  </div>
+</div>

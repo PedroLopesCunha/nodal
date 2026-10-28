@@ -1,0 +1,19 @@
+  <% pp = @product_pricing %>
+  <% pricing_data = pp ? {
+       controller: "product-pricing",
+       product_pricing_locked_unit_cents_value: pp[:locked_unit_cents],
+       product_pricing_unlocked_unit_cents_value: pp[:unlocked_unit_cents],
+       product_pricing_base_unit_cents_value: pp[:base_unit_cents],
+       product_pricing_condition_type_value: pp[:condition_type],
+       product_pricing_threshold_value: pp[:threshold],
+       product_pricing_cart_current_value: pp[:cart_current],
+       product_pricing_cart_current_label_value: pp[:cart_current_label],
+       product_pricing_discount_label_value: pp[:discount_label],
+       product_pricing_currency_symbol_value: pp[:currency_symbol],
+       product_pricing_remaining_template_value: t('storefront.carts.show.nudge.remaining', remaining: '%{remaining}', discount: '%{discount}'),
+       product_pricing_celebration_default_value: t('storefront.products.show.unlocked_add_to_cart', discount: pp[:discount_label]),
+       product_pricing_celebration_from_cart_template_value: t('storefront.products.show.unlocked_from_cart', discount: pp[:discount_label], cart: '%{cart}'),
+       product_pricing_discount_applied_template_value: t('storefront.products.show.discount_applied', discount: '%{discount}'),
+       product_pricing_variant_pricing_value: (@variant_pricing || {}).to_json
+     } : {} %>
+<%= yield pricing_data %>

@@ -1,0 +1,13 @@
+<% if product.quick_add_available? && !browsing_as_member? %>
+  <% label = t('quick_add.open', product: product.name) %>
+  <div class="quick-add-action" data-controller="quick-add" data-loading="<%= t('quick_add.loading') %>" data-error="<%= t('quick_add.error') %>">
+      <button type="button" class="btn btn-outline-primary quick-add-trigger" data-action="quick-add#open" data-url="<%= quick_add_product_path(org_slug: params[:org_slug], id: product) %>" aria-label="<%= label %>" title="<%= label %>" aria-haspopup="dialog">
+        <i class="fa-solid fa-cart-plus" aria-hidden="true"></i>
+      </button>
+      <dialog class="quick-add-dialog <%= 'quick-add-dialog--grid' if product.grid_add_to_cart? %>" aria-label="<%= label %>" data-quick-add-target="dialog" data-action="click->quick-add#backdrop cancel->quick-add#close">
+        <button type="button" class="btn-close float-end" data-action="quick-add#close" aria-label="<%= t('quick_add.close') %>"></button>
+        <div class="pt-4" data-quick-add-target="content" data-action="submit->quick-add#submit"></div>
+      </dialog>
+    <p class="quick-add-status small mb-0" role="status" data-quick-add-target="status"></p>
+  </div>
+<% end %>

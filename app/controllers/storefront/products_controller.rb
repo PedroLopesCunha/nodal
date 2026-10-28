@@ -249,9 +249,19 @@ class Storefront::ProductsController < Storefront::BaseController
     render json: results
   end
 
+  def quick_add
+    show
+    return if performed?
+    unless @product.quick_add_available? && !browsing_as_member?
+      head :not_found
+      return
+    end
+    render :quick_add, layout: false
+  end
+
   def show
     @product = current_organisation.products.find(params[:id])
-    authorize @product
+    authorize @product, :show?
 
     unless @product.published?
       redirect_to products_path(org_slug: current_organisation.slug), alert: I18n.t('storefront.products.not_available')

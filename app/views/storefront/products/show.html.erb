@@ -1,53 +1,5 @@
-<%
-  controllers = "image-gallery"
-  row_data = {}
-  if @product.has_variants? && @attributes_with_values.present?
-    controllers += " variant-selector"
-    row_data.merge!(
-      "variant-selector-variants-value" => @variants.map { |v|
-        vd = @variant_discounts[v.id] || { has_discount: false, final_price_cents: v.unit_price_cents, discount_percentage: 0 }
-        variant_data = {
-          id: v.id, name: v.name, sku: v.sku,
-          price_cents: v.unit_price_cents,
-          original_price_cents: @product.unit_price,
-          attribute_value_ids: v.attribute_values.pluck(:id),
-          in_stock: v.in_stock?,
-          track_stock: v.track_stock?, purchasable: v.purchasable?,
-          photo_url: v.photo.attached? ? url_for(v.photo.variant(resize_to_limit: [400, 400])) : nil,
-          has_discount: vd[:has_discount],
-          final_price_cents: vd[:final_price_cents],
-          discount_percentage: vd[:discount_percentage]
-        }
+<%= render layout: "storefront/products/selection_config" do |controllers, row_data| %>
 
-        # A label, never the raw figure. Withheld here rather than hidden in the
-        # markup: this payload used to carry the real quantity for every variant
-        # to every visitor, and no script ever read it. Sending the number and
-        # rendering a word would publish the number all the same, which matters
-        # when the organisation chose bands over exact quantities.
-        # Feeds the availability line, which already says "In stock" in words.
-        label = stock_display_label(v, beside_availability: true)
-        variant_data[:stock_label] = label if label.present?
-        variant_data
-      }.to_json,
-      "variant-selector-currency-symbol-value" => current_organisation.currency_symbol,
-      "variant-selector-default-price-cents-value" => @default_variant&.unit_price_cents || @product.unit_price,
-      "variant-selector-default-final-price-cents-value" => @reference_breakdown[:final_price].cents,
-      "variant-selector-default-has-discount-value" => @reference_breakdown[:has_discount].to_s,
-      "variant-selector-default-discount-percentage-value" => (@reference_breakdown[:has_discount] && @reference_breakdown[:effective_discount][:percentage].to_f.finite? ? (@reference_breakdown[:effective_discount][:percentage] * 100).round(0) : 0).to_s,
-      "variant-selector-min-quantity-value" => @product.quantity_input_min,
-      "variant-selector-default-sku-value" => @product.sku,
-      "variant-selector-in-stock-text-value" => t('storefront.products.show.in_stock'),
-      "variant-selector-out-of-stock-text-value" => t('storefront.products.show.out_of_stock'),
-      "variant-selector-display-price-value" => (@display_price || @product.display_price),
-      "variant-selector-display-price-original-value" => (@display_price_original || "")
-    )
-    # Hand price/total/tracker to the product-pricing controller — selector mode
-    # only (in grid mode the grid-pricing controller drives the panel tracker).
-    unless @product.grid_add_to_cart?
-      row_data["variant-selector-product-pricing-outlet"] = "[data-controller~='product-pricing']"
-    end
-  end
-%>
 <div class="row g-4 mt-4" data-controller="<%= controllers %>" <%= row_data.map { |k, v| "data-#{k}=\"#{ERB::Util.html_escape(v)}\"" }.join(" ").html_safe %>>
   <!-- Left Column - Product Image -->
   <div class="col-lg-6">
@@ -100,24 +52,7 @@
   </div>
 
   <!-- Right Column - Product Details -->
-  <% pp = @product_pricing %>
-  <% pricing_data = pp ? {
-       controller: "product-pricing",
-       product_pricing_locked_unit_cents_value: pp[:locked_unit_cents],
-       product_pricing_unlocked_unit_cents_value: pp[:unlocked_unit_cents],
-       product_pricing_base_unit_cents_value: pp[:base_unit_cents],
-       product_pricing_condition_type_value: pp[:condition_type],
-       product_pricing_threshold_value: pp[:threshold],
-       product_pricing_cart_current_value: pp[:cart_current],
-       product_pricing_cart_current_label_value: pp[:cart_current_label],
-       product_pricing_discount_label_value: pp[:discount_label],
-       product_pricing_currency_symbol_value: pp[:currency_symbol],
-       product_pricing_remaining_template_value: t('storefront.carts.show.nudge.remaining', remaining: '%{remaining}', discount: '%{discount}'),
-       product_pricing_celebration_default_value: t('storefront.products.show.unlocked_add_to_cart', discount: pp[:discount_label]),
-       product_pricing_celebration_from_cart_template_value: t('storefront.products.show.unlocked_from_cart', discount: pp[:discount_label], cart: '%{cart}'),
-       product_pricing_discount_applied_template_value: t('storefront.products.show.discount_applied', discount: '%{discount}'),
-       product_pricing_variant_pricing_value: (@variant_pricing || {}).to_json
-     } : {} %>
+  <%= render layout: "storefront/products/pricing_config" do |pricing_data| %>
   <div class="col-lg-6" <%= tag.attributes(data: pricing_data) %>>
     <div class="card border-0 shadow-sm" style="border-radius: 12px;">
       <div class="card-body p-4">
@@ -307,173 +242,7 @@
           </div>
         <% end %>
 
-        <!-- Variant Selector (for variable products) -->
-        <% if @product.grid_add_to_cart? %>
-          <%= render "storefront/products/grid_add_to_cart", product: @product %>
-        <% elsif @product.has_variants? && @attributes_with_values.present? %>
-          <div class="mb-4">
-            <% if @selectable_attributes_with_values.present? %>
-              <h6 class="text-muted mb-3"><%= t('storefront.products.show.select_options') %></h6>
-            <% end %>
-
-            <% @selectable_attributes_with_values.each do |attribute, values| %>
-              <div class="mb-3">
-                <% if values.size == 1 %>
-                  <span class="fw-semibold"><%= attribute.name %>:</span>
-                  <span class="text-muted"><%= values.first.value %></span>
-                  <input type="hidden" data-single-attribute-value="<%= values.first.id %>">
-                <% elsif attribute.display_type == 'color_swatches' %>
-                  <% max_visible = 9 %>
-                  <div <%= "data-controller=expandable" if values.size > max_visible %>>
-                    <div class="d-flex justify-content-between align-items-center mb-2">
-                      <label class="form-label fw-semibold mb-0"><%= attribute.name %></label>
-                      <% if values.size > max_visible %>
-                        <a href="#" class="text-primary text-decoration-none small"
-                           style="font-size: 0.85rem;"
-                           data-expandable-target="toggle"
-                           data-collapse-label="<%= t('storefront.products.show.less_options') %> <i class='fa-solid fa-chevron-up fa-xs'></i>"
-                           data-action="click->expandable#toggle">
-                          +<%= values.size - max_visible %> <%= t('storefront.products.show.more_options') %> <i class="fa-solid fa-chevron-down fa-xs"></i>
-                        </a>
-                      <% end %>
-                    </div>
-                    <div class="d-flex flex-wrap gap-2" data-variant-selector-target="group">
-                      <% values.each_with_index do |value, idx| %>
-                        <% is_default = @default_variant&.purchasable? && @default_variant&.attribute_values&.include?(value) %>
-                        <button type="button"
-                                class="btn btn-outline-secondary position-relative <%= 'active' if is_default %>"
-                                style="width: 42px; height: 42px; padding: 3px; border-radius: 50%; border-width: 2px;<%= ' display: none;' if idx >= max_visible && values.size > max_visible %>"
-                                data-variant-selector-target="button"
-                                data-value-id="<%= value.id %>"
-                                data-action="click->variant-selector#selectOption"
-                                title="<%= value.value %>"
-                                <% if idx >= max_visible && values.size > max_visible %>data-expandable-target="item"<% end %>>
-                          <span class="d-block w-100 h-100 rounded-circle" style="background-color: <%= value.color_hex.presence || '#ccc' %>;"></span>
-                        </button>
-                      <% end %>
-                    </div>
-                  </div>
-                <% elsif attribute.display_type == 'buttons' %>
-                  <% max_visible = 9 %>
-                  <div <%= "data-controller=expandable" if values.size > max_visible %>>
-                    <div class="d-flex justify-content-between align-items-center mb-2">
-                      <label class="form-label fw-semibold mb-0"><%= attribute.name %></label>
-                      <% if values.size > max_visible %>
-                        <a href="#" class="text-primary text-decoration-none small"
-                           style="font-size: 0.85rem;"
-                           data-expandable-target="toggle"
-                           data-collapse-label="<%= t('storefront.products.show.less_options') %> <i class='fa-solid fa-chevron-up fa-xs'></i>"
-                           data-action="click->expandable#toggle">
-                          +<%= values.size - max_visible %> <%= t('storefront.products.show.more_options') %> <i class="fa-solid fa-chevron-down fa-xs"></i>
-                        </a>
-                      <% end %>
-                    </div>
-                    <div class="d-flex flex-wrap gap-2" data-variant-selector-target="group">
-                      <% values.each_with_index do |value, idx| %>
-                        <% is_default = @default_variant&.purchasable? && @default_variant&.attribute_values&.include?(value) %>
-                        <button type="button"
-                                class="btn btn-outline-secondary <%= 'active' if is_default %>"
-                                style="min-width: 48px; border-radius: 8px; padding: 6px 12px; font-weight: 500; text-align: center;<%= ' display: none;' if idx >= max_visible && values.size > max_visible %>"
-                                data-variant-selector-target="button"
-                                data-value-id="<%= value.id %>"
-                                data-action="click->variant-selector#selectOption"
-                                <% if idx >= max_visible && values.size > max_visible %>data-expandable-target="item"<% end %>>
-                          <%= value.value %>
-                        </button>
-                      <% end %>
-                    </div>
-                  </div>
-                <% else %>
-                  <%# dropdown (default) %>
-                  <label class="form-label fw-semibold"><%= attribute.name %></label>
-                  <select class="form-select" data-variant-selector-target="select" data-action="change->variant-selector#change">
-                    <option value=""><%= t('storefront.products.show.select_option', attribute: attribute.name) %></option>
-                    <% values.each do |value| %>
-                      <option value="<%= value.id %>"
-                              <%= 'selected' if @default_variant&.purchasable? && @default_variant&.attribute_values&.include?(value) %>>
-                        <%= value.value %>
-                      </option>
-                    <% end %>
-                  </select>
-                <% end %>
-              </div>
-            <% end %>
-
-            <!-- Add to Cart Section -->
-            <% combined_counter = @product.min_quantity_combined? && @product.enforced_min_quantity.present? && @product.combined_min_reachable? %>
-            <% in_cart_qty = combined_counter ? current_cart&.order_items&.where(product_id: @product.id)&.sum(:quantity).to_i : 0 %>
-            <% counter_data = combined_counter ? {
-                 controller: "min-quantity-counter",
-                 min_quantity_counter_min_value: @product.enforced_min_quantity,
-                 min_quantity_counter_in_cart_value: in_cart_qty,
-                 min_quantity_counter_label_value: @product.minimum_quantity_label,
-                 min_quantity_counter_below_value: t('storefront.products.show.grid.min_counter_below'),
-                 min_quantity_counter_met_value: t('storefront.products.show.grid.min_counter_met')
-               } : {} %>
-            <% unless browsing_as_member? || @product.price_on_request? %>
-              <%= form_with url: order_items_path(org_slug: params[:org_slug]), method: :post, local: true, class: "w-100", data: counter_data do |f| %>
-                <%= hidden_field_tag :product_id, @product.id %>
-                <%= hidden_field_tag :variant_id, @default_variant&.id, data: { variant_selector_target: "variantId" } %>
-                <%= hidden_field_tag :category, params[:category] if params[:category].present? %>
-                <%= hidden_field_tag :queries, params[:queries] if params[:queries].present? %>
-                <%= hidden_field_tag :page, params[:page] if params[:page].present? %>
-                <%= hidden_field_tag :promo, params[:promo] if params[:promo].present? %>
-                <%= render 'storefront/products/attrs_hidden_fields' %>
-
-                <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-2">
-                  <div class="d-flex align-items-center">
-                    <label class="text-muted small me-2 mb-0"><%= t('storefront.products.show.quantity') %></label>
-                    <% qty_action = "change->variant-selector#updateTotal input->variant-selector#updateTotal input->product-pricing#update" %>
-                    <% qty_action += " input->min-quantity-counter#update" if combined_counter %>
-                    <%= number_field_tag "order_item[quantity]", @product.quantity_input_default, required: true, min: @product.quantity_input_min, class: "form-control text-center", style: "width: 70px;", data: { variant_selector_target: "quantity", product_pricing_target: "quantity", min_quantity_counter_target: ("input" if combined_counter), action: qty_action } %>
-                  </div>
-                  <% if show_prices? %>
-                    <small class="text-success fw-semibold" data-product-pricing-target="discountNote"></small>
-                  <% end %>
-                </div>
-
-                <button type="submit" class="btn btn-primary btn-lg w-100" style="border-radius: 8px;"
-                        data-variant-selector-target="addToCart"
-                        <%= 'disabled' unless @default_variant&.purchasable? %>>
-                  <i class="fa-solid fa-cart-plus me-2"></i><%= t('storefront.products.show.add_to_cart') %><% if show_prices? %><span data-variant-selector-target="price" data-product-pricing-target="total"></span><% end %>
-                </button>
-
-                <% if combined_counter %>
-                  <div class="w-100 small mt-2">
-                    <i class="fa-solid fa-layer-group me-1 text-muted"></i><span class="text-muted" data-min-quantity-counter-target="output"></span>
-                  </div>
-                <% end %>
-              <% end %>
-            <% end %>
-          </div>
-        <% else %>
-          <!-- Add to Cart Section (simple product) -->
-          <% unless browsing_as_member? || @product.price_on_request? %>
-            <% pp = @product_pricing %>
-            <%= form_with url: order_items_path(org_slug: params[:org_slug]), method: :post, local: true, class: "w-100" do |f| %>
-              <%= hidden_field_tag :product_id, @product.id %>
-              <%= hidden_field_tag :variant_id, @default_variant&.id %>
-              <%= hidden_field_tag :category, params[:category] if params[:category].present? %>
-              <%= hidden_field_tag :queries, params[:queries] if params[:queries].present? %>
-              <%= hidden_field_tag :page, params[:page] if params[:page].present? %>
-              <%= hidden_field_tag :promo, params[:promo] if params[:promo].present? %>
-              <%= render 'storefront/products/attrs_hidden_fields' %>
-              <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-2">
-                <div class="d-flex align-items-center">
-                  <label class="text-muted small me-2 mb-0"><%= t('storefront.products.show.quantity') %></label>
-                  <%= number_field_tag "order_item[quantity]", @product.quantity_input_default, required: true, min: @product.quantity_input_min, class: "form-control text-center", style: "width: 70px;", data: (pp ? { product_pricing_target: "quantity", action: "input->product-pricing#update" } : {}) %>
-                </div>
-                <% if show_prices? %>
-                  <small class="text-success fw-semibold" data-product-pricing-target="discountNote"></small>
-                <% end %>
-              </div>
-
-              <button type="submit" class="btn btn-primary btn-lg w-100" style="border-radius: 8px;" <%= 'disabled' unless @product.purchasable? %>>
-                <i class="fa-solid fa-cart-plus me-2"></i><%= t('storefront.products.show.add_to_cart') %><% if show_prices? %><span data-product-pricing-target="total"> · <%= money_amount((@actual_breakdown ? @actual_breakdown[:final_price] : @product.price) * @product.quantity_input_min) %></span><% end %>
-              </button>
-            <% end %>
-          <% end %>
-        <% end %>
+        <%= render "storefront/products/purchase" %>
 
         <% if @product.price_on_request? %>
           <%
@@ -520,6 +289,8 @@
     </div>
   </div>
 </div>
+
+<% end %>
 
 <%= render 'related_products' if @related_products&.any? %>
 
@@ -601,4 +372,6 @@
       </div>
     </div>
   </div>
+<% end %>
+
 <% end %>

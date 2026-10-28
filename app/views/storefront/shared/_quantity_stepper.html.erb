@@ -1,0 +1,5 @@
+<div class="quantity-stepper" data-controller="quantity-stepper">
+  <button type="button" data-action="quantity-stepper#decrease" aria-label="<%= t('storefront.carts.show.decrease_quantity') %>"><i class="fa-solid fa-minus" aria-hidden="true"></i></button>
+  <%= yield %>
+  <button type="button" data-action="quantity-stepper#increase" aria-label="<%= t('storefront.carts.show.increase_quantity') %>"><i class="fa-solid fa-plus" aria-hidden="true"></i></button>
+</div>

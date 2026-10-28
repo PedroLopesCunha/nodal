@@ -1,0 +1,27 @@
+<%= render layout: "storefront/products/selection_config", thumbnail: true do |controllers, row_data| %>
+  <% row_data["variant-selector-product-pricing-outlet"] = "#quick-add-product-#{@product.id} [data-controller~='product-pricing']" if @product.has_variants? %>
+  <div id="quick-add-product-<%= @product.id %>" data-controller="<%= controllers %>" <%= tag.attributes(data: row_data) %>>
+    <p role="alert" class="text-danger small"></p>
+    <div class="quick-add-header mb-3">
+      <% photo = @product.photo || @variants&.find { |variant| variant.photo.attached? }&.photo %>
+      <% if photo %>
+        <%= image_tag photo.variant(resize_to_limit: [160, 160]), class: "quick-add-thumbnail", width: 80, height: 80, alt: @product.name, data: { variant_selector_target: "image" } %>
+      <% else %>
+        <div class="quick-add-thumbnail quick-add-thumbnail--placeholder" aria-hidden="true"><i class="fa-solid fa-image"></i></div>
+      <% end %>
+      <div class="quick-add-header-details">
+        <h2 class="h5"><%= @product.name %></h2>
+        <%= link_to t('quick_add.details'), product_path(org_slug: params[:org_slug], id: @product), class: "small" %>
+      </div>
+    </div>
+    <% @fixed_attributes_with_values&.each do |attribute, values| %>
+      <p class="small"><strong><%= attribute.name %>:</strong> <%= values.first.value %></p>
+      <input type="hidden" data-single-attribute-value="<%= values.first.id %>">
+    <% end %>
+    <%= render layout: "storefront/products/pricing_config" do |pricing_data| %>
+      <div <%= tag.attributes(data: pricing_data) %>>
+        <%= render "storefront/products/purchase", quick_add: true %>
+      </div>
+    <% end %>
+  </div>
+<% end %>

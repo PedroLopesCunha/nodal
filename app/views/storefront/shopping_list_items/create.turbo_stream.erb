@@ -41,7 +41,9 @@
                 <td>
                   <div class="d-flex align-items-center gap-1">
                     <%= form_with model: item, url: shopping_list_item_path(org_slug: params[:org_slug], shopping_list_id: @shopping_list, id: item), method: :patch do |f| %>
-                      <%= f.number_field :quantity, min: 1, class: "form-control form-control-sm text-center", style: "width: 70px;", onchange: "this.form.requestSubmit()" %>
+                      <%= render layout: "storefront/shared/quantity_stepper" do %>
+                        <%= f.number_field :quantity, min: 1, class: "form-control form-control-sm text-center", style: "width: 70px;", onchange: "this.form.requestSubmit()" %>
+                      <% end %>
                     <% end %>
                     <% if item.product.unit_description.present? %>
                       <span class="text-muted small"><%= item.product.unit_description %></span>

@@ -1,0 +1,35 @@
+.quantity-stepper {
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+  border: 1px solid #dee2e6;
+  border-radius: 8px;
+  overflow: hidden;
+  background: transparent;
+
+  button {
+    border: 0;
+    background: transparent;
+    color: var(--org-primary, #0d6efd);
+    width: 32px;
+    height: 40px;
+    font-size: .7rem;
+    &:disabled { opacity: .35; }
+    &:focus-visible { outline: 2px solid var(--org-primary, #0d6efd); outline-offset: -3px; }
+  }
+  input {
+    appearance: textfield;
+    border: 0 !important;
+    border-radius: 0;
+    box-shadow: none;
+    height: 40px;
+    min-height: 0;
+    margin: 0 !important;
+    width: 36px !important;
+    padding: 6px 0 !important;
+    text-align: center;
+    font-size: .85rem;
+    background: transparent;
+    &::-webkit-inner-spin-button, &::-webkit-outer-spin-button { appearance: none; margin: 0; }
+  }
+}

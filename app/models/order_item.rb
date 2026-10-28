@@ -47,6 +47,7 @@ class OrderItem < ApplicationRecord
   validates :discount_percentage, numericality: { greater_than_or_equal_to: 0,
      less_than_or_equal_to: 1 }, allow_nil: true
   validates :note, length: { maximum: 500 }, allow_blank: true
+  validate :distinct_line_note, on: :customer_change
   validate :variant_belongs_to_order_organisation
   validate :variant_belongs_to_product
   validate :variant_is_purchasable, on: :create
@@ -190,6 +191,12 @@ class OrderItem < ApplicationRecord
     unless product_variant.product_id == product.id
       errors.add(:product_variant, "must belong to the selected product")
     end
+  end
+
+  def distinct_line_note
+    duplicates = order.order_items.where(product_id: product_id, product_variant_id: product_variant_id)
+                      .where(note: note.presence || [nil, ""]).where.not(id: id)
+    errors.add(:note, :taken) if duplicates.exists?
   end
 
   def variant_is_purchasable

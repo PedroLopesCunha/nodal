@@ -44,6 +44,47 @@ class Storefront::ProductFixedAttributesTest < ActionDispatch::IntegrationTest
     @red_variant.attribute_values << [@red, @medium]
   end
 
+  test "grid quick add shows bulk quantities and returns saved rows on partial failure" do
+    @org.update!(quick_add_enabled: true)
+    @product.update!(add_to_cart_mode: "grid")
+    get quick_add_product_path(org_slug: @org.slug, id: @product)
+    assert_response :success
+    assert_select '.quick-add-rows', count: 1
+    assert_select '.quantity-stepper input[value="0"]', count: 2
+    assert_select '.quick-add-bulk-footer button[disabled]', count: 1
+    assert_select 'input[name="quick_add"][value="1"]', count: 1
+    assert_select 'input[name=?]', "bulk_items[#{@variant.id}]", count: 1
+    assert_select 'textarea[name="order_item[note]"]', count: 1
+
+    post bulk_add_order_items_path(org_slug: @org.slug), params: {
+      product_id: @product.id, quick_add: "1", bulk_items: { @variant.id.to_s => "2", "0" => "1" },
+      order_item: { note: "Separar por tamanho" }
+    }, as: :json
+    assert_response :unprocessable_entity
+    assert_equal [@variant.id], response.parsed_body["added_variant_ids"]
+    assert_equal 1, response.parsed_body["cart_count"]
+    item = @customer_user.current_cart(@org).order_items.find_by!(product_variant: @variant)
+    assert_equal 2, item.quantity
+    assert_equal "Separar por tamanho", item.note
+
+    post bulk_add_order_items_path(org_slug: @org.slug), params: {
+      product_id: @product.id, quick_add: "1", bulk_items: { @red_variant.id.to_s => "3" }
+    }, as: :json
+    assert_response :success
+    assert_equal [@red_variant.id], response.parsed_body["added_variant_ids"]
+    assert_equal 2, response.parsed_body["cart_count"]
+  end
+
+  test "quick add reuses variant choices and fixed attributes" do
+    @org.update!(quick_add_enabled: true)
+    get quick_add_product_path(org_slug: @org.slug, id: @product)
+    assert_response :success
+    assert_select 'input[data-single-attribute-value=?]', @medium.id.to_s, count: 1
+    assert_select 'select[data-variant-selector-target=select]', count: 1
+    assert_select 'textarea[name="order_item[note]"]', count: 1
+    assert_select '[data-controller~=variant-selector]', count: 1
+  end
+
   test "default mode shows shared size outside the selector and preserves automatic value" do
     get product_path(org_slug: @org.slug, id: @product.id)
     assert_response :success

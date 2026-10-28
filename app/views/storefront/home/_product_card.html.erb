@@ -1,4 +1,5 @@
-<%= link_to product_path(org_slug: params[:org_slug], id: product), class: "text-decoration-none" do %>
+<div class="product-tile">
+<%= link_to product_path(org_slug: params[:org_slug], id: product), class: "text-decoration-none product-tile-link" do %>
   <div class="card h-100 product-card">
     <% discount_info = product_discounts[product.id] if product_discounts %>
     <div class="product-card-image">
@@ -25,3 +26,7 @@
     </div>
   </div>
 <% end %>
+
+<%= render "storefront/shared/quick_add", product: product %>
+
+</div>

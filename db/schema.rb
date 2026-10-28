@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2026_10_08_130000) do
+ActiveRecord::Schema[7.1].define(version: 2026_10_28_121000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_trgm"
   enable_extension "plpgsql"
@@ -548,7 +548,7 @@ ActiveRecord::Schema[7.1].define(version: 2026_10_08_130000) do
     t.text "note"
     t.integer "local_stock_consumed", default: 0, null: false
     t.integer "auto_order_discount_amount_cents"
-    t.index ["order_id", "product_id", "product_variant_id"], name: "idx_order_items_order_product_variant", unique: true
+    t.index "order_id, product_id, product_variant_id, COALESCE(note, ''::text)", name: "idx_order_items_order_product_variant_note", unique: true
     t.index ["order_id"], name: "index_order_items_on_order_id"
     t.index ["product_id"], name: "index_order_items_on_product_id"
     t.index ["product_variant_id"], name: "index_order_items_on_product_variant_id"
@@ -708,6 +708,7 @@ ActiveRecord::Schema[7.1].define(version: 2026_10_08_130000) do
     t.string "shipping_mode", default: "fixed", null: false
     t.boolean "email_automation_enabled", default: true, null: false
     t.string "storefront_stock_display", default: "none", null: false
+    t.boolean "quick_add_enabled", default: false, null: false
     t.index ["custom_domain"], name: "index_organisations_on_custom_domain", unique: true, where: "(custom_domain IS NOT NULL)"
     t.index ["default_locale"], name: "index_organisations_on_default_locale"
     t.index ["slug"], name: "index_organisations_on_slug", unique: true
@@ -854,6 +855,7 @@ ActiveRecord::Schema[7.1].define(version: 2026_10_08_130000) do
     t.string "supplier"
     t.boolean "hide_sku_on_card", default: false, null: false
     t.bigint "variable_base_variant_id"
+    t.boolean "quick_add_enabled", default: true, null: false
     t.index ["category_id"], name: "index_products_on_category_id"
     t.index ["organisation_id", "external_id", "external_source"], name: "index_products_on_org_external_id_source", unique: true, where: "(external_id IS NOT NULL)"
     t.index ["organisation_id"], name: "index_products_on_organisation_id"

@@ -18,8 +18,9 @@ class Storefront::OrderItemsController < Storefront::BaseController
       @product.default_variant
     end
 
-    # Find existing order item by product + variant combination
-    @order_item = @order.order_items.find_by(product: @product, product_variant: @variant)
+    note = order_item_params[:note].to_s.strip.presence
+    @order_item = @order.order_items.where(product: @product, product_variant: @variant)
+                        .where(note: note ? note : [nil, ""]).first
 
     if @order_item
       @order_item.quantity += order_item_params[:quantity].to_i
@@ -28,7 +29,7 @@ class Storefront::OrderItemsController < Storefront::BaseController
       # to apply the effective discount from all sources (ProductDiscount,
       # CustomerDiscount, CustomerProductDiscount)
       @order_item = @order.order_items.build(
-        order_item_params.merge(product: @product, product_variant: @variant)
+        order_item_params.merge(product: @product, product_variant: @variant, note: note)
       )
     end
 
@@ -40,8 +41,16 @@ class Storefront::OrderItemsController < Storefront::BaseController
       product_path(org_slug: params[:org_slug], id: @product, **storefront_filter_params)
 
     if @order_item.save
+      if params[:quick_add] == "1"
+        render json: { message: t('storefront.cart.item_added'), cart_count: @order.order_items.count }
+        return
+      end
       redirect_to back_path, notice: t('storefront.cart.item_added')
     else
+      if params[:quick_add] == "1"
+        render json: { message: @order_item.errors.full_messages.join(", ") }, status: :unprocessable_entity
+        return
+      end
       redirect_to back_path, alert: @order_item.errors.full_messages.join(", ")
     end
   end
@@ -85,7 +94,9 @@ class Storefront::OrderItemsController < Storefront::BaseController
     bulk_items = params[:bulk_items].respond_to?(:each_pair) ? params[:bulk_items] : {}
 
     added = []
+    added_variant_ids = []
     failed = []
+    note = params.dig(:order_item, :note).to_s.strip.presence
 
     bulk_items.each_pair do |variant_id, raw_qty|
       qty = raw_qty.to_i
@@ -99,18 +110,32 @@ class Storefront::OrderItemsController < Storefront::BaseController
         next
       end
 
-      item = @order.order_items.find_by(product: @product, product_variant: variant)
+      item = @order.order_items.where(note: note || [nil, ""]).find_by(product: @product, product_variant: variant)
       if item
         item.quantity += qty
       else
-        item = @order.order_items.build(product: @product, product_variant: variant, quantity: qty)
+        item = @order.order_items.build(product: @product, product_variant: variant, quantity: qty, note: note)
       end
 
       if item.save
         added << label
+        added_variant_ids << variant.id
       else
         failed << "#{label} (#{item.errors.full_messages.join(', ')})"
       end
+    end
+
+    if params[:quick_add] == "1"
+      message = if failed.any?
+        t('storefront.cart.bulk_add.partial_failure', items: failed.to_sentence)
+      elsif added.empty?
+        t('storefront.cart.bulk_add.nothing_selected')
+      else
+        t('storefront.cart.bulk_add.added', count: added.size)
+      end
+      render json: { message: message, cart_count: @order.order_items.count, added_variant_ids: added_variant_ids },
+             status: (failed.any? || added.empty? ? :unprocessable_entity : :ok)
+      return
     end
 
     if added.empty? && failed.empty?
@@ -157,7 +182,7 @@ class Storefront::OrderItemsController < Storefront::BaseController
     end
 
     @order = current_cart
-    @order_item = @order.order_items.find_by(product: @product, product_variant: @variant)
+    @order_item = @order.order_items.where(note: [nil, ""]).find_by(product: @product, product_variant: @variant)
 
     if @order_item
       @order_item.quantity += 1
