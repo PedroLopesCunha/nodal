@@ -298,6 +298,11 @@
             </label>
           </div>
           <small class="text-muted d-block mb-3"><%= t('bo.settings.edit.show_product_sku_on_card_hint') %></small>
+          <div class="form-check form-switch mt-3">
+            <%= f.check_box :quick_add_enabled, class: "form-check-input", role: "switch" %>
+            <%= f.label :quick_add_enabled, t('quick_add.settings.organisation'), class: "form-check-label" %>
+          </div>
+          <small class="text-muted d-block mb-3"><%= t('quick_add.settings.organisation_hint') %></small>
 
           <div class="form-check form-switch">
             <%= f.check_box :show_product_min_quantity, class: "form-check-input", role: "switch" %>

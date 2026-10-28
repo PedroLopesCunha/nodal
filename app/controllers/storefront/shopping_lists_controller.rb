@@ -71,7 +71,7 @@ class Storefront::ShoppingListsController < Storefront::BaseController
         next
       end
 
-      existing = cart.order_items.find_by(product: product, product_variant: variant)
+      existing = cart.order_items.where(note: [nil, ""]).find_by(product: product, product_variant: variant)
       if existing
         existing.update!(quantity: existing.quantity + item.quantity)
       else

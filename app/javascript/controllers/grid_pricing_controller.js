@@ -99,7 +99,7 @@ export default class extends Controller {
   }
 
   setRowPrice(input, unit, base) {
-    const tr = input.closest("tr")
+    const tr = input.closest("tr, [data-grid-row]")
     if (!tr) return
     const priceEl = tr.querySelector("[data-grid-pricing-target='rowPrice']")
     const origEl = tr.querySelector("[data-grid-pricing-target='rowOriginal']")

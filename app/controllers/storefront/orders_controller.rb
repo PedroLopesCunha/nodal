@@ -94,7 +94,8 @@ class Storefront::OrdersController < Storefront::BaseController
         items_to_add[key] = {
           product: product,
           product_variant: variant,
-          quantity: item.quantity
+          quantity: item.quantity,
+          note: note
         }
       end
     end
@@ -139,14 +140,16 @@ class Storefront::OrdersController < Storefront::BaseController
       end
 
       # Check if product+variant already exists in cart
-      existing = cart.order_items.find_by(product: product, product_variant: variant)
+      note = item.note.to_s.strip.presence
+      existing = cart.order_items.where(note: note || [nil, ""]).find_by(product: product, product_variant: variant)
       if existing
         existing.update!(quantity: existing.quantity + item.quantity)
       else
         cart.order_items.create!(
           product: product,
           product_variant: variant,
-          quantity: item.quantity
+          quantity: item.quantity,
+          note: note
         )
       end
     end

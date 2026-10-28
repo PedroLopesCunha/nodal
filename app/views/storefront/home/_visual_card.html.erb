@@ -1,3 +1,4 @@
+<div class="product-tile product-tile--visual">
 <%#
   Unified card used in every home carousel.
 
@@ -56,3 +57,7 @@
     </div>
   </div>
 <% end %>
+
+<%= render "storefront/shared/quick_add", product: product if local_assigns[:product] %>
+
+</div>

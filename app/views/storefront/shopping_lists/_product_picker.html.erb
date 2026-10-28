@@ -65,7 +65,9 @@
                   <% elsif product.default_variant %>
                     <%= hidden_field_tag :variant_id, product.default_variant.id %>
                   <% end %>
-                  <%= number_field_tag "shopping_list_item[quantity]", 1, min: 1, class: "form-control form-control-sm text-center", style: "width: 55px;" %>
+                  <%= render layout: "storefront/shared/quantity_stepper" do %>
+                    <%= number_field_tag "shopping_list_item[quantity]", 1, min: 1, class: "form-control form-control-sm text-center", style: "width: 55px;" %>
+                  <% end %>
                   <button type="submit" class="btn btn-primary btn-sm">
                     <i class="fa-solid fa-plus"></i>
                   </button>

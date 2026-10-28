@@ -293,6 +293,10 @@ class Product < ApplicationRecord
 
   # True when the storefront should render the bulk-add grid instead of the
   # standard variant selector. Only meaningful for products with variants.
+  def quick_add_available?
+    organisation.quick_add_enabled? && quick_add_enabled? && !price_on_request?
+  end
+
   def grid_add_to_cart?
     add_to_cart_mode == "grid" && has_variants?
   end

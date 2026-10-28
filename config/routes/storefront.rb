@@ -32,6 +32,7 @@ scope module: :storefront do
   resource :contact, only: [:show]
   resources :products, only: [:index, :show] do
     get :autocomplete, on: :collection
+    get :quick_add, on: :member
   end
 
   # Cart (current draft order)

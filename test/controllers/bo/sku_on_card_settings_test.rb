@@ -18,6 +18,16 @@ class Bo::SkuOnCardSettingsTest < ActionDispatch::IntegrationTest
     sign_in @member
   end
 
+  test "quick add settings persist independently" do
+    assert_not @organisation.quick_add_enabled?
+    patch bo_settings_path(org_slug: @organisation.slug), params: { organisation: { quick_add_enabled: "1" } }
+    assert @organisation.reload.quick_add_enabled?
+    product = Product.create!(organisation: @organisation, name: "Quick Product", sku: "QP1")
+    assert product.quick_add_enabled?
+    patch bo_product_path(org_slug: @organisation.slug, id: product.id), params: { product: { quick_add_enabled: "0" } }
+    assert_not product.reload.quick_add_enabled?
+  end
+
   test "settings form persists the org-level show_product_sku_on_card toggle" do
     assert_not @organisation.show_product_sku_on_card, "should default off"
 

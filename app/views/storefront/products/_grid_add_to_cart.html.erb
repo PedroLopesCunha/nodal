@@ -43,13 +43,14 @@
          grid_pricing_scope_value: grid[:scope],
          grid_pricing_cart_summed_value: grid[:cart_summed],
          grid_pricing_currency_symbol_value: current_organisation.currency_symbol,
-         grid_pricing_product_pricing_outlet: "[data-controller~='product-pricing']"
+         grid_pricing_product_pricing_outlet: (local_assigns[:quick_add] ? "#quick-add-product-#{product.id} [data-controller~='product-pricing']" : "[data-controller~='product-pricing']")
        ) %>
   <% end %>
-  <div class="mb-4" <%= tag.attributes(data: wrapper_data) %>>
+  <div class="<%= local_assigns[:quick_add] ? 'quick-add-bulk' : 'mb-4' %>" <%= tag.attributes(data: wrapper_data) %>>
     <%= form_with url: bulk_add_order_items_path(org_slug: params[:org_slug]),
                   method: :post, local: true do |f| %>
       <%= hidden_field_tag :product_id, product.id %>
+      <%= hidden_field_tag :quick_add, "1" if local_assigns[:quick_add] %>
 
       <%# Carry the listing filters/page so the post-add redirect (and the
           "back to products" link) returns to where the customer came from. %>
@@ -71,8 +72,11 @@
         </p>
       <% end %>
 
+      <% if local_assigns[:quick_add] %>
+        <%= render "storefront/products/quick_add_rows", product: product, variants: visible_variants, attributes: grid_attributes, grid: grid, combined_counter: combined_counter %>
+      <% else %>
       <div class="table-responsive">
-        <table class="table align-middle mb-2">
+        <table class="table align-middle mb-2 <%= 'quick-add-grid' if local_assigns[:quick_add] %>">
           <thead class="table-light">
             <tr>
               <th class="align-middle">
@@ -103,19 +107,19 @@
                     <span class="badge bg-danger-subtle text-danger small mt-1"><%= t('storefront.carts.show.stock.out_of_stock') %></span>
                   <% end %>
                 </td>
-                <td class="text-muted small text-center align-middle"><%= variant.sku %></td>
+                <td class="text-muted small text-center align-middle quick-add-grid-sku"><%= variant.sku %></td>
                 <% if show_stock_column %>
-                  <td class="text-muted small text-center align-middle"><%= stock_display_label(variant) %></td>
+                  <td class="text-muted small text-center align-middle" data-label="<%= t('storefront.products.show.grid.stock') %>"><%= stock_display_label(variant) %></td>
                 <% end %>
                 <% if show_prices? %>
-                  <td class="text-center align-middle">
+                  <td class="text-center align-middle" data-label="<%= t('storefront.products.show.grid.price') %>">
                     <span class="text-decoration-line-through text-muted small d-block <%= 'd-none' unless discounted %>" data-grid-pricing-target="rowOriginal"><%= money_amount(calc.base_price) %></span>
                     <span class="<%= 'text-success fw-medium' if discounted %>" data-grid-pricing-target="rowPrice"><%= money_amount(calc.final_price) %></span>
                   </td>
                 <% end %>
                 <% if interactive %>
-                  <td class="text-center align-middle">
-                    <% input_data = { variant_id: variant.id } %>
+                  <td class="text-center align-middle" data-label="<%= t('storefront.products.show.grid.quantity') %>">
+                    <% input_data = { variant_id: variant.id, minimum: product.quantity_input_min } %>
                     <% input_data[:min_quantity_counter_target] = "input" if combined_counter %>
                     <% input_data[:grid_pricing_target] = "rowInput" if grid %>
                     <% acts = [] %>
@@ -124,7 +128,9 @@
                     <% input_data[:action] = acts.join(" ") if acts.any? %>
                     <% deferred_default = hidden && product.quantity_input_default.present? %>
                     <% input_data[:enable_on_expand] = true if deferred_default %>
-                    <%= number_field_tag "bulk_items[#{variant.id}]", product.quantity_input_default, min: 0, disabled: deferred_default, class: "form-control text-center mx-auto d-block", style: "width: 100px;", data: input_data %>
+                    <%= render layout: "storefront/shared/quantity_stepper" do %>
+                      <%= number_field_tag "bulk_items[#{variant.id}]", product.quantity_input_default, min: 0, disabled: deferred_default, class: "form-control text-center mx-auto d-block", style: "width: 100px;", data: input_data %>
+                    <% end %>
                   </td>
                 <% end %>
               </tr>
@@ -149,9 +155,11 @@
       <% end %>
 
       <% if interactive %>
+        <%= render "storefront/products/quick_add_note" if local_assigns[:quick_add] %>
         <button type="submit" class="btn btn-primary btn-lg w-100 mt-2" style="border-radius: 8px;">
           <i class="fa-solid fa-cart-plus me-2"></i><%= t('storefront.products.show.grid.add_to_cart') %><span data-grid-pricing-target="buttonTotal"></span>
         </button>
+      <% end %>
       <% end %>
     <% end %>
   </div>

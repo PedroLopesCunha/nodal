@@ -113,7 +113,9 @@
                   </td>
                   <td>
                     <%= form_with model: item, url: order_item_path(org_slug: params[:org_slug], id: item), method: :patch, local: true, class: "d-flex justify-content-center", data: { controller: "cart-quantity" } do |f| %>
-                      <%= f.number_field :quantity, min: item.product.quantity_input_min, class: "form-control text-center", style: "width: 70px;", data: { cart_quantity_target: "input", action: "change->cart-quantity#submit" } %>
+                      <%= render layout: "storefront/shared/quantity_stepper" do %>
+                        <%= f.number_field :quantity, min: item.product.quantity_input_min, class: "form-control text-center", style: "width: 70px;", data: { cart_quantity_target: "input", action: "change->cart-quantity#submit" } %>
+                      <% end %>
                     <% end %>
                   </td>
                   <% if show_prices? %>
@@ -160,18 +162,9 @@
                   </div>
                   <%# Inline quantity controls %>
                   <%= form_with model: item, url: order_item_path(org_slug: params[:org_slug], id: item), method: :patch, local: true, class: "flex-shrink-0", data: { controller: "cart-quantity" } do |f| %>
-                    <div class="input-group cart-quantity-group cart-quantity-group-compact">
-                      <button type="button" class="btn btn-outline-secondary cart-quantity-btn cart-quantity-btn-compact" data-action="cart-quantity#decrement" aria-label="<%= t('storefront.carts.show.decrease_quantity') %>">
-                        <i class="fa-solid fa-minus" style="font-size: 0.65rem;"></i>
-                      </button>
-                      <%= f.number_field :quantity,
-                          min: item.product.quantity_input_min,
-                          class: "form-control text-center cart-quantity-input cart-quantity-input-compact",
-                          data: { cart_quantity_target: "input", action: "change->cart-quantity#submit" } %>
-                      <button type="button" class="btn btn-outline-secondary cart-quantity-btn cart-quantity-btn-compact" data-action="cart-quantity#increment" aria-label="<%= t('storefront.carts.show.increase_quantity') %>">
-                        <i class="fa-solid fa-plus" style="font-size: 0.65rem;"></i>
-                      </button>
-                    </div>
+                    <%= render layout: "storefront/shared/quantity_stepper" do %>
+                      <%= f.number_field :quantity, min: item.product.quantity_input_min, class: "form-control text-center", data: { cart_quantity_target: "input", action: "change->cart-quantity#submit" } %>
+                    <% end %>
                   <% end %>
                 </div>
 
