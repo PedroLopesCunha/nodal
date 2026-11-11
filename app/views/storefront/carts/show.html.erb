@@ -266,11 +266,13 @@
               </div>
             <% end %>
 
+            <%= render 'storefront/shared/erp_customer_discount', order: @order, cart: true %>
+
             <hr>
 
             <div class="d-flex justify-content-between mb-4">
               <span class="fw-bold"><%= t('storefront.checkouts.show.summary.total') %></span>
-              <span class="fw-bold fs-5"><%= money_amount(@order.total_with_auto_discount) %></span>
+              <span class="fw-bold fs-5"><%= money_amount(@order.cart_subtotal) %></span>
             </div>
 
             <%= render 'storefront/carts/free_shipping_progress' %>
@@ -333,7 +335,7 @@
     <div class="d-flex justify-content-between align-items-center mb-2">
       <span class="text-muted small"><%= t('storefront.common.items', count: @order.item_count) %></span>
       <% if show_prices? %>
-        <span class="fw-bold fs-5"><%= money_amount(@order.total_with_auto_discount) %></span>
+        <span class="fw-bold fs-5"><%= money_amount(@order.cart_subtotal) %></span>
       <% end %>
     </div>
     <%= link_to checkout_path(org_slug: params[:org_slug]), class: "btn btn-primary w-100" do %>

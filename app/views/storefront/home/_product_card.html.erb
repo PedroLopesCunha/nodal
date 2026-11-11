@@ -11,13 +11,13 @@
       <% end %>
     </div>
     <div class="card-body">
-      <% if product.primary_category&.name.present? %>
+      <% if current_organisation.show_product_category_on_card? && product.primary_category&.name.present? %>
         <span class="product-card-category"><%= product.primary_category.name %></span>
       <% end %>
       <h6 class="product-card-title mb-0"><%= product.name %></h6>
     </div>
     <div class="card-footer">
-      <div class="d-flex justify-content-between align-items-center">
+      <div class="product-card-price-row">
         <% if show_prices? %>
           <%= render "storefront/shared/product_card_price", product: product, discount_info: discount_info %>
         <% end %>

@@ -1,0 +1,9 @@
+<span class="product-card-price-range">
+  <% if local_assigns[:show_from] && maximum != minimum %>
+    <span class="product-card-price-from"><%= t('storefront.card_pricing.from') %></span>
+  <% end %>
+  <span class="product-card-price-amount"><%= money_amount(minimum) %></span>
+  <% if maximum != minimum %>
+    <span class="product-card-price-amount product-card-price-upper">– <%= money_amount(maximum) %></span>
+  <% end %>
+</span>

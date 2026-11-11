@@ -10,6 +10,7 @@ export default class extends Controller {
     ]
     static values = {
         subtotal: Number,
+        freeShippingSubtotal: Number,
         tax: Number,
         shippingCost: Number,
         currencySymbol: String,
@@ -33,7 +34,7 @@ export default class extends Controller {
     qualifiesForFreeShipping() {
         return this.freeShippingEnabledValue &&
                this.freeShippingThresholdValue > 0 &&
-               this.subtotalValue >= this.freeShippingThresholdValue
+               (this.hasFreeShippingSubtotalValue ? this.freeShippingSubtotalValue : this.subtotalValue) >= this.freeShippingThresholdValue
     }
 
     // Mirrors Order#deferred_shipping? — pickup and free shipping are settled

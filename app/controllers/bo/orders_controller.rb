@@ -53,6 +53,7 @@ class Bo::OrdersController < Bo::BaseController
     quantity = params[:quantity].presence&.to_i || 1
 
     discount = DiscountCalculator.new(
+      include_erp_discount: false,
       product: variant.product,
       customer: customer,
       quantity: quantity,

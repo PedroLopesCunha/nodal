@@ -1,0 +1,12 @@
+pt:
+  storefront:
+    card_pricing:
+      from: "Desde"
+en:
+  storefront:
+    card_pricing:
+      from: "From"
+es:
+  storefront:
+    card_pricing:
+      from: "Desde"

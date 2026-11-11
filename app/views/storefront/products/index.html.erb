@@ -349,9 +349,12 @@
                 </div>
                 <div class="card-body">
                   <% show_card_sku = product.show_sku_on_card? && product.sku.present? %>
-                  <% if product.primary_category&.name.present? || show_card_sku %>
+                  <% show_card_category = current_organisation.show_product_category_on_card? && product.primary_category&.name.present? %>
+                  <% if show_card_category || show_card_sku %>
                     <div class="d-flex justify-content-between align-items-center gap-2">
-                      <span class="product-card-category"><%= product.primary_category&.name %></span>
+                      <% if show_card_category %>
+                        <span class="product-card-category"><%= product.primary_category.name %></span>
+                      <% end %>
                       <% if show_card_sku %>
                         <span class="product-card-sku text-muted small text-nowrap ms-auto">SKU: <%= product.sku %></span>
                       <% end %>
@@ -380,7 +383,7 @@
                   <% end %>
                 </div>
                 <div class="card-footer">
-                  <div class="d-flex justify-content-between align-items-center">
+                  <div class="product-card-price-row">
                     <% if show_prices? %>
                       <%= render "storefront/shared/product_card_price", product: product, discount_info: discount_info %>
                     <% end %>

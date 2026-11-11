@@ -104,8 +104,12 @@
         </div>
         <% end %>
 
+        <% if show_prices? && !@product.price_on_request? && current_customer&.erp_discount_percentage.to_d.positive? %>
+          <p class="small text-muted mb-3"><em><%= t('erp_discount.included', percentage: number_to_percentage(current_customer.erp_discount_percentage, precision: 4, strip_insignificant_zeros: true)) %></em></p>
+        <% end %>
+
         <!-- Discount Details Section -->
-        <% if show_prices? && discount_breakdown[:has_discount] && !@product.price_on_request? %>
+        <% if show_prices? && discount_breakdown[:applied_discounts].any? && !@product.price_on_request? %>
           <div class="alert alert-success mb-4" style="border-radius: 10px;">
             <h6 class="alert-heading mb-3">
               <i class="fa-solid fa-tags me-2"></i><%= t('storefront.products.show.available_discounts') %>

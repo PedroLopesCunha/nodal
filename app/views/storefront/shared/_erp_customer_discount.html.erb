@@ -1,0 +1,7 @@
+<% amount = local_assigns[:cart] ? order.cart_erp_discount_amount : order.erp_discount_amount %>
+<% if order.erp_discount_rate.positive? %>
+  <div class="d-flex justify-content-between mb-2 text-success">
+    <span><%= t('erp_discount.label') %> (<%= format_discount_percentage(order.erp_discount_rate) %>)</span>
+    <span class="text-nowrap">-<%= money_amount(amount) %></span>
+  </div>
+<% end %>

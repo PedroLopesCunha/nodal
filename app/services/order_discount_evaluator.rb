@@ -60,7 +60,7 @@ class OrderDiscountEvaluator
     return false unless discount.stackable?
     return true if (item.price * item.quantity - item.total_price).zero?
     unless @line_stackable.key?(item.id)
-      applied = DiscountCalculator.new(product: item.product, customer: @order.customer,
+      applied = DiscountCalculator.new(include_erp_discount: false, product: item.product, customer: @order.customer,
         quantity: item.quantity, variant: item.product_variant, cart_context: @context).applied_discounts
       # Compare against the complete existing line price. A bundle can accumulate
       # only when every contributing rule consents; unattributed prices are exclusive.

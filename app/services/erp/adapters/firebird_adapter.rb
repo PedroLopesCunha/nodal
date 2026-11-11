@@ -437,6 +437,7 @@ module Erp
 
         {
           external_id: get_mapped_value(row, mappings, :external_id)&.to_s,
+          erp_discount_percentage: (parse_customer_discount(get_mapped_value(row, mappings, :erp_discount_percentage)) if mappings[:erp_discount_percentage].present?),
           company_name: get_mapped_value(row, mappings, :company_name),
           contact_name: get_mapped_value(row, mappings, :contact_name),
           email: get_mapped_value(row, mappings, :email),

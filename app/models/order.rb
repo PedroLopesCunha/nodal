@@ -43,10 +43,12 @@ class Order < ApplicationRecord
   validates :delivery_method, inclusion: { in: DELIVERY_METHODS }, allow_nil: true
   validates :discount_type, inclusion: { in: DISCOUNT_TYPES }, allow_nil: true
   validates :push_status, inclusion: { in: PUSH_STATUSES }
+  validates :erp_discount_percentage, numericality: { greater_than_or_equal_to: 0, less_than_or_equal_to: 100 }
   validates :discount_value, numericality: { greater_than: 0 }, allow_nil: true
   validate :discount_value_valid_for_type
 
   before_validation :generate_order_number, on: :create
+  before_validation :snapshot_erp_discount
   before_validation :update_tax, on: :update
   around_save :manage_local_stock
   around_destroy :restore_local_stock, prepend: true
@@ -214,6 +216,12 @@ class Order < ApplicationRecord
       end
       item.refresh_base_price!
       remaining << item
+    end
+
+    current_erp_discount = customer&.erp_discount_percentage || 0
+    if erp_discount_percentage != current_erp_discount
+      changes[:discount_changed].concat(remaining.map(&:id))
+      update_column(:erp_discount_percentage, current_erp_discount)
     end
 
     cart_context = CartDiscountContext.new(remaining)
@@ -487,13 +495,13 @@ class Order < ApplicationRecord
 
   def qualifies_for_free_shipping?
     return false unless organisation.free_shipping_enabled?
-    total_with_auto_discount >= organisation.free_shipping_threshold
+    cart_subtotal >= organisation.free_shipping_threshold
   end
 
   def free_shipping_amount_remaining
     return nil unless organisation.free_shipping_enabled?
     return Money.new(0, organisation.currency) if qualifies_for_free_shipping?
-    organisation.free_shipping_threshold - total_with_auto_discount
+    organisation.free_shipping_threshold - cart_subtotal
   end
 
   # Order discount methods
@@ -523,8 +531,38 @@ class Order < ApplicationRecord
     order_items.sum { |i| i.price * i.quantity }
   end
 
-  def subtotal_after_discount
+  # ERP discount is applied after Nodal's rules and cap. Never feed it back
+  # into promotion qualification, stacking, or the price exported to ERP.
+  def erp_discount_rate
+    (placed? ? erp_discount_percentage : customer&.erp_discount_percentage).to_d / 100
+  end
+
+  def nodal_subtotal_after_discount
     cap_subtotal(raw_subtotal_after_discount)
+  end
+
+  def erp_discount_amount
+    return Money.new(0, organisation.currency) if erp_discount_rate.zero?
+
+    # Match ERP rounding per line, including allocated order-wide adjustments.
+    totals = OrderLinePricing.new(self, include_erp_discount: false).export_totals
+    totals.values.sum(Money.new(0, organisation.currency)) do |cents|
+      Money.new(cents, organisation.currency) * erp_discount_rate
+    end
+  end
+
+  def subtotal_after_discount
+    nodal_subtotal_after_discount - erp_discount_amount
+  end
+
+  def cart_erp_discount_amount
+    total_with_auto_discount - cart_subtotal
+  end
+
+  def cart_subtotal
+    # Round per line, exactly as the cart's displayed line totals do.
+    pricing = OrderLinePricing.new(self)
+    order_items.sum(Money.new(0, organisation.currency)) { |item| pricing.line(item).total }
   end
 
   # True when the org's maximum-discount cap actually reduced the total discount.
@@ -665,6 +703,12 @@ class Order < ApplicationRecord
     timestamp = Time.current.strftime("%Y%m%d%H%M%S")
     sequence = organisation.orders.count + 1
     self.order_number = "#{organisation.slug.upcase}-#{timestamp}-#{sequence.to_s.rjust(4, '0')}"
+  end
+
+  def snapshot_erp_discount
+    if will_save_change_to_placed_at? && placed_at.present?
+      self.erp_discount_percentage = customer&.erp_discount_percentage || 0
+    end
   end
 
   def update_tax

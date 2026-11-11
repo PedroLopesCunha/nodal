@@ -91,7 +91,7 @@ module Erp
     def serialize_order
       items = @order.order_items.includes(:product, :product_variant).to_a
       validate_campaign_allocations!(items)
-      @line_pricing = OrderLinePricing.new(@order)
+      @line_pricing = OrderLinePricing.new(@order, include_erp_discount: false)
       {
         idempotency_key: idempotency_key,
         customer_external_id: @order.customer.external_id,
@@ -102,9 +102,9 @@ module Erp
     end
 
     def serialize_item(item)
-      # Use the recorded line total, including the saved campaign allocation.
+      # Use Nodal-only totals, including saved campaigns and order adjustments.
       # Money division would round each unit to cents and lose fixed allocations.
-      total_cents = @line_pricing.line(item).total.cents
+      total_cents = @line_pricing.export_totals.fetch(item.id)
       net_unit_price = (BigDecimal(total_cents.to_s) / 100 / item.quantity).round(4)
       # Reject half-cent boundaries too: ERP rounding modes may differ there.
       unless (net_unit_price * item.quantity * 100 - total_cents).abs < BigDecimal('0.5')

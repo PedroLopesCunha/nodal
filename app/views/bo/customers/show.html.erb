@@ -165,6 +165,10 @@
               <small class="text-muted d-block"><%= t('bo.customers.show.member_since') %></small>
               <span><%= l(@customer.created_at.to_date, format: :short) %></span>
             </div>
+            <div class="col-md-6 mt-3" data-customer-erp-discount>
+              <small class="text-muted d-block"><%= t('erp_discount.admin_label') %></small>
+              <span><%= number_to_percentage(@customer.erp_discount_percentage, precision: 4, strip_insignificant_zeros: true) %></span>
+            </div>
             <% if @customer.external_id.present? && !@customer.synced_from_erp? %>
               <div class="col-md-6 mt-3">
                 <small class="text-muted d-block"><%= t('bo.erp_sync.external_id') %></small>

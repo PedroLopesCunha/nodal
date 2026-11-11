@@ -1,0 +1,15 @@
+pt:
+  erp_discount:
+    included: "O seu desconto de cliente de %{percentage} já está incluído."
+    label: "Desconto de cliente"
+    admin_label: "Desconto ERP"
+en:
+  erp_discount:
+    included: "Your %{percentage} customer discount is included."
+    label: "Customer discount"
+    admin_label: "ERP discount"
+es:
+  erp_discount:
+    included: "Su descuento de cliente del %{percentage} ya está incluido."
+    label: "Descuento de cliente"
+    admin_label: "Descuento ERP"

@@ -32,6 +32,7 @@ class Customer < ApplicationRecord
   has_many :promo_code_redemptions, dependent: :destroy
   has_many :email_logs, dependent: :nullify
 
+  validates :erp_discount_percentage, numericality: { greater_than_or_equal_to: 0, less_than_or_equal_to: 100 }
   validates :company_name, presence: true
   validates :contact_name, presence: true
   validates :active, inclusion: { in: [true, false] }

@@ -112,6 +112,8 @@
                 <span>-<%= money_amount(@order.promo_code_discount) %></span>
               </div>
             <% end %>
+            <%= render 'storefront/shared/erp_customer_discount', order: @order %>
+
             <% if @order.tax_amount.present? %>
               <div class="d-flex justify-content-between mb-2">
                 <span class="text-muted"><%= t('storefront.orders.show.summary.tax') %></span>

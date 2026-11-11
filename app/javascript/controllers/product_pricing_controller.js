@@ -95,7 +95,7 @@ export default class extends Controller {
     if (this.hasTotalTarget) this.totalTarget.textContent = ` · ${this.formatPrice(unit * qty)}`
     if (this.hasDiscountNoteTarget) {
       const discounted = unit < this.baseUnitCentsValue
-      this.discountNoteTarget.textContent = discounted
+      this.discountNoteTarget.textContent = discounted && this.discountLabelValue
         ? this.discountAppliedTemplateValue.replace("%{discount}", this.discountLabelValue)
         : ""
     }

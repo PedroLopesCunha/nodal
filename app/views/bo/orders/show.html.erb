@@ -147,6 +147,8 @@
               </div>
             <% end %>
 
+            <%= render 'storefront/shared/erp_customer_discount', order: @order %>
+
             <div class="d-flex justify-content-between mb-2">
               <span class="text-muted"><%= t('bo.common.tax') %> (<%= (@current_organisation.tax_rate * 100).round(1) %>%)</span>
               <span><%= humanized_money_with_symbol(@order.tax_amount || @order.calculated_tax) %></span>
