@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2026_10_28_121000) do
+ActiveRecord::Schema[7.1].define(version: 2026_11_11_130000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_trgm"
   enable_extension "plpgsql"
@@ -324,6 +324,7 @@ ActiveRecord::Schema[7.1].define(version: 2026_10_28_121000) do
     t.boolean "hide_prices", default: false, null: false
     t.bigint "created_by_member_id"
     t.boolean "sees_stock_quantities", default: false, null: false
+    t.decimal "erp_discount_percentage", precision: 7, scale: 4, default: "0.0", null: false
     t.index ["created_by_member_id"], name: "index_customers_on_created_by_member_id"
     t.index ["customer_category_id"], name: "index_customers_on_customer_category_id"
     t.index ["email", "organisation_id"], name: "index_customers_on_email_and_organisation_id", unique: true, where: "((email)::text <> ''::text)"
@@ -336,6 +337,7 @@ ActiveRecord::Schema[7.1].define(version: 2026_10_28_121000) do
     t.index ["organisation_id", "taxpayer_id"], name: "index_customers_on_org_id_taxpayer_id_unique", unique: true, where: "((taxpayer_id IS NOT NULL) AND ((taxpayer_id)::text <> ''::text))"
     t.index ["organisation_id"], name: "index_customers_on_organisation_id"
     t.index ["reset_password_token"], name: "index_customers_on_reset_password_token", unique: true
+    t.check_constraint "erp_discount_percentage >= 0::numeric AND erp_discount_percentage <= 100::numeric", name: "customers_erp_discount_range"
   end
 
   create_table "discount_category_scope_categories", force: :cascade do |t|
@@ -599,6 +601,7 @@ ActiveRecord::Schema[7.1].define(version: 2026_10_28_121000) do
     t.datetime "pricing_changed_at"
     t.boolean "shipping_pending", default: false, null: false
     t.jsonb "auto_discount_scope_snapshot"
+    t.decimal "erp_discount_percentage", precision: 7, scale: 4, default: "0.0", null: false
     t.index ["applied_by_id"], name: "index_orders_on_applied_by_id"
     t.index ["billing_address_id"], name: "index_orders_on_billing_address_id"
     t.index ["customer_id"], name: "index_orders_on_customer_id"
@@ -614,6 +617,7 @@ ActiveRecord::Schema[7.1].define(version: 2026_10_28_121000) do
     t.index ["promo_code_id"], name: "index_orders_on_promo_code_id"
     t.index ["sales_rep_id"], name: "index_orders_on_sales_rep_id"
     t.index ["shipping_address_id"], name: "index_orders_on_shipping_address_id"
+    t.check_constraint "erp_discount_percentage >= 0::numeric AND erp_discount_percentage <= 100::numeric", name: "orders_erp_discount_range"
   end
 
   create_table "org_members", force: :cascade do |t|
@@ -709,6 +713,7 @@ ActiveRecord::Schema[7.1].define(version: 2026_10_28_121000) do
     t.boolean "email_automation_enabled", default: true, null: false
     t.string "storefront_stock_display", default: "none", null: false
     t.boolean "quick_add_enabled", default: false, null: false
+    t.boolean "show_product_category_on_card", default: true, null: false
     t.index ["custom_domain"], name: "index_organisations_on_custom_domain", unique: true, where: "(custom_domain IS NOT NULL)"
     t.index ["default_locale"], name: "index_organisations_on_default_locale"
     t.index ["slug"], name: "index_organisations_on_slug", unique: true

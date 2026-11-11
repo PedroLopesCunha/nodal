@@ -6,7 +6,8 @@
 
 <div class="row g-4"
      data-controller="checkout"
-     data-checkout-subtotal-value="<%= @order.total_with_auto_discount.cents %>"
+     data-checkout-subtotal-value="<%= @order.subtotal_after_discount.cents %>"
+     data-checkout-free-shipping-subtotal-value="<%= @order.cart_subtotal.cents %>"
      data-checkout-tax-value="<%= @order.calculated_tax.cents %>"
      data-checkout-shipping-cost-value="<%= @current_organisation.shipping_cost.cents %>"
      data-checkout-currency-symbol-value="<%= @current_organisation.currency_symbol %>"
@@ -381,6 +382,8 @@
               <i class="fa-solid fa-shield-halved me-1"></i><%= t('storefront.carts.show.max_discount_applied', percentage: number_to_percentage(@current_organisation.max_discount_percentage * 100, precision: 0)) %>
             </div>
           <% end %>
+
+            <%= render 'storefront/shared/erp_customer_discount', order: @order %>
 
           <div class="d-flex justify-content-between mb-2">
             <span class="text-muted"><%= t('storefront.checkouts.show.summary.tax') %> (<%= (@current_organisation.tax_rate * 100).round(1) %>%)</span>

@@ -239,6 +239,7 @@ module Erp
       end
 
       def update_customer_attributes(customer, data, _is_new)
+        customer.erp_discount_percentage = data[:erp_discount_percentage] if data.key?(:erp_discount_percentage)
         customer.assign_attributes(
           company_name: data[:company_name],
           contact_name: data[:contact_name],

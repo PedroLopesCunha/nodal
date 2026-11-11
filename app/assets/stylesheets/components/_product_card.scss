@@ -20,6 +20,49 @@
   text-decoration: line-through;
 }
 
+// Stack old/new prices and let a range wrap between complete amounts.
+// The unit moves below the price when the card is too narrow.
+.product-card-price-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 0.25rem 0.75rem;
+}
+
+.product-card-prices {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  min-width: 0;
+  max-width: 100%;
+  flex: 1 1 auto;
+  line-height: 1.35;
+}
+
+.product-card-price-range {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.1rem 0.3rem;
+}
+
+.product-card-price-from {
+  display: none;
+  font-size: 0.85em;
+  font-weight: 500;
+}
+
+.product-card-price-amount {
+  white-space: nowrap;
+}
+
+.product-card-price-row > .product-card-unit {
+  flex: 0 1 auto;
+  max-width: 100%;
+  overflow-wrap: anywhere;
+}
+
 .product-card {
   border: 1px solid rgba(0, 0, 0, 0.06);
   border-radius: 12px;
@@ -189,6 +232,15 @@
 
 // Mobile product card refinements
 @media (max-width: 575.98px) {
+  // A minimum price communicates the range without four stacked lines.
+  .product-card-price-upper {
+    display: none;
+  }
+
+  .product-card-price-from {
+    display: inline;
+  }
+
   .product-card {
     border-radius: 8px;
 
@@ -208,7 +260,8 @@
       font-size: 0.6rem;
     }
 
-    .product-card-price {
+    .product-card-price,
+    .product-card-price-discounted {
       font-size: 0.85rem;
     }
 

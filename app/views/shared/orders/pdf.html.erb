@@ -192,6 +192,13 @@
       </div>
     <% end %>
 
+    <% if @order.erp_discount_rate.positive? %>
+      <div class="summary-row discount">
+        <span><%= t('erp_discount.label') %> (<%= format_discount_percentage(@order.erp_discount_rate) %>)</span>
+        <span>-<%= humanized_money_with_symbol(@order.erp_discount_amount) %></span>
+      </div>
+    <% end %>
+
     <div class="summary-row">
       <span class="text-muted"><%= t('storefront.orders.pdf.tax') %> (<%= (@order.organisation.tax_rate * 100).round(1) %>%)</span>
       <span><%= humanized_money_with_symbol(@order.tax_amount || @order.calculated_tax) %></span>

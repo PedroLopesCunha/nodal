@@ -180,6 +180,7 @@ module Erp
 
         {
           external_id: get_mapped_value(item, mappings, :external_id, ['id'])&.to_s,
+          erp_discount_percentage: (parse_customer_discount(get_mapped_value(item, mappings, :erp_discount_percentage, [])) if mappings[:erp_discount_percentage].present?),
           company_name: get_mapped_value(item, mappings, :company_name, ['company_name', 'company', 'name']),
           contact_name: get_mapped_value(item, mappings, :contact_name, ['contact_name', 'contact', 'primary_contact']),
           email: get_mapped_value(item, mappings, :email, ['email', 'contact_email']),

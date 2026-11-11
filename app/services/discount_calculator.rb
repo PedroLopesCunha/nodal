@@ -4,13 +4,14 @@ class DiscountCalculator
   # for_display: true - shows all available discounts (ignoring min_quantity) for product pages
   # for_display: false - only shows applicable discounts (respecting min_quantity) for cart/checkout
   # variant: optional ProductVariant - if provided, uses variant price as base price
-  def initialize(product:, customer: nil, quantity: 1, for_display: false, variant: nil, cart_context: nil)
+  def initialize(product:, customer: nil, quantity: 1, for_display: false, variant: nil, cart_context: nil, include_erp_discount: true)
     @product = product
     @customer = customer
     @quantity = quantity
     @for_display = for_display
     @variant = variant || pick_reference_variant
     @cart_context = cart_context
+    @include_erp_discount = include_erp_discount
   end
 
   # Returns all applicable discounts with metadata
@@ -20,7 +21,17 @@ class DiscountCalculator
 
   # Returns the effective discount after applying stacking rules
   def effective_discount
-    @effective_discount ||= calculate_effective_discount
+    @effective_discount ||= begin
+      internal = calculate_effective_discount
+      if erp_discount_rate.positive?
+        internal_price = apply_discount(base_price, internal)
+        final = internal_price - internal_price * erp_discount_rate
+        saved = base_price - final
+        internal.merge(savings: saved, percentage: base_price.zero? ? 0 : (saved.to_d / base_price.to_d).round(4))
+      else
+        internal
+      end
+    end
   end
 
   # Returns the base price (variant price if available, otherwise product price)
@@ -70,16 +81,19 @@ class DiscountCalculator
       effective_discount: effective_discount,
       final_price: final_price,
       savings: savings,
-      has_discount: all_discounts.any?,
+      has_discount: all_discounts.any? || erp_discount_rate.positive?,
+      erp_discount_percentage: erp_discount_rate * 100,
       variant: variant
     }
   end
 
   private
 
-  # Evaluates a discount's condition. For a "summed" condition the threshold is
-  # checked against the cart-wide total for the discount's target (a product's
-  # variants, or all products in a category); otherwise against this line.
+  def erp_discount_rate
+    @include_erp_discount ? customer&.erp_discount_percentage.to_d / 100 : BigDecimal('0')
+  end
+
+  # Conditions use original prices; the ERP discount never changes eligibility.
   def meets_condition?(source)
     qty, amount = condition_inputs(source)
     source.condition_met?(quantity: qty, line_amount_cents: amount)

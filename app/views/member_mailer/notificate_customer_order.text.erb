@@ -33,7 +33,7 @@ PLACED BY
 ITEMS
 -----
 <% @order.order_items.each do |item| %>
-- <%= item.product.name %> x<%= item.quantity %> @ <%= humanized_money_with_symbol(item.price) %> = <%= humanized_money_with_symbol(item.total_price) %>
+- <%= item.product.name %> x<%= item.quantity %> @ <%= humanized_money_with_symbol(item.price) %> = <%= humanized_money_with_symbol(OrderLinePricing.new(@order).line(item).total) %>
 <% if item.note.present? %>  <%= t('orders.item_note_label') %>: <%= item.note %>
 <% end %><% end %>
 
@@ -50,6 +50,9 @@ humanized_money_with_symbol(@order.order_discount_amount) %>
 <% end %>
 <% if @order.has_promo_code? && @order.promo_code_discount.positive? %>
 Promo Code (<%= @order.promo_code.code %>): -<%= humanized_money_with_symbol(@order.promo_code_discount) %>
+<% end %>
+<% if @order.erp_discount_rate.positive? %>
+<%= t('erp_discount.label') %> (<%= (@order.erp_discount_rate * 100).to_f %>%): -<%= @order.erp_discount_amount.format %>
 <% end %>
 Tax: <%= humanized_money_with_symbol(@order.tax_amount || @order.calculated_tax) %>
 <% if @order.shipping_pending? %>

@@ -1,0 +1,18 @@
+pt:
+  bo:
+    settings:
+      edit:
+        show_product_category_on_card: "Mostrar categoria nos cards de produto"
+        show_product_category_on_card_hint: "Apresentar o nome da categoria nos cards do catálogo, da página inicial e dos produtos relacionados."
+en:
+  bo:
+    settings:
+      edit:
+        show_product_category_on_card: "Show category on product cards"
+        show_product_category_on_card_hint: "Display the category name on catalogue, home page and related product cards."
+es:
+  bo:
+    settings:
+      edit:
+        show_product_category_on_card: "Mostrar categoría en las tarjetas de producto"
+        show_product_category_on_card_hint: "Mostrar el nombre de la categoría en las tarjetas del catálogo, la página de inicio y los productos relacionados."

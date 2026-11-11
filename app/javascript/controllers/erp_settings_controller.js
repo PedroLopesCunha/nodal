@@ -41,6 +41,7 @@ export default class extends Controller {
   ]
 
   static customerFields = [
+    { key: 'erp_discount_percentage', label: 'Desconto ERP (%)', required: false, description: 'Percentagem aplicada pelo ERP: 20 significa 20%. Incluída nos preços da loja, excluída do push.' },
     { key: 'external_id', label: 'External ID', required: true, description: "ERP's unique identifier" },
     { key: 'company_name', label: 'Company Name', required: true, description: 'Company/business name' },
     { key: 'contact_name', label: 'Contact Name', required: true, description: 'Primary contact person' },

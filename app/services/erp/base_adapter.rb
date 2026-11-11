@@ -59,6 +59,18 @@ module Erp
 
     protected
 
+    # A missing field means the integration does not own the discount. An
+    # explicitly mapped NULL/blank clears it. Reject malformed values rather
+    # than silently changing a commercial condition to zero.
+    def parse_customer_discount(value)
+      return BigDecimal('0') if value.blank?
+
+      decimal = BigDecimal(value.to_s.strip.tr(',', '.'))
+      raise ArgumentError, 'Customer ERP discount must be between 0 and 100' unless decimal.finite? && decimal.between?(0, 100)
+      raise ArgumentError, 'Customer ERP discount supports at most 4 decimal places' unless decimal == decimal.round(4)
+      decimal
+    end
+
     def http_client
       @http_client ||= build_http_client
     end

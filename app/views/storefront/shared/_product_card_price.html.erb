@@ -1,53 +1,28 @@
-<%#
-  Renders the price section of a product card, handling:
-    - price on request
-    - simple product with discount
-    - variable product with discount (range strikethrough → discounted range)
-    - variable product without discount (range)
-    - simple product without discount
-
-  Discount/promotion badges live in storefront/shared/product_card_badges
-  and are overlaid on the image, not rendered here.
-
-  Locals:
-    product       — Product
-    discount_info — Hash from DiscountCalculator#discount_breakdown (or nil)
-%>
-<%# Strikethrough "sale" treatment only for flag-worthy discounts (campaign /
-    special price / variant), NOT the customer's global tier — a tier shows the
-    customer's real price plain, without making every card look discounted. %>
+<%# Keep old and customer prices on separate rows. Range endpoints wrap as
+    complete amounts, so currency symbols and digits never overlap. %>
 <% has_flag = discount_info && discount_info[:all_discounts]&.any? { |d| [:product, :category, :customer_product, :variant].include?(d[:type]) } %>
-<% if product.price_on_request? %>
-  <span class="product-card-price"><%= t('storefront.products.index.price_on_request') %></span>
-<% elsif has_flag && discount_info[:effective_discount][:percentage]&.finite? && (product.variable? || !discount_info[:base_price].zero?) %>
-  <% dr = product.variable? ? product.discounted_price_range(current_customer, for_display: !@honest_cards, cart_context: @cart_context) : nil %>
-  <div>
-    <% if dr %>
-      <span class="product-card-price-original">
-        <%= dr[:range] ? "#{dr[:original_min].format} - #{dr[:original_max].format}" : dr[:original_min].format %>
-      </span>
-      <span class="product-card-price-discounted">
-        <%= dr[:range] ? "#{dr[:final_min].format} - #{dr[:final_max].format}" : dr[:final_min].format %>
-      </span>
-    <% else %>
-      <span class="product-card-price-original">
-        <%= money_amount(discount_info[:base_price]) %>
-      </span>
-      <span class="product-card-price-discounted">
-        <%= money_amount(discount_info[:final_price]) %>
-      </span>
-    <% end %>
-  </div>
-<% elsif discount_info && discount_info[:has_discount] && (product.variable? || !discount_info[:base_price].zero?) %>
-  <%# Tier-only (or other non-flag) discount: show the customer's real price, plain. %>
-  <% dr = product.variable? ? product.discounted_price_range(current_customer, for_display: !@honest_cards, cart_context: @cart_context) : nil %>
-  <% if dr %>
-    <span class="product-card-price"><%= dr[:range] ? "#{dr[:final_min].format} - #{dr[:final_max].format}" : dr[:final_min].format %></span>
+<% has_erp_discount = discount_info&.dig(:erp_discount_percentage).to_d.positive? %>
+<div class="product-card-prices">
+  <% if product.price_on_request? %>
+    <span class="product-card-price"><%= t('storefront.products.index.price_on_request') %></span>
   <% else %>
-    <span class="product-card-price"><%= money_amount(discount_info[:final_price]) %></span>
+    <% range = product.variable? ? product.discounted_price_range(current_customer, for_display: !@honest_cards, cart_context: @cart_context) : nil %>
+    <% original_min = range ? range[:original_min] : (discount_info&.dig(:base_price) || product.price) %>
+    <% original_max = range ? range[:original_max] : original_min %>
+    <% final_min = range ? range[:final_min] : (discount_info&.dig(:final_price) || product.price) %>
+    <% final_max = range ? range[:final_max] : final_min %>
+    <% show_original = (has_flag || has_erp_discount) && (original_min > final_min || original_max > final_max) %>
+    <% if show_original %>
+      <del class="product-card-price-original">
+        <%= render 'storefront/shared/card_price_range', minimum: original_min, maximum: original_max %>
+      </del>
+    <% end %>
+    <div class="<%= show_original ? 'product-card-price-discounted' : 'product-card-price' %>">
+      <% if product.variable? && range.nil? %>
+        <%= product.display_price %>
+      <% else %>
+        <%= render 'storefront/shared/card_price_range', minimum: final_min, maximum: final_max, show_from: true %>
+      <% end %>
+    </div>
   <% end %>
-<% elsif product.variable? %>
-  <span class="product-card-price"><%= product.display_price %></span>
-<% else %>
-  <span class="product-card-price"><%= money_amount(product.price) %></span>
-<% end %>
+</div>

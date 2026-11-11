@@ -140,6 +140,7 @@ class OrderItem < ApplicationRecord
     refresh_base_price!
 
     calculator = DiscountCalculator.new(
+      include_erp_discount: false,
       product: product,
       customer: order&.customer,
       quantity: quantity || 1,
@@ -237,6 +238,7 @@ class OrderItem < ApplicationRecord
     # - CustomerDiscount (client tier discounts)
     # - CustomerProductDiscount (custom pricing)
     calculator = DiscountCalculator.new(
+      include_erp_discount: false,
       product: product,
       customer: order&.customer,
       quantity: quantity || 1,

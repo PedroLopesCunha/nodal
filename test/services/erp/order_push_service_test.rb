@@ -114,6 +114,26 @@ module Erp
       @order.finalize_checkout!
     end
 
+    test 'ERP receives Nodal prices once while storefront includes the ERP customer discount' do
+      @customer.update!(erp_discount_percentage: 20)
+      place_campaign_order
+      assert_equal 77440, @order.subtotal_after_discount.cents
+      @customer.update!(erp_discount_percentage: 50)
+      adapter = FakeAdapter.new
+      assert push(adapter).success?
+      assert_equal 88.0, adapter.pushed.first[:items].first[:unit_price]
+      assert_equal 77440, @order.reload.subtotal_after_discount.cents
+    end
+
+    test 'ERP receives manual Nodal adjustments but never a full ERP discount' do
+      @customer.update!(erp_discount_percentage: 100)
+      place_campaign_order { @order.assign_attributes(discount_type: 'fixed', discount_value: 11) }
+      adapter = FakeAdapter.new
+      assert_equal 0, @order.subtotal_after_discount.cents
+      assert push(adapter).success?
+      assert_equal 87.0, adapter.pushed.first[:items].first[:unit_price]
+    end
+
     test 'ERP receives the campaign price replacing the category price' do
       place_campaign_order
       adapter = FakeAdapter.new

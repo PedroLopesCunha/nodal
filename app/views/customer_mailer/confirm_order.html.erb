@@ -149,6 +149,15 @@
           </tr>
         <% end %>
 
+        <% if @order.erp_discount_rate.positive? %>
+          <tr>
+            <td style="padding: 8px 20px; color: #166534;">
+              <%= t('erp_discount.label') %> (<%= (@order.erp_discount_rate * 100).to_f %>%)
+            </td>
+            <td align="right" style="padding: 8px 20px; color: #166534;">-<%= @order.erp_discount_amount.format %></td>
+          </tr>
+        <% end %>
+
         <!-- Tax -->
         <tr>
           <td style="padding: 8px 20px;">
