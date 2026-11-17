@@ -51,7 +51,7 @@ module Erp
           query_as_hashes(db, build_select_sql(products_table, products_filter))
         end
 
-        rows.map { |row| normalize_product(normalize_row(row)) }
+        aggregate_product_rows(rows).to_a
       rescue => e
         raise_erp_error(e)
       end
@@ -87,7 +87,7 @@ module Erp
         rows = with_connection do |db|
           query_as_hashes(db, build_select_sql(products_table, filter), *encode_values(params))
         end
-        rows.map { |row| normalize_product(normalize_row(row)) }
+        aggregate_product_rows(rows).to_a
       rescue => e
         raise_erp_error(e)
       end
@@ -99,9 +99,9 @@ module Erp
         return unless valid_credentials?
 
         with_connection do |db|
-          each_row_as_hash(db, build_select_sql(products_table, products_filter)) do |row|
-            yield normalize_product(normalize_row(row))
-          end
+          sql = build_select_sql(products_table, products_filter)
+          sql += " ORDER BY #{safe_column_name(product_field_mappings.fetch(:external_id))}"
+          aggregate_product_rows(each_row_as_hash(db, sql), &block)
         end
       rescue => e
         raise_erp_error(e)
@@ -369,6 +369,8 @@ module Erp
       # Streaming variant of query_as_hashes — yields each row as a hash without
       # accumulating all rows in memory.
       def each_row_as_hash(db, sql)
+        return enum_for(:each_row_as_hash, db, sql) unless block_given?
+
         cursor = db.execute(sql)
         columns = cursor.fields.map { |f| f.name.to_s }
         while (row = cursor.fetch)
@@ -416,6 +418,33 @@ module Erp
       end
 
       # Apply field mappings to convert raw Firebird rows into Nodal format
+      # Rows must be contiguous by external_id. Bulk reads sort locally; the
+      # streaming path orders in Firebird to retain bounded Ruby memory usage.
+      def aggregate_product_rows(rows)
+        return enum_for(:aggregate_product_rows, rows) unless block_given?
+
+        rows = rows.sort_by { |row| get_mapped_value(normalize_row(row), product_field_mappings, :external_id).to_s } if rows.is_a?(Array)
+        current = nil
+        rows.each do |row|
+          row = normalize_row(row)
+          stock = get_mapped_value(row, product_field_mappings, :stock_quantity)
+          data = normalize_product(row)
+          if product_field_mappings[:stock_quantity].present? && (stock.nil? || stock.to_s !~ /\A[+-]?\d+(?:\.\d+)?\z/)
+            data[:sync_error] = "Invalid or missing ERP stock for #{data[:external_id]} (field #{product_field_mappings[:stock_quantity]}): #{stock.inspect}. Reference skipped; previous stock preserved."
+          end
+          if current && current[:external_id].present? && current[:external_id] == data[:external_id]
+            current[:sync_error] ||= data[:sync_error] if data[:sync_error]
+            if data.key?(:stock_quantity)
+              current[:stock_quantity] = current.fetch(:stock_quantity, 0) + data[:stock_quantity]
+            end
+          else
+            yield current if current
+            current = data
+          end
+        end
+        yield current if current
+      end
+
       def normalize_product(row)
         mappings = product_field_mappings
 
