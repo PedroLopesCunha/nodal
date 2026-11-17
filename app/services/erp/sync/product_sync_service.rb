@@ -22,6 +22,7 @@ module Erp
 
       def sync_product(data)
         external_id = data[:external_id]
+        raise Erp::ApiError, data[:sync_error] if data[:sync_error].present?
 
         unless external_id.present?
           sync_log.increment_failed!('unknown', 'Missing external_id')

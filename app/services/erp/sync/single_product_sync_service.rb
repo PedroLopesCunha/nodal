@@ -32,6 +32,7 @@ module Erp
             raise Erp::ApiError, 'Multiple ERP products match this variant' unless matches.one?
 
             data = matches.first
+            raise Erp::ApiError, data[:sync_error] if data[:sync_error].present?
             raise Erp::ApiError, 'Missing ERP external_id' if data[:external_id].blank?
 
             @product.with_lock do
