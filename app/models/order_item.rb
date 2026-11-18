@@ -4,6 +4,16 @@ class OrderItem < ApplicationRecord
   belongs_to :order
   belongs_to :product
   belongs_to :product_variant, optional: true
+  belongs_to :order_bundle, optional: true
+
+  def bundle_component?
+    order_bundle_id.present? || order_bundle.present?
+  end
+
+  def display_product_name
+    return product&.name unless bundle_component?
+    order_bundle.composition.find { |c| c["variant_id"] == product_variant_id }&.fetch("name", nil) || product&.name
+  end
 
   monetize :unit_price, as: :price
 
@@ -50,6 +60,7 @@ class OrderItem < ApplicationRecord
   validate :distinct_line_note, on: :customer_change
   validate :variant_belongs_to_order_organisation
   validate :variant_belongs_to_product
+  validate :valid_bundle_line
   validate :variant_is_purchasable, on: :create
   # Only enforced on customer-initiated add/edit (:create, :customer_change),
   # never on system re-pricing/stock-capping (refresh_cart! saves without a
@@ -80,6 +91,7 @@ class OrderItem < ApplicationRecord
   end
 
   def total_price
+    return Money.new(bundle_amount_cents * order_bundle.quantity, order.organisation.currency) if bundle_component?
     subtotal = price * quantity
     discount = subtotal * (discount_percentage || 0)
     return subtotal - discount
@@ -115,7 +127,7 @@ class OrderItem < ApplicationRecord
     # is actually enforced for the variant.
     if product_variant.track_stock? &&
        product_variant.effective_stock_policy != "track_only" &&
-       quantity.to_i > product_variant.stock_quantity.to_i
+       order.order_items.select { |i| i.product_variant_id == product_variant_id }.sum(&:quantity) > product_variant.stock_quantity.to_i
       return :qty_overflow
     end
 
@@ -130,12 +142,14 @@ class OrderItem < ApplicationRecord
   attr_accessor :preserve_calculated_discount
 
   def refresh_base_price!
+    return if bundle_component?
     new_price = product_variant&.unit_price_cents || product&.unit_price
     self.unit_price = new_price if new_price.present?
   end
 
   def refresh_pricing!(cart_context: nil)
     return {} if order&.placed?
+    return {} if bundle_component?
 
     refresh_base_price!
 
@@ -156,6 +170,14 @@ class OrderItem < ApplicationRecord
   end
 
   private
+
+  def valid_bundle_line
+    return unless bundle_component?
+    if order_bundle.order_id != order_id || quantity != bundle_component_quantity.to_i * order_bundle.quantity ||
+       bundle_amount_cents.nil? || bundle_amount_cents.negative?
+      errors.add(:base, I18n.t("bundles.errors.grouped_line"))
+    end
+  end
 
   # The picker chooses a variant; which product it belongs to is not a separate
   # decision. Deriving it keeps a stale or missing product_id from producing an
@@ -195,12 +217,18 @@ class OrderItem < ApplicationRecord
   end
 
   def distinct_line_note
+    return if bundle_component?
     duplicates = order.order_items.where(product_id: product_id, product_variant_id: product_variant_id)
+                      .where(order_bundle_id: nil)
                       .where(note: note.presence || [nil, ""]).where.not(id: id)
     errors.add(:note, :taken) if duplicates.exists?
   end
 
   def variant_is_purchasable
+    if product&.bundle?
+      errors.add(:base, I18n.t("bundles.errors.use_bundle"))
+      return
+    end
     return if product_variant.nil?
 
     unless product_variant.purchasable?
@@ -209,6 +237,7 @@ class OrderItem < ApplicationRecord
   end
 
   def meets_minimum_quantity
+    return if bundle_component?
     return unless product
     # Combined-scope minimums are checked across all the product's lines
     # (at the cart/checkout level), never per line.
@@ -225,6 +254,7 @@ class OrderItem < ApplicationRecord
   end
 
   def should_recalculate_discount?
+    return false if bundle_component?
     # A discount typed in the back office is a decision, not a starting point.
     return false if discount_set_by_hand || preserve_calculated_discount
 

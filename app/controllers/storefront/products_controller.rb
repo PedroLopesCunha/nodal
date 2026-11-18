@@ -2,6 +2,7 @@ class Storefront::ProductsController < Storefront::BaseController
   def index
     base_products = policy_scope(current_organisation.products).includes(:categories, :product_discounts)
                       .where(published: true)
+    base_products = base_products.bundles if params[:bundles] == "1"
     # Hide unavailable products, unless any variant has a non-hide policy
     keep_visible_ids = current_organisation.product_variants
                                            .where.not(stock_policy: ['hide', 'inherit'])
@@ -375,6 +376,14 @@ class Storefront::ProductsController < Storefront::BaseController
         for_display: false, variant: @default_variant, cart_context: @cart_context
       ).discount_breakdown
       @product_pricing = product_pricing_data(@cart_context)
+      if @product.bundle?
+        comparison = BundleStorefrontPricing.new(product: @product, customer: current_customer, base_prices: browsing_as_member?).call
+        @bundle_comparisons = { @product.id => comparison }
+        @actual_breakdown[:final_price] = comparison[:price]
+        @product_pricing[:locked_unit_cents] = comparison[:price].cents
+        @product_pricing[:unlocked_unit_cents] = comparison[:price].cents
+        @product_pricing[:base_unit_cents] = [comparison[:separate].cents, comparison[:price].cents].max
+      end
     end
 
     # Build the display strings used while no variant is selected. Honest: the

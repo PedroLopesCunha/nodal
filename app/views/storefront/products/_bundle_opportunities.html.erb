@@ -1,0 +1,17 @@
+<% bundles = @product.containing_bundles.select(&:bundle_purchasable?) %>
+<% if bundles.any? %>
+  <section id="product-bundles" class="card mt-4"><div class="card-body">
+    <h2 class="h5"><%= t("bundles.opportunity") %></h2>
+    <% bundles.each do |bundle| %>
+      <div data-bundle-variant-ids="<%= bundle.bundle_components.map(&:product_variant_id).to_json %>">
+      <div class="d-flex gap-3 align-items-center mt-3">
+        <% if bundle.display_photo %><%= image_tag bundle.display_photo, width: 80, height: 80, style: "object-fit:contain", alt: bundle.name %><% end %>
+        <div><h3 class="h6"><%= bundle.name %></h3><p class="small text-muted mb-1"><%= bundle.bundle_components.includes(product_variant: :product).map { |c| "#{c.quantity} × #{c.product_variant.product.name} #{c.product_variant.option_values_string}" }.join(" + ") %></p>
+          <% if show_prices? %><% comparison = bundle_comparison(bundle) %><p><%= money_amount(comparison[:price]) %><% if comparison[:savings].positive? %> · <%= t("bundles.savings", amount: money_amount(comparison[:savings])) %><% end %></p><% end %>
+          <%= link_to t("bundles.view"), product_path(org_slug: params[:org_slug], id: bundle), class: "btn btn-outline-primary btn-sm" %>
+        </div>
+      </div>
+      </div>
+    <% end %>
+  </div></section>
+<% end %>

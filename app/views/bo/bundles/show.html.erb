@@ -1,0 +1,52 @@
+<% content_for :bo_main_content do %>
+  <div class="bo-page-header">
+    <div class="d-flex justify-content-between align-items-start">
+      <div class="d-flex align-items-center gap-3">
+        <%= link_to bo_bundles_path(params[:org_slug]), class: "text-muted text-decoration-none", aria: { label: t("bundles.back") } do %><i class="fa-solid fa-arrow-left fa-lg"></i><% end %>
+        <div><h1><%= @bundle.name %></h1><p><%= t("bundles.label") %></p></div>
+      </div>
+      <div class="bo-page-actions">
+        <%= link_to product_path(org_slug: params[:org_slug], id: @bundle), class: "btn btn-outline-secondary", target: "_blank" do %><i class="fa-solid fa-store me-1"></i><%= t("bo.products.show.view_in_storefront") %><% end %>
+        <%= link_to edit_bo_bundle_path(params[:org_slug], @bundle), class: "btn btn-outline-primary" do %><i class="fa-solid fa-pen-to-square me-1"></i><%= t("bo.common.actions.edit") %><% end %>
+        <%= link_to bo_bundle_path(params[:org_slug], @bundle), class: "btn btn-outline-danger", data: { turbo_method: :delete, turbo_confirm: t("bundles.confirm_remove") } do %><i class="fa-solid fa-trash me-1"></i><%= t("bo.common.actions.delete") %><% end %>
+      </div>
+    </div>
+  </div>
+  <div class="bo-page-body">
+    <% if @summary[:warning] %><div class="alert alert-warning"><%= @summary[:warning] %></div><% end %>
+    <div class="row g-4">
+      <div class="col-lg-8">
+        <%= render "bo/products/information_card" %>
+        <div class="card mb-4"><div class="card-body">
+          <div class="d-flex justify-content-between align-items-center mb-3"><h5 class="card-title mb-0"><%= t("bundles.components") %></h5><%= link_to t("bundles.edit"), edit_bo_bundle_path(params[:org_slug], @bundle, anchor: "bundle-components"), class: "btn btn-sm btn-outline-primary" %></div>
+          <div class="table-responsive"><table class="table table-sm align-middle mb-0">
+            <thead><tr><th><%= t("bo.common.product") %></th><th class="text-center"><%= t("bundles.quantity") %></th><th class="text-end"><%= t("bundles.individual_price") %></th><th class="text-end"><%= t("bo.products.show.stock") %></th><th class="text-end"><%= t("bundles.subtotal") %></th></tr></thead>
+            <tbody><% @summary[:lines].each do |line| %>
+              <tr><td><%= link_to line[:label], bo_product_path(params[:org_slug], line[:product_id]) %></td><td class="text-center"><%= line[:quantity] %></td><td class="text-end text-nowrap"><%= line[:unit_price] %></td><td class="text-end"><%= line[:stock] %></td><td class="text-end text-nowrap"><%= line[:subtotal] %></td></tr>
+            <% end %></tbody>
+            <tfoot><tr><th colspan="4"><%= t("bundles.components_value") %></th><td class="text-end fw-semibold"><%= @summary[:total] %></td></tr></tfoot>
+          </table></div>
+        </div></div>
+      </div>
+      <div class="col-lg-4">
+        <div class="card mb-4"><div class="card-body">
+          <h6 class="card-title mb-3"><%= t("bundles.price") %></h6>
+          <div class="mb-3"><small class="text-muted d-block"><%= t("bundles.components_value") %></small><strong><%= @summary[:total] %></strong></div>
+          <div class="mb-3"><small class="text-muted d-block"><%= t("bundles.price") %></small><strong><%= @bundle.price.format %></strong></div>
+          <div><small class="text-muted d-block"><%= @summary[:above_base] ? t("bundles.above_components") : t("bundles.bundle_discount") %></small><strong><%= @summary[:difference] %></strong><% if @summary[:percentage_label] %> <small class="text-muted">(<%= @summary[:percentage_label] %>)</small><% end %></div>
+        </div></div>
+        <div class="card mb-4"><div class="card-body">
+          <h6 class="card-title mb-3"><%= t("bundles.bundle_stock") %></h6>
+          <strong data-bundle-stock><%= @summary[:stock] %></strong>
+          <small class="text-muted d-block mt-2"><%= t("bundles.summary_basis") %></small>
+        </div></div>
+        <div class="card mb-4"><div class="card-body">
+          <h6 class="card-title mb-3"><%= t("bo.products.form.availability") %></h6>
+          <span class="badge <%= @bundle.published? ? 'bg-success-subtle text-success' : 'bg-danger-subtle text-danger' %>"><%= @bundle.published? ? t("bo.products.index.table.available") : t("bo.products.index.table.unavailable") %></span>
+          <hr>
+          <small class="text-muted d-block mb-1"><%= t("bundles.homepage") %></small><%= @bundle.bundle_featured? ? t("bundles.yes") : t("bundles.no") %>
+        </div></div>
+      </div>
+    </div>
+  </div>
+<% end %>

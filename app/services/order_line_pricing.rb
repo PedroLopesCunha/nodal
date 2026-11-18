@@ -36,9 +36,11 @@ class OrderLinePricing
     @export_totals ||= begin
       internal = self.class.new(@order, include_erp_discount: false)
       items = @order.order_items.to_a
+      protected_items, items = items.partition(&:bundle_component?)
+      protected_totals = protected_items.to_h { |item| [item.id, item.total_price.cents] }
       # Unsaved nested lines also participate when BO updates trigger tax pricing.
       bases = items.to_h { |item| [item.id || -item.object_id, internal.line(item).total.cents] }
-      target = @order.nodal_subtotal_after_discount.cents
+      target = @order.nodal_subtotal_after_discount.cents - protected_totals.values.sum
       base = bases.values.sum
       if target > base
         # A cap restores savings. Allocate only against the amounts actually
@@ -48,9 +50,9 @@ class OrderLinePricing
           [key, (item.price * item.quantity).cents - bases.fetch(key)]
         end
         restored = allocate_cents(savings, target - base)
-        bases.to_h { |key, cents| [key, cents + restored.fetch(key, 0)] }
+        protected_totals.merge(bases.to_h { |key, cents| [key, cents + restored.fetch(key, 0)] })
       else
-        allocate_cents(bases, target)
+        protected_totals.merge(allocate_cents(bases, target))
       end
     end
   end
@@ -58,6 +60,12 @@ class OrderLinePricing
   # Presentation only: OrderItem#total_price remains the base used by the engine.
   # Allocations are before coupons, shipping, tax and the organisation discount cap.
   def line(item)
+    if item.bundle_component?
+      total = item.total_price
+      total -= total * @order.erp_discount_rate if @include_erp_discount
+      return Line.new(original_total: item.total_price, total: total, unit_price: total / item.quantity,
+        campaign_savings: Money.new(0, total.currency), line_discount_percentage: 0)
+    end
     cents = if @order.placed?
       item.auto_order_discount_amount_cents.to_i
     else

@@ -90,7 +90,17 @@ class Bo::OrdersController < Bo::BaseController
   end
 
   def update
-    @order.assign_attributes(order_params)
+    attributes = order_params
+    if attributes[:order_items_attributes]
+      protected_ids = @order.order_items.where.not(order_bundle_id: nil).pluck(:id).map(&:to_s)
+      lines = attributes[:order_items_attributes]
+      if lines.is_a?(Array)
+        lines.reject! { |value| protected_ids.include?(value[:id].to_s) }
+      else
+        lines.delete_if { |_, value| protected_ids.include?(value[:id].to_s) }
+      end
+    end
+    @order.assign_attributes(attributes)
     if assign_customer_contact && @order.save
       redirect_to bo_order_path(org_slug: @current_organisation.slug, id: @order.id, **filter_params_hash), notice: "Order updated successfully."
     else

@@ -157,6 +157,7 @@ class DiscountCalculator
   end
 
   def collect_discounts
+    return [] if product.bundle?
     discounts = []
     # Value of this line (base price × quantity), for amount-based conditions.
     @line_amount_cents = (base_price * quantity).cents

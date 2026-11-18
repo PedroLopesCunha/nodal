@@ -1,5 +1,7 @@
         <!-- Variant Selector (for variable products) -->
-        <% if @product.grid_add_to_cart? %>
+        <% if @product.bundle? %>
+          <%= render "storefront/products/bundle_purchase" %>
+        <% elsif @product.grid_add_to_cart? %>
           <%= render "storefront/products/grid_add_to_cart", product: @product, quick_add: local_assigns[:quick_add] %>
         <% elsif @product.has_variants? && @attributes_with_values.present? %>
           <div class="mb-4">

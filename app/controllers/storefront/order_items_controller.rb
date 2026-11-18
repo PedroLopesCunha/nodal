@@ -19,7 +19,7 @@ class Storefront::OrderItemsController < Storefront::BaseController
     end
 
     note = order_item_params[:note].to_s.strip.presence
-    @order_item = @order.order_items.where(product: @product, product_variant: @variant)
+    @order_item = @order.order_items.where(order_bundle_id: nil).where(product: @product, product_variant: @variant)
                         .where(note: note ? note : [nil, ""]).first
 
     if @order_item
@@ -42,7 +42,7 @@ class Storefront::OrderItemsController < Storefront::BaseController
 
     if @order_item.save
       if params[:quick_add] == "1"
-        render json: { message: t('storefront.cart.item_added'), cart_count: @order.order_items.count }
+        render json: { message: t('storefront.cart.item_added'), cart_count: @order.line_item_count }
         return
       end
       redirect_to back_path, notice: t('storefront.cart.item_added')
@@ -56,7 +56,7 @@ class Storefront::OrderItemsController < Storefront::BaseController
   end
 
   def update
-    @order_item = current_cart.order_items.find(params[:id])
+    @order_item = current_cart.order_items.where(order_bundle_id: nil).find(params[:id])
     authorize @order_item
 
     @order_item.assign_attributes(order_item_params)
@@ -71,7 +71,7 @@ class Storefront::OrderItemsController < Storefront::BaseController
   end
 
   def destroy
-    @order_item = current_cart.order_items.find(params[:id])
+    @order_item = current_cart.order_items.where(order_bundle_id: nil).find(params[:id])
     authorize @order_item
     @order_item.destroy
     redirect_to cart_path(org_slug: params[:org_slug]), notice: "Item removed."
@@ -110,7 +110,7 @@ class Storefront::OrderItemsController < Storefront::BaseController
         next
       end
 
-      item = @order.order_items.where(note: note || [nil, ""]).find_by(product: @product, product_variant: variant)
+      item = @order.order_items.where(order_bundle_id: nil).where(note: note || [nil, ""]).find_by(product: @product, product_variant: variant)
       if item
         item.quantity += qty
       else
@@ -133,7 +133,7 @@ class Storefront::OrderItemsController < Storefront::BaseController
       else
         t('storefront.cart.bulk_add.added', count: added.size)
       end
-      render json: { message: message, cart_count: @order.order_items.count, added_variant_ids: added_variant_ids },
+      render json: { message: message, cart_count: @order.line_item_count, added_variant_ids: added_variant_ids },
              status: (failed.any? || added.empty? ? :unprocessable_entity : :ok)
       return
     end
@@ -182,7 +182,7 @@ class Storefront::OrderItemsController < Storefront::BaseController
     end
 
     @order = current_cart
-    @order_item = @order.order_items.where(note: [nil, ""]).find_by(product: @product, product_variant: @variant)
+    @order_item = @order.order_items.where(order_bundle_id: nil).where(note: [nil, ""]).find_by(product: @product, product_variant: @variant)
 
     if @order_item
       @order_item.quantity += 1

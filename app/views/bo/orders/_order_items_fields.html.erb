@@ -1,3 +1,7 @@
+<% if f.object.bundle_component? %>
+<tr><td><span class="badge bg-primary"><%= f.object.order_bundle.name %></span><div><%= f.object.display_product_name %></div><small><%= f.object.product_variant&.sku %></small></td>
+<td><%= f.object.quantity %></td><td><%= (f.object.total_price / f.object.quantity).format %></td><td>—</td><td><span data-line-total><%= number_with_precision(f.object.total_price.to_f, precision: 2) %></span></td><td><small class="text-muted"><%= t("bundles.errors.grouped_line") %></small></td></tr>
+<% else %>
 <%# A line is a variant, not a product: the SKU lives on the variant, and it is
     the only thing that separates the 45 products called "Moldura Criança".
     Only the variant already chosen is rendered as an option — the rest arrive
@@ -49,3 +53,5 @@
     </button>
   </td>
 </tr>
+
+<% end %>

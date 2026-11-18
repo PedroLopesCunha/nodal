@@ -66,12 +66,21 @@ class Storefront::OrdersController < Storefront::BaseController
     skipped_items = []
 
     # Clear existing cart items
+    cart.order_bundles.destroy_all
     cart.order_items.destroy_all
 
     # Group items by product+variant to handle potential duplicates in original order
     items_to_add = {}
 
-    original_order.order_items.includes(:product, :product_variant).each do |item|
+    original_order.order_bundles.includes(:product).each do |group|
+      begin
+        BundleCartService.new(cart).add!(group.product, group.quantity)
+      rescue ArgumentError, ActiveRecord::RecordInvalid
+        skipped_items << group.name
+      end
+    end
+
+    original_order.order_items.where(order_bundle_id: nil).includes(:product, :product_variant).each do |item|
       product = item.product
 
       if product.nil? || !product.published?
@@ -95,7 +104,7 @@ class Storefront::OrdersController < Storefront::BaseController
           product: product,
           product_variant: variant,
           quantity: item.quantity,
-          note: note
+          note: item.note
         }
       end
     end
@@ -125,7 +134,15 @@ class Storefront::OrdersController < Storefront::BaseController
     cart = current_cart
     skipped_items = []
 
-    original_order.order_items.includes(:product, :product_variant).each do |item|
+    original_order.order_bundles.includes(:product).each do |group|
+      begin
+        BundleCartService.new(cart).add!(group.product, group.quantity)
+      rescue ArgumentError, ActiveRecord::RecordInvalid
+        skipped_items << group.name
+      end
+    end
+
+    original_order.order_items.where(order_bundle_id: nil).includes(:product, :product_variant).each do |item|
       product = item.product
 
       if product.nil? || !product.published?
@@ -141,7 +158,7 @@ class Storefront::OrdersController < Storefront::BaseController
 
       # Check if product+variant already exists in cart
       note = item.note.to_s.strip.presence
-      existing = cart.order_items.where(note: note || [nil, ""]).find_by(product: product, product_variant: variant)
+      existing = cart.order_items.where(order_bundle_id: nil).where(note: note || [nil, ""]).find_by(product: product, product_variant: variant)
       if existing
         existing.update!(quantity: existing.quantity + item.quantity)
       else
@@ -149,7 +166,7 @@ class Storefront::OrdersController < Storefront::BaseController
           product: product,
           product_variant: variant,
           quantity: item.quantity,
-          note: note
+          note: item.note
         )
       end
     end

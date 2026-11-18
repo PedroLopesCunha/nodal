@@ -54,87 +54,13 @@
         </div>
       <% end %>
 
-      <div class="card mb-3">
-        <div class="card-body">
-          <h5 class="card-title mb-4"><%= t('bo.products.form.basic_information') %></h5>
-
-          <div class="row g-3">
-            <div class="col-md-8">
-              <label class="form-label"><%= t('bo.products.form.product_name') %> <span class="text-danger">*</span></label>
-              <%= f.text_field :name, class: "form-control", placeholder: t('bo.products.form.placeholders.product_name'), required: true %>
-            </div>
-            <div class="col-md-4">
-              <label class="form-label"><%= t('bo.products.form.sku') %></label>
-              <%= f.text_field :sku, class: "form-control", placeholder: t('bo.products.form.placeholders.sku') %>
-            </div>
-          </div>
-
-          <div class="row g-3 mt-1">
-            <div class="col-md-4">
-              <label class="form-label"><%= t('bo.products.form.supplier') %></label>
-              <%= f.text_field :supplier, class: "form-control", placeholder: t('bo.products.form.placeholders.supplier') %>
-              <small class="text-muted"><%= t('bo.products.form.supplier_hint') %></small>
-            </div>
-          </div>
-
-          <div class="row g-3 mt-1">
-            <div class="col-md-12">
-              <label class="form-label"><%= t('bo.products.form.description') %></label>
-              <%= f.rich_text_area :rich_description, class: "form-control" %>
-              <small class="text-muted"><%= t('bo.products.form.description_hint') %></small>
-            </div>
-          </div>
-
-          <div class="row g-3 mt-1">
-            <div class="col-md-6">
-              <label class="form-label"><%= t('bo.products.form.categories') %> <span class="text-danger">*</span></label>
-              <div data-controller="checkbox-select">
-                <input type="text"
-                       class="form-control form-control-sm mb-2"
-                       placeholder="<%= t('bo.products.form.search_categories') %>"
-                       data-checkbox-select-target="search"
-                       data-action="input->checkbox-select#filter">
-                <div class="border rounded p-2" style="max-height: 200px; overflow-y: auto;">
-                  <% current_organisation.categories.kept.order(:ancestry, :position).each do |category| %>
-                    <div class="form-check" data-checkbox-select-target="item" data-label="<%= category.full_path %>">
-                      <input type="checkbox"
-                             name="product[category_ids][]"
-                             value="<%= category.id %>"
-                             class="form-check-input"
-                             id="category_<%= category.id %>"
-                             <%= 'checked' if @product.category_ids.include?(category.id) %>>
-                      <label class="form-check-label" for="category_<%= category.id %>">
-                        <%= category.full_path %>
-                      </label>
-                    </div>
-                  <% end %>
-                </div>
-              </div>
-              <small class="text-muted"><%= t('bo.products.form.categories_hint') %></small>
-            </div>
-            <div class="col-md-6">
-              <label class="form-label"><%= t('bo.products.form.slug') %></label>
-              <%= f.text_field :slug, class: "form-control", placeholder: t('bo.products.form.placeholders.slug') %>
-              <small class="text-muted"><%= t('bo.products.form.slug_hint_auto') %></small>
-            </div>
-          </div>
-        </div>
-      </div>
+      <%= render "bo/products/basic_information", f: f %>
 
       <div class="card mb-3">
         <div class="card-body">
           <h5 class="card-title mb-4"><%= t('bo.products.form.pricing_units') %></h5>
 
-          <div class="row g-3">
-            <div class="col-md-6">
-              <label class="form-label"><%= t('bo.products.form.unit_price', currency: @current_organisation.currency_symbol) %> <span class="text-danger">*</span></label>
-              <%= f.text_field :price, class: "form-control", placeholder: "24.99", required: true %>
-            </div>
-            <div class="col-md-6">
-              <label class="form-label"><%= t('bo.products.form.unit_description') %></label>
-              <%= f.text_field :unit_description, class: "form-control", placeholder: t('bo.products.form.placeholders.unit_description') %>
-            </div>
-          </div>
+          <%= render "bo/products/price_and_unit", f: f %>
 
           <div class="row g-3 mt-1">
             <div class="col-md-6">
@@ -166,17 +92,7 @@
         </div>
       <% end %>
 
-      <div class="card">
-        <div class="card-body">
-          <h5 class="card-title mb-4"><%= t('bo.products.form.product_images') %></h5>
-
-          <div>
-            <label class="form-label"><%= t('bo.products.form.upload_images') %></label>
-            <%= f.file_field :photos, class: "form-control", accept: "image/*", multiple: true %>
-            <small class="text-muted"><%= t('bo.products.form.images_hint') %></small>
-          </div>
-        </div>
-      </div>
+      <%= render "bo/products/images", f: f %>
     </div>
 
     <div class="col-md-4">

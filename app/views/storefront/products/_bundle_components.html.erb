@@ -1,0 +1,28 @@
+<% comparison = bundle_comparison(@product) %>
+<section class="mt-5 mb-4" aria-labelledby="bundle-components-title" data-bundle-components>
+  <h2 id="bundle-components-title" class="h4 mb-3"><%= t("bundles.included") %></h2>
+  <div class="table-responsive">
+    <table class="table table-sm small align-middle">
+      <thead><tr><th><%= t("bundles.component") %></th><th class="text-center"><%= t("bundles.quantity") %></th><% if show_prices? %><th class="text-end"><%= t("bundles.unit_separate") %></th><th class="text-end"><%= t("bundles.unit_in_bundle") %></th><% end %></tr></thead>
+      <tbody>
+        <% comparison[:lines].each do |line| %>
+          <% component = line[:component]; variant = component.product_variant; product = variant.product %>
+          <tr><td><div class="d-flex align-items-center gap-3 py-2">
+        <% photo = variant.photo.attached? ? variant.photo : product.all_photos.first %>
+        <% if photo.present? %>
+          <%= image_tag photo, width: 56, height: 56, class: "rounded flex-shrink-0", style: "object-fit:cover", loading: "lazy", alt: product.name %>
+        <% else %>
+          <div class="rounded bg-light d-flex align-items-center justify-content-center flex-shrink-0 text-muted" style="width:56px;height:56px"><i class="fa-solid fa-image"></i></div>
+        <% end %>
+        <div>
+          <%= link_to product.name, product_path(org_slug: params[:org_slug], id: product), class: "text-body text-decoration-none fw-semibold" %>
+          <small class="d-block text-muted"><%= [variant.sku, variant.option_values_string].compact_blank.join(" · ") %></small>
+        </div>
+          </div></td><td class="text-center"><%= component.quantity %></td>
+          <% if show_prices? %><td class="text-end text-nowrap"><%= bundle_unit_price(line[:separate_unit]) %></td><td class="text-end text-nowrap fw-semibold"><%= bundle_unit_price(line[:bundle_unit]) %></td><% end %></tr>
+        <% end %>
+      </tbody>
+      <% if show_prices? %><tfoot><tr class="fw-semibold"><th colspan="2"><%= t("bundles.total") %></th><td class="text-end text-nowrap"><%= money_amount(comparison[:separate]) %></td><td class="text-end text-nowrap"><%= money_amount(comparison[:price]) %></td></tr></tfoot><% end %>
+    </table>
+  </div>
+</section>

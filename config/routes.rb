@@ -87,6 +87,10 @@ Rails.application.routes.draw do
     # bo routes
     devise_for :members, controllers: { sessions: "members/sessions" }
     namespace :bo do
+      resources :bundles do
+        get :components, on: :collection
+        post :preview, on: :collection
+      end
       get "/", to: "dashboards#index"
       get "dashboards/metrics", to: "dashboards#metrics", as: :dashboards_metrics
       get "analytics", to: "analytics#index", as: :analytics

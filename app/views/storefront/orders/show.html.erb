@@ -25,6 +25,7 @@
     <div class="card border-0 shadow-sm mb-4" style="border-radius: 12px;">
       <div class="card-body">
         <h5 class="card-title mb-3"><%= t('storefront.orders.show.order_items') %></h5>
+        <%= render "storefront/shared/bundle_summary", order: @order %>
 
         <table class="table">
           <thead>
@@ -38,7 +39,7 @@
             </tr>
           </thead>
           <tbody>
-            <% @order.order_items.includes(:product, :product_variant).each do |item| %>
+            <% @order.order_items.where(order_bundle_id: nil).includes(:product, :product_variant).each do |item| %>
               <tr>
                 <td>
                   <div class="d-flex align-items-center">

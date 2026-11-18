@@ -1,0 +1,15 @@
+<div class="row g-3">
+  <div class="col-md-6">
+    <%= f.label :price, class: "form-label" do %>
+      <%= t('bo.products.form.unit_price', currency: current_organisation.currency_symbol) %>
+      <% unless f.object.has_variants? %><span class="text-danger">*</span><% end %>
+    <% end %>
+    <%= f.text_field :price, class: "form-control", placeholder: "24.99", required: !f.object.has_variants? %>
+    <% if f.object.has_variants? %><small class="text-muted"><%= t('bo.products.form.price_from_variants', default: 'O preço é definido nas variantes') %></small><% end %>
+    <% if f.object.bundle? %><small class="text-muted"><%= t('bundles.fixed_price_hint') %></small><% end %>
+  </div>
+  <div class="col-md-6">
+    <%= f.label :unit_description, t('bo.products.form.unit_description'), class: "form-label" %>
+    <%= f.text_field :unit_description, class: "form-control", placeholder: t('bo.products.form.placeholders.unit_description') %>
+  </div>
+</div>

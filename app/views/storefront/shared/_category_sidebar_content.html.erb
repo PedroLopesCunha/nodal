@@ -5,10 +5,13 @@
       <% all_products_params = { org_slug: params[:org_slug], queries: params[:queries] } %>
       <% all_products_params[:sort] = params[:sort] if params[:sort].present? %>
       <%= link_to products_path(**all_products_params),
-          class: "category-link #{'active' if params[:category].blank?}" do %>
+          class: "category-link #{'active' if params[:category].blank? && params[:bundles] != "1"}" do %>
         <%= t('storefront.products.index.all_products') %>
       <% end %>
     </li>
+    <% if current_organisation.products.bundles.where(published: true).exists? %>
+      <li class="category-list-item"><%= link_to t("bundles.title"), products_path(org_slug: params[:org_slug], bundles: "1"), class: "category-link #{'active' if params[:bundles] == '1'}" %></li>
+    <% end %>
     <% categories.each do |category| %>
       <%= render 'storefront/shared/category_tree_item', category: category, current_categories: local_assigns[:current_categories] %>
     <% end %>

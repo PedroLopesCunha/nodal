@@ -41,7 +41,7 @@ class Bo::BaseController < ApplicationController
   # gated to their OWN tasks in redirect_pure_rep_from_admin_only_pages below,
   # because BackgroundTaskPolicy#show? is only org-scoped, not member-scoped.
   PURE_REP_DENIED_CONTROLLERS = %w[
-    products categories product_attributes product_variants
+    products bundles categories product_attributes product_variants
     pricing customer_product_discounts product_discounts
     customer_discounts order_discounts order_discount_campaigns promo_codes
     customer_categories unmet_demands automations

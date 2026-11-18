@@ -145,6 +145,15 @@
   </section>
 <% end %>
 
+<% if @featured_bundles.any? %>
+  <section class="home-section" data-controller="horizontal-scroll">
+    <div class="home-section__header"><h2 class="home-section__title"><%= t("bundles.featured_title") %></h2><%= link_to t("bundles.view_all"), products_path(org_slug: params[:org_slug], bundles: "1") %></div>
+    <div class="home-carousel" data-horizontal-scroll-target="container">
+      <% @featured_bundles.each do |product| %><div class="home-carousel__item"><%= render "storefront/home/product_card", product: product, product_discounts: @product_discounts %></div><% end %>
+    </div>
+  </section>
+<% end %>
+
 <%# ==================== FEATURED PRODUCTS ==================== %>
 <% if @featured_products.any? %>
   <section class="home-section fade-in-up" data-controller="horizontal-scroll">

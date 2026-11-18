@@ -1,0 +1,6 @@
+<div class="row g-3 mt-1" aria-live="polite" data-bundle-editor-target="summary">
+  <div class="col-md-6"><small class="text-muted d-block"><%= t("bundles.components_value") %></small><strong data-bundle-editor-target="total"><%= @summary&.fetch(:total) || "—" %></strong></div>
+  <div class="col-md-6"><small class="text-muted d-block"><%= t("bundles.bundle_stock") %></small><strong data-bundle-editor-target="stock"><%= @summary&.fetch(:stock) || "—" %></strong></div>
+  <div class="col-12"><small class="text-muted"><%= t("bundles.summary_basis") %></small></div>
+</div>
+<div class="alert alert-warning small d-none mt-3 mb-0" role="status" data-bundle-editor-target="error"></div>

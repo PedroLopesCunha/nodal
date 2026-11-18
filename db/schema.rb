@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2026_11_11_130000) do
+ActiveRecord::Schema[7.1].define(version: 2026_11_18_150100) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_trgm"
   enable_extension "plpgsql"
@@ -127,6 +127,18 @@ ActiveRecord::Schema[7.1].define(version: 2026_11_11_130000) do
     t.index ["member_id"], name: "index_background_tasks_on_member_id"
     t.index ["organisation_id"], name: "index_background_tasks_on_organisation_id"
     t.index ["status"], name: "index_background_tasks_on_status"
+  end
+
+  create_table "bundle_components", force: :cascade do |t|
+    t.bigint "product_id", null: false
+    t.bigint "product_variant_id", null: false
+    t.integer "quantity", default: 1, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["product_id", "product_variant_id"], name: "index_bundle_components_on_product_id_and_product_variant_id", unique: true
+    t.index ["product_id"], name: "index_bundle_components_on_product_id"
+    t.index ["product_variant_id"], name: "index_bundle_components_on_product_variant_id"
+    t.check_constraint "quantity > 0", name: "bundle_component_positive_quantity"
   end
 
   create_table "categories", force: :cascade do |t|
@@ -509,6 +521,20 @@ ActiveRecord::Schema[7.1].define(version: 2026_11_11_130000) do
     t.index ["reset_password_token"], name: "index_members_on_reset_password_token", unique: true
   end
 
+  create_table "order_bundles", force: :cascade do |t|
+    t.bigint "order_id", null: false
+    t.bigint "product_id", null: false
+    t.string "name", null: false
+    t.integer "quantity", default: 1, null: false
+    t.integer "unit_price_cents", null: false
+    t.jsonb "composition", default: [], null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["order_id"], name: "index_order_bundles_on_order_id"
+    t.index ["product_id"], name: "index_order_bundles_on_product_id"
+    t.check_constraint "quantity > 0 AND unit_price_cents >= 0", name: "order_bundle_valid_amounts"
+  end
+
   create_table "order_discount_campaigns", force: :cascade do |t|
     t.bigint "organisation_id", null: false
     t.string "name", null: false
@@ -550,11 +576,17 @@ ActiveRecord::Schema[7.1].define(version: 2026_11_11_130000) do
     t.text "note"
     t.integer "local_stock_consumed", default: 0, null: false
     t.integer "auto_order_discount_amount_cents"
-    t.index "order_id, product_id, product_variant_id, COALESCE(note, ''::text)", name: "idx_order_items_order_product_variant_note", unique: true
+    t.bigint "order_bundle_id"
+    t.integer "bundle_amount_cents"
+    t.integer "bundle_component_quantity"
+    t.index "order_id, product_id, product_variant_id, COALESCE(note, ''::text)", name: "idx_order_items_order_product_variant_note", unique: true, where: "(order_bundle_id IS NULL)"
+    t.index ["order_bundle_id", "product_variant_id"], name: "idx_order_bundle_variant", unique: true, where: "(order_bundle_id IS NOT NULL)"
+    t.index ["order_bundle_id"], name: "index_order_items_on_order_bundle_id"
     t.index ["order_id"], name: "index_order_items_on_order_id"
     t.index ["product_id"], name: "index_order_items_on_product_id"
     t.index ["product_variant_id"], name: "index_order_items_on_product_variant_id"
     t.check_constraint "local_stock_consumed >= 0", name: "order_items_local_stock_consumed"
+    t.check_constraint "order_bundle_id IS NULL OR bundle_amount_cents >= 0 AND bundle_component_quantity > 0 AND bundle_amount_cents IS NOT NULL AND bundle_component_quantity IS NOT NULL", name: "order_bundle_line_amounts"
   end
 
   create_table "orders", force: :cascade do |t|
@@ -861,6 +893,9 @@ ActiveRecord::Schema[7.1].define(version: 2026_11_11_130000) do
     t.boolean "hide_sku_on_card", default: false, null: false
     t.bigint "variable_base_variant_id"
     t.boolean "quick_add_enabled", default: true, null: false
+    t.boolean "bundle", default: false, null: false
+    t.boolean "bundle_featured", default: false, null: false
+    t.integer "bundle_position", default: 0, null: false
     t.index ["category_id"], name: "index_products_on_category_id"
     t.index ["organisation_id", "external_id", "external_source"], name: "index_products_on_org_external_id_source", unique: true, where: "(external_id IS NOT NULL)"
     t.index ["organisation_id"], name: "index_products_on_organisation_id"
@@ -1178,6 +1213,8 @@ ActiveRecord::Schema[7.1].define(version: 2026_11_11_130000) do
   add_foreign_key "automations", "organisations"
   add_foreign_key "background_tasks", "members"
   add_foreign_key "background_tasks", "organisations"
+  add_foreign_key "bundle_components", "product_variants"
+  add_foreign_key "bundle_components", "products"
   add_foreign_key "categories", "organisations"
   add_foreign_key "category_products", "categories"
   add_foreign_key "category_products", "products"
@@ -1220,9 +1257,12 @@ ActiveRecord::Schema[7.1].define(version: 2026_11_11_130000) do
   add_foreign_key "homepage_featured_products", "products"
   add_foreign_key "homepage_special_price_products", "organisations"
   add_foreign_key "homepage_special_price_products", "products"
+  add_foreign_key "order_bundles", "orders"
+  add_foreign_key "order_bundles", "products"
   add_foreign_key "order_discount_campaigns", "organisations"
   add_foreign_key "order_discounts", "order_discount_campaigns"
   add_foreign_key "order_discounts", "organisations"
+  add_foreign_key "order_items", "order_bundles"
   add_foreign_key "order_items", "orders"
   add_foreign_key "order_items", "product_variants"
   add_foreign_key "order_items", "products"

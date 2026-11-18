@@ -29,6 +29,7 @@
       <div class="card border-0 shadow-sm mb-4" style="border-radius: 12px;">
         <div class="card-body">
           <h5 class="card-title mb-3"><%= t('storefront.checkouts.show.order_items') %></h5>
+          <%= render "storefront/shared/bundle_summary", order: @order %>
 
           <%# Desktop table view (hidden on mobile) %>
           <div class="d-none d-md-block">
