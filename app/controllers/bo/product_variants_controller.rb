@@ -87,6 +87,7 @@ class Bo::ProductVariantsController < Bo::BaseController
   def set_product
     @product = current_organisation.products.find(params[:product_id])
     authorize @product, :show?
+    redirect_to edit_bo_bundle_path(params[:org_slug], @product) if @product.bundle?
   end
 
   def set_variant

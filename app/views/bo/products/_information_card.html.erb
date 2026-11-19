@@ -1,0 +1,99 @@
+    <%# Product Information Card %>
+    <div class="card mb-4">
+      <div class="card-body">
+        <h5 class="card-title mb-3"><%= t('bo.products.show.product_information') %></h5>
+
+        <div class="mb-3">
+          <small class="text-muted d-block"><%= t('bo.products.form.description') %></small>
+          <% if @product.rich_description.body.present? %>
+            <div class="mb-0"><%= @product.rich_description %></div>
+          <% else %>
+            <p class="mb-0"><%= @product.description %></p>
+          <% end %>
+        </div>
+
+        <hr>
+
+        <div class="row">
+          <div class="col-md-6 mb-3">
+            <small class="text-muted d-block"><%= t('bo.products.form.categories') %></small>
+            <% if @product.categories.any? %>
+              <div class="d-flex flex-wrap gap-1">
+                <% @product.categories.each do |category| %>
+                  <%= link_to bo_category_path(params[:org_slug], category), class: "badge bg-secondary text-decoration-none" do %>
+                    <%= category.full_path %>
+                  <% end %>
+                <% end %>
+              </div>
+            <% else %>
+              <span class="text-muted">-</span>
+            <% end %>
+          </div>
+          <div class="col-md-6 mb-3">
+            <small class="text-muted d-block"><%= t('bo.products.form.unit_price', currency: @current_organisation.currency_symbol) %></small>
+            <% if @product.price_on_request? %>
+              <span class="badge bg-warning-subtle text-warning"><i class="fa-solid fa-tag me-1"></i><%= t('bo.products.form.price_on_request') %></span>
+            <% else %>
+              <strong><%= humanized_money_with_symbol(@product.price) || '-'  %></strong>
+            <% end %>
+          </div>
+          <div class="col-md-6 mb-3">
+            <small class="text-muted d-block"><%= t('bo.products.form.unit_description') %></small>
+            <strong><%= @product.unit_description || '-' %></strong>
+          </div>
+          <div class="col-md-6 mb-3">
+            <small class="text-muted d-block"><%= t('bo.products.form.supplier') %></small>
+            <strong><%= @product.supplier.presence || '-' %></strong>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="col-md-6 mb-3">
+            <small class="text-muted d-block"><%= t('bo.products.form.min_quantity') %></small>
+            <strong><%= @product.min_quantity %></strong>
+          </div>
+          <div class="col-md-6 mb-3">
+            <small class="text-muted d-block"><%= t('bo.products.form.min_quantity_type') %></small>
+            <strong><%= @product.min_quantity_type || t('bo.products.form.units') %></strong>
+          </div>
+        </div>
+
+        <% variant_attrs = @product.default_variant&.attribute_values&.joins(:product_attribute)&.includes(:product_attribute)&.order('product_attributes.position') %>
+        <% if variant_attrs.present? && variant_attrs.any? %>
+          <div class="row">
+            <% variant_attrs.group_by(&:product_attribute).each do |attribute, values| %>
+              <div class="col-md-6 mb-3">
+                <small class="text-muted d-block"><%= attribute.name %></small>
+                <strong><%= values.map(&:value).join(', ') %></strong>
+              </div>
+            <% end %>
+          </div>
+        <% end %>
+
+        <hr>
+
+        <div>
+          <small class="text-muted d-block mb-2"><%= t('bo.products.form.product_images') %></small>
+          <% all_photos = @product.all_photos %>
+          <% if all_photos.any? %>
+            <div class="d-flex flex-wrap gap-2" data-controller="lightbox">
+              <% main_blob_id = @product.cover_photo_blob_id || all_photos.first&.blob_id %>
+              <% all_photos.each do |photo| %>
+                <div class="border rounded p-1 position-relative" style="width: 120px;">
+                  <a href="#" data-action="lightbox#open" data-lightbox-url="<%= url_for(photo) %>" style="cursor: zoom-in;">
+                    <%= image_tag photo, style: "width: 100%; height: 100px; object-fit: cover; border-radius: 4px;", loading: "lazy" %>
+                  </a>
+                  <% if photo.blob_id == main_blob_id %>
+                    <span class="badge bg-primary position-absolute" style="bottom: 4px; left: 4px; font-size: 10px;"><%= t('bo.products.show.main') %></span>
+                  <% end %>
+                </div>
+              <% end %>
+              <%= render "shared/lightbox" %>
+            </div>
+          <% else %>
+            <p class="text-muted mb-0"><%= t('bo.products.show.no_images') %></p>
+          <% end %>
+        </div>
+      </div>
+    </div>
+

@@ -1,0 +1,68 @@
+<%= form_with model: @bundle, url: @bundle.persisted? ? bo_bundle_path(params[:org_slug], @bundle) : bo_bundles_path(params[:org_slug]), id: "bundle-form", multipart: true, data: { controller: "bundle-editor", bundle_editor_preview_url_value: preview_bo_bundles_path(params[:org_slug]), bundle_editor_preview_error_value: t("bundles.preview_error"), bundle_editor_discount_label_value: t("bundles.bundle_discount"), bundle_editor_above_label_value: t("bundles.above_components"), action: "input->bundle-editor#schedule change->bundle-editor#schedule" } do |f| %>
+  <% if @bundle.errors.any? %>
+    <div class="alert alert-danger" role="alert"><%= @bundle.errors.full_messages.to_sentence %></div>
+  <% end %>
+
+  <div class="row g-3">
+    <div class="col-md-8">
+      <%= render "bo/products/basic_information", f: f %>
+
+      <div class="card mb-3" id="bundle-components">
+        <div class="card-body">
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <h5 class="card-title mb-0"><%= t("bundles.components") %></h5>
+            <button type="button" class="btn btn-outline-primary btn-sm" data-action="bundle-editor#add"><i class="fa-solid fa-plus me-1"></i><%= t("bundles.add_component") %></button>
+          </div>
+          <p class="text-muted small mb-3"><%= t("bundles.components_hint") %></p>
+          <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+              <thead class="table-light"><tr><th><%= t("bo.common.product") %></th><th><%= t("bundles.quantity") %></th><th class="text-end"><%= t("bundles.individual_price") %></th><th class="text-end"><%= t("bo.products.show.stock") %></th><th class="text-end"><%= t("bundles.subtotal") %></th><th class="text-center"><%= t("bo.common.actions_column") %></th></tr></thead>
+              <tbody data-bundle-editor-target="rows">
+                <%= f.fields_for :bundle_components do |fields| %><%= render "component", fields: fields %><% end %>
+              </tbody>
+            </table>
+          </div>
+          <template data-bundle-editor-target="template"><%= f.fields_for :bundle_components, BundleComponent.new(quantity: 1), child_index: "NEW_COMPONENT" do |fields| %><%= render "component", fields: fields %><% end %></template>
+          <%= render "composition_summary" %>
+        </div>
+      </div>
+
+      <div class="card mb-3">
+        <div class="card-body">
+          <h5 class="card-title mb-4"><%= t('bo.products.form.pricing_units') %></h5>
+          <%= render "bo/products/price_and_unit", f: f %>
+          <div class="border-top mt-3 pt-3" aria-live="polite">
+            <small class="text-muted d-block" data-bundle-editor-target="differenceLabel"><%= @summary&.fetch(:above_base) ? t("bundles.above_components") : t("bundles.bundle_discount") %></small>
+            <strong data-bundle-editor-target="difference"><%= @summary&.fetch(:difference) || "—" %></strong>
+            <span class="text-muted small" data-bundle-editor-target="percentage"><%= @summary&.fetch(:percentage_label) %></span>
+          </div>
+        </div>
+      </div>
+
+      <%= render "bo/products/images", f: f %>
+    </div>
+
+    <div class="col-md-4">
+      <div class="card mb-3">
+        <div class="card-body">
+          <h5 class="card-title mb-4"><%= t("bo.products.form.availability") %></h5>
+          <div class="form-check form-switch"><%= f.check_box :published, class: "form-check-input", role: "switch" %><%= f.label :published, t("bundles.published"), class: "form-check-label" %></div>
+          <small class="text-muted"><%= t("bo.products.form.unpublished_hint") %></small>
+          <div class="form-check form-switch mt-3">
+            <%= f.check_box :quick_add_enabled, class: "form-check-input", role: "switch" %>
+            <%= f.label :quick_add_enabled, t('quick_add.settings.product'), class: "form-check-label" %>
+          </div>
+          <small class="text-muted d-block"><%= t('quick_add.settings.product_hint') %></small>
+        </div>
+      </div>
+      <div class="card mb-3">
+        <div class="card-body">
+          <h5 class="card-title mb-4"><%= t("bundles.homepage") %></h5>
+          <div class="form-check form-switch mb-3"><%= f.check_box :bundle_featured, class: "form-check-input", role: "switch" %><%= f.label :bundle_featured, t("bundles.featured"), class: "form-check-label" %></div>
+          <%= f.label :bundle_position, t("bundles.position"), class: "form-label" %>
+          <%= f.number_field :bundle_position, class: "form-control" %>
+        </div>
+      </div>
+    </div>
+  </div>
+<% end %>

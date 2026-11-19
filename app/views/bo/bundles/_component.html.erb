@@ -1,0 +1,23 @@
+<tr data-bundle-editor-target="row">
+  <td>
+    <%= fields.hidden_field :id %>
+    <%= fields.select :product_variant_id,
+        options_for_select([fields.object.product_variant].compact.map { |v| [v.picker_label, v.id, { "data-sku": v.sku }] }, fields.object.product_variant_id),
+        { prompt: t("bundles.search") },
+        class: "form-select form-select-sm", aria: { label: t("bundles.component") },
+        data: { controller: "tom-select", tom_select_url_value: components_bo_bundles_path(params[:org_slug]), tom_select_dropdown_parent_value: "body" } %>
+  </td>
+  <td style="width: 110px;">
+    <%= fields.number_field :quantity, min: 1, step: 1, required: true, class: "form-control form-control-sm", aria: { label: t("bundles.quantity") } %>
+  </td>
+  <% variant = fields.object.product_variant %>
+  <td class="text-end text-nowrap"><span data-component-unit-price><%= variant&.price&.format || "—" %></span></td>
+  <td class="text-end text-nowrap"><span data-component-stock><%= variant ? (variant.track_stock? ? variant.stock_quantity.to_i : t("bundles.stock_untracked")) : "—" %></span></td>
+  <td class="text-end text-nowrap"><span data-component-subtotal><%= variant&.price && fields.object.quantity.to_i.positive? ? (variant.price * fields.object.quantity).format : "—" %></span></td>
+  <td class="text-center" style="width: 60px;">
+    <%= fields.hidden_field :_destroy, value: "0" %>
+    <button type="button" class="btn btn-sm btn-link text-danger p-0" data-action="bundle-editor#remove" aria-label="<%= t("bundles.remove") %>">
+      <i class="fa-solid fa-trash"></i>
+    </button>
+  </td>
+</tr>

@@ -1,8 +1,9 @@
 module Erp
   module Sync
     class SingleProductSyncService < ProductSyncService
-      def initialize(product:, on_progress: nil)
+      def initialize(product:, on_progress: nil, variant_ids: nil)
         super(organisation: product.organisation)
+        @variant_ids = variant_ids
         @product = product
         @on_progress = on_progress
       end
@@ -12,7 +13,9 @@ module Erp
       def perform_sync
         raise Erp::ConfigurationError, 'Product sync is disabled' unless erp_configuration.can_sync_products?
 
-        variants = @product.product_variants.where(is_default: !@product.has_variants?).to_a
+        scope = @product.product_variants.where(is_default: !@product.has_variants?)
+        scope = scope.where(id: @variant_ids) if @variant_ids
+        variants = scope.to_a
         raise Erp::ApiError, 'No product variants to sync' if variants.empty?
 
         external_ids = variants.select { |v| v.external_source == external_source }.filter_map { |v| v.external_id.presence }.map(&:to_s).uniq

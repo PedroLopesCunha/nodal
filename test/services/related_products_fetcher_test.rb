@@ -46,6 +46,15 @@ class RelatedProductsFetcherTest < ActiveSupport::TestCase
     CategoryProduct.create!(category: @category, product: @related2)
   end
 
+  test "uncategorised bundles use component categories for related products" do
+    [@product, @related1, @related2].each { |product| product.update!(published: true) }
+    bundle = @organisation.products.create!(name: "Set", bundle: true, published: true, unit_price: 2000,
+      bundle_components_attributes: [@product, @related1].map { |product| { product_variant_id: product.default_variant.id, quantity: 1 } })
+    assert_includes RelatedProductsFetcher.new(product: bundle).fetch, @related2
+    bundle.update!(hide_related_products: true)
+    assert_empty RelatedProductsFetcher.new(product: bundle).fetch
+  end
+
   test "returns empty array when feature disabled at org level" do
     @organisation.update!(show_related_products: false)
 

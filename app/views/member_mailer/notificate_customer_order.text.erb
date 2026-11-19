@@ -33,8 +33,9 @@ PLACED BY
 ITEMS
 -----
 <% @order.order_items.each do |item| %>
-- <%= item.product.name %> x<%= item.quantity %> @ <%= humanized_money_with_symbol(item.price) %> = <%= humanized_money_with_symbol(OrderLinePricing.new(@order).line(item).total) %>
-<% if item.note.present? %>  <%= t('orders.item_note_label') %>: <%= item.note %>
+- <%= item.display_product_name %> x<%= item.quantity %> @ <%= humanized_money_with_symbol(item.price) %> = <%= humanized_money_with_symbol(OrderLinePricing.new(@order).line(item).total) %>
+<% if item.bundle_component? %>  <%= t("bundles.line_origin", name: item.order_bundle.name, count: item.order_bundle.quantity) %>
+<% end %><% if item.note.present? %>  <%= t('orders.item_note_label') %>: <%= item.note %>
 <% end %><% end %>
 
 ORDER SUMMARY

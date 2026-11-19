@@ -437,6 +437,7 @@ class Bo::ProductsController < Bo::BaseController
   end
 
   def show
+    redirect_to bo_bundle_path(params[:org_slug], @product) if @product.bundle?
   end
 
   def new
@@ -465,9 +466,14 @@ class Bo::ProductsController < Bo::BaseController
   end
 
   def edit
+    redirect_to edit_bo_bundle_path(params[:org_slug], @product) if @product.bundle?
   end
 
   def update
+    if @product.bundle?
+      redirect_to edit_bo_bundle_path(params[:org_slug], @product)
+      return
+    end
     update_params = product_params
     new_photos = update_params.delete(:photos)
     new_photos = nil if new_photos.blank? || new_photos == [""]

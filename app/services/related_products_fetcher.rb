@@ -53,6 +53,15 @@ class RelatedProductsFetcher
     category_ids = @product.categories.pluck(:id)
     category_ids << @product.category_id if @product.category_id.present?
 
+    if category_ids.empty? && @product.bundle?
+      @product.bundle_components.includes(product_variant: { product: :categories }).each do |component|
+        product = component.product_variant.product
+        category_ids.concat(product.categories.map(&:id))
+        category_ids << product.category_id if product.category_id.present?
+      end
+      category_ids.uniq!
+    end
+
     return Product.none if category_ids.empty?
 
     product_ids_from_categories = CategoryProduct.where(category_id: category_ids).pluck(:product_id)

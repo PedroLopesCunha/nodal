@@ -5,7 +5,7 @@ export default class extends Controller {
 
   sync() {
     // Find the quantity input from the Add to Cart form on the page
-    const quantityInput = document.querySelector('input[name="order_item[quantity]"]')
+    const quantityInput = document.querySelector('input[name="order_item[quantity]"], input[form="bundle-cart-form"][name="quantity"]')
     if (quantityInput && this.hasQuantityTarget) {
       const value = parseInt(quantityInput.value) || 1
       this.quantityTargets.forEach(hidden => hidden.value = value)

@@ -2,6 +2,8 @@ class Storefront::HomeController < Storefront::BaseController
   skip_after_action :verify_authorized
 
   def show
+    @featured_bundles = current_organisation.products.bundles.where(published: true, bundle_featured: true)
+      .order(:bundle_position, :id).select(&:bundle_purchasable?)
     @banners = current_organisation.homepage_banners.active.by_position.includes(image_attachment: :blob)
     # A hidden category stays out of the homepage cards too, even if it was
     # featured before being unpublished.
@@ -45,7 +47,7 @@ class Storefront::HomeController < Storefront::BaseController
     @products_count = current_organisation.products.where(published: true).count
 
     # Build discount info for all displayed products
-    all_products = @featured_products + @special_price_products + @frequent_products + @new_products
+    all_products = @featured_products + @special_price_products + @frequent_products + @new_products + @featured_bundles
     @product_discounts = all_products.uniq.each_with_object({}) do |product, hash|
       calculator = DiscountCalculator.new(product: product, customer: current_customer, for_display: true)
       hash[product.id] = calculator.discount_breakdown

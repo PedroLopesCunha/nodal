@@ -1,0 +1,15 @@
+<div class="d-flex align-items-center">
+  <% photo = group.product.display_photo %>
+  <% if photo.present? %>
+    <%= image_tag photo, class: "me-3 flex-shrink-0", style: "width:60px;height:60px;object-fit:cover;border-radius:8px", loading: "lazy", alt: group.name %>
+  <% else %>
+    <div class="me-3 bg-light d-flex align-items-center justify-content-center flex-shrink-0" style="width:60px;height:60px;border-radius:8px"><i class="fa-solid fa-image text-muted"></i></div>
+  <% end %>
+  <div>
+    <%= link_to group.name, product_path(org_slug: params[:org_slug], id: group.product), class: "fw-medium text-decoration-none text-body d-block" %>
+    <% group.composition.each do |component| %>
+      <div class="small text-muted"><%= component["quantity"] %> × <%= component["name"] %> <%= component["variant"] %></div>
+    <% end %>
+    <% if group.capacity_in_cart < group.quantity %><div class="small text-danger mt-1"><%= t("bundles.errors.insufficient_stock") %></div><% end %>
+  </div>
+</div>

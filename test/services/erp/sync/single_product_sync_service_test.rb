@@ -25,6 +25,18 @@ class Erp::Sync::SingleProductSyncServiceTest < ActiveSupport::TestCase
     Erp::AdapterRegistry.stub(:build, @adapter) { Erp::Sync::SingleProductSyncService.new(product: @product).call }
   end
 
+  test "optional variant selection leaves sibling variants untouched" do
+    sibling = @product.product_variants.create!(name: "Red", sku: "RED", unit_price_cents: 500,
+      published: true, is_default: false)
+    Erp::AdapterRegistry.stub(:build, @adapter) do
+      result = Erp::Sync::SingleProductSyncService.new(product: @product, variant_ids: [@variant.id]).call
+      assert result.success?
+    end
+    assert_equal ["BLUE"], @adapter.request[:skus]
+    assert_equal 500, sibling.reload.unit_price_cents
+    assert_nil sibling.last_synced_at
+  end
+
   test "updates only the real variants of this product" do
     result = sync
     assert result.success?

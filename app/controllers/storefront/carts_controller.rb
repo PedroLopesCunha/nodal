@@ -5,7 +5,7 @@ class Storefront::CartsController < Storefront::BaseController
   def show
     @order = current_cart
     authorize @order, policy_class: OrderPolicy
-    @order_items = @order.order_items.includes(product: :category)
+    @order_items = @order.order_items.where(order_bundle_id: nil).includes(product: :category)
     @order_discounts = active_order_discounts
     @suggested_products = load_suggested_products
     @min_quantity_shortfall_by_product_id =
@@ -30,6 +30,7 @@ class Storefront::CartsController < Storefront::BaseController
   def clear
     authorize current_cart, policy_class: OrderPolicy
     current_cart.order_items.destroy_all
+    current_cart.order_bundles.destroy_all
     redirect_to cart_path(org_slug: params[:org_slug]), notice: "Cart cleared."
   end
 

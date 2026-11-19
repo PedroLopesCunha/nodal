@@ -71,7 +71,16 @@ class Storefront::ShoppingListsController < Storefront::BaseController
         next
       end
 
-      existing = cart.order_items.where(note: [nil, ""]).find_by(product: product, product_variant: variant)
+      if product.bundle?
+        begin
+          BundleCartService.new(cart).add!(product, item.quantity)
+        rescue ArgumentError, ActiveRecord::RecordInvalid
+          skipped_items << product.name
+        end
+        next
+      end
+
+      existing = cart.order_items.where(order_bundle_id: nil).where(note: [nil, ""]).find_by(product: product, product_variant: variant)
       if existing
         existing.update!(quantity: existing.quantity + item.quantity)
       else

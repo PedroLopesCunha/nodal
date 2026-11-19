@@ -52,6 +52,7 @@ scope module: :storefront do
   end
 
   # Order items (add/update/remove from cart)
+  resources :order_bundles, only: [:create, :update, :destroy]
   resources :order_items, only: [:create, :update, :destroy] do
     post :bulk_add, on: :collection
     # Scan-to-cart: resolve a scanned barcode (variant SKU) and add it to the

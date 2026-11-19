@@ -4,6 +4,12 @@ class ProductVariant < ApplicationRecord
 
   belongs_to :organisation
   belongs_to :product
+  has_many :bundle_components, dependent: :restrict_with_error
+  after_save :refresh_containing_bundles
+
+  def refresh_containing_bundles
+    Product.where(id: bundle_components.select(:product_id)).find_each(&:refresh_bundle_inventory!)
+  end
   has_many :variant_attribute_values, dependent: :destroy
   has_many :attribute_values, through: :variant_attribute_values, source: :product_attribute_value
   has_many :order_items, dependent: :restrict_with_error
@@ -43,7 +49,7 @@ class ProductVariant < ApplicationRecord
   scope :stock_low_or_out, ->(threshold) { stock_tracked.where("stock_quantity <= ?", threshold) }
   # The placeholder base variant of a variable product isn't a real sellable
   # unit — exclude it from stock listings.
-  scope :real_units, -> { joins(:product).where("NOT (product_variants.is_default AND products.has_variants)") }
+  scope :real_units, -> { joins(:product).where(products: { bundle: false }).where("NOT (product_variants.is_default AND products.has_variants)") }
 
   def self.exportable_columns
     [

@@ -1,0 +1,52 @@
+<% content_for :bo_main_content do %>
+  <div class="bo-page-header">
+    <div class="d-flex justify-content-between align-items-start">
+      <div><h1><%= t("bundles.title") %></h1><p><%= t("bundles.index_subtitle") %></p></div>
+      <div class="bo-page-actions"><%= link_to new_bo_bundle_path(params[:org_slug]), class: "btn btn-primary" do %><i class="fa-solid fa-plus"></i><%= t("bundles.new") %><% end %></div>
+    </div>
+  </div>
+
+  <div class="bo-page-body">
+    <%= render "bo/products/products_tabs" %>
+    <div class="card mb-4"><div class="card-body">
+      <%= form_with url: bo_bundles_path(params[:org_slug]), method: :get, local: true, class: "row g-3 align-items-end" do %>
+        <div class="col-md-6"><div class="input-group"><span class="input-group-text bg-white border-end-0"><i class="fa-solid fa-magnifying-glass text-muted"></i></span><%= search_field_tag :query, params[:query], class: "form-control border-start-0", placeholder: t("bundles.search_bundles"), aria: { label: t("bundles.search_bundles") } %></div></div>
+        <div class="col-md-3"><%= select_tag :status, options_for_select([[t("bo.products.index.filters.all_statuses"), ""], [t("bo.products.index.table.available"), "published"], [t("bo.products.index.table.unavailable"), "unpublished"]], params[:status]), class: "form-select", aria: { label: t("bo.products.index.table.status_header") } %></div>
+        <div class="col-md-3 d-flex gap-2"><button type="submit" class="btn btn-outline-secondary"><i class="fa-solid fa-magnifying-glass"></i><%= t("bo.common.actions.search") %></button><% if params[:query].present? || params[:status].present? %><%= link_to t("bo.common.actions.clear"), bo_bundles_path(params[:org_slug]), class: "btn btn-outline-secondary" %><% end %></div>
+      <% end %>
+    </div></div>
+
+    <div class="card">
+      <% if @bundles.any? %>
+        <div class="table-responsive"><table class="table table-hover align-middle mb-0">
+          <thead class="table-light"><tr><th><%= t("bo.common.product") %></th><th class="text-center"><%= t("bundles.components") %></th><th class="text-center"><%= t("bundles.price") %></th><th class="text-center"><%= t("bo.products.index.table.status_header") %></th><th class="text-center"><%= t("bundles.homepage") %></th><th class="text-center"><%= t("bo.common.actions_column") %></th></tr></thead>
+          <tbody><% @bundles.each do |bundle| %>
+            <tr>
+              <td><%= link_to bo_bundle_path(params[:org_slug], bundle), class: "d-flex align-items-center gap-2 text-decoration-none text-body" do %>
+                <% if bundle.display_photo %><%= image_tag bundle.display_photo, width: 40, height: 40, class: "rounded", style: "object-fit:cover", alt: bundle.name %><% else %><div class="rounded bg-light d-flex align-items-center justify-content-center" style="width:40px;height:40px"><i class="fa-solid fa-image text-muted"></i></div><% end %>
+                <span class="fw-semibold"><%= bundle.name %></span>
+              <% end %></td>
+              <td class="text-center"><%= bundle.bundle_components.size %></td>
+              <td class="text-center"><%= bundle.price.format %></td>
+              <td class="text-center"><span class="badge <%= bundle.published? ? 'bg-success-subtle text-success' : 'bg-danger-subtle text-danger' %>"><%= bundle.published? ? t("bo.products.index.table.available") : t("bo.products.index.table.unavailable") %></span></td>
+              <td class="text-center"><% if bundle.bundle_featured? %><i class="fa-solid fa-star text-warning" aria-label="<%= t('bundles.featured') %>"></i><% else %><span class="text-muted">—</span><% end %></td>
+              <td class="text-center"><div class="d-flex justify-content-center gap-2">
+                <%= link_to bo_bundle_path(params[:org_slug], bundle), class: "btn btn-sm btn-link text-muted p-0", aria: { label: t("bundles.view") } do %><i class="fa-solid fa-eye"></i><% end %>
+                <%= link_to edit_bo_bundle_path(params[:org_slug], bundle), class: "btn btn-sm btn-link text-muted p-0", aria: { label: t("bundles.edit") } do %><i class="fa-solid fa-pen-to-square"></i><% end %>
+                <%= button_to bo_bundle_path(params[:org_slug], bundle), method: :delete, class: "btn btn-sm btn-link text-danger p-0", aria: { label: t("bundles.remove") }, data: { turbo_confirm: t("bundles.confirm_remove") } do %><i class="fa-solid fa-trash"></i><% end %>
+              </div></td>
+            </tr>
+          <% end %></tbody>
+        </table></div>
+        <% if @pagy.pages > 1 %><div class="card-footer d-flex justify-content-center"><%== pagy_bootstrap_nav(@pagy) %></div><% end %>
+      <% else %>
+        <div class="card-body text-center py-5">
+          <i class="fa-solid fa-boxes-stacked fa-3x text-muted mb-3"></i>
+          <h5><%= params[:query].present? || params[:status].present? ? t("bundles.no_results") : t("bundles.empty_title") %></h5>
+          <p class="text-muted"><%= t("bundles.empty_hint") %></p>
+          <%= link_to new_bo_bundle_path(params[:org_slug]), class: "btn btn-primary" do %><i class="fa-solid fa-plus"></i><%= t("bundles.new") %><% end %>
+        </div>
+      <% end %>
+    </div>
+  </div>
+<% end %>

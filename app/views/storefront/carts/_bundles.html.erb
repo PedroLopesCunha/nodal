@@ -1,0 +1,27 @@
+<% @order.order_bundles.includes(product: :photos_attachments, order_items: :product_variant).each do |group| %>
+  <% if show_prices? %>
+    <% total = group.order_items.sum(Money.new(0, @order.organisation.currency)) { |item| order_line_pricing(@order).line(item).total } %>
+  <% end %>
+  <% if mobile %>
+    <div class="cart-item-compact p-3 border-bottom" data-cart-bundle="<%= group.id %>">
+      <%= render "storefront/carts/bundle_identity", group: group %>
+      <div class="d-flex justify-content-between align-items-center gap-2 mt-3">
+        <%= render "storefront/carts/bundle_quantity", group: group, mobile: true %>
+        <div class="d-flex align-items-center gap-2">
+          <% if show_prices? %><span class="fw-bold small"><%= money_amount(total) %></span><% end %>
+          <%= render "storefront/carts/bundle_remove", group: group %>
+        </div>
+      </div>
+    </div>
+  <% else %>
+    <tr data-cart-bundle="<%= group.id %>">
+      <td class="ps-4"><%= render "storefront/carts/bundle_identity", group: group %></td>
+      <td><%= render "storefront/carts/bundle_quantity", group: group, mobile: false %></td>
+      <% if show_prices? %>
+        <td class="text-end text-nowrap"><%= money_amount(total / group.quantity) %></td>
+        <td class="text-end fw-medium text-nowrap"><%= money_amount(total) %></td>
+      <% end %>
+      <td class="text-end pe-4"><%= render "storefront/carts/bundle_remove", group: group %></td>
+    </tr>
+  <% end %>
+<% end %>

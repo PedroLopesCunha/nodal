@@ -11,5 +11,5 @@
     <span class="badge bg-success-subtle text-success small"><%= t('storefront.line_pricing.product') %> -<%= format_discount_percentage(pricing.line_discount_percentage) %></span>
   <% end %>
 <% else %>
-  <%= money_amount(item.price) %>
+  <%= money_amount(item.bundle_component? ? pricing.unit_price : item.price) %>
 <% end %>

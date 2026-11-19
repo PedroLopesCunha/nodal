@@ -1,6 +1,7 @@
 class Product < ApplicationRecord
   include Slugable
   include HasExportableColumns
+  include BundleProduct
 
   # Storefront sort options exposed in the products listing dropdown.
   # Reused by Organisation and Category to validate their default_product_sort.

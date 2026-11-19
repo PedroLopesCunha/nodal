@@ -1,0 +1,10 @@
+<% order.order_bundles.includes(:order_items).each do |group| %>
+  <section class="border rounded p-3 mb-3">
+    <div class="d-flex justify-content-between gap-3 flex-wrap">
+      <div><span class="badge bg-primary"><%= t("bundles.label") %></span><h3 class="h6 mt-2"><%= group.name %> × <%= group.quantity %></h3>
+        <% group.composition.each do |component| %><div class="small"><%= component["quantity"] %> × <%= component["name"] %> <%= component["variant"] %></div><% end %>
+      </div>
+      <% if show_prices? %><strong><%= money_amount(group.order_items.sum(Money.new(0, order.organisation.currency)) { |item| order_line_pricing(order).line(item).total }) %></strong><% end %>
+    </div>
+  </section>
+<% end %>

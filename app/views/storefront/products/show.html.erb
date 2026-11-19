@@ -59,6 +59,10 @@
         <!-- Product Name -->
         <h1 class="mb-2" style="font-size: 2rem; font-weight: 600;"><%= @product.name %></h1>
 
+        <% if @product.bundle? %>
+          <p class="text-muted small mb-3"><%= t("bundles.composition_label", references: @product.bundle_components.size, units: @product.bundle_components.sum(&:quantity)) %></p>
+        <% end %>
+
         <!-- Description -->
         <% if @product.rich_description.body.present? %>
           <div class="text-muted mb-4"><%= @product.rich_description %></div>
@@ -69,7 +73,19 @@
         <!-- Price -->
         <% if show_prices? %>
         <div class="mb-3">
-          <% if @product.price_on_request? %>
+          <% if @product.bundle? %>
+            <% comparison = bundle_comparison(@product) %>
+            <div class="price-with-discount">
+              <% if comparison[:savings].positive? %>
+                <span class="text-muted small d-block"><%= t("bundles.separate") %></span>
+                <del class="original-price text-muted text-decoration-line-through" style="font-size:1.5rem" data-product-pricing-target="headerOriginal" aria-label="<%= t('bundles.separate') %>"><%= money_amount(comparison[:separate]) %></del>
+              <% end %>
+              <span class="<%= comparison[:savings].positive? ? 'text-success' : 'text-primary' %>" style="font-size:2.5rem;font-weight:700" data-product-pricing-target="headerPrice"><%= money_amount(comparison[:price]) %></span>
+            </div>
+            <% if comparison[:savings].positive? %>
+              <div class="text-success mt-2 mb-0" data-bundle-savings><i class="fa-solid fa-tags me-2"></i><strong><%= t("bundles.savings", amount: money_amount(comparison[:savings])) %></strong></div>
+            <% end %>
+          <% elsif @product.price_on_request? %>
             <span class="text-primary" style="font-size: 2rem; font-weight: 700;"><%= t('storefront.products.show.price_on_request') %></span>
           <% elsif @product.variable? %>
             <%# Honest no-selection header: strikethrough only when the range is
@@ -106,6 +122,19 @@
 
         <% if show_prices? && !@product.price_on_request? && current_customer&.erp_discount_percentage.to_d.positive? %>
           <p class="small text-muted mb-3"><em><%= t('erp_discount.included', percentage: number_to_percentage(current_customer.erp_discount_percentage, precision: 4, strip_insignificant_zeros: true)) %></em></p>
+        <% end %>
+
+        <% if @product.bundle? %>
+          <% if current_organisation.show_product_availability? %>
+            <p class="small mb-3" data-bundle-availability>
+              <i class="fa-solid fa-circle me-2 <%= @product.available? ? 'text-success' : 'text-danger' %>" style="font-size:.65rem"></i>
+              <%= t(@product.available? ? "storefront.products.show.in_stock" : "storefront.products.show.out_of_stock") %>
+              <% if (stock_label = stock_display_label(@default_variant, beside_availability: true)).present? %>
+                <span class="text-muted ms-1" data-bundle-stock><%= stock_label %></span>
+              <% end %>
+            </p>
+          <% end %>
+          <%= render "storefront/products/bundle_purchase" %>
         <% end %>
 
         <!-- Discount Details Section -->
@@ -166,7 +195,7 @@
         <% display_sku = @product.variable? ? (@default_variant&.sku || @product.sku) : @product.sku %>
         <% show_sku = current_organisation.show_product_sku? && display_sku.present? %>
         <% show_save_list = current_customer && !browsing_as_member? %>
-        <% if show_sku || show_save_list %>
+        <% if !@product.bundle? && (show_sku || show_save_list) %>
           <div class="mb-4 d-flex justify-content-between align-items-center flex-wrap gap-2">
             <div class="text-muted">
               <% if show_sku %>
@@ -183,7 +212,7 @@
         <% show_min_qty = current_organisation.show_product_min_quantity? %>
         <% show_category = current_organisation.show_product_category? %>
         <% show_availability = current_organisation.show_product_availability? %>
-        <% if show_min_qty || show_category || show_availability %>
+        <% if !@product.bundle? && (show_min_qty || show_category || show_availability) %>
           <div class="row g-3 mb-4 py-3 border-top border-bottom">
             <% if show_min_qty %>
               <div class="col-6 col-md-4">
@@ -246,7 +275,8 @@
           </div>
         <% end %>
 
-        <%= render "storefront/products/purchase" %>
+        <%= render "storefront/products/purchase" unless @product.bundle? %>
+        <%= render "storefront/products/bundle_opportunities" %>
 
         <% if @product.price_on_request? %>
           <%
@@ -295,6 +325,8 @@
 </div>
 
 <% end %>
+
+<%= render "storefront/products/bundle_components" if @product.bundle? %>
 
 <%= render 'related_products' if @related_products&.any? %>
 

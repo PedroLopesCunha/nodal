@@ -5,6 +5,7 @@
 # its ancestor categories).
 class CartDiscountContext
   def initialize(order_items)
+    order_items = order_items.reject(&:bundle_component?)
     @scope_evaluator = DiscountScopeEvaluator.new(order_items)
     @product_qty = Hash.new(0)
     @product_amount = Hash.new(0)

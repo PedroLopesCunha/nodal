@@ -1,0 +1,6 @@
+<div style="font-size:12px;color:#6b7280;margin-top:4px">
+  <div><%= t("bundles.per_bundle") %></div>
+  <% group.composition.each do |component| %>
+    <div><%= component["quantity"] %> × <%= component["name"] %><% if component["variant"].present? %> · <%= component["variant"] %><% end %><% if component["sku"].present? %> (<%= component["sku"] %>)<% end %></div>
+  <% end %>
+</div>

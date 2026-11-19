@@ -1,0 +1,50 @@
+<% product = f.object %>
+<div class="card mb-3">
+  <div class="card-body">
+    <h5 class="card-title mb-4"><%= t('bo.products.form.basic_information') %></h5>
+    <div class="row g-3">
+      <div class="col-md-8">
+        <%= f.label :name, class: "form-label" do %><%= t('bo.products.form.product_name') %> <span class="text-danger">*</span><% end %>
+        <%= f.text_field :name, class: "form-control", placeholder: t('bo.products.form.placeholders.product_name'), required: true %>
+      </div>
+      <% unless product.bundle? %>
+        <div class="col-md-4"><%= f.label :sku, t('bo.products.form.sku'), class: "form-label" %><%= f.text_field :sku, class: "form-control", placeholder: t('bo.products.form.placeholders.sku') %></div>
+      <% end %>
+    </div>
+    <% unless product.bundle? %>
+      <div class="row g-3 mt-1"><div class="col-md-4">
+        <%= f.label :supplier, t('bo.products.form.supplier'), class: "form-label" %><%= f.text_field :supplier, class: "form-control", placeholder: t('bo.products.form.placeholders.supplier') %>
+        <small class="text-muted"><%= t('bo.products.form.supplier_hint') %></small>
+      </div></div>
+    <% end %>
+    <div class="row g-3 mt-1"><div class="col-md-12">
+      <%= f.label :rich_description, t('bo.products.form.description'), class: "form-label" %>
+      <%= f.rich_text_area :rich_description, class: "form-control" %>
+      <small class="text-muted"><%= t('bo.products.form.description_hint') %></small>
+    </div></div>
+    <div class="row g-3 mt-1">
+      <div class="col-md-6">
+        <label class="form-label"><%= t('bo.products.form.categories') %> <span class="text-danger">*</span></label>
+        <%= hidden_field_tag "product[category_ids][]", "" %>
+        <div data-controller="checkbox-select">
+          <input type="text" class="form-control form-control-sm mb-2" placeholder="<%= t('bo.products.form.search_categories') %>" aria-label="<%= t('bo.products.form.search_categories') %>" data-checkbox-select-target="search" data-action="input->checkbox-select#filter">
+          <div class="border rounded p-2" style="max-height: 200px; overflow-y: auto;">
+            <% current_organisation.categories.kept.order(:ancestry, :position).each do |category| %>
+              <% category_input_id = product.bundle? ? "bundle_category_#{category.id}" : "category_#{category.id}" %>
+              <div class="form-check" data-checkbox-select-target="item" data-label="<%= category.full_path %>">
+                <%= check_box_tag "product[category_ids][]", category.id, product.category_ids.include?(category.id), class: "form-check-input", id: category_input_id %>
+                <%= label_tag category_input_id, category.full_path, class: "form-check-label" %>
+              </div>
+            <% end %>
+          </div>
+        </div>
+        <small class="text-muted"><%= t('bo.products.form.categories_hint') %></small>
+      </div>
+      <div class="col-md-6">
+        <%= f.label :slug, t('bo.products.form.slug'), class: "form-label" %>
+        <%= f.text_field :slug, class: "form-control", placeholder: t('bo.products.form.placeholders.slug') %>
+        <small class="text-muted"><%= t('bo.products.form.slug_hint') %></small>
+      </div>
+    </div>
+  </div>
+</div>

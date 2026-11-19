@@ -211,6 +211,7 @@ export default class extends Controller {
   updateSelection() {
     const selectedValues = this.getSelectedValues()
     const variant = this.findMatchingVariant(selectedValues)
+    this.updateBundleOpportunities(variant)
 
     if (variant) {
       this.selectedVariant = variant
@@ -258,6 +259,18 @@ export default class extends Controller {
         this.discountBadgeTarget.classList.add("d-none")
       }
     }
+  }
+
+  updateBundleOpportunities(variant) {
+    const section = this.element.querySelector("#product-bundles")
+    if (!section) return
+    let visible = false
+    section.querySelectorAll("[data-bundle-variant-ids]").forEach(row => {
+      const ids = JSON.parse(row.dataset.bundleVariantIds)
+      row.hidden = Boolean(variant && !ids.includes(variant.id))
+      visible ||= !row.hidden
+    })
+    section.classList.toggle("d-none", !visible)
   }
 
   showPriceRange() {

@@ -48,7 +48,7 @@ export default class extends Controller {
     try {
       const response = await fetch(form.action, {
         method: "POST", body: new FormData(form),
-        headers: { Accept: "application/json", "X-CSRF-Token": document.querySelector('meta[name="csrf-token"]').content }
+        headers: { Accept: "application/json", "X-CSRF-Token": document.querySelector('meta[name="csrf-token"]')?.content || "" }
       })
       if (response.redirected) throw new Error()
       const result = await response.json()

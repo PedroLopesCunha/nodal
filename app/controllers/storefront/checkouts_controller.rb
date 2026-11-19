@@ -10,7 +10,7 @@ class Storefront::CheckoutsController < Storefront::BaseController
       return
     end
 
-    @order_items = @order.order_items.includes(product: :category)
+    @order_items = @order.order_items.where(order_bundle_id: nil).includes(product: :category)
     @shipping_addresses = current_customer.shipping_addresses
     @billing_address = current_customer.billing_address
     @earliest_delivery_date = current_organisation.earliest_delivery_date

@@ -38,7 +38,15 @@
             </tr>
           </thead>
           <tbody>
-            <% @order.order_items.includes(:product, :product_variant).each do |item| %>
+            <% @order.order_bundles.includes(:order_items).each do |group| %>
+              <% total = group.customer_total(order_line_pricing(@order)) if show_prices? %>
+              <tr data-order-bundle="<%= group.id %>">
+                <td><div class="fw-medium"><%= group.name %></div><%= render "shared/orders/bundle_contents", group: group %></td>
+                <td class="text-center"><%= group.quantity %></td>
+                <% if show_prices? %><td class="text-end"><%= money_amount(total / group.quantity) %></td><td class="text-end fw-medium"><%= money_amount(total) %></td><% end %>
+              </tr>
+            <% end %>
+            <% @order.order_items.where(order_bundle_id: nil).includes(:product, :product_variant).each do |item| %>
               <tr>
                 <td>
                   <div class="d-flex align-items-center">

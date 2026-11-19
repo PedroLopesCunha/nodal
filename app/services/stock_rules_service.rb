@@ -5,6 +5,7 @@ class StockRulesService
 
   def apply_to_variant(variant)
     record_stock_event(variant)
+    variant.refresh_containing_bundles
 
     # A variant that doesn't track stock is treated as unlimited / always in stock,
     # so it must stay available regardless of the org's out-of-stock strategy.

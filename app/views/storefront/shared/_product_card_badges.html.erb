@@ -1,3 +1,7 @@
+<% if local_assigns[:product] && bundle_opportunity?(product) %>
+  <span class="badge bg-primary position-absolute bottom-0 start-0 m-2" data-bundle-opportunity><%= t("bundles.available_badge") %></span>
+<% end %>
+<% if local_assigns[:product]&.bundle? %><span class="badge bg-primary position-absolute top-0 start-0 m-2"><%= t("bundles.label") %></span><% end %>
 <%#
   Discount/promotion badges overlaid on the product card image.
   Renders nothing if there's no meaningful discount.

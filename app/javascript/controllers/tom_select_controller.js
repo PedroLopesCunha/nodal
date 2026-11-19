@@ -10,7 +10,7 @@ import TomSelect from "tom-select"
 // catalog is 4234 sellable variants, and a <select> carrying all of them in
 // every row is what made picking a line by SKU impractical in the first place.
 export default class extends Controller {
-  static values = { url: String, minChars: { type: Number, default: 2 } }
+  static values = { url: String, minChars: { type: Number, default: 2 }, dropdownParent: String }
 
   connect() {
     // Build options data with SKU before Tom Select initializes,
@@ -60,6 +60,10 @@ export default class extends Controller {
         }
       }
     }
+
+    // A picker inside a responsive table can place its popup outside the
+    // scrolling container, so the result list is not clipped by the rows.
+    if (this.hasDropdownParentValue) config.dropdownParent = this.dropdownParentValue
 
     if (this.hasUrlValue) {
       // Nothing is worth showing until the user has typed something specific:

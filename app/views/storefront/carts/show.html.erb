@@ -61,9 +61,10 @@
   </div>
 <% else %>
   <div class="row g-4" data-controller="cart-summary">
-    <div class="col-lg-8">
+    <div class="col-lg-8" data-cart-summary-target="products">
+
       <%# Desktop table view (hidden on mobile) %>
-      <div class="card border-0 shadow-sm d-none d-lg-block" style="border-radius: 12px;" data-cart-summary-target="products">
+      <div class="card border-0 shadow-sm d-none d-lg-block" style="border-radius: 12px;">
         <div class="card-body p-0">
           <table class="table table-hover align-middle mb-0">
             <thead class="table-light">
@@ -78,6 +79,7 @@
               </tr>
             </thead>
             <tbody>
+              <%= render "storefront/carts/bundles", mobile: false %>
               <% @order_items.each do |item| %>
                 <tr>
                   <td class="ps-4">
@@ -142,6 +144,7 @@
       <div class="d-lg-none">
         <div class="card border-0 shadow-sm" style="border-radius: 12px;">
           <div class="card-body p-0">
+            <%= render "storefront/carts/bundles", mobile: true %>
             <% @order_items.each_with_index do |item, index| %>
               <div class="cart-item-compact p-3 <%= 'border-bottom' unless index == @order_items.length - 1 %>">
                 <%# Line 1: Thumbnail + Name + Quantity controls %>

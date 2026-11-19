@@ -32,6 +32,7 @@ class Order < ApplicationRecord
   belongs_to :order_discount, optional: true
   belongs_to :promo_code, optional: true
   has_many :order_items, dependent: :destroy
+  has_many :order_bundles, dependent: :destroy
   has_many :products, through: :order_items
   has_one :promo_code_redemption, dependent: :destroy
 
@@ -133,11 +134,11 @@ class Order < ApplicationRecord
   end
 
   def item_count
-    order_items.sum(:quantity)
+    order_items.where(order_bundle_id: nil).sum(:quantity) + order_bundles.sum(:quantity)
   end
 
   def line_item_count
-    order_items.size
+    order_items.where(order_bundle_id: nil).count + order_bundles.count
   end
 
   def place!
@@ -190,9 +191,31 @@ class Order < ApplicationRecord
     changes = blank_cart_changes
     return changes if placed?
 
+    order_bundles.includes(order_items: :product_variant).each do |group|
+      if BundleCartService.new(self).refresh_price!(group)
+        changes[:price_changed].concat(group.order_items.pluck(:id))
+      end
+      capacity = group.capacity_in_cart
+      if capacity < group.quantity
+        if organisation.cart_stock_policy == "remove" && capacity.zero?
+          changes[:removed] << { id: group.id, name: group.name }
+          group.destroy!
+        elsif organisation.cart_qty_overflow_policy == "cap" && capacity >= 1
+          BundleCartService.new(self).update!(group, capacity)
+          changes[:capped] << { id: group.id, name: group.name, to: capacity }
+        else
+          changes[:out_of_stock] << { id: group.id, name: group.name }
+        end
+      end
+    end
+
     items = order_items.includes(:product_variant, product: :categories).to_a
     remaining = []
     items.each do |item|
+      if item.bundle_component?
+        remaining << item
+        next
+      end
       status = item.stock_status
       if status.in?(%i[out_of_stock variant_unpublished]) && organisation.cart_stock_policy == "remove"
         changes[:removed] << cart_item_label(item)
@@ -205,7 +228,8 @@ class Order < ApplicationRecord
       when :out_of_stock, :variant_unpublished
         changes[:out_of_stock] << cart_item_label(item)
       when :qty_overflow
-        available = item.product_variant.stock_quantity.to_i
+        others = items.reject { |i| i.id == item.id }.select { |i| i.product_variant_id == item.product_variant_id }.sum(&:quantity)
+        available = [item.product_variant.stock_quantity.to_i - others, 0].max
         if organisation.cart_qty_overflow_policy == "cap" && available >= 1
           record_unmet_demand(item, requested: item.quantity, kept: available, reason: :capped)
           item.quantity = available
@@ -276,6 +300,10 @@ class Order < ApplicationRecord
   # Runs after refresh_cart!, so items already removed/capped by the cart
   # policies are no longer counted here.
   def validate_checkout_stock!
+    if order_bundles.any? { |group| group.capacity_in_cart < group.quantity }
+      errors.add(:base, I18n.t("bundles.errors.insufficient_stock"))
+      raise ActiveRecord::RecordInvalid, self
+    end
     policy = organisation.checkout_stock_policy
     return if policy == "allow" || stock_issue_items.empty?
 
@@ -302,7 +330,7 @@ class Order < ApplicationRecord
   # Returns [{ product:, required:, current:, label:, shortfall: }]. Used for
   # the cart warning and the checkout gate.
   def combined_min_quantity_shortfalls
-    order_items.reload.group_by(&:product).filter_map do |product, items|
+    order_items.reload.reject(&:bundle_component?).group_by(&:product).filter_map do |product, items|
       next unless product&.min_quantity_combined?
 
       min = product.enforced_min_quantity
@@ -325,6 +353,7 @@ class Order < ApplicationRecord
     messages = []
 
     order_items.reload.each do |item|
+      next if item.bundle_component?
       product = item.product
       next unless product && !product.min_quantity_combined?
 
@@ -516,10 +545,10 @@ class Order < ApplicationRecord
     when 'percentage'
       # Compound: the manual discount applies last, on the total already reduced
       # by the auto tier and the promo code — not on the gross total.
-      base = [total_with_auto_discount - promo_code_discount, Money.new(0, organisation.currency)].max
+      base = [total_with_auto_discount - bundle_subtotal - promo_code_discount, Money.new(0, organisation.currency)].max
       base * discount_value
     when 'fixed'
-      Money.new((discount_value * 100).to_i, organisation.currency)
+      [Money.new((discount_value * 100).to_i, organisation.currency), total_with_auto_discount - bundle_subtotal - promo_code_discount].min
     else
       Money.new(0, organisation.currency)
     end
@@ -528,7 +557,11 @@ class Order < ApplicationRecord
   # Sum of line totals BEFORE any discount (base price × quantity) — the
   # reference for the organisation's maximum-discount cap.
   def gross_subtotal
-    order_items.sum { |i| i.price * i.quantity }
+    order_items.sum(Money.new(0, organisation.currency)) { |i| i.bundle_component? ? i.total_price : i.price * i.quantity }
+  end
+
+  def bundle_subtotal
+    order_items.select(&:bundle_component?).sum(Money.new(0, organisation.currency), &:total_price)
   end
 
   # ERP discount is applied after Nodal's rules and cap. Never feed it back
@@ -574,7 +607,7 @@ class Order < ApplicationRecord
     if placed? && promo_code_discount_amount_cents.present? && promo_code_discount_amount_cents > 0
       Money.new(promo_code_discount_amount_cents, organisation.currency)
     elsif promo_code.present? && draft?
-      promo_code.calculate_discount(total_with_auto_discount)
+      promo_code.calculate_discount(total_with_auto_discount - bundle_subtotal)
     else
       Money.new(0, organisation.currency)
     end
@@ -662,7 +695,7 @@ class Order < ApplicationRecord
   end
 
   def max_discount_floor
-    gross_subtotal * (1 - organisation.max_discount_percentage)
+    bundle_subtotal + (gross_subtotal - bundle_subtotal) * (1 - organisation.max_discount_percentage)
   end
 
   def cap_subtotal(subtotal)
@@ -765,7 +798,7 @@ class Order < ApplicationRecord
       return
     end
 
-    discount_amount = promo_code.calculate_discount(total_with_auto_discount)
+    discount_amount = promo_code.calculate_discount(total_with_auto_discount - bundle_subtotal)
     self.promo_code_discount_amount_cents = discount_amount.cents
 
     PromoCodeRedemption.create!(
