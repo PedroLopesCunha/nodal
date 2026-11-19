@@ -88,6 +88,7 @@ Rails.application.routes.draw do
     devise_for :members, controllers: { sessions: "members/sessions" }
     namespace :bo do
       resources :bundles do
+        post :sync_erp, on: :member
         get :components, on: :collection
         post :preview, on: :collection
       end

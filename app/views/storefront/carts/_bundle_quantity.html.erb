@@ -1,0 +1,5 @@
+<%= form_with url: order_bundle_path(org_slug: params[:org_slug], id: group), method: :patch, local: true, class: "d-flex justify-content-center flex-shrink-0", data: { controller: "cart-quantity" } do %>
+  <%= render layout: "storefront/shared/quantity_stepper" do %>
+    <%= number_field_tag :quantity, group.quantity, id: "bundle-quantity-#{group.id}-#{mobile ? 'mobile' : 'desktop'}", min: 1, step: 1, aria: { label: t("bundles.set_quantity") }, class: "form-control text-center", style: "width:70px", data: { cart_quantity_target: "input", action: "change->cart-quantity#submit" } %>
+  <% end %>
+<% end %>

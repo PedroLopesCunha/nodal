@@ -1,17 +1,27 @@
-<% @order.order_bundles.includes(:product, :order_items).each do |group| %>
-  <div class="card mb-3"><div class="card-body">
-    <div class="d-flex justify-content-between gap-3 flex-wrap">
-      <div><span class="badge bg-primary"><%= t("bundles.label") %></span><h2 class="h5 mt-2"><%= group.name %></h2>
-        <% group.composition.each do |component| %><div class="small text-muted"><%= component["quantity"] %> × <%= component["name"] %> <%= component["variant"] %></div><% end %>
-        <% if group.capacity_in_cart < group.quantity %><p class="text-danger"><%= t("bundles.errors.insufficient_stock") %></p><% end %>
-      </div>
-      <div>
-        <% if show_prices? %><p class="fw-semibold"><%= money_amount(group.order_items.sum(Money.new(0, @order.organisation.currency)) { |item| order_line_pricing(@order).line(item).total }) %></p><% end %>
-        <%= form_with url: order_bundle_path(org_slug: params[:org_slug], id: group), method: :patch, class: "d-flex gap-2 mb-2" do |f| %>
-          <%= number_field_tag :quantity, group.quantity, min: 1, step: 1, aria: { label: t("bundles.quantity") }, class: "form-control", style: "width:90px" %><%= f.submit t("bundles.save"), class: "btn btn-outline-primary" %>
-        <% end %>
-        <%= button_to t("bundles.remove"), order_bundle_path(org_slug: params[:org_slug], id: group), method: :delete, class: "btn btn-outline-danger btn-sm" %>
+<% @order.order_bundles.includes(product: :photos_attachments, order_items: :product_variant).each do |group| %>
+  <% if show_prices? %>
+    <% total = group.order_items.sum(Money.new(0, @order.organisation.currency)) { |item| order_line_pricing(@order).line(item).total } %>
+  <% end %>
+  <% if mobile %>
+    <div class="cart-item-compact p-3 border-bottom" data-cart-bundle="<%= group.id %>">
+      <%= render "storefront/carts/bundle_identity", group: group %>
+      <div class="d-flex justify-content-between align-items-center gap-2 mt-3">
+        <%= render "storefront/carts/bundle_quantity", group: group, mobile: true %>
+        <div class="d-flex align-items-center gap-2">
+          <% if show_prices? %><span class="fw-bold small"><%= money_amount(total) %></span><% end %>
+          <%= render "storefront/carts/bundle_remove", group: group %>
+        </div>
       </div>
     </div>
-  </div></div>
+  <% else %>
+    <tr data-cart-bundle="<%= group.id %>">
+      <td class="ps-4"><%= render "storefront/carts/bundle_identity", group: group %></td>
+      <td><%= render "storefront/carts/bundle_quantity", group: group, mobile: false %></td>
+      <% if show_prices? %>
+        <td class="text-end text-nowrap"><%= money_amount(total / group.quantity) %></td>
+        <td class="text-end fw-medium text-nowrap"><%= money_amount(total) %></td>
+      <% end %>
+      <td class="text-end pe-4"><%= render "storefront/carts/bundle_remove", group: group %></td>
+    </tr>
+  <% end %>
 <% end %>

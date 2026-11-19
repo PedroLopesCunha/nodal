@@ -122,7 +122,16 @@
       </tr>
     </thead>
     <tbody>
-      <% @order.order_items.includes(:product, :product_variant).each do |item| %>
+      <% @order.order_bundles.includes(:order_items).each do |group| %>
+        <% total = group.customer_total(order_line_pricing(@order)) %>
+        <tr data-order-bundle="<%= group.id %>">
+          <td><div class="fw-bold"><%= group.name %></div><%= render "shared/orders/bundle_contents", group: group %></td>
+          <td>-</td><td class="text-center"><%= group.quantity %></td>
+          <td class="text-end"><%= humanized_money_with_symbol(total / group.quantity) %></td>
+          <td class="text-center">-</td><td class="text-end fw-bold"><%= humanized_money_with_symbol(total) %></td>
+        </tr>
+      <% end %>
+      <% @order.order_items.where(order_bundle_id: nil).includes(:product, :product_variant).each do |item| %>
         <tr>
           <td>
             <div class="fw-bold"><%= item.display_product_name %></div>

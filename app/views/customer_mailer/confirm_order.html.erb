@@ -44,7 +44,7 @@
             <span style="font-size: 14px; font-weight: 600; color: #1a1a1a; text-transform: uppercase; letter-spacing: 0.5px;"><%= t('mailers.common.order_summary') %></span>
           </td>
           <td align="right">
-            <span style="font-size: 13px; color: #6b7177;"><%= @order.order_items.count %> <%= @order.order_items.count == 1 ? t('mailers.common.item') : t('mailers.common.items') %></span>
+            <span style="font-size: 13px; color: #6b7177;"><%= @order.line_item_count %> <%= @order.line_item_count == 1 ? t('mailers.common.item') : t('mailers.common.items') %></span>
           </td>
         </tr>
       </table>
@@ -62,10 +62,20 @@
       <%= t('mailers.common.price') %>
     </td>
   </tr>
+  <% @order.order_bundles.includes(:order_items).each do |group| %>
+    <tr data-order-bundle="<%= group.id %>">
+      <td style="padding:16px 20px;background-color:#ffffff;border-bottom:1px solid #f3f4f6;">
+        <span style="font-size:15px;font-weight:500;color:#1a1a1a"><%= group.name %></span>
+        <%= render "shared/orders/bundle_contents", group: group %>
+      </td>
+      <td align="center" style="padding:16px;background-color:#ffffff;"><%= group.quantity %></td>
+      <td align="right" style="padding:16px 20px;background-color:#ffffff;font-weight:500;"><%= group.customer_total(line_pricing).format %></td>
+    </tr>
+  <% end %>
   <!-- Order items -->
-  <% @order.order_items.each_with_index do |item, index| %>
+  <% @order.order_items.where(order_bundle_id: nil).each_with_index do |item, index| %>
     <tr>
-      <td style="padding: 16px 20px; background-color: #ffffff; <%= index < @order.order_items.count - 1 ? 'border-bottom: 1px solid #f3f4f6;' : '' %>">
+      <td style="padding: 16px 20px; background-color: #ffffff; <%= index < @order.line_item_count - 1 ? 'border-bottom: 1px solid #f3f4f6;' : '' %>">
         <span style="font-size: 15px; font-weight: 500; color: #1a1a1a;"><%= item.display_product_name %></span>
         <% if item.product_variant.present? && item.product.variable? %>
           <span style="display: block; font-size: 13px; color: #6366f1; margin-top: 2px;"><%= item.product_variant.sku.presence || item.product_variant.option_values_string %></span>
@@ -80,10 +90,10 @@
           <span style="display: block; font-size: 13px; color: #6b7280; font-style: italic; margin-top: 4px;"><%= t('orders.item_note_label') %>: <%= item.note %></span>
         <% end %>
       </td>
-      <td align="center" style="padding: 16px; background-color: #ffffff; <%= index < @order.order_items.count - 1 ? 'border-bottom: 1px solid #f3f4f6;' : '' %>">
+      <td align="center" style="padding: 16px; background-color: #ffffff; <%= index < @order.line_item_count - 1 ? 'border-bottom: 1px solid #f3f4f6;' : '' %>">
         <span style="display: inline-block; background-color: #f3f4f6; padding: 4px 12px; border-radius: 20px; font-size: 14px; font-weight: 600; color: #4b5563;"><%= item.quantity %></span>
       </td>
-      <td align="right" style="padding: 16px 20px; background-color: #ffffff; <%= index < @order.order_items.count - 1 ? 'border-bottom: 1px solid #f3f4f6;' : '' %>">
+      <td align="right" style="padding: 16px 20px; background-color: #ffffff; <%= index < @order.line_item_count - 1 ? 'border-bottom: 1px solid #f3f4f6;' : '' %>">
         <% if line_pricing.line(item).total < line_pricing.line(item).original_total %>
           <span style="font-size: 13px; color: #9ca3af; text-decoration: line-through; display: block;"><%= (item.price * item.quantity).format %></span>
         <% end %>

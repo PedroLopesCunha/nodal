@@ -25,7 +25,6 @@
     <div class="card border-0 shadow-sm mb-4" style="border-radius: 12px;">
       <div class="card-body">
         <h5 class="card-title mb-3"><%= t('storefront.orders.show.order_items') %></h5>
-        <%= render "storefront/shared/bundle_summary", order: @order %>
 
         <table class="table">
           <thead>
@@ -39,6 +38,14 @@
             </tr>
           </thead>
           <tbody>
+            <% @order.order_bundles.includes(:order_items).each do |group| %>
+              <% total = group.customer_total(order_line_pricing(@order)) if show_prices? %>
+              <tr data-order-bundle="<%= group.id %>">
+                <td><div class="fw-medium"><%= group.name %></div><%= render "shared/orders/bundle_contents", group: group %></td>
+                <td class="text-center"><%= group.quantity %></td>
+                <% if show_prices? %><td class="text-end"><%= money_amount(total / group.quantity) %></td><td class="text-end fw-medium"><%= money_amount(total) %></td><% end %>
+              </tr>
+            <% end %>
             <% @order.order_items.where(order_bundle_id: nil).includes(:product, :product_variant).each do |item| %>
               <tr>
                 <td>

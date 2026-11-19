@@ -1,9 +1,27 @@
 class Bo::BundlesController < Bo::BaseController
-  before_action :load_bundle, only: [:show, :edit, :update, :destroy]
+  before_action :load_bundle, only: [:show, :edit, :update, :destroy, :sync_erp]
 
   def show
     @product = @bundle
     @summary = composition_summary(@bundle.bundle_components.map { |part| { product_variant_id: part.product_variant_id, quantity: part.quantity } }, @bundle.unit_price)
+  end
+
+  def sync_erp
+    authorize @bundle, :sync_erp?
+    unless erp_product_sync_enabled?
+      respond_to do |format|
+        format.json { render json: { error: t("bo.products.erp_sync.unavailable") }, status: :unprocessable_entity }
+        format.html { redirect_to bo_bundle_path(params[:org_slug], @bundle), alert: t("bo.products.erp_sync.unavailable") }
+      end
+      return
+    end
+    task = current_organisation.background_tasks.create!(member: current_member,
+      task_type: "erp_product_sync", result: { product_id: @bundle.id, bundle_id: @bundle.id })
+    ErpBundleSyncJob.perform_later(task.id, product_id: @bundle.id)
+    respond_to do |format|
+      format.json { render json: { status_url: bo_background_task_path(params[:org_slug], task, format: :json) }, status: :accepted }
+      format.html { redirect_to bo_bundle_path(params[:org_slug], @bundle), notice: t("bo.products.erp_sync.queued") }
+    end
   end
 
   def index
@@ -87,7 +105,7 @@ class Bo::BundlesController < Bo::BaseController
 
   def load_bundle
     @bundle = current_organisation.products.bundles.find(params[:id])
-    permission = { "show" => :show?, "destroy" => :destroy? }.fetch(action_name, :update?)
+    permission = { "show" => :show?, "destroy" => :destroy?, "sync_erp" => :sync_erp? }.fetch(action_name, :update?)
     authorize @bundle, permission
   end
 
@@ -104,7 +122,7 @@ class Bo::BundlesController < Bo::BaseController
 
   def bundle_params
     values = params.require(:product).permit(:name, :slug, :unit_description, :description, :rich_description, :price, :published, :bundle_featured,
-      :bundle_position, photos: [], category_ids: [], bundle_components_attributes: [:id, :product_variant_id, :quantity, :_destroy])
+      :bundle_position, :quick_add_enabled, photos: [], category_ids: [], bundle_components_attributes: [:id, :product_variant_id, :quantity, :_destroy])
     ids = values.fetch(:bundle_components_attributes, {}).values.filter_map { |v| v[:product_variant_id].presence }.map(&:to_s).uniq
     allowed = current_organisation.product_variants.where(id: ids).pluck(:id).map(&:to_s)
     raise ActiveRecord::RecordNotFound if (ids - allowed).any?

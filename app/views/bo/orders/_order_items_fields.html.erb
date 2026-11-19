@@ -1,5 +1,5 @@
 <% if f.object.bundle_component? %>
-<tr><td><span class="badge bg-primary"><%= f.object.order_bundle.name %></span><div><%= f.object.display_product_name %></div><small><%= f.object.product_variant&.sku %></small></td>
+<tr><td><div><%= f.object.display_product_name %></div><small><%= f.object.product_variant&.sku %></small><% if f.object.bundle_component? %><small data-bundle-origin style="display:block;font-size:12px;color:#6b7280;margin-top:4px"><%= t("bundles.line_origin", name: f.object.order_bundle.name, count: f.object.order_bundle.quantity) %></small><% end %></td>
 <td><%= f.object.quantity %></td><td><%= (f.object.total_price / f.object.quantity).format %></td><td>—</td><td><span data-line-total><%= number_with_precision(f.object.total_price.to_f, precision: 2) %></span></td><td><small class="text-muted"><%= t("bundles.errors.grouped_line") %></small></td></tr>
 <% else %>
 <%# A line is a variant, not a product: the SKU lives on the variant, and it is

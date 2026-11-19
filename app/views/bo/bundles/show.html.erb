@@ -1,4 +1,10 @@
 <% content_for :bo_main_content do %>
+<div id="product-details" data-controller="product-erp-sync"
+ data-product-erp-sync-refresh-url-value="<%= request.fullpath %>"
+ data-product-erp-sync-pending-text-value="<%= t('bo.products.erp_sync.pending') %>"
+ data-product-erp-sync-success-text-value="<%= t('bo.products.erp_sync.success') %>"
+ data-product-erp-sync-error-text-value="<%= t('bo.products.erp_sync.failed') %>"
+ data-product-erp-sync-refresh-error-text-value="<%= t('bo.products.erp_sync.refresh_failed') %>">
   <div class="bo-page-header">
     <div class="d-flex justify-content-between align-items-start">
       <div class="d-flex align-items-center gap-3">
@@ -6,6 +12,11 @@
         <div><h1><%= @bundle.name %></h1><p><%= t("bundles.label") %></p></div>
       </div>
       <div class="bo-page-actions">
+        <% if policy(@bundle).sync_erp? && erp_product_sync_enabled? %>
+          <%= button_to sync_erp_bo_bundle_path(params[:org_slug], @bundle), method: :post, class: "btn btn-outline-primary", form: { data: { action: "submit->product-erp-sync#start" } }, data: { product_erp_sync_target: "button" } do %>
+            <i class="fa-solid fa-rotate me-1"></i><%= t("bundles.sync_components") %>
+          <% end %>
+        <% end %>
         <%= link_to product_path(org_slug: params[:org_slug], id: @bundle), class: "btn btn-outline-secondary", target: "_blank" do %><i class="fa-solid fa-store me-1"></i><%= t("bo.products.show.view_in_storefront") %><% end %>
         <%= link_to edit_bo_bundle_path(params[:org_slug], @bundle), class: "btn btn-outline-primary" do %><i class="fa-solid fa-pen-to-square me-1"></i><%= t("bo.common.actions.edit") %><% end %>
         <%= link_to bo_bundle_path(params[:org_slug], @bundle), class: "btn btn-outline-danger", data: { turbo_method: :delete, turbo_confirm: t("bundles.confirm_remove") } do %><i class="fa-solid fa-trash me-1"></i><%= t("bo.common.actions.delete") %><% end %>
@@ -13,6 +24,7 @@
     </div>
   </div>
   <div class="bo-page-body">
+    <div class="alert d-none" role="status" aria-live="polite" data-product-erp-sync-target="message"></div>
     <% if @summary[:warning] %><div class="alert alert-warning"><%= @summary[:warning] %></div><% end %>
     <div class="row g-4">
       <div class="col-lg-8">
@@ -49,4 +61,5 @@
       </div>
     </div>
   </div>
+</div>
 <% end %>

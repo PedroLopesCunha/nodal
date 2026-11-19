@@ -19,6 +19,28 @@ class BundlesBackofficeTest < ApplicationSystemTestCase
 
   teardown { Warden.test_reset! }
 
+  test "bundle quick add submits the selected quantity without leaving the catalogue" do
+    @org.update!(quick_add_enabled: true)
+    bundle = @org.products.create!(name: "Quick set", bundle: true, published: true, unit_price: 20000,
+      bundle_components_attributes: [@first, @second].map { |p| { product_variant_id: p.default_variant.id, quantity: 1 } })
+    customer = @org.customers.create!(company_name: "Quick buyer", contact_name: "Buyer", active: true, erp_discount_percentage: 20)
+    user = customer.customer_users.create!(organisation: @org, email: "bundle-quick@example.com", password: "password123", active: true, locale: "pt")
+    logout :member
+    login_as user, scope: :customer_user
+    visit products_path(org_slug: @org.slug, bundles: "1")
+    find(".quick-add-trigger").click
+    within "dialog[open]" do
+      assert_selector "h2", text: bundle.name
+      find("input[name='quantity']").set("2")
+      assert_selector "[data-product-pricing-target='total']", text: /320.00/
+      find("button[type='submit']").click
+    end
+    assert_no_selector "dialog[open]"
+    assert_current_path products_path(org_slug: @org.slug, bundles: "1")
+    assert_equal 2, user.current_cart(@org).order_bundles.sole.quantity
+    assert_selector "[data-cart-count]", text: "1"
+  end
+
   test "uses the existing BO layout and searchable selectors to create and edit a bundle" do
     visit bo_bundles_path(org_slug: @org.slug, locale: "pt")
     assert_selector ".bo-page-header h1", text: "Conjuntos"
@@ -121,6 +143,39 @@ class BundlesBackofficeTest < ApplicationSystemTestCase
     find("button[form='bundle-cart-form'][type='submit']").click
     assert_text "Conjunto adicionado ao carrinho."
     assert_equal 20000, user.current_cart(@org).total_amount.cents
+    group = user.current_cart(@org).order_bundles.sole
+    assert_selector "tr[data-cart-bundle] .quantity-stepper"
+    assert_no_button "Guardar"
+    within "tr[data-cart-bundle]" do
+      find("[data-action='quantity-stepper#increase']").click
+    end
+    assert_selector "tr[data-cart-bundle] input[name='quantity'][value='2']"
+    assert_equal 2, group.reload.quantity
+    page.save_screenshot("/tmp/nodal-bundle-cart-desktop.png")
+    visit checkout_path(org_slug: @org.slug)
+    assert_selector "tr[data-checkout-bundle]", text: bundle.name
+    assert_no_selector "[data-checkout-bundle] .badge"
+    page.save_screenshot("/tmp/nodal-bundle-checkout-desktop.png")
+    visit cart_path(org_slug: @org.slug)
+    page.driver.browser.manage.window.resize_to(390, 844)
+    assert_selector ".cart-item-compact[data-cart-bundle] .quantity-stepper"
+    within ".cart-item-compact[data-cart-bundle]" do
+      find("[data-action='quantity-stepper#decrease']").click
+    end
+    assert_selector ".cart-item-compact[data-cart-bundle] input[name='quantity'][value='1']"
+    assert_equal 1, group.reload.quantity
+    page.save_screenshot("/tmp/nodal-bundle-cart-mobile.png")
+    visit checkout_path(org_slug: @org.slug)
+    assert_selector ".checkout-item-card[data-checkout-bundle]", text: bundle.name
+    assert_no_selector "[data-checkout-bundle] .badge"
+    page.save_screenshot("/tmp/nodal-bundle-checkout-mobile.png")
+    visit cart_path(org_slug: @org.slug)
+    within ".cart-item-compact[data-cart-bundle]" do
+      accept_confirm { find("button.btn-outline-danger").click }
+    end
+    assert_no_selector "[data-cart-bundle]"
+    assert_equal 0, user.current_cart(@org).order_bundles.count
+
   end
 
   test "bundle price comparison and included unit prices remain stable after quantity changes" do

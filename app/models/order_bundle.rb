@@ -9,6 +9,10 @@ class OrderBundle < ApplicationRecord
     errors.add(:product, :invalid) unless product&.bundle? && product.organisation_id == order&.organisation_id
   end
 
+  def customer_total(pricing = OrderLinePricing.new(order))
+    order_items.sum(Money.new(0, order.organisation.currency)) { |item| pricing.line(item).total }
+  end
+
   def total_price
     price * quantity
   end

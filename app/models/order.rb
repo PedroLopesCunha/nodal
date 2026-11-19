@@ -330,7 +330,7 @@ class Order < ApplicationRecord
   # Returns [{ product:, required:, current:, label:, shortfall: }]. Used for
   # the cart warning and the checkout gate.
   def combined_min_quantity_shortfalls
-    order_items.reload.group_by(&:product).filter_map do |product, items|
+    order_items.reload.reject(&:bundle_component?).group_by(&:product).filter_map do |product, items|
       next unless product&.min_quantity_combined?
 
       min = product.enforced_min_quantity
@@ -353,6 +353,7 @@ class Order < ApplicationRecord
     messages = []
 
     order_items.reload.each do |item|
+      next if item.bundle_component?
       product = item.product
       next unless product && !product.min_quantity_combined?
 

@@ -14,6 +14,21 @@
         <%= link_to t('quick_add.details'), product_path(org_slug: params[:org_slug], id: @product), class: "small" %>
       </div>
     </div>
+    <% if @product.bundle? %>
+      <div class="border-top border-bottom py-2 mb-3 small" data-quick-bundle-components>
+        <p class="fw-semibold mb-2"><%= t("bundles.included") %></p>
+        <% @product.bundle_components.includes(product_variant: :product).order(:id).each do |component| %>
+          <% variant = component.product_variant %>
+          <div class="d-flex justify-content-between align-items-start gap-3 py-1">
+            <div>
+              <span><%= variant.product.name %></span>
+              <% if variant.option_values_string.present? %><small class="text-muted d-block"><%= variant.option_values_string %></small><% end %>
+            </div>
+            <span class="text-nowrap text-muted">× <%= component.quantity %></span>
+          </div>
+        <% end %>
+      </div>
+    <% end %>
     <% @fixed_attributes_with_values&.each do |attribute, values| %>
       <p class="small"><strong><%= attribute.name %>:</strong> <%= values.first.value %></p>
       <input type="hidden" data-single-attribute-value="<%= values.first.id %>">

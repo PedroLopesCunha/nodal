@@ -2,6 +2,7 @@ require "test_helper"
 
 class BundlesTest < ActionDispatch::IntegrationTest
   include Devise::Test::IntegrationHelpers
+  include ActiveJob::TestHelper
 
   setup do
     @org = Organisation.create!(name: "Bundle UI", currency: "EUR")
@@ -13,6 +14,57 @@ class BundlesTest < ActionDispatch::IntegrationTest
       unit_price: 20000, bundle_components_attributes: [@first, @second].map { |p| { product_variant_id: p.default_variant.id, quantity: 1 } })
     @admin = Member.create!(email: "bundle-admin@example.com", password: "password123", first_name: "Bundle", last_name: "Admin")
     @org.org_members.create!(member: @admin, role: "owner", active: true)
+  end
+
+  test "bundle ERP sync requires configuration and queues the component job" do
+    sign_in @admin
+    get bo_bundle_path(org_slug: @org.slug, id: @bundle)
+    assert_select "form[action$='/sync_erp']", count: 0
+    post sync_erp_bo_bundle_path(org_slug: @org.slug, id: @bundle), as: :json
+    assert_response :unprocessable_entity
+    @org.create_erp_configuration!(adapter_type: "custom_api", enabled: true, sync_products: true, product_sync_mode: "update_only",
+      credentials: { base_url: "https://erp.example.test", api_key: "test" })
+    get bo_bundle_path(org_slug: @org.slug, id: @bundle)
+    assert_select "#product-details form[action$='/sync_erp']", count: 1
+    assert_enqueued_with(job: ErpBundleSyncJob) do
+      post sync_erp_bo_bundle_path(org_slug: @org.slug, id: @bundle), as: :json
+    end
+    assert_response :accepted
+    assert response.parsed_body["status_url"]
+  end
+
+  test "bundle quick add respects organisation and product switches and returns JSON" do
+    sign_in @admin
+    get new_bo_bundle_path(org_slug: @org.slug)
+    assert_select "input[type='checkbox'][name='product[quick_add_enabled]']"
+    patch bo_bundle_path(org_slug: @org.slug, id: @bundle), params: { product: { quick_add_enabled: "0" } }
+    assert_not @bundle.reload.quick_add_enabled?
+    sign_out @admin
+    sign_in @user
+    @org.update!(quick_add_enabled: true)
+    get quick_add_product_path(org_slug: @org.slug, id: @bundle)
+    assert_response :not_found
+    @bundle.update!(quick_add_enabled: true)
+    @customer.update!(erp_discount_percentage: 20)
+    get quick_add_product_path(org_slug: @org.slug, id: @bundle)
+    assert_response :success
+    assert_select "input[name='quick_add'][value='1']"
+    assert_select "[data-quick-bundle-components]", text: /#{@first.name}/
+    assert_select "[data-quick-bundle-components] .text-nowrap", count: 2
+    assert_select "[data-product-pricing-target='total']", text: /160/
+    assert_difference "OrderBundle.count", 1 do
+      post order_bundles_path(org_slug: @org.slug), params: { product_id: @bundle.id, quantity: 2, quick_add: "1" }, as: :json
+    end
+    assert_response :success
+    assert response.parsed_body.key?("cart_count")
+    assert_equal 2, @user.current_cart(@org).order_bundles.sole.quantity
+    assert_no_difference "OrderBundle.count" do
+      post order_bundles_path(org_slug: @org.slug), params: { product_id: @bundle.id, quantity: 0, quick_add: "1" }, as: :json
+    end
+    assert_response :unprocessable_entity
+    @org.update!(quick_add_enabled: false)
+    get quick_add_product_path(org_slug: @org.slug, id: @bundle)
+    assert_response :not_found
   end
 
   test "bundle stock follows the product quantity permission and display settings" do
@@ -90,13 +142,13 @@ class BundlesTest < ActionDispatch::IntegrationTest
     assert_redirected_to cart_path(org_slug: @org.slug)
     follow_redirect!
     assert_response :success
-    assert_select "h2", text: @bundle.name
+    assert_select "tr[data-cart-bundle] a", text: @bundle.name
     cart = @user.current_cart(@org)
     group = cart.order_bundles.sole
     assert_equal 40000, cart.total_amount.cents
     get checkout_path(org_slug: @org.slug)
     assert_response :success
-    assert_select "h3", text: /#{@bundle.name}/
+    assert_select "tr[data-checkout-bundle]", text: /#{@bundle.name}/
     patch order_bundle_path(org_slug: @org.slug, id: group.id), params: { quantity: 3 }
     assert_equal 3, group.reload.quantity
     assert_equal [3, 3], group.order_items.pluck(:quantity)
@@ -114,7 +166,7 @@ class BundlesTest < ActionDispatch::IntegrationTest
     @bundle.update!(name: "Updated bundle", unit_price: 19000)
     get order_path(org_slug: @org.slug, id: cart.id)
     assert_response :success
-    assert_select "h3", text: /Conjunto Aurora/
+    assert_select "[data-order-bundle]", text: /Conjunto Aurora/
     assert_equal 20000, group.reload.total_price.cents
     post add_to_cart_order_path(org_slug: @org.slug, id: cart.id)
     assert_response :redirect

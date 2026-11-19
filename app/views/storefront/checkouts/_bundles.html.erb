@@ -1,0 +1,18 @@
+<% @order.order_bundles.includes(:product, :order_items).each do |group| %>
+  <% if show_prices? %><% total = group.order_items.sum(Money.new(0, @order.organisation.currency)) { |item| order_line_pricing(@order).line(item).total } %><% end %>
+  <% if mobile %>
+    <div class="checkout-item-card border-bottom pb-3 mb-3" data-checkout-bundle="<%= group.id %>">
+      <%= render "storefront/carts/bundle_identity", group: group %>
+      <div class="d-flex justify-content-between align-items-center mt-2 small">
+        <span class="text-muted"><%= t('storefront.checkouts.show.table.quantity') %>: <strong><%= group.quantity %></strong></span>
+        <% if show_prices? %><span><%= money_amount(total / group.quantity) %> · <strong><%= money_amount(total) %></strong></span><% end %>
+      </div>
+    </div>
+  <% else %>
+    <tr class="align-middle" data-checkout-bundle="<%= group.id %>">
+      <td><%= render "storefront/carts/bundle_identity", group: group %></td>
+      <td class="text-center"><%= group.quantity %></td>
+      <% if show_prices? %><td class="text-end text-nowrap"><%= money_amount(total / group.quantity) %></td><td class="text-end fw-medium text-nowrap"><%= money_amount(total) %></td><% end %>
+    </tr>
+  <% end %>
+<% end %>

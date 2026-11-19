@@ -29,7 +29,6 @@
       <div class="card border-0 shadow-sm mb-4" style="border-radius: 12px;">
         <div class="card-body">
           <h5 class="card-title mb-3"><%= t('storefront.checkouts.show.order_items') %></h5>
-          <%= render "storefront/shared/bundle_summary", order: @order %>
 
           <%# Desktop table view (hidden on mobile) %>
           <div class="d-none d-md-block">
@@ -45,6 +44,7 @@
                 </tr>
               </thead>
               <tbody>
+                <%= render "storefront/checkouts/bundles", mobile: false %>
                 <% @order_items.each do |item| %>
                   <tr>
                     <td>
@@ -87,6 +87,7 @@
 
           <%# Mobile card view (hidden on desktop) %>
           <div class="d-md-none">
+            <%= render "storefront/checkouts/bundles", mobile: true %>
             <% @order_items.each_with_index do |item, index| %>
               <div class="checkout-item-card <%= 'border-bottom pb-3 mb-3' unless index == @order_items.length - 1 %>">
                 <div class="d-flex align-items-start">

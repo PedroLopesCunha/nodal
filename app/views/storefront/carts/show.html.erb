@@ -62,8 +62,7 @@
 <% else %>
   <div class="row g-4" data-controller="cart-summary">
     <div class="col-lg-8" data-cart-summary-target="products">
-      <%= render "storefront/carts/bundles" %>
-      <% if @order_items.any? %>
+
       <%# Desktop table view (hidden on mobile) %>
       <div class="card border-0 shadow-sm d-none d-lg-block" style="border-radius: 12px;">
         <div class="card-body p-0">
@@ -80,6 +79,7 @@
               </tr>
             </thead>
             <tbody>
+              <%= render "storefront/carts/bundles", mobile: false %>
               <% @order_items.each do |item| %>
                 <tr>
                   <td class="ps-4">
@@ -144,6 +144,7 @@
       <div class="d-lg-none">
         <div class="card border-0 shadow-sm" style="border-radius: 12px;">
           <div class="card-body p-0">
+            <%= render "storefront/carts/bundles", mobile: true %>
             <% @order_items.each_with_index do |item, index| %>
               <div class="cart-item-compact p-3 <%= 'border-bottom' unless index == @order_items.length - 1 %>">
                 <%# Line 1: Thumbnail + Name + Quantity controls %>
@@ -215,7 +216,6 @@
         </div>
       </div>
 
-      <% end %>
       <% if show_prices? && (@current_organisation.free_shipping_enabled? || @discount_nudges.present? || @discount_unlocked.present?) %>
         <div class="d-lg-none mt-3">
           <%= render 'storefront/carts/free_shipping_progress' %>

@@ -1,3 +1,18 @@
+<% if local_assigns[:quick_add] %>
+  <%= form_with url: order_bundles_path(org_slug: params[:org_slug]), method: :post, local: true do %>
+    <%= hidden_field_tag :product_id, @product.id %>
+    <%= hidden_field_tag :quick_add, "1" %>
+    <div class="d-flex align-items-center gap-2 mb-3">
+      <%= label_tag "quick-bundle-quantity-#{@product.id}", t("bundles.set_quantity"), class: "small text-muted" %>
+      <%= render layout: "storefront/shared/quantity_stepper" do %>
+        <%= number_field_tag :quantity, 1, id: "quick-bundle-quantity-#{@product.id}", required: true, min: 1, step: 1, class: "form-control text-center", style: "width:70px", data: { product_pricing_target: "quantity", action: "input->product-pricing#update" } %>
+      <% end %>
+    </div>
+    <button type="submit" class="btn btn-primary w-100" <%= 'disabled' unless @product.bundle_purchasable? %>>
+      <i class="fa-solid fa-cart-plus me-2"></i><%= t("storefront.products.show.add_to_cart") %><% if show_prices? %><span data-product-pricing-target="total"> · <%= money_amount(@actual_breakdown[:final_price]) %></span><% end %>
+    </button>
+  <% end %>
+<% else %>
 <% unless browsing_as_member? %>
   <%= form_with url: order_bundles_path(org_slug: params[:org_slug]), method: :post, local: true, class: "w-100", id: "bundle-cart-form" do %>
     <%= hidden_field_tag :product_id, @product.id %>
@@ -16,4 +31,6 @@
     <button type="submit" form="bundle-cart-form" class="btn btn-primary btn-lg w-100" style="border-radius:8px" <%= 'disabled' unless @product.bundle_purchasable? %>>
       <i class="fa-solid fa-cart-plus me-2"></i><%= t("storefront.products.show.add_to_cart") %><% if show_prices? %><span data-product-pricing-target="total"> · <%= money_amount(@actual_breakdown[:final_price]) %></span><% end %>
     </button>
+<% end %>
+
 <% end %>

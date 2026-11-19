@@ -82,7 +82,13 @@
       "available_sets": "%{count} conjuntos disponíveis",
       "composition_label": "%{references} referências · %{units} unidades por conjunto",
       "set_quantity": "N.º de conjuntos",
-      "available_badge": "Conjunto disponível"
+      "available_badge": "Conjunto disponível",
+      "per_bundle": "Componentes por conjunto",
+      "line_origin": {
+        "one": "Conjunto “%{name}” · %{count} conjunto",
+        "other": "Conjunto “%{name}” · %{count} conjuntos"
+      },
+      "sync_components": "Sincronizar componentes com ERP"
     }
   },
   "en": {
@@ -168,7 +174,13 @@
       "available_sets": "%{count} bundles available",
       "composition_label": "%{references} references · %{units} units per bundle",
       "set_quantity": "Number of bundles",
-      "available_badge": "Bundle available"
+      "available_badge": "Bundle available",
+      "per_bundle": "Components per bundle",
+      "line_origin": {
+        "one": "Bundle “%{name}” · %{count} bundle",
+        "other": "Bundle “%{name}” · %{count} bundles"
+      },
+      "sync_components": "Sync components with ERP"
     }
   },
   "es": {
@@ -254,7 +266,13 @@
       "available_sets": "%{count} conjuntos disponibles",
       "composition_label": "%{references} referencias · %{units} unidades por conjunto",
       "set_quantity": "N.º de conjuntos",
-      "available_badge": "Conjunto disponible"
+      "available_badge": "Conjunto disponible",
+      "per_bundle": "Componentes por conjunto",
+      "line_origin": {
+        "one": "Conjunto «%{name}» · %{count} conjunto",
+        "other": "Conjunto «%{name}» · %{count} conjuntos"
+      },
+      "sync_components": "Sincronizar componentes con ERP"
     }
   }
 }

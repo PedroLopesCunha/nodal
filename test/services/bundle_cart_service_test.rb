@@ -19,6 +19,58 @@ class BundleCartServiceTest < ActiveSupport::TestCase
     @service = BundleCartService.new(@order)
   end
 
+  test "confirmation email and PDF group saved bundles and retain ordinary purchases" do
+    @customer.update!(erp_discount_percentage: 20)
+    group = @service.add!(@bundle, 2)
+    @order.order_items.create!(product: @third, product_variant: @third.default_variant, quantity: 1)
+    @order.place!
+    @bundle.update!(name: "Renamed live set")
+    @first.update!(name: "Renamed live component")
+    EmailDeliveryGuard.stub(:should_send?, true) do
+      mail = CustomerMailer.with(customer_user: @user, order: @order).confirm_order
+      html = Nokogiri::HTML(mail.html_part.body.decoded)
+      rows = html.css("tr[data-order-bundle]")
+      assert_equal 1, rows.length
+      assert_includes rows.first.text, "Aurora"
+      assert_includes rows.first.text, "Necklace"
+      assert_includes rows.first.text, "XYZ"
+      assert_not_includes rows.first.text, "Renamed live"
+      assert_includes rows.first.text, group.customer_total.format
+      assert_includes mail.text_part.body.decoded, "Aurora x2"
+      assert_includes mail.text_part.body.decoded, "Ring x1"
+    end
+    html = ApplicationController.render(template: "shared/orders/pdf", layout: false, assigns: { order: @order, organisation: @org })
+    doc = Nokogiri::HTML(html)
+    assert_equal 1, doc.css("tr[data-order-bundle]").length
+    assert_equal 2, doc.css("tbody tr").length
+    assert_includes doc.css("tr[data-order-bundle]").text, "Necklace"
+  end
+
+  test "bundle components bypass individual minimums at checkout but ordinary lines do not" do
+    @first.update!(min_quantity: 5)
+    @service.add!(@bundle.reload, 1)
+    @order.validate_minimum_quantities!
+    ordinary = @order.order_items.build(product: @first, product_variant: @first.default_variant, quantity: 5)
+    ordinary.save!
+    ordinary.update_column(:quantity, 1)
+    assert_raises(ActiveRecord::RecordInvalid) { @order.validate_minimum_quantities! }
+  end
+
+  test "combined minimum ignores bundled lines and still checks ordinary purchases" do
+    @first.update!(has_variants: true, min_quantity: 5, min_quantity_scope: "combined")
+    variant = @first.product_variants.create!(name: "Red", sku: "ABC-R", unit_price_cents: 15000,
+      published: true, is_default: false, track_stock: true, stock_quantity: 10)
+    @bundle.bundle_components.find_by!(product_variant_id: @first.default_variant.id).update!(product_variant: variant)
+    @service.add!(@bundle.reload, 1)
+    assert_empty @order.combined_min_quantity_shortfalls
+    @order.validate_minimum_quantities!
+    @order.order_items.create!(product: @first, product_variant: variant, quantity: 4, unit_price: 15000)
+    shortfall = @order.combined_min_quantity_shortfalls.sole
+    assert_equal 4, shortfall[:current]
+    assert_equal 1, shortfall[:shortfall]
+    assert_raises(ActiveRecord::RecordInvalid) { @order.validate_minimum_quantities! }
+  end
+
   test "bundle is made of actual components with an exact exclusive price" do
     @org.product_discounts.create!(product: @first, discount_type: "percentage", discount_value: 0.5)
     group = @service.add!(@bundle, 1)
