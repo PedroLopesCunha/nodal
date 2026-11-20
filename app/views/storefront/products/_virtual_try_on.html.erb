@@ -1,6 +1,7 @@
 <div data-virtual-try-on
      data-react-url="<%= asset_path("react-18.3.1.js") %>"
      data-react-dom-url="<%= asset_path("react-dom-18.3.1.js") %>"
+     data-kind="<%= product.virtual_try_on_kind %>"
      data-image-url="<%= rails_storage_proxy_path(product.virtual_try_on_image) %>"
      data-height-mm="<%= product.virtual_try_on_height_mm %>"
      data-anchor-x="<%= product.virtual_try_on_anchor_x %>"
@@ -18,7 +19,8 @@
       </form>
     </div>
     <div class="text-center" data-try-on-chooser>
-      <p class="small mb-2">Escolhe como queres experimentar o brinco.</p>
+      <% ring = product.virtual_try_on_kind == "ring" %>
+      <p class="small mb-2"><%= ring ? "Mostra o dorso da mão à câmara ou escolhe uma fotografia com os dedos estendidos." : "Escolhe como queres experimentar o brinco." %></p>
       <div class="d-flex flex-wrap justify-content-center gap-2">
         <button type="button" class="btn btn-primary" data-try-on-camera>Usar câmara</button>
         <label class="btn btn-outline-primary position-relative mb-0">

@@ -1,4 +1,5 @@
 const visionUrl = "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.21"
+const handModelUrl = "https://storage.googleapis.com/mediapipe-models/hand_landmarker/hand_landmarker/float16/1/hand_landmarker.task"
 const modelUrl = "https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/1/face_landmarker.task"
 
 let reactLibraries
@@ -55,7 +56,8 @@ class VirtualTryOn {
   useCamera() {
     if (this.opening) return
 
-    const initialCameraRequest = navigator.mediaDevices?.getUserMedia ? requestCamera() : null
+    const facing = this.settings.kind === "ring" ? "environment" : "user"
+    const initialCameraRequest = navigator.mediaDevices?.getUserMedia ? requestCamera(facing) : null
     this.cameraRequest = initialCameraRequest
     this.load({ initialCamera: true, initialCameraRequest })
   }
@@ -87,7 +89,7 @@ class VirtualTryOn {
       this.root = ReactDOM.createRoot(this.mountTarget)
       this.root.render(React.createElement(TryOn, {
         React, ...selection, onCameraRequestTaken: () => { this.cameraRequest = null },
-        imageUrl: this.settings.imageUrl, heightMm: Number(this.settings.heightMm),
+        kind: this.settings.kind, imageUrl: this.settings.imageUrl, heightMm: Number(this.settings.heightMm),
         anchorX: Number(this.settings.anchorX), anchorY: Number(this.settings.anchorY)
       }))
     } catch (error) {
@@ -151,7 +153,8 @@ document.addEventListener("turbo:before-cache", closeOpenTryOns)
 document.addEventListener("turbo:before-render", closeOpenTryOns)
 window.addEventListener("pagehide", closeOpenTryOns)
 
-function TryOn({ React, imageUrl, heightMm, anchorX, anchorY, initialCamera = false, initialCameraRequest, onCameraRequestTaken, initialFile }) {
+function TryOn({ React, kind, imageUrl, heightMm, anchorX, anchorY, initialCamera = false, initialCameraRequest, onCameraRequestTaken, initialFile }) {
+  const ring = kind === "ring"
   const { createElement: h, useEffect, useLayoutEffect, useRef, useState } = React
   const video = useRef(null)
   const photoInput = useRef(null)
@@ -163,7 +166,7 @@ function TryOn({ React, imageUrl, heightMm, anchorX, anchorY, initialCamera = fa
   const photoViewport = useRef(null)
   const photoPointers = useRef(new Map())
   const pendingScroll = useRef(null)
-  const image = useRef(null)
+  const productAsset = useRef(null)
   const productImage = useRef(null)
   const offsets = useRef({})
   const positions = useRef([])
@@ -174,11 +177,12 @@ function TryOn({ React, imageUrl, heightMm, anchorX, anchorY, initialCamera = fa
   const [photoLoading, setPhotoLoading] = useState(Boolean(initialFile))
   const [cameraActive, setCameraActive] = useState(initialCamera)
   const [cameraReady, setCameraReady] = useState(false)
-  const [cameraFacing, setCameraFacing] = useState("user")
+  const [cameraFacing, setCameraFacing] = useState(ring ? "environment" : "user")
   const [mirrored, setMirrored] = useState(true)
   const [cameraNotice, setCameraNotice] = useState("")
   const [snapshot, setSnapshot] = useState(null)
   const [zoom, setZoom] = useState(1)
+  const [calibration, setCalibration] = useState(null)
   const [resumeError, setResumeError] = useState(false)
 
   useEffect(() => {
@@ -189,10 +193,9 @@ function TryOn({ React, imageUrl, heightMm, anchorX, anchorY, initialCamera = fa
     const context = overlay.getContext("2d")
     let active = true
     let stream
-    let faceLandmarker
+    let detector
     let frame
     let previousTime = -1
-    let landmarks
     let mirrorVideo = cameraFacing === "user"
 
     function release() {
@@ -200,21 +203,22 @@ function TryOn({ React, imageUrl, heightMm, anchorX, anchorY, initialCamera = fa
       cancelAnimationFrame(frame)
       stream?.getTracks().forEach(track => track.stop())
       camera.srcObject = null
-      faceLandmarker?.close()
-      faceLandmarker = null
+      detector?.close()
+      detector = null
       context.clearRect(0, 0, overlay.width, overlay.height)
     }
 
     function render(now) {
       if (camera.readyState >= 2 && camera.currentTime !== previousTime) {
         previousTime = camera.currentTime
+        let result
         try {
-          landmarks = faceLandmarker.detectForVideo(camera, now).faceLandmarks[0]
+          result = detector.detectForVideo(camera, now)
         } catch (error) {
           release()
           setCameraReady(false)
           setCameraActive(false)
-          setMessage("O seguimento facial foi interrompido. Podes escolher uma fotografia.")
+          setMessage("O seguimento foi interrompido. Podes escolher uma fotografia.")
           console.error(error)
           return
         }
@@ -223,10 +227,16 @@ function TryOn({ React, imageUrl, heightMm, anchorX, anchorY, initialCamera = fa
         if (overlay.height !== camera.videoHeight) overlay.height = camera.videoHeight
         context.clearRect(0, 0, overlay.width, overlay.height)
 
-        const photo = image.current
-        positions.current = landmarks && photo
-          ? drawEarrings(context, landmarks, photo, heightMm, anchorX, anchorY, offsets.current, mirrorVideo)
-          : []
+        positions.current = []
+        const asset = productAsset.current
+        if (asset && ring) {
+          positions.current = positionRing(overlay, result.landmarks[0], result.worldLandmarks?.[0],
+            asset.photo, heightMm, asset.anchorX, asset.anchorY, mirrorVideo, offsets.current[0])
+          paintPieces(context, asset.photo, positions.current)
+        } else if (asset && result.faceLandmarks?.[0]) {
+          positions.current = drawEarrings(context, result.faceLandmarks[0], asset.photo,
+            heightMm, anchorX, anchorY, offsets.current, mirrorVideo)
+        }
       }
       frame = requestAnimationFrame(render)
     }
@@ -257,16 +267,17 @@ function TryOn({ React, imageUrl, heightMm, anchorX, anchorY, initialCamera = fa
         await camera.play()
         if (!active) return
 
-        setMessage("A carregar o seguimento facial…")
-        const detector = await createFaceLandmarker("VIDEO")
+        setMessage(ring ? "A carregar o seguimento da mão…" : "A carregar o seguimento facial…")
+        const model = await (ring ? createHandLandmarker("VIDEO") : createFaceLandmarker("VIDEO"))
         if (!active) {
-          detector.close()
+          model.close()
           return
         }
 
-        faceLandmarker = detector
+        detector = model
         setCameraReady(true)
-        setMessage("Se o brinco estiver descentrado, arrasta-o até ao lóbulo.")
+        setMessage(ring ? "Mostra o dorso da mão, com os dedos estendidos."
+          : "Se o brinco estiver descentrado, arrasta-o até ao lóbulo.")
         frame = requestAnimationFrame(render)
       } catch (error) {
         if (!active) return
@@ -288,7 +299,7 @@ function TryOn({ React, imageUrl, heightMm, anchorX, anchorY, initialCamera = fa
 
     start()
     return release
-  }, [cameraActive, cameraFacing, heightMm, anchorX, anchorY])
+  }, [cameraActive, cameraFacing, heightMm, anchorX, anchorY, ring])
 
   useEffect(() => {
     let active = true
@@ -296,24 +307,25 @@ function TryOn({ React, imageUrl, heightMm, anchorX, anchorY, initialCamera = fa
     photo.src = imageUrl
     productImage.current = photo.decode().then(() => {
       if (active) {
-        image.current = photo
+        const asset = ring ? cropRingAsset(photo, anchorX, anchorY) : { photo, anchorX, anchorY }
+        productAsset.current = asset
         setPhotoReady(true)
-        return photo
+        return asset
       }
       return null
     }).catch(() => {
       if (active) {
         setPhotoLoading(false)
         setMessage("Podes tentar novamente fechando e voltando a abrir o provador.")
-        setImageError("Não foi possível carregar a imagem do brinco.")
+        setImageError("Não foi possível carregar a imagem da peça.")
       }
       return null
     })
     return () => { active = false }
-  }, [imageUrl])
+  }, [imageUrl, ring, anchorX, anchorY])
 
   useEffect(() => {
-    if (snapshot) paintPhotoEarrings(photoOverlay.current, image.current, snapshot.earrings)
+    if (snapshot) paintPhotoPieces(photoOverlay.current, productAsset.current?.photo, snapshot.pieces)
   }, [snapshot])
 
   useLayoutEffect(() => {
@@ -343,7 +355,32 @@ function TryOn({ React, imageUrl, heightMm, anchorX, anchorY, initialCamera = fa
     zoomPhoto(zoom > 1 ? 1 : 2, { x: bounds.left + bounds.width / 2, y: bounds.top + bounds.height / 2 })
   }
 
+  function calibrateRing(event) {
+    const point = pointerPosition(event)
+    if (!calibration.first) {
+      setCalibration({ first: point })
+      return
+    }
+
+    const distance = Math.hypot(point.x - calibration.first.x, point.y - calibration.first.y)
+    if (distance < 2) return
+
+    const piece = snapshot.pieces[0]
+    const factor = distance * heightMm / (10 * piece.photoHeight)
+    const calibrated = {
+      ...piece, photoHeight: piece.photoHeight * factor, photoWidth: piece.photoWidth * factor,
+      xOffset: piece.xOffset * factor, yOffset: piece.yOffset * factor, hitRadius: piece.hitRadius * factor
+    }
+    setSnapshot({ ...snapshot, adjusted: true, calibrated: true, pieces: [calibrated] })
+    setCalibration(null)
+  }
+
   function startPhotoGesture(event) {
+    if (calibration) {
+      if (event.isPrimary && event.button === 0) calibrateRing(event)
+      return
+    }
+
     const pointers = photoPointers.current
     if (event.button !== 0 || pointers.size >= 2) return
 
@@ -394,7 +431,7 @@ function TryOn({ React, imageUrl, heightMm, anchorX, anchorY, initialCamera = fa
     if (!event.isPrimary || event.button !== 0 || drag.current) return
 
     const pointer = pointerPosition(event)
-    const nearest = (snapshot ? snapshot.earrings : positions.current)
+    const nearest = (snapshot ? snapshot.pieces : positions.current)
       .map(position => ({ ...position, distance: Math.hypot(pointer.x - position.x, pointer.y - position.y) }))
       .sort((first, second) => first.distance - second.distance)[0]
     if (!nearest || nearest.distance > Math.max(pointer.hitRadius, nearest.hitRadius)) return
@@ -407,7 +444,7 @@ function TryOn({ React, imageUrl, heightMm, anchorX, anchorY, initialCamera = fa
     const current = drag.current
     if (current?.id !== event.pointerId) return
 
-    const position = (snapshot ? snapshot.earrings : positions.current).find(position => position.side === current.side)
+    const position = (snapshot ? snapshot.pieces : positions.current).find(position => position.side === current.side)
     if (!position) return
 
     const pointer = pointerPosition(event)
@@ -417,7 +454,7 @@ function TryOn({ React, imageUrl, heightMm, anchorX, anchorY, initialCamera = fa
       snapshot.adjusted = true
       position.x = x
       position.y = y
-      paintPhotoEarrings(photoOverlay.current, image.current, snapshot.earrings)
+      paintPhotoPieces(photoOverlay.current, productAsset.current?.photo, snapshot.pieces)
     } else {
       offsets.current[current.side] = {
         x: (x - position.baseX) / position.scale,
@@ -439,6 +476,7 @@ function TryOn({ React, imageUrl, heightMm, anchorX, anchorY, initialCamera = fa
     photoPointers.current.clear()
     pendingScroll.current = null
     drag.current = null
+    setCalibration(null)
     setZoom(1)
     setSnapshot(null)
   }
@@ -495,37 +533,32 @@ function TryOn({ React, imageUrl, heightMm, anchorX, anchorY, initialCamera = fa
       context.drawImage(photo, 0, 0, frame.width, frame.height)
       const preview = {
         url: frame.toDataURL("image/jpeg", 0.92), width: frame.width, height: frame.height,
-        earrings: [], uploaded: true, findingFit: true
+        pieces: [], uploaded: true, findingFit: true
       }
       setSnapshot(preview)
       setPhotoLoading(false)
 
-      const productPhoto = await productImage.current
+      const asset = await productImage.current
       if (request !== photoRequest.current) return
-      if (!productPhoto) {
+      if (!asset) {
         setSnapshot({ ...preview, findingFit: false })
         return
       }
 
-      const photoHeight = Math.min(frame.width, frame.height) * 0.08
-      const photoWidth = photoHeight * productPhoto.naturalWidth / productPhoto.naturalHeight
-      const manual = {
-        ...preview, manualPlacement: true, earrings: [{
-          side: 0, x: frame.width / 2, y: frame.height / 2, opacity: 1,
-          photoWidth, photoHeight, xOffset: photoWidth * anchorX, yOffset: photoHeight * anchorY,
-          hitRadius: Math.max(photoWidth, photoHeight) / 2
-        }]
-      }
+      const { photo: productPhoto, anchorX: fitX, anchorY: fitY } = asset
+      const manual = { ...preview, manualPlacement: true, pieces: [manualPiece(frame, asset)] }
       setSnapshot(manual)
 
-      let earrings = []
+      let pieces = []
       try {
-        detector = await createFaceLandmarker("IMAGE")
+        detector = await (ring ? createHandLandmarker("IMAGE") : createFaceLandmarker("IMAGE"))
         if (request !== photoRequest.current) return
 
-        const landmarks = detector.detect(frame).faceLandmarks[0]
-        if (landmarks) {
-          earrings = drawEarrings(context, landmarks, productPhoto, heightMm, anchorX, anchorY, {}, false)
+        const result = detector.detect(frame)
+        if (ring) {
+          pieces = positionRing(frame, result.landmarks[0], result.worldLandmarks?.[0], productPhoto, heightMm, fitX, fitY)
+        } else if (result.faceLandmarks[0]) {
+          pieces = drawEarrings(context, result.faceLandmarks[0], productPhoto, heightMm, anchorX, anchorY, {}, false)
         }
       } catch (error) {
         console.error(error)
@@ -535,7 +568,7 @@ function TryOn({ React, imageUrl, heightMm, anchorX, anchorY, initialCamera = fa
       setSnapshot(current => ({
         ...current,
         findingFit: false,
-        ...(earrings.length && !current.adjusted && !drag.current ? { earrings, manualPlacement: false } : {})
+        ...(pieces.length && !current.adjusted && !drag.current ? { pieces, manualPlacement: false } : {})
       }))
     } catch {
       if (request === photoRequest.current) {
@@ -579,11 +612,14 @@ function TryOn({ React, imageUrl, heightMm, anchorX, anchorY, initialCamera = fa
     camera.pause()
     drag.current = null
     setResumeError(false)
+    const pieces = positions.current.map(position => ({ ...position }))
+    const asset = productAsset.current
+    const manualPlacement = ring && pieces.length === 0 && Boolean(asset)
+    if (manualPlacement) pieces.push(manualPiece(frame, asset))
+
     setSnapshot({
-      url: frame.toDataURL("image/png"),
-      width: frame.width,
-      height: frame.height,
-      earrings: positions.current.map(position => ({ ...position }))
+      url: frame.toDataURL("image/png"), width: frame.width, height: frame.height,
+      pieces, manualPlacement
     })
   }
 
@@ -600,9 +636,12 @@ function TryOn({ React, imageUrl, heightMm, anchorX, anchorY, initialCamera = fa
     imageError && h("p", { role: "alert", className: "text-danger" }, imageError),
     h("input", { ref: photoInput, type: "file", accept: "image/*", hidden: true, onChange: selectPhoto }),
     h("p", { role: "status", className: "small mb-2" },
-      snapshot?.findingFit ? "A procurar o encaixe. Podes ajustar o brinco assim que aparecer."
-        : snapshot?.manualPlacement ? "Não foi possível encontrar o encaixe. Arrasta o brinco até ao lóbulo."
-        : snapshot ? "Podes arrastar o brinco para afinar o encaixe." : message),
+      calibration?.first ? "Toca na segunda marca, a 10 mm da primeira."
+        : calibration ? "Na fotografia, toca na primeira de duas marcas de régua separadas por 10 mm."
+        : snapshot?.calibrated ? "Escala calibrada. Podes arrastar o anel para afinar o encaixe."
+        : snapshot?.findingFit ? "A procurar o encaixe. Podes ajustar a peça assim que aparecer."
+        : snapshot?.manualPlacement ? (ring ? "Arrasta o anel até à base do dedo anelar." : "Não foi possível encontrar o encaixe. Arrasta o brinco até ao lóbulo.")
+        : snapshot ? "Podes arrastar a peça para afinar o encaixe." : message),
     !snapshot && cameraNotice && h("p", { role: "status", className: "small mb-2" }, cameraNotice),
     !snapshot && !photoLoading && !cameraActive && h("div", { className: "d-flex flex-wrap justify-content-center gap-2 mb-3" },
       h("button", { type: "button", className: "btn btn-primary", onClick: startCamera }, "Usar câmara"),
@@ -629,10 +668,17 @@ function TryOn({ React, imageUrl, heightMm, anchorX, anchorY, initialCamera = fa
             h("img", { src: snapshot.url, alt: "Fotografia do provador virtual", draggable: false, className: "d-block w-100" }),
             h("canvas", { ref: photoOverlay, width: snapshot.width, height: snapshot.height, "aria-hidden": true,
               className: "position-absolute top-0 start-0 w-100 h-100",
-              style: { cursor: "grab" } }))),
+              style: { cursor: calibration ? "crosshair" : "grab" } }),
+            calibration?.first && h("span", {
+              "aria-hidden": true, className: "position-absolute translate-middle rounded-circle bg-primary border border-white pe-none",
+              style: { left: `${calibration.first.x / snapshot.width * 100}%`,
+                top: `${calibration.first.y / snapshot.height * 100}%`, width: "12px", height: "12px" }
+            }))),
         h("div", { className: "d-flex justify-content-center gap-2", role: "group", "aria-label": "Opções da fotografia" },
           photoAction(h, zoom > 1 ? "magnifying-glass-minus" : "magnifying-glass-plus",
             zoom > 1 ? "Reduzir fotografia" : "Ampliar fotografia", toggleZoom, "btn-primary"),
+          ring && snapshot.pieces.length > 0 && photoAction(h, calibration ? "xmark" : "ruler",
+            calibration ? "Cancelar calibração" : "Calibrar escala", () => setCalibration(calibration ? null : {})),
           snapshot.uploaded && photoAction(h, "image", "Escolher outra fotografia", () => photoInput.current.click()),
           photoAction(h, "camera", snapshot.uploaded ? "Usar câmara" : "Voltar à câmara",
             snapshot.uploaded ? startCamera : returnToCamera)))
@@ -663,6 +709,121 @@ async function createFaceLandmarker(runningMode) {
     runningMode,
     numFaces: 1
   })
+}
+
+async function createHandLandmarker(runningMode) {
+  const { HandLandmarker, FilesetResolver } = await import(visionUrl + "/vision_bundle.mjs")
+  const fileset = await FilesetResolver.forVisionTasks(visionUrl + "/wasm")
+  return HandLandmarker.createFromOptions(fileset, {
+    baseOptions: { modelAssetPath: handModelUrl },
+    runningMode,
+    numHands: 1
+  })
+}
+
+function manualPiece(frame, asset) {
+  const photoHeight = Math.min(frame.width, frame.height) * 0.08
+  const photoWidth = photoHeight * asset.photo.width / asset.photo.height
+  return {
+    side: 0, x: frame.width / 2, y: frame.height / 2, opacity: 1,
+    photoWidth, photoHeight, xOffset: photoWidth * asset.anchorX, yOffset: photoHeight * asset.anchorY,
+    hitRadius: Math.max(photoWidth, photoHeight) / 2
+  }
+}
+
+function cropRingAsset(photo, anchorX, anchorY) {
+  const canvas = document.createElement("canvas")
+  const factor = Math.min(1, 1024 / Math.max(photo.naturalWidth, photo.naturalHeight))
+  const width = Math.max(1, Math.round(photo.naturalWidth * factor))
+  const height = Math.max(1, Math.round(photo.naturalHeight * factor))
+  canvas.width = width
+  canvas.height = height
+  const context = canvas.getContext("2d", { willReadFrequently: true })
+  context.drawImage(photo, 0, 0, width, height)
+  const pixels = context.getImageData(0, 0, width, height).data
+
+  let left = width
+  let top = height
+  let right = -1
+  let bottom = -1
+  for (let y = 0; y < height; y++) {
+    for (let x = 0; x < width; x++) {
+      if (pixels[(y * width + x) * 4 + 3] < 16) continue
+
+      left = Math.min(left, x)
+      top = Math.min(top, y)
+      right = Math.max(right, x)
+      bottom = Math.max(bottom, y)
+    }
+  }
+  if (right < left || bottom < top) throw new Error("A imagem do anel está vazia.")
+
+  canvas.width = right - left + 1
+  canvas.height = bottom - top + 1
+  context.drawImage(photo, -left, -top, width, height)
+  return {
+    photo: canvas,
+    anchorX: (anchorX * width - left) / canvas.width,
+    anchorY: (anchorY * height - top) / canvas.height
+  }
+}
+
+function positionRing(frame, landmarks, worldLandmarks, photo, heightMm, anchorX, anchorY, mirrored = false, offset) {
+  if (!landmarks || !(heightMm > 0)) return []
+
+  const point = index => ({
+    x: (mirrored ? 1 - landmarks[index].x : landmarks[index].x) * frame.width,
+    y: landmarks[index].y * frame.height,
+    z: landmarks[index].z * frame.width
+  })
+  const indexBase = point(5)
+  const littleBase = point(17)
+  const ringBase = point(13)
+  const ringJoint = point(14)
+  const dx = ringJoint.x - ringBase.x
+  const dy = ringJoint.y - ringBase.y
+  const palmWidth = Math.hypot(indexBase.x - littleBase.x, indexBase.y - littleBase.y, indexBase.z - littleBase.z)
+  if (Math.hypot(dx, dy) < 1) return []
+
+  const pixelsPerMm = estimateRingScale(point, worldLandmarks) ?? palmWidth / 60
+  if (!(pixelsPerMm > 0)) return []
+
+  const photoHeight = heightMm * pixelsPerMm
+  const photoWidth = photoHeight * photo.width / photo.height
+  const xOffset = photoWidth * anchorX
+  const yOffset = photoHeight * anchorY
+  const baseX = ringBase.x + dx * 0.3
+  const baseY = ringBase.y + dy * 0.3
+  return [{
+    side: 0, baseX, baseY, scale: pixelsPerMm,
+    x: baseX + (offset?.x ?? 0) * pixelsPerMm, y: baseY + (offset?.y ?? 0) * pixelsPerMm,
+    rotation: Math.atan2(dx, -dy), opacity: 1, photoWidth, photoHeight, xOffset, yOffset,
+    hitRadius: Math.hypot(Math.max(xOffset, photoWidth - xOffset), Math.max(yOffset, photoHeight - yOffset))
+  }]
+}
+
+function estimateRingScale(point, worldLandmarks) {
+  if (!worldLandmarks) return null
+
+  // Use several nearby joints so one foreshortened or noisy segment cannot dominate.
+  const estimates = []
+  for (const [base, joint] of [[9, 10], [13, 14], [17, 18], [9, 13], [13, 17]]) {
+    const first = worldLandmarks[base]
+    const second = worldLandmarks[joint]
+    if (!first || !second) continue
+
+    // The Hand Landmarker world coordinates are in metres.
+    const lengthMm = Math.hypot(first.x - second.x, first.y - second.y, first.z - second.z) * 1000
+    const start = point(base)
+    const end = point(joint)
+    const projectedPixels = Math.hypot(end.x - start.x, end.y - start.y)
+    const estimate = projectedPixels / lengthMm
+    if (lengthMm > 0 && projectedPixels >= 2 && Number.isFinite(estimate)) estimates.push(estimate)
+  }
+  if (estimates.length < 3) return null
+
+  estimates.sort((first, second) => first - second)
+  return (estimates[Math.floor((estimates.length - 1) / 2)] + estimates[Math.floor(estimates.length / 2)]) / 2
 }
 
 function drawEarrings(context, landmarks, photo, heightMm, anchorX, anchorY, offsets, mirrored = true) {
@@ -717,14 +878,19 @@ function drawEarrings(context, landmarks, photo, heightMm, anchorX, anchorY, off
   return positions
 }
 
-function paintPhotoEarrings(overlay, photo, earrings) {
+function paintPhotoPieces(overlay, photo, pieces) {
   const context = overlay.getContext("2d")
   context.clearRect(0, 0, overlay.width, overlay.height)
+  paintPieces(context, photo, pieces)
+}
 
-  for (const earring of earrings) {
-    context.globalAlpha = earring.opacity
-    context.drawImage(photo, earring.x - earring.xOffset, earring.y - earring.yOffset,
-      earring.photoWidth, earring.photoHeight)
+function paintPieces(context, photo, pieces) {
+  for (const piece of pieces) {
+    context.save()
+    context.globalAlpha = piece.opacity
+    context.translate(piece.x, piece.y)
+    if (piece.rotation) context.rotate(piece.rotation)
+    context.drawImage(photo, -piece.xOffset, -piece.yOffset, piece.photoWidth, piece.photoHeight)
+    context.restore()
   }
-  context.globalAlpha = 1
 }

@@ -52,6 +52,16 @@ class Bo::ProductsControllerTest < ActionDispatch::IntegrationTest
     get path
     assert_response :success
     assert_select "[data-virtual-try-on]", count: 1
+
+    patch bo_product_path(org_slug: @organisation.slug, id: product.id), params: {
+      product: { virtual_try_on_kind: "ring", virtual_try_on_enabled: "1" }
+    }
+    assert_response :redirect
+    assert_equal "ring", product.reload.virtual_try_on_kind
+    get path
+    assert_response :success
+    assert_select "[data-virtual-try-on][data-kind=ring]", count: 1
+    assert_select "[data-try-on-camera]", count: 1
   end
 
   test "virtual try-on requires an image and height before activation" do

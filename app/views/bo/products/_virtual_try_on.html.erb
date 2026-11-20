@@ -13,7 +13,7 @@
     <div class="row g-3 mb-3">
       <div class="col-sm-6">
         <%= f.label :virtual_try_on_kind, "Tipo de peça", class: "form-label" %>
-        <%= f.select :virtual_try_on_kind, [["Brincos", "earrings"]], {}, class: "form-select" %>
+        <%= f.select :virtual_try_on_kind, [["Brincos", "earrings"], ["Anel", "ring"]], {}, class: "form-select" %>
       </div>
       <div class="col-sm-6">
         <%= f.label :virtual_try_on_height_mm, "Altura real (mm)", class: "form-label" %>
@@ -24,13 +24,13 @@
     <%= f.label :virtual_try_on_image, "Imagem para o provador", class: "form-label" %>
     <%= f.file_field :virtual_try_on_image, accept: "image/png,image/webp", class: "form-control",
           data: { action: "change->try-on-anchor#preview" } %>
-    <p class="form-text">Usa uma fotografia de um só brinco, vista de frente, com fundo transparente e recortada junto à peça.</p>
+    <p class="form-text">Usa uma fotografia com fundo transparente e recortada junto à peça. Para brincos, usa uma vista de frente. Para anéis, usa a vista de cima da parte que fica visível sobre o dedo.</p>
 
     <%= f.hidden_field :virtual_try_on_anchor_x, data: { try_on_anchor_target: "x" } %>
     <%= f.hidden_field :virtual_try_on_anchor_y, data: { try_on_anchor_target: "y" } %>
 
     <div data-try-on-anchor-target="preview" style="<%= 'display: none' unless image_url %>">
-      <p class="form-text">Clica no ponto da imagem que deve ficar sobre o lóbulo. Também podes usar as setas do teclado.</p>
+      <p class="form-text">Clica no ponto da imagem que deve ficar sobre o lóbulo ou sobre o centro do dedo. Também podes usar as setas do teclado.</p>
       <button type="button" class="position-relative border rounded p-0 bg-light"
               style="cursor: crosshair; max-width: 100%" aria-label="Ajustar ponto de encaixe"
               data-action="click->try-on-anchor#place keydown->try-on-anchor#move">
