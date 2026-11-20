@@ -85,7 +85,7 @@ class Product < ApplicationRecord
     result
   end
 
-  validates :virtual_try_on_kind, inclusion: { in: %w[earrings] }
+  validates :virtual_try_on_kind, inclusion: { in: %w[earrings ring] }
   validates :virtual_try_on_height_mm, numericality: { greater_than_or_equal_to: 0.01, less_than: 100_000 },
             allow_nil: true
   validates :virtual_try_on_height_mm, presence: true, if: :virtual_try_on_enabled?
