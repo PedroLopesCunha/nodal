@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2026_11_18_150100) do
+ActiveRecord::Schema[7.1].define(version: 2026_11_20_160000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_trgm"
   enable_extension "plpgsql"
@@ -896,6 +896,11 @@ ActiveRecord::Schema[7.1].define(version: 2026_11_18_150100) do
     t.boolean "bundle", default: false, null: false
     t.boolean "bundle_featured", default: false, null: false
     t.integer "bundle_position", default: 0, null: false
+    t.boolean "virtual_try_on_enabled", default: false, null: false
+    t.string "virtual_try_on_kind", default: "earrings", null: false
+    t.decimal "virtual_try_on_height_mm", precision: 7, scale: 2
+    t.decimal "virtual_try_on_anchor_x", precision: 5, scale: 4, default: "0.5", null: false
+    t.decimal "virtual_try_on_anchor_y", precision: 5, scale: 4, default: "0.5", null: false
     t.index ["category_id"], name: "index_products_on_category_id"
     t.index ["organisation_id", "external_id", "external_source"], name: "index_products_on_org_external_id_source", unique: true, where: "(external_id IS NOT NULL)"
     t.index ["organisation_id"], name: "index_products_on_organisation_id"

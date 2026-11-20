@@ -190,20 +190,25 @@
           </div>
         <% end %>
 
-        <!-- SKU + save-to-list (kept together so the list action is always visible,
-             including in grid add-to-cart mode) -->
+        <!-- Product actions stay visible in grid add-to-cart mode. -->
         <% display_sku = @product.variable? ? (@default_variant&.sku || @product.sku) : @product.sku %>
         <% show_sku = current_organisation.show_product_sku? && display_sku.present? %>
         <% show_save_list = current_customer && !browsing_as_member? %>
-        <% if !@product.bundle? && (show_sku || show_save_list) %>
+        <% show_try_on = @product.virtual_try_on_available?(preview: browsing_as_member?) %>
+        <% if !@product.bundle? && (show_sku || show_save_list || show_try_on) %>
           <div class="mb-4 d-flex justify-content-between align-items-center flex-wrap gap-2">
             <div class="text-muted">
               <% if show_sku %>
                 <span class="sku-container"><i class="fa-solid fa-barcode me-2"></i>SKU: <span data-variant-selector-target="sku"><%= display_sku %></span></span>
               <% end %>
             </div>
-            <% if show_save_list %>
-              <%= render 'storefront/products/add_to_list_dropdown', product: @product, default_variant: @default_variant, has_variants: @product.variable?, wrapper_class: '' %>
+            <% if show_try_on || show_save_list %>
+              <div class="d-flex flex-wrap align-items-center gap-2 ms-auto">
+                <%= render "storefront/products/virtual_try_on", product: @product if show_try_on %>
+                <% if show_save_list %>
+                  <%= render 'storefront/products/add_to_list_dropdown', product: @product, default_variant: @default_variant, has_variants: @product.variable?, wrapper_class: '' %>
+                <% end %>
+              </div>
             <% end %>
           </div>
         <% end %>

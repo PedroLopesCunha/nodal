@@ -1,0 +1,44 @@
+<% image = f.object.virtual_try_on_image %>
+<% image_url = url_for(image) if image.attached? && image.blob.persisted? %>
+<section class="card mt-3" data-controller="try-on-anchor">
+  <div class="card-body">
+    <h2 class="h5 card-title">Provador virtual</h2>
+    <div class="form-check mb-3">
+      <%= f.check_box :virtual_try_on_enabled, class: "form-check-input" %>
+      <%= f.label :virtual_try_on_enabled, "Ativar provador virtual", class: "form-check-label" %>
+    </div>
+
+    <p class="form-text">A equipa pode experimentar na pré-visualização da loja. Ativa esta opção para mostrar o botão aos clientes.</p>
+
+    <div class="row g-3 mb-3">
+      <div class="col-sm-6">
+        <%= f.label :virtual_try_on_kind, "Tipo de peça", class: "form-label" %>
+        <%= f.select :virtual_try_on_kind, [["Brincos", "earrings"]], {}, class: "form-select" %>
+      </div>
+      <div class="col-sm-6">
+        <%= f.label :virtual_try_on_height_mm, "Altura real (mm)", class: "form-label" %>
+        <%= f.number_field :virtual_try_on_height_mm, min: 0.01, step: 0.01, class: "form-control" %>
+      </div>
+    </div>
+
+    <%= f.label :virtual_try_on_image, "Imagem para o provador", class: "form-label" %>
+    <%= f.file_field :virtual_try_on_image, accept: "image/png,image/webp", class: "form-control",
+          data: { action: "change->try-on-anchor#preview" } %>
+    <p class="form-text">Usa uma fotografia de um só brinco, vista de frente, com fundo transparente e recortada junto à peça.</p>
+
+    <%= f.hidden_field :virtual_try_on_anchor_x, data: { try_on_anchor_target: "x" } %>
+    <%= f.hidden_field :virtual_try_on_anchor_y, data: { try_on_anchor_target: "y" } %>
+
+    <div data-try-on-anchor-target="preview" style="<%= 'display: none' unless image_url %>">
+      <p class="form-text">Clica no ponto da imagem que deve ficar sobre o lóbulo. Também podes usar as setas do teclado.</p>
+      <button type="button" class="position-relative border rounded p-0 bg-light"
+              style="cursor: crosshair; max-width: 100%" aria-label="Ajustar ponto de encaixe"
+              data-action="click->try-on-anchor#place keydown->try-on-anchor#move">
+        <%= tag.img src: image_url, alt: "", class: "d-block img-fluid", style: "max-height: 240px",
+              data: { try_on_anchor_target: "image" } %>
+        <span class="position-absolute translate-middle rounded-circle bg-primary border border-white pe-none"
+              style="width: 14px; height: 14px" aria-hidden="true" data-try-on-anchor-target="marker"></span>
+      </button>
+    </div>
+  </div>
+</section>

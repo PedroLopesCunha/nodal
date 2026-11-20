@@ -1,6 +1,10 @@
 require "active_support/core_ext/integer/time"
 
 Rails.application.configure do
+  if (tunnel_host = ENV["NODAL_DEV_TUNNEL_HOST"].presence)
+    config.hosts << tunnel_host
+  end
+
   # Settings specified here will take precedence over those in config/application.rb.
 
   # In the development environment your application's code is reloaded any time

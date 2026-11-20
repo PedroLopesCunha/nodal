@@ -11,6 +11,58 @@ class Bo::ProductsControllerTest < ActionDispatch::IntegrationTest
     sign_in @admin
   end
 
+  test "virtual try-on settings saved in the backoffice are used on the storefront" do
+    product = @organisation.products.create!(name: "Brincos", unit_price: 1000, published: true, available: true)
+    get edit_bo_product_path(org_slug: @organisation.slug, id: product.id)
+    assert_response :success
+    assert_select "input[type=file][name='product[virtual_try_on_image]']"
+
+    png = Base64.decode64("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+jvL8AAAAASUVORK5CYII=")
+    image = Rack::Test::UploadedFile.new(StringIO.new(png), "image/png", original_filename: "brinco.png")
+    patch bo_product_path(org_slug: @organisation.slug, id: product.id), params: {
+      product: { virtual_try_on_enabled: "1", virtual_try_on_kind: "earrings", virtual_try_on_height_mm: "7.5",
+                 virtual_try_on_anchor_x: "0.48", virtual_try_on_anchor_y: "0.2", virtual_try_on_image: image }
+    }
+    assert_response :redirect
+    assert product.reload.virtual_try_on_available?
+
+    sign_out @admin
+    customer = @organisation.customers.create!(company_name: "Cliente", contact_name: "Maria", active: true)
+    user = customer.customer_users.create!(organisation: @organisation, email: "provador@example.com",
+                                           password: "password123", active: true, invitation_accepted_at: Time.current)
+    sign_in user
+    path = product_path(org_slug: @organisation.slug, id: product.id)
+    get path
+    assert_response :success
+    assert_select "[data-virtual-try-on]" do |elements|
+      element = elements.first
+      assert_equal 7.5, element["data-height-mm"].to_f
+      assert_equal 0.48, element["data-anchor-x"].to_f
+      assert_equal 0.2, element["data-anchor-y"].to_f
+      assert_match(%r{/blobs/proxy/.+/brinco.png}, element["data-image-url"])
+    end
+
+    product.update!(virtual_try_on_enabled: false)
+    get path
+    assert_response :success
+    assert_select "[data-virtual-try-on]", count: 0
+
+    sign_out user
+    sign_in @admin
+    get path
+    assert_response :success
+    assert_select "[data-virtual-try-on]", count: 1
+  end
+
+  test "virtual try-on requires an image and height before activation" do
+    product = @organisation.products.create!(name: "Brincos", unit_price: 1000)
+    patch bo_product_path(org_slug: @organisation.slug, id: product.id), params: {
+      product: { virtual_try_on_enabled: "1" }
+    }
+    assert_response :unprocessable_entity
+    assert_not product.reload.virtual_try_on_enabled?
+  end
+
   # Regression guard: the catalog modals/partials were parameterized so the
   # sales-rep page can reuse them. The admin flow must keep working with the
   # default (products-scoped) URLs when no locals are passed.
