@@ -1,0 +1,36 @@
+<div data-virtual-try-on
+     data-react-url="<%= asset_path("react-18.3.1.js") %>"
+     data-react-dom-url="<%= asset_path("react-dom-18.3.1.js") %>"
+     data-image-url="<%= rails_storage_proxy_path(product.virtual_try_on_image) %>"
+     data-height-mm="<%= product.virtual_try_on_height_mm %>"
+     data-anchor-x="<%= product.virtual_try_on_anchor_x %>"
+     data-anchor-y="<%= product.virtual_try_on_anchor_y %>">
+  <button type="button" class="btn btn-sm btn-outline-primary" commandfor="virtual-try-on-dialog" command="show-modal" data-try-on-open>
+    <i class="fa-solid fa-cube me-1" aria-hidden="true"></i> Experimentar
+  </button>
+
+  <dialog id="virtual-try-on-dialog" class="rounded border-0 shadow p-3" style="width: min(94vw, 42rem)"
+          aria-labelledby="virtual-try-on-title">
+    <div class="position-relative text-center mb-3 px-4">
+      <h2 class="h5 mb-0" id="virtual-try-on-title">Experimentar virtualmente</h2>
+      <form method="dialog" class="position-absolute top-0 end-0">
+        <button type="submit" class="btn-close" aria-label="Fechar"></button>
+      </form>
+    </div>
+    <div class="text-center" data-try-on-chooser>
+      <p class="small mb-2">Escolhe como queres experimentar o brinco.</p>
+      <div class="d-flex flex-wrap justify-content-center gap-2">
+        <button type="button" class="btn btn-primary" data-try-on-camera>Usar câmara</button>
+        <label class="btn btn-outline-primary position-relative mb-0">
+          Escolher fotografia
+          <input id="virtual-try-on-photo" type="file" accept="image/*"
+                 class="position-absolute top-0 start-0 w-100 h-100 opacity-0"
+                 data-try-on-photo>
+        </label>
+      </div>
+    </div>
+    <div role="status" class="text-center" data-try-on-loading></div>
+    <div data-try-on-mount></div>
+  </dialog>
+</div>
+<%= javascript_include_tag "virtual_try_on", type: "module" %>

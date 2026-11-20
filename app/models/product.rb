@@ -46,6 +46,7 @@ class Product < ApplicationRecord
   has_many :available_attribute_values, through: :product_available_values, source: :product_attribute_value
 
   has_many_attached :photos
+  has_one_attached :virtual_try_on_image
   has_rich_text :rich_description
 
   # Returns the cover photo if set, otherwise falls back to first photo
@@ -83,6 +84,29 @@ class Product < ApplicationRecord
     end
     result
   end
+
+  validates :virtual_try_on_kind, inclusion: { in: %w[earrings] }
+  validates :virtual_try_on_height_mm, numericality: { greater_than_or_equal_to: 0.01, less_than: 100_000 },
+            allow_nil: true
+  validates :virtual_try_on_height_mm, presence: true, if: :virtual_try_on_enabled?
+  validates :virtual_try_on_anchor_x, :virtual_try_on_anchor_y, numericality: { in: 0..1 }
+  validate :validate_virtual_try_on_image
+
+  def virtual_try_on_available?(preview: false)
+    (virtual_try_on_enabled? || preview) && !bundle? &&
+      virtual_try_on_height_mm&.positive? && virtual_try_on_image.attached?
+  end
+
+  def validate_virtual_try_on_image
+    if virtual_try_on_image.attached?
+      unless %w[image/png image/webp].include?(virtual_try_on_image.blob.content_type)
+        errors.add(:virtual_try_on_image, "deve estar em formato PNG ou WebP")
+      end
+    elsif virtual_try_on_enabled?
+      errors.add(:virtual_try_on_image, "é obrigatória para ativar o provador virtual")
+    end
+  end
+  private :validate_virtual_try_on_image
 
   validates :slug, uniqueness: true
   validates :name, presence: true
